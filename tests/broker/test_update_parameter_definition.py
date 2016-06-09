@@ -31,7 +31,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
                "--path=foo/testint", "--description=testint", "--required",
                "--activation", "reboot", "--justification", "tcm=12345678"]
-        out = self.statustest(cmd)
+        self.statustest(cmd)
 
     def test_105_verify_update(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
@@ -46,13 +46,13 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           cmd)
 
     def test_110_update_feature_paramdef(self):
-        cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
+        cmd = ["update_parameter_definition", "--feature", "hostfeature", "--type=host",
                "--path=testint", "--description=testint",
                "--default=100", "--required"]
         self.noouttest(cmd)
 
     def test_115_verify_update_feature(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "hostfeature", "--type=host"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint \[required\]\s*'
@@ -62,12 +62,12 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           cmd)
 
     def test_130_update_norequired(self):
-        cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
+        cmd = ["update_parameter_definition", "--feature", "hostfeature", "--type=host",
                "--path=testint", "--norequired"]
         self.noouttest(cmd)
 
     def test_135_verify_update_feature(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "hostfeature", "--type=host"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint\s*'
@@ -85,7 +85,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_200_update_bad_feature_type(self):
-        cmd = ["update_parameter_definition", "--feature", "myfeature",
+        cmd = ["update_parameter_definition", "--feature", "hostfeature",
                "--type=no-such-type", "--path=testpath"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,

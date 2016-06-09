@@ -47,11 +47,6 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "myfeature": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "hostfeature": {
             "visibility": "public",
             "post_personality": True,
