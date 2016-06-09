@@ -119,6 +119,12 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'//testlist/1\s*',
                           command)
 
+    def test_110_add_src_route_param(self):
+        self.noouttest(["add_parameter", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--feature", "src_route",
+                        "--path", "testdefault",
+                        "--value", "abcd"])
+
     def test_200_add_hw_existing(self):
         command = ["add_parameter", "--personality", "compileserver",
                    "--archetype", "aquilon", "--feature", "bios_setup",

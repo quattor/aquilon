@@ -97,7 +97,7 @@ default_param_defs = {
 param_features = {
     "host": ["myfeature", "hostfeature"],
     "hardware": ["bios_setup"],
-    "interface": ["interfacefeature"],
+    "interface": ["interfacefeature", "src_route"],
 }
 
 
@@ -173,11 +173,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.extend(["--schema", params["schema"]])
 
             self.noouttest(cmd)
-
-    def test_140_add_src_route_param(self):
-        self.noouttest(["add_parameter_definition",
-                        "--feature", "src_route", "--type", "interface",
-                        "--path", "testparam", "--value_type", "string"])
 
     def test_200_add_feature_all(self):
         for feature_type, features in param_features.items():

@@ -396,12 +396,6 @@ class TestParameterFeature(TestBrokerCommand):
                           r'Host Feature: shinynew\s*'
                           r'car: "audihost"', cmd)
 
-    def test_700_add_src_route_param(self):
-        self.noouttest(["add_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon",
-                        "--feature", "src_route", "--type", "interface",
-                        "--path", "testparam", "--value", "abcd"])
-
     def test_910_del_host_featue_param(self):
         cmd = DEL_CMD + ["--path=testdefault", "--feature", HOSTFEATURE]
         self.noouttest(cmd)
