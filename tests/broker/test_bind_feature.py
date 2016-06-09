@@ -252,7 +252,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver", "--interface", "eth1",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
     def test_141_verify_show_model(self):
@@ -325,7 +325,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "src_route", command)
 
-    def test_160_bind_interface_personality(self):
+    def test_150_bind_interface_personality(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
@@ -337,7 +337,7 @@ class TestBindFeature(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
-    def test_161_verify_show_personality(self):
+    def test_151_verify_show_personality(self):
         command = ["show", "personality", "--personality", "compileserver"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -345,7 +345,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'^    Interface: bond0$',
                           command)
 
-    def test_161_verify_show_personality_proto(self):
+    def test_151_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "compileserver", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
         features = {feature.interface_name: feature
@@ -366,7 +366,7 @@ class TestBindFeature(TestBrokerCommand):
         self.assertEqual(feature.model.name, "")
         self.assertEqual(feature.model.vendor, "")
 
-    def test_161_verify_show_feature(self):
+    def test_151_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
@@ -374,7 +374,7 @@ class TestBindFeature(TestBrokerCommand):
                          'Bound to: Personality aquilon/compileserver, '
                          'Interface bond0', command)
 
-    def test_161_verify_show_host(self):
+    def test_151_verify_show_host(self):
         command = ["show", "host", "--hostname", "unittest21.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -383,7 +383,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'^    Template: features/interface/src_route',
                           command)
 
-    def test_161_verify_cat_personality(self):
+    def test_151_verify_cat_personality(self):
         command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
         self.searchoutput(out,

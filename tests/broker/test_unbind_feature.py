@@ -130,7 +130,7 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["show_parameter", "--personality", "compileserver",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out, 'testdefault: "abcd"', command)
+        self.matchoutput(out, 'testdefault: "interface_feature"', command)
 
     def test_145_unbind_nic_model_2nd_interface(self):
         command = ["unbind", "feature", "--feature", "src_route",

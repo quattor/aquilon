@@ -60,6 +60,39 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                           r'"/system/features/hardware/bios_setup/teststring" = "default";\s*',
                           command)
 
+    def test_110_iface_update(self):
+        self.noouttest(["update_parameter", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--feature", "src_route",
+                        "--path", "testlist",
+                        "--value", "newiface1,newiface2,newiface3"])
+
+    def test_115_show_iface_params(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Interface Feature: src_route\s*'
+                          r'testdefault: "interface_feature"\s*'
+                          r'testlist: \[\s*"newiface1",\s*"newiface2",\s*"newiface3"\s*\]\s*',
+                          command)
+
+    def test_115_cat_iface_params(self):
+        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
+                   "--pre_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/features/interface/src_route/testboolean" = true;\s*'
+                          r'"/system/features/interface/src_route/testdefault" = "interface_feature";\s*'
+                          r'"/system/features/interface/src_route/testfalsedefault" = false;\s*'
+                          r'"/system/features/interface/src_route/testfloat" = 100\.100;\s*'
+                          r'"/system/features/interface/src_route/testint" = 60;\s*'
+                          r'"/system/features/interface/src_route/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
+                          r'"/system/features/interface/src_route/testlist" = list\(\s*"newiface1",\s*"newiface2",\s*"newiface3"\s*\);\s*'
+                          r'"/system/features/interface/src_route/teststring" = "default";\s*',
+                          command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateParameterFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)

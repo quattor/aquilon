@@ -51,12 +51,6 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = ["bind_feature", "--feature", HOSTFEATURE, "--personality", PERSONALITY]
         self.ignoreoutputtest(cmd)
 
-    def test_070_bind_interface_feature(self):
-        cmd = ["bind_feature", "--feature", "src_route",
-               "--personality", PERSONALITY, "--interface", "eth0",
-               "--justification", "tcm=12345678"]
-        self.successtest(cmd)
-
     def test_090_verify_feature_proto_noerr(self):
         cmd = ["show", "parameter", "--personality", "utunused/dev", "--format=proto"]
         out = self.notfoundtest(cmd)
@@ -157,67 +151,10 @@ class TestParameterFeature(TestBrokerCommand):
                           r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*',
                           cmd)
-        self.searchoutput(out,
-                          r'Feature Binding: src_route\s*'
-                          r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*',
-                          cmd)
-
-    def test_140_unbound_feature(self):
-        command = ["add_parameter", "--personality", PERSONALITY,
-                   "--feature", "unused_no_params", "--path", "teststring",
-                   "--value", "some_value"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Host Feature unused_no_params is not bound to "
-                         "personality aquilon/unixeng-test@next.", command)
-
-    def test_200_add_path_interface_feature(self):
-        path = "testdefault"
-        value = "interface_feature"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "src_route"]
-        self.noouttest(cmd)
-
-        path = "testlist"
-        value = "intf1,intf2"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "src_route"]
-        self.noouttest(cmd)
-
-    def test_210_verify_interface_feature(self):
-        cmd = SHOW_CMD
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Interface Feature: src_route\s*'
-                          r'testdefault: "interface_feature"\s*'
-                          r'testlist: \[\s*"intf1",\s*"intf2"\s*\]\s*',
-                          cmd)
-
-    def test_220_verify_cat_interface_feature(self):
-        cmd = CAT_CMD + ["--pre_feature"]
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'"/system/features/interface/src_route/testboolean" = true;\s*'
-                          r'"/system/features/interface/src_route/testdefault" = "interface_feature";\s*'
-                          r'"/system/features/interface/src_route/testfalsedefault" = false;\s*'
-                          r'"/system/features/interface/src_route/testfloat" = 100\.100;\s*'
-                          r'"/system/features/interface/src_route/testint" = 60;\s*'
-                          r'"/system/features/interface/src_route/testjson" = nlist\(\s*'
-                          r'"key",\s*"param_key",\s*'
-                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/interface/src_route/testlist" = list\(\s*"intf1",\s*"intf2"\s*\);\s*'
-                          r'"/system/features/interface/src_route/teststring" = "default";\s*',
-                          cmd)
-
-    def test_260_add_existing(self):
-        path = "testdefault"
-        value = "interface_feature"
-        cmd = ADD_CMD + ["--path", path, "--value", value,
-                         "--feature", "src_route"]
-        out = self.badrequesttest(cmd)
-        self.matchoutput(out, "Parameter with path=testdefault already exists.", cmd)
 
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=12)
+        params = self.protobuftest(cmd, expect=10)
 
         param_values = {}
         for param in params:
@@ -233,8 +170,6 @@ class TestParameterFeature(TestBrokerCommand):
                               "features/hostfeature/testjson",
                               "features/hostfeature/testlist",
                               "features/hostfeature/teststring",
-                              "features/interface/src_route/testlist",
-                              "features/interface/src_route/testdefault",
                               "windows/windows",
                              ]))
 
@@ -254,10 +189,6 @@ class TestParameterFeature(TestBrokerCommand):
                          'host1,host2')
         self.assertEqual(param_values['features/hostfeature/testdefault'],
                          'host_feature')
-        self.assertEqual(param_values['features/interface/src_route/testlist'],
-                         'intf1,intf2')
-        self.assertEqual(param_values['features/interface/src_route/testdefault'],
-                         'interface_feature')
 
     def test_400_json_validation(self):
         cmd = ["update_parameter", "--archetype", ARCHETYPE,
@@ -332,13 +263,6 @@ class TestParameterFeature(TestBrokerCommand):
                           r'//testlist/1\s*'
                           r'//teststring\s*',
                           cmd)
-        self.searchoutput(out,
-                          r'Differences for Parameters for interface feature src_route:\s*'
-                          r'missing Parameters for interface feature src_route in Personality aquilon/utpers-dev@current:\s*'
-                          r'//testdefault\s*'
-                          r'//testlist/0\s*'
-                          r'//testlist/1\s*',
-                          cmd)
 
     def test_600_add_same_name_feature(self):
         feature = "shinynew"
@@ -402,16 +326,6 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_915_unbind_host_featue(self):
         cmd = ["unbind_feature", "--feature", HOSTFEATURE, "--personality", PERSONALITY]
-        self.ignoreoutputtest(cmd)
-
-    def test_930_del_interface_feature_params(self):
-        cmd = DEL_CMD + ["--path=testdefault", "--feature", "src_route"]
-        self.noouttest(cmd)
-
-    def test_935_del_interface_feature(self):
-        cmd = ["unbind_feature", "--feature", "src_route", "--interface", "eth0",
-               "--personality", PERSONALITY,
-               "--justification", "tcm=12345678"]
         self.ignoreoutputtest(cmd)
 
     def test_950_del_same_name_feature_parameter(self):

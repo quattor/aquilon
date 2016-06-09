@@ -119,11 +119,93 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'//testlist/1\s*',
                           command)
 
-    def test_110_add_src_route_param(self):
+    def test_110_add_iface_params(self):
         self.noouttest(["add_parameter", "--personality", "compileserver",
                         "--archetype", "aquilon", "--feature", "src_route",
                         "--path", "testdefault",
-                        "--value", "abcd"])
+                        "--value", "interface_feature"])
+        self.noouttest(["add_parameter", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--feature", "src_route",
+                        "--path", "testlist",
+                        "--value", "iface1,iface2"])
+
+    def test_115_show_iface_params(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Interface Feature: src_route\s*'
+                          r'testdefault: "interface_feature"\s*'
+                          r'testlist: \[\s*"iface1",\s*"iface2"\s*\]\s*',
+                          command)
+
+    def test_115_show_iface_params_proto(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon", "--format", "proto"]
+        params = self.protobuftest(command, expect=8)
+
+        param_values = {}
+        for param in params:
+            param_values[param.path] = param.value
+
+        self.assertEqual(set(param_values.keys()),
+                         set(["espinfo/class",
+                              "espinfo/function",
+                              "espinfo/users",
+                              "features/hardware/bios_setup/testdefault",
+                              "features/hardware/bios_setup/testlist",
+                              "features/interface/src_route/testdefault",
+                              "features/interface/src_route/testlist",
+                              "windows/windows",
+                             ]))
+
+        self.assertEqual(param_values['features/interface/src_route/testlist'],
+                         'iface1,iface2')
+        self.assertEqual(param_values['features/interface/src_route/testdefault'],
+                         'interface_feature')
+
+    def test_115_cat_iface_params(self):
+        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
+                   "--pre_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/features/interface/src_route/testboolean" = true;\s*'
+                          r'"/system/features/interface/src_route/testdefault" = "interface_feature";\s*'
+                          r'"/system/features/interface/src_route/testfalsedefault" = false;\s*'
+                          r'"/system/features/interface/src_route/testfloat" = 100\.100;\s*'
+                          r'"/system/features/interface/src_route/testint" = 60;\s*'
+                          r'"/system/features/interface/src_route/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
+                          r'"/system/features/interface/src_route/testlist" = list\(\s*"iface1",\s*"iface2"\s*\);\s*'
+                          r'"/system/features/interface/src_route/teststring" = "default";\s*',
+                          command)
+
+    def test_115_diff_iface_params(self):
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "compileserver", "--other", "utpers-dev"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Differences for Features:\s*'
+                          r'missing Features in Personality aquilon/utpers-dev@current:\s*'
+                          r'bios_setup\s*'
+                          r'src_route\s*',
+                          command)
+        self.searchoutput(out,
+                          r'Differences for Parameters for interface feature src_route:\s*'
+                          r'missing Parameters for interface feature src_route in Personality aquilon/utpers-dev@current:\s*'
+                          r'//testdefault\s*'
+                          r'//testlist/0\s*'
+                          r'//testlist/1\s*',
+                          command)
+
+    def test_200_unbound_feature(self):
+        command = ["add_parameter", "--personality", "unixeng-test",
+                   "--feature", "unused_no_params", "--path", "teststring",
+                   "--value", "some_value"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Host Feature unused_no_params is not bound to "
+                         "personality aquilon/unixeng-test@next.", command)
 
     def test_200_add_hw_existing(self):
         command = ["add_parameter", "--personality", "compileserver",
@@ -132,6 +214,29 @@ class TestAddParameterFeature(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Parameter with path=testdefault already exists",
                          command)
+
+    def test_200_add_iface_existing(self):
+        command = ["add_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon", "--feature", "src_route",
+                   "--path", "testdefault", "--value", "interface_feature"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Parameter with path=testdefault already exists",
+                         command)
+
+    def test_300_validate(self):
+        command = ["validate_parameter", "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+
+        self.searchoutput(out,
+                          r'Feature Binding: bios_setup\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string\s*',
+                          command)
+        self.searchoutput(out,
+                          r'Feature Binding: src_route\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string\s*',
+                          command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddParameterFeature)

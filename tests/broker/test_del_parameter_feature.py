@@ -47,6 +47,20 @@ class TestDelParameterFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "bios_setup/testdefault", command)
 
+    def test_110_del_iface_params(self):
+        self.noouttest(["del_parameter", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--feature", "src_route",
+                        "--path", "testlist"])
+
+    def test_115_cat_iface_param_gone(self):
+        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
+                   "--pre_feature"]
+        out = self.commandtest(command)
+        # The default value should be there
+        self.searchoutput(out,
+                          r'"/system/features/interface/src_route/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*',
+                          command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelParameterFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)
