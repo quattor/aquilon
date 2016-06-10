@@ -168,6 +168,17 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
         self.noouttest(command)
         self.events_verify()
 
+    def test_124_update_ut3c5n16_eth0(self):
+        mac = self.net["unknown0"].usable[52].mac
+        self.dsdb_expect_update("ut3c5n16-e0.aqd-unittest.ms.com", "eth0", mac=mac)
+        command = ["update", "interface", "--interface", "eth0",
+                   "--machine", "ut3c5n16",
+                   "--mac", mac]
+        self.event_upd_hardware('ut3c5n16')
+        self.noouttest(command)
+        self.dsdb_verify()
+        self.events_verify()
+
     def test_130_update_switch1(self):
         mac = self.net["ut_net_mgmt"].usable[1].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49",

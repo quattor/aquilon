@@ -368,6 +368,24 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     contains=str(ip))
 
+    def testaddut3c5n16eth0(self):
+        ip = self.net["zebra_eth0"].usable[16]
+        fqdn = "ut3c5n16-e0.aqd-unittest.ms.com"
+        self.dsdb_expect_add(fqdn, ip, "eth0", ip.mac)
+        command = ["add", "interface", "address", "--machine", "ut3c5n16",
+                   "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
+        self.statustest(command)
+        self.dsdb_verify()
+
+    def testaddut3c5n16eth1(self):
+        ip = self.net["zebra_eth1"].usable[16]
+        fqdn = "ut3c5n16-e1.aqd-unittest.ms.com"
+        self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac)
+        command = ["add", "interface", "address", "--machine", "ut3c5n16",
+                   "--interface", "eth1", "--fqdn", fqdn, "--ip", ip]
+        self.statustest(command)
+        self.dsdb_verify()
+
     def testverifyut3gd1r04(self):
         command = ["show", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)

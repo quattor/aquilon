@@ -127,6 +127,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                                  eth0_mac=self.net["zebra_eth0"].usable[2].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[2].mac)
 
+    # Used for testing machines without a host for DSDB
+    def test_113_add_ut3c5n16(self):
+        self.create_machine_hs21("ut3c5n16", chassis="ut3c5", slot=16,
+                                 eth0_mac=self.net["zebra_eth0"].usable[16].mac,
+                                 eth1_mac=self.net["zebra_eth1"].usable[16].mac)
+
     # Used for filer - a fake machine for now
     def test_125_add_filer(self):
         self.event_add_hardware('filer1')

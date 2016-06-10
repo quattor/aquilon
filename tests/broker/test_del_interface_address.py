@@ -104,6 +104,22 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.matchclean(out, "zebra2", command)
         self.matchclean(out, "zebra3", command)
 
+    def testdelut3c5n16eth0(self):
+        ip = self.net["zebra_eth0"].usable[16]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "interface", "address", "--machine", "ut3c5n16",
+                   "--interface", "eth0", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def testdelut3c5n16eth1(self):
+        ip = self.net["zebra_eth1"].usable[16]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "interface", "address", "--machine", "ut3c5n16",
+                   "--interface", "eth1", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testdelunittest25utcolo(self):
         net = self.net["unknown1"]
         ip = net[4]

@@ -791,6 +791,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Slot #11: ut3c5n11 (afs-by-net.aqd-unittest.ms.com)
               Slot #12: ut3c5n12 (netmap-pers.aqd-unittest.ms.com)
               Slot #13: ut3c5n13 (infra1.aqd-unittest.ms.com)
+              Slot #16: ut3c5n16 (no hostname)
             """ % (ip, ip.mac, ip, hostname),
             command)
 
