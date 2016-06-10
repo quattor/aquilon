@@ -43,7 +43,7 @@ class Machine(HardwareEntity):
 
     uuid = Column(GUID, nullable=True, unique=True)
 
-    uri = Column(String(255), nullable=True)
+    uri = Column(String(400), nullable=True)
 
     cpu_model = relation(Model, innerjoin=True, foreign_keys=cpu_model_id)
 
