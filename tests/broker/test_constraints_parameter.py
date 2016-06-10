@@ -35,7 +35,7 @@ class TestParameterConstraints(TestBrokerCommand):
     # This test should eventually be here, but parameter tests need to be
     # re-organized first
     #def test_110_feature_validation(self):
-    #    cmd = ["del_parameter_definition", "--feature", "hostfeature", "--type=host",
+    #    cmd = ["del_parameter_definition", "--feature", "pre_host", "--type=host",
     #           "--path=teststring"]
     #    out = self.badrequesttest(cmd)
     #    self.matchoutput(out, "Parameter with path teststring used by following and cannot be deleted", cmd)

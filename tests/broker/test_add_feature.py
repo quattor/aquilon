@@ -47,12 +47,6 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "hostfeature": {
-            "visibility": "public",
-            "post_personality": True,
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "shinynew": {
             "visibility": "public",
             "activation": "reboot",

@@ -46,13 +46,13 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           cmd)
 
     def test_110_update_feature_paramdef(self):
-        cmd = ["update_parameter_definition", "--feature", "hostfeature", "--type=host",
+        cmd = ["update_parameter_definition", "--feature", "pre_host", "--type=host",
                "--path=testint", "--description=testint",
-               "--default=100", "--required"]
-        self.noouttest(cmd)
+               "--default=100", "--required", "--justification", "tcm=12345678"]
+        self.statustest(cmd)
 
     def test_115_verify_update_feature(self):
-        cmd = ["search_parameter_definition", "--feature", "hostfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "pre_host", "--type=host"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint \[required\]\s*'
@@ -62,12 +62,12 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           cmd)
 
     def test_130_update_norequired(self):
-        cmd = ["update_parameter_definition", "--feature", "hostfeature", "--type=host",
-               "--path=testint", "--norequired"]
+        cmd = ["update_parameter_definition", "--feature", "pre_host", "--type=host",
+               "--path=testint", "--norequired", "--justification", "tcm=12345678"]
         self.noouttest(cmd)
 
     def test_135_verify_update_feature(self):
-        cmd = ["search_parameter_definition", "--feature", "hostfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "pre_host", "--type=host"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint\s*'
@@ -85,7 +85,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_200_update_bad_feature_type(self):
-        cmd = ["update_parameter_definition", "--feature", "hostfeature",
+        cmd = ["update_parameter_definition", "--feature", "pre_host",
                "--type=no-such-type", "--path=testpath"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
