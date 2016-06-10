@@ -81,8 +81,7 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/hostfeature/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*'
-                          r'"/system/features/hostfeature/teststring" = "default";\s*'
-                          r'include \{ "features/hostfeature/config" \};',
+                          r'"/system/features/hostfeature/teststring" = "default";\s*',
                           cmd)
 
     def test_105_add_path_host_feature(self):
@@ -142,8 +141,7 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"key",\s*"other_key",\s*'
                           r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
                           r'"/system/features/hostfeature/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
-                          r'"/system/features/hostfeature/teststring" = "override";\s*'
-                          r'include \{ "features/hostfeature/config" \};',
+                          r'"/system/features/hostfeature/teststring" = "override";\s*',
                           cmd)
 
     # TODO: Move this to test_constraints_parameter
@@ -217,9 +215,7 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/interface/interfacefeature/testlist" = list\(\s*"intf1",\s*"intf2"\s*\);\s*'
-                          r'"/system/features/interface/interfacefeature/teststring" = "default";\s*'
-                          r'variable CURRENT_INTERFACE = "eth0";\s*'
-                          r'include \{ "features/interface/interfacefeature/config" \};',
+                          r'"/system/features/interface/interfacefeature/teststring" = "default";\s*',
                           cmd)
 
     def test_260_add_existing(self):
@@ -315,17 +311,6 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/teststring" = "default";\s*',
-                          cmd)
-        self.searchoutput(out,
-                          r'include \{\s*'
-                          r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
-                          r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\s*\{\s*'
-                          r'if \(exists\("features/hardware/hardwarefeature/config"\)\) \{\s*'
-                          r'"features/hardware/hardwarefeature/config";\s*'
-                          r'\} else \{\s*'
-                          r'"features/hardware/hardwarefeature";\s*'
-                          r'\};\s*'
-                          r'\} else \{\s*undef;\s*\};\s*\};',
                           cmd)
 
     def test_360_add_existing(self):
@@ -426,23 +411,6 @@ class TestParameterFeature(TestBrokerCommand):
                "--personality_stage", "next", "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Differences for Required Services:\s*'
-                          r'missing Required Services in Personality aquilon/unixeng-test@next:\s*'
-                          r'scope_test\s*'
-                          r'missing Required Services in Personality aquilon/utpers-dev@current:\s*'
-                          r'chooser1\s*chooser2\s*chooser3\s*'
-                          r'matching Required Services with different values:\s*'
-                          r'afs value=None, othervalue=qa\s*',
-                          cmd)
-        self.searchoutput(out,
-                          r'Differences for Features:\s*'
-                          r'missing Features in Personality aquilon/utpers-dev@current:\s*'
-                          r'hardwarefeature\s*'
-                          r'hostfeature\s*'
-                          r'interfacefeature\s*',
-                          cmd)
-
         self.searchoutput(out,
                           r'Differences for Parameters for hardware feature hardwarefeature:\s*'
                           r'missing Parameters for hardware feature hardwarefeature in Personality aquilon/utpers-dev@current:\s*'

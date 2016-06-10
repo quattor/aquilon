@@ -26,19 +26,6 @@ from broker.brokertest import TestBrokerCommand
 
 AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
-hardware_feature_str = r'include {\n'
-r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
-r'\s*(value("/hardware/template_name") == "hs21-8853")){\n'
-r'\s*return("features/hardware/bios_setup")\n'
-r'\s*} else{ return(undef); };\n'
-r'};'
-r'"/metadata/features"={\n'
-r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
-r'\s(value("/hardware/template_name") == "hs21-8853")){\n'
-r'\sappend("features/hardware/bios_setup");\n'
-r'\s} else { SELF; };\n'
-r'};'
-
 
 class TestBindFeature(TestBrokerCommand):
 
@@ -251,8 +238,17 @@ class TestBindFeature(TestBrokerCommand):
     def test_131_verify_cat_personality(self):
         command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
-        # The feature should be after the OS definition
-        self.searchoutput(out, hardware_feature_str, command)
+        self.searchoutput(out,
+                          r'include \{\s*'
+                          r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
+                          r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\s*\{\s*'
+                          r'if \(exists\("features/hardware/bios_setup/config"\)\) \{\s*'
+                          r'"features/hardware/bios_setup/config";\s*'
+                          r'\} else \{\s*'
+                          r'"features/hardware/bios_setup";\s*'
+                          r'\};\s*'
+                          r'\} else \{\s*undef;\s*\};\s*\};',
+                          command)
 
     def test_140_bind_nic_model_interface(self):
         command = ["bind", "feature", "--feature", "src_route",
@@ -550,6 +546,17 @@ class TestBindFeature(TestBrokerCommand):
                          "deleted.",
                          command)
 
+    def test_400_show_diff(self):
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "compileserver", "--other", "inventory"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Differences for Features:\s*'
+                          r'missing Features in Personality aquilon/compileserver:\s*'
+                          r'post_host\s*'
+                          r'missing Features in Personality aquilon/inventory:\s*'
+                          r'src_route\s*',
+                          command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindFeature)
