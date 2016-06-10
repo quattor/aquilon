@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing parameter definition support."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -92,6 +94,53 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                          "Unknown feature type 'no-such-type'. The valid "
                          "values are: hardware, host, interface.",
                          cmd)
+
+    def test_200_json_schema_update_value_conflict(self):
+        new_schema = {
+            "schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                    },
+                    "maxItems": 1,
+                },
+            },
+            "additionalProperties": False,
+        }
+
+        cmd = ["update_parameter_definition",
+               "--feature", "pre_host", "--type", "host",
+               "--path", "testjson", "--schema", json.dumps(new_schema)]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "Existing value for personality aquilon/%s "
+                         "conflicts with the new schema: [1, 2] is too long" %
+                         "inventory",
+                         cmd)
+
+    def test_200_json_schema_update_default_conflict(self):
+        new_schema = {
+            "schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+            },
+            "additionalProperties": False,
+        }
+
+        cmd = ["update_parameter_definition",
+               "--feature", "pre_host", "--type", "host",
+               "--path", "testjson", "--schema", json.dumps(new_schema)]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "The existing default value conflicts with the new schema", cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateParameterDefinition)

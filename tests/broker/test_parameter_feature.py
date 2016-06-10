@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing parameter support for features."""
 
-import json
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -36,66 +34,6 @@ DEL_CMD = ["del", "parameter", "--personality", "inventory"]
 
 
 class TestParameterFeature(TestBrokerCommand):
-
-    def test_090_verify_feature_proto_noerr(self):
-        cmd = ["show", "parameter", "--personality", "utunused/dev", "--format=proto"]
-        out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Not Found: No parameters found for personality "
-                         "aquilon/utunused/dev", cmd)
-
-    # TODO: Move this to test_constraints_parameter
-    def test_125_try_del_paramdef(self):
-        cmd = ["del_parameter_definition", "--feature", "pre_host", "--type=host",
-               "--path=testdefault"]
-        out = self.badrequesttest(cmd)
-        self.matchoutput(out, "Parameter with path testdefault used by following and cannot be deleted", cmd)
-
-    def test_400_update_json_schema_value_conflict(self):
-        new_schema = {
-            "schema": "http://json-schema.org/draft-04/schema#",
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer",
-                    },
-                    "maxItems": 1,
-                },
-            },
-            "additionalProperties": False,
-        }
-
-        cmd = ["update_parameter_definition",
-               "--feature", "pre_host", "--type", "host",
-               "--path", "testjson", "--schema", json.dumps(new_schema)]
-        out = self.badrequesttest(cmd)
-        self.matchoutput(out,
-                         "Existing value for personality aquilon/%s "
-                         "conflicts with the new schema: [1, 2] is too long" %
-                         "inventory",
-                         cmd)
-
-    def test_400_update_json_schema_default_conflict(self):
-        new_schema = {
-            "schema": "http://json-schema.org/draft-04/schema#",
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-            },
-            "additionalProperties": False,
-        }
-
-        cmd = ["update_parameter_definition",
-               "--feature", "pre_host", "--type", "host",
-               "--path", "testjson", "--schema", json.dumps(new_schema)]
-        out = self.badrequesttest(cmd)
-        self.matchoutput(out, "The existing default value conflicts with the new schema", cmd)
 
     def test_600_add_same_name_feature(self):
         feature = "shinynew"
