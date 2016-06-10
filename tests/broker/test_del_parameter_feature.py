@@ -61,6 +61,16 @@ class TestDelParameterFeature(TestBrokerCommand):
                           r'"/system/features/interface/src_route/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*',
                           command)
 
+    def test_120_del_host_params(self):
+        self.noouttest(["del_parameter", "--personality", "inventory",
+                        "--archetype", "aquilon", "--feature", "pre_host",
+                        "--path", "testdefault"])
+
+    def test_125_cat_host_param_gone(self):
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        out = self.commandtest(command)
+        self.matchclean(out, "pre_host/testdefault", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelParameterFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)

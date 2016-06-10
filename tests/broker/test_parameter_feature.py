@@ -26,19 +26,13 @@ if __name__ == "__main__":
 import unittest
 from broker.brokertest import TestBrokerCommand
 
-PERSONALITY = 'inventory'
+SHOW_CMD = ["show", "parameter", "--personality", "inventory"]
 
-SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY]
+ADD_CMD = ["add", "parameter", "--personality", "inventory"]
 
-ADD_CMD = ["add", "parameter", "--personality", PERSONALITY]
+UPD_CMD = ["update", "parameter", "--personality", "inventory"]
 
-UPD_CMD = ["update", "parameter", "--personality", PERSONALITY]
-
-DEL_CMD = ["del", "parameter", "--personality", PERSONALITY]
-
-CAT_CMD = ["cat", "--personality", PERSONALITY]
-
-VAL_CMD = ["validate_parameter", "--personality", PERSONALITY]
+DEL_CMD = ["del", "parameter", "--personality", "inventory"]
 
 
 class TestParameterFeature(TestBrokerCommand):
@@ -49,146 +43,12 @@ class TestParameterFeature(TestBrokerCommand):
         self.matchoutput(out, "Not Found: No parameters found for personality "
                          "aquilon/utunused/dev", cmd)
 
-    def test_100_verify_cat_host_feature_defaults(self):
-        cmd = CAT_CMD + ["--pre_feature"]
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'"/system/features/pre_host/testboolean" = true;\s*'
-                          r'"/system/features/pre_host/testfalsedefault" = false;\s*'
-                          r'"/system/features/pre_host/testfloat" = 100\.100;\s*'
-                          r'"/system/features/pre_host/testint" = 60;\s*'
-                          r'"/system/features/pre_host/testjson" = nlist\(\s*'
-                          r'"key",\s*"param_key",\s*'
-                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/pre_host/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*'
-                          r'"/system/features/pre_host/teststring" = "default";\s*',
-                          cmd)
-
-    def test_105_add_path_host_feature(self):
-        path = "testdefault"
-        value = "host_feature"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "pre_host"]
-        self.noouttest(cmd)
-
-        path = "testlist"
-        value = "host1,host2"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "pre_host"]
-        self.noouttest(cmd)
-
-    def test_110_add_path_host_feature_overrides(self):
-        path = "testboolean"
-        value = False
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "pre_host"]
-        self.noouttest(cmd)
-
-        path = "teststring"
-        value = "override"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "pre_host"]
-        self.noouttest(cmd)
-
-        path = "testint"
-        value = 0
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "pre_host"]
-        self.noouttest(cmd)
-
-        path = "testjson"
-        value = '{"key": "other_key", "values": [1, 2]}'
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "pre_host"]
-        self.noouttest(cmd)
-
-    def test_115_verify_host_feature(self):
-        cmd = SHOW_CMD
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Host Feature: pre_host\s*'
-                          r'testboolean: false\s*'
-                          r'testdefault: "host_feature"\s*'
-                          r'testint: 0\s*'
-                          r'testjson: {\s*"key":\s*"other_key",\s*"values":\s*\[\s*1,\s*2\s*\]\s*}\s*'
-                          r'testlist: \[\s*"host1",\s*"host2"\s*\]\s*'
-                          r'teststring: "override"\s*', cmd)
-
-    def test_120_verify_cat_host_feature(self):
-        cmd = CAT_CMD + ["--pre_feature"]
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'"/system/features/pre_host/testboolean" = false;\s*'
-                          r'"/system/features/pre_host/testdefault" = "host_feature";\s*'
-                          r'"/system/features/pre_host/testfalsedefault" = false;\s*'
-                          r'"/system/features/pre_host/testfloat" = 100\.100;\s*'
-                          r'"/system/features/pre_host/testint" = 0;\s*'
-                          r'"/system/features/pre_host/testjson" = nlist\(\s*'
-                          r'"key",\s*"other_key",\s*'
-                          r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
-                          r'"/system/features/pre_host/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
-                          r'"/system/features/pre_host/teststring" = "override";\s*',
-                          cmd)
-
     # TODO: Move this to test_constraints_parameter
     def test_125_try_del_paramdef(self):
         cmd = ["del_parameter_definition", "--feature", "pre_host", "--type=host",
                "--path=testdefault"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Parameter with path testdefault used by following and cannot be deleted", cmd)
-
-    def test_130_validate(self):
-        cmd = VAL_CMD
-        out = self.badrequesttest(cmd)
-
-        self.searchoutput(out,
-                          r'Following required parameters have not been specified:\s*',
-                          cmd)
-        self.searchoutput(out,
-                          r'Feature Binding: pre_host\s*'
-                          r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*',
-                          cmd)
-
-    def test_310_verify_feature_proto(self):
-        cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=10)
-
-        param_values = {}
-        for param in params:
-            param_values[param.path] = param.value
-
-        self.assertEqual(set(param_values.keys()),
-                         set(["espinfo/class",
-                              "espinfo/function",
-                              "espinfo/users",
-                              "features/pre_host/testboolean",
-                              "features/pre_host/testdefault",
-                              "features/pre_host/testint",
-                              "features/pre_host/testjson",
-                              "features/pre_host/testlist",
-                              "features/pre_host/teststring",
-                              "windows/windows",
-                             ]))
-
-        self.assertEqual(param_values['features/pre_host/testboolean'],
-                         'False')
-        self.assertEqual(param_values['features/pre_host/teststring'],
-                         'override')
-        self.assertEqual(param_values['features/pre_host/testint'],
-                         '0')
-
-        # The order of the keys is not deterministic, so we cannot do
-        # string-wise comparison here
-        self.assertEqual(json.loads(param_values['features/pre_host/testjson']),
-                         json.loads('{"key": "other_key", "values": [1, 2]}'))
-
-        self.assertEqual(param_values['features/pre_host/testlist'],
-                         'host1,host2')
-        self.assertEqual(param_values['features/pre_host/testdefault'],
-                         'host_feature')
-
-    def test_400_json_validation(self):
-        cmd = ["update_parameter", "--archetype", "aquilon",
-               "--personality", PERSONALITY, "--feature", "pre_host",
-               "--type", "host", "--path", "testjson",
-               "--value", '{"key": "val3", "values": []}']
-        out = self.badrequesttest(cmd)
-        self.matchoutput(out, "Failed validating", cmd)
 
     def test_400_update_json_schema_value_conflict(self):
         new_schema = {
@@ -216,7 +76,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.matchoutput(out,
                          "Existing value for personality aquilon/%s "
                          "conflicts with the new schema: [1, 2] is too long" %
-                         PERSONALITY,
+                         "inventory",
                          cmd)
 
     def test_400_update_json_schema_default_conflict(self):
@@ -237,25 +97,6 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "The existing default value conflicts with the new schema", cmd)
 
-    def test_500_verify_diff(self):
-        cmd = ["show_diff", "--archetype", "aquilon", "--personality", PERSONALITY,
-               "--other", "utpers-dev"]
-
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Differences for Parameters for host feature pre_host:\s*'
-                          r'missing Parameters for host feature pre_host in Personality aquilon/utpers-dev@current:\s*'
-                          r'//testboolean\s*'
-                          r'//testdefault\s*'
-                          r'//testint\s*'
-                          r'//testjson/key\s*'
-                          r'//testjson/values/0\s*'
-                          r'//testjson/values/1\s*'
-                          r'//testlist/0\s*'
-                          r'//testlist/1\s*'
-                          r'//teststring\s*',
-                          cmd)
-
     def test_600_add_same_name_feature(self):
         feature = "shinynew"
         for type in ["host", "hardware", "interface"]:
@@ -263,7 +104,7 @@ class TestParameterFeature(TestBrokerCommand):
                    "--path", "car", "--value_type", "string"]
             self.noouttest(cmd)
 
-            cmd = ["bind_feature", "--feature", feature, "--personality", PERSONALITY]
+            cmd = ["bind_feature", "--feature", feature, "--personality", "inventory"]
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":
@@ -312,10 +153,6 @@ class TestParameterFeature(TestBrokerCommand):
                           r'Host Feature: shinynew\s*'
                           r'car: "audihost"', cmd)
 
-    def test_910_del_host_featue_param(self):
-        cmd = DEL_CMD + ["--path=testdefault", "--feature", "pre_host"]
-        self.noouttest(cmd)
-
     def test_950_del_same_name_feature_parameter(self):
         feature = "shinynew"
         path = "car"
@@ -333,7 +170,7 @@ class TestParameterFeature(TestBrokerCommand):
     def test_970_unbind_same_name_feature(self):
         feature = "shinynew"
         for type in ["host", "hardware", "interface"]:
-            cmd = ["unbind_feature", "--feature", feature, "--personality", PERSONALITY]
+            cmd = ["unbind_feature", "--feature", feature, "--personality", "inventory"]
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":

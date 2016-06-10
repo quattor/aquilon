@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing parameter support for features."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -197,6 +199,137 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'//testdefault\s*'
                           r'//testlist/0\s*'
                           r'//testlist/1\s*',
+                          command)
+
+    def test_120_verify_host_feature_defaults(self):
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/features/pre_host/testboolean" = true;\s*'
+                          r'"/system/features/pre_host/testfalsedefault" = false;\s*'
+                          r'"/system/features/pre_host/testfloat" = 100\.100;\s*'
+                          r'"/system/features/pre_host/testint" = 60;\s*'
+                          r'"/system/features/pre_host/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
+                          r'"/system/features/pre_host/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*'
+                          r'"/system/features/pre_host/teststring" = "default";\s*',
+                          command)
+
+    def test_130_add_host_params(self):
+        self.noouttest(["add_parameter", "--personality", "inventory",
+                        "--feature", "pre_host", "--path", "testdefault",
+                        "--value", "host_feature"])
+        self.noouttest(["add_parameter", "--personality", "inventory",
+                        "--feature", "pre_host", "--path", "testlist",
+                        "--value", "host1,host2"])
+
+    def test_131_add_host_param_overrides(self):
+        for path, value in [("testboolean", False),
+                            ("teststring", "override"),
+                            ("testint", 0),
+                            ("testjson", '{"key": "other_key", "values": [1, 2]}')]:
+
+            self.noouttest(["add_parameter", "--personality", "inventory",
+                            "--feature", "pre_host", "--path", path,
+                            "--value", value])
+
+    def test_135_show_parameter(self):
+        command = ["show_parameter", "--personality", "inventory"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Host Feature: pre_host\s*'
+                          r'testboolean: false\s*'
+                          r'testdefault: "host_feature"\s*'
+                          r'testint: 0\s*'
+                          r'testjson: {\s*"key":\s*"other_key",\s*"values":\s*\[\s*1,\s*2\s*\]\s*}\s*'
+                          r'testlist: \[\s*"host1",\s*"host2"\s*\]\s*'
+                          r'teststring: "override"\s*',
+                          command)
+
+    def test_135_show_parameter_proto(self):
+        command = ["show_parameter", "--personality", "inventory", "--format", "proto"]
+        params = self.protobuftest(command, expect=10)
+
+        param_values = {}
+        for param in params:
+            param_values[param.path] = param.value
+
+        self.assertEqual(set(param_values.keys()),
+                         set(["espinfo/class",
+                              "espinfo/function",
+                              "espinfo/users",
+                              "features/pre_host/testboolean",
+                              "features/pre_host/testdefault",
+                              "features/pre_host/testint",
+                              "features/pre_host/testjson",
+                              "features/pre_host/testlist",
+                              "features/pre_host/teststring",
+                              "windows/windows",
+                             ]))
+
+        self.assertEqual(param_values['features/pre_host/testboolean'],
+                         'False')
+        self.assertEqual(param_values['features/pre_host/teststring'],
+                         'override')
+        self.assertEqual(param_values['features/pre_host/testint'],
+                         '0')
+
+        # The order of the keys is not deterministic, so we cannot do
+        # string-wise comparison here
+        self.assertEqual(json.loads(param_values['features/pre_host/testjson']),
+                         json.loads('{"key": "other_key", "values": [1, 2]}'))
+
+        self.assertEqual(param_values['features/pre_host/testlist'],
+                         'host1,host2')
+        self.assertEqual(param_values['features/pre_host/testdefault'],
+                         'host_feature')
+
+    def test_135_verify_cat_host_feature(self):
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/features/pre_host/testboolean" = false;\s*'
+                          r'"/system/features/pre_host/testdefault" = "host_feature";\s*'
+                          r'"/system/features/pre_host/testfalsedefault" = false;\s*'
+                          r'"/system/features/pre_host/testfloat" = 100\.100;\s*'
+                          r'"/system/features/pre_host/testint" = 0;\s*'
+                          r'"/system/features/pre_host/testjson" = nlist\(\s*'
+                          r'"key",\s*"other_key",\s*'
+                          r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
+                          r'"/system/features/pre_host/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
+                          r'"/system/features/pre_host/teststring" = "override";\s*',
+                          command)
+
+    def test_135_validate(self):
+        command = ["validate_parameter", "--personality", "inventory"]
+        out = self.badrequesttest(command)
+        self.searchoutput(out,
+                          r'Following required parameters have not been specified:\s*',
+                          command)
+        self.searchoutput(out,
+                          r'Feature Binding: pre_host\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Type: string\s*',
+                          command)
+
+    def test_135_verify_diff(self):
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "inventory", "--other", "utpers-dev"]
+
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Differences for Parameters for host feature pre_host:\s*'
+                          r'missing Parameters for host feature pre_host in Personality aquilon/utpers-dev@current:\s*'
+                          r'//testboolean\s*'
+                          r'//testdefault\s*'
+                          r'//testint\s*'
+                          r'//testjson/key\s*'
+                          r'//testjson/values/0\s*'
+                          r'//testjson/values/1\s*'
+                          r'//testlist/0\s*'
+                          r'//testlist/1\s*'
+                          r'//teststring\s*',
                           command)
 
     def test_200_unbound_feature(self):

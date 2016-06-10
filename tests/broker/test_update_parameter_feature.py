@@ -93,6 +93,35 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                           r'"/system/features/interface/src_route/teststring" = "default";\s*',
                           command)
 
+    def test_120_host_update(self):
+        self.noouttest(["update_parameter", "--personality", "inventory",
+                        "--archetype", "aquilon", "--feature", "pre_host",
+                        "--path", "testdefault", "--value", "host_newstring"])
+
+    def test_125_cat_host_params(self):
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"/system/features/pre_host/testboolean" = false;\s*'
+                          r'"/system/features/pre_host/testdefault" = "host_newstring";\s*'
+                          r'"/system/features/pre_host/testfalsedefault" = false;\s*'
+                          r'"/system/features/pre_host/testfloat" = 100\.100;\s*'
+                          r'"/system/features/pre_host/testint" = 0;\s*'
+                          r'"/system/features/pre_host/testjson" = nlist\(\s*'
+                          r'"key",\s*"other_key",\s*'
+                          r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
+                          r'"/system/features/pre_host/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
+                          r'"/system/features/pre_host/teststring" = "override";\s*',
+                          command)
+
+    def test_200_json_validation(self):
+        command = ["update_parameter", "--archetype", "aquilon",
+                   "--personality", "inventory", "--feature", "pre_host",
+                   "--type", "host", "--path", "testjson",
+                   "--value", '{"key": "val3", "values": []}']
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed validating", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateParameterFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)
