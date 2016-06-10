@@ -35,40 +35,93 @@ class TestUnbindFeature(TestBrokerCommand):
         self.matchoutput(err, "Flushed %d/%d templates" %
                          (len(perslist), len(perslist)), command)
 
-    def test_100_unbind_archetype(self):
+    def test_100_unbind_redundant_personality(self):
+        command = ["unbind", "feature", "--feature", "pre_host",
+                   "--personality", "inventory"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Flushed 1/1 templates.", command)
+
+    def test_101_verify_still_there(self):
+        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bound to: Archetype aquilon", command)
+        self.matchclean(out, "inventory", command)
+
+        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'include { "features/pre_host/config" };',
+                          command)
+
+    def test_105_unbind_archetype(self):
         command = ["unbind", "feature", "--feature", "pre_host",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.verify_personality_flush(err, command)
 
-    def test_101_verify_archetype(self):
+    def test_106_verify_archetype(self):
         command = ["show", "archetype", "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.searchclean(out, "pre_host$", command)
 
-    def test_101_verify_feature(self):
+    def test_106_verify_feature(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
         self.matchclean(out, "Bound to: Archetype aquilon", command)
 
-    def test_101_verify_show_host(self):
+    def test_106_verify_show_host(self):
         command = ["show", "host", "--hostname", "unittest00.one-nyp.ms.com"]
         out = self.commandtest(command)
         # Make sure we don't match the feature listed as part of the archetype
         # definition
         self.searchclean(out, r'^  Host Feature: pre_host$', command)
 
-    def test_101_verify_cat_personality(self):
+    def test_106_verify_cat_personality(self):
         command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
         self.matchclean(out, "pre_host/config", command)
 
-    def test_110_unbind_personality(self):
+    def test_110_unbind_redundant_archetype(self):
+        command = ["unbind", "feature", "--feature", "post_host",
+                   "--archetype", "aquilon",
+                   "--justification", "tcm=12345678"]
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
+
+    def test_111_verify_archetype(self):
+        command = ["show", "archetype", "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.searchclean(out, "post_host$", command)
+
+    def test_111_verify_show_feature(self):
+        command = ["show", "feature", "--feature", "post_host", "--type", "host"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
+        self.matchclean(out, "Bound to: Archetype aquilon", command)
+
+    def test_111_verify_cat_personality(self):
+        command = ["cat", "--personality", "inventory", "--post_feature"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'include { "features/post_host/config" };',
+                          command)
+
+    def test_115_unbind_personality(self):
         command = ["unbind", "feature", "--feature", "post_host",
                    "--personality", "inventory"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
+
+    def test_116_verify_show_personality(self):
+        command = ["show_personality", "--personality", "inventory"]
+        out = self.commandtest(command)
+        self.matchclean(out, "post_host", command)
+
+    def test_116_verify_cat_personality(self):
+        command = ["cat", "--personality", "inventory", "--post_feature"]
+        out = self.commandtest(command)
+        self.matchclean(out, "post_host/config", command)
 
     def test_130_unbind_model_personality(self):
         self.statustest(["unbind_feature", "--feature", "bios_setup",

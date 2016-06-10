@@ -146,18 +146,6 @@ class TestBindFeature(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
         self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
 
-    def test_122_undo_redundant_personality(self):
-        command = ["unbind", "feature", "--feature", "pre_host",
-                   "--personality", "inventory"]
-        err = self.statustest(command)
-        self.matchoutput(err, "Flushed 1/1 templates.", command)
-
-    def test_123_verify_undo(self):
-        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Archetype aquilon", command)
-        self.matchclean(out, "inventory", command)
-
     def test_125_bind_archetype_redundant(self):
         command = ["bind", "feature", "--feature", "post_host",
                    "--archetype", "aquilon", "--justification", "tcm=12345678"]
@@ -174,19 +162,6 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
         self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
-
-    def test_127_undo_redundant_archetype(self):
-        command = ["unbind", "feature", "--feature", "post_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
-        err = self.statustest(command)
-        self.verify_personality_flush(err, command)
-
-    def test_128_verify_undo(self):
-        command = ["show", "feature", "--feature", "post_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
-        self.matchclean(out, "Bound to: Archetype aquilon", command)
 
     def test_130_bind_model(self):
         command = ["bind", "feature", "--feature", "bios_setup",
@@ -545,6 +520,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'Differences for Features:\s*'
                           r'missing Features in Personality aquilon/compileserver:\s*'
                           r'post_host\s*'
+                          r'pre_host\s*'
                           r'missing Features in Personality aquilon/inventory:\s*'
                           r'src_route\s*',
                           command)
