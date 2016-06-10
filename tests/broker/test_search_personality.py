@@ -143,7 +143,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'missing Grns in Personality aquilon/inventory:\s+'
-                          r'GRN grn:/ms/ei/aquilon/aqd',
+                          r'esp: grn:/ms/ei/aquilon/aqd',
                           command)
 
     def test_110_show_diff_2(self):

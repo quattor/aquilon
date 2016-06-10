@@ -78,7 +78,7 @@ class CommandShowDiff(BrokerCommand):
         ret["ServiceMap"][dtype] = smaps
 
         # grns
-        grns = {grn_rec.grn: True for grn_rec in dbstage.grns}
+        grns = {"{0.target}: {0.grn!s}".format(grn_rec): True for grn_rec in dbstage.grns}
         ret["Grns"][dtype] = grns
 
         # options
