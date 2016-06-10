@@ -71,6 +71,18 @@ class TestDelParameterFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "pre_host/testdefault", command)
 
+    def test_130_del_same_feature_name_parameter(self):
+        for type in ["host", "hardware", "interface"]:
+            self.statustest(["del_parameter", "--personality", "inventory",
+                             "--feature", "shinynew", "--type", type,
+                             "--path", "car"])
+
+    def test_135_verify_same_feature_name_parameter(self):
+        command = ["show_parameter", "--personality", "inventory"]
+        out = self.commandtest(command)
+        self.searchclean(out, "shinynew", command)
+        self.searchclean(out, "car", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelParameterFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)

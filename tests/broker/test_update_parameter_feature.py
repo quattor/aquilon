@@ -114,6 +114,25 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                           r'"/system/features/pre_host/teststring" = "override";\s*',
                           command)
 
+    def test_130_upd_same_feature_name_parameter(self):
+        for type in ["host", "hardware", "interface"]:
+            self.statustest(["update_parameter", "--personality", "inventory",
+                             "--feature", "shinynew", "--type", type,
+                             "--path", "car", "--value", 'audi' + type])
+
+    def test_135_verify_same_feature_name_parameter(self):
+        command = ["show_parameter", "--personality", "inventory"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Interface Feature: shinynew\s*'
+                          r'car: "audiinterface"', command)
+        self.searchoutput(out,
+                          r'Hardware Feature: shinynew\s*'
+                          r'car: "audihardware"', command)
+        self.searchoutput(out,
+                          r'Host Feature: shinynew\s*'
+                          r'car: "audihost"', command)
+
     def test_200_json_validation(self):
         command = ["update_parameter", "--archetype", "aquilon",
                    "--personality", "inventory", "--feature", "pre_host",

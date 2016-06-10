@@ -368,6 +368,16 @@ class TestBindFeature(TestBrokerCommand):
         self.matchclean(out, 'variable CURRENT_INTERFACE = "eth0";', command)
         self.matchoutput(out, 'variable CURRENT_INTERFACE = "eth1";', command)
 
+    def test_160_bind_same_feature_name(self):
+        for type in ["host", "hardware", "interface"]:
+            command = ["bind_feature", "--feature", "shinynew",
+                       "--personality", "inventory"]
+            if type == "interface":
+                command.extend(["--interface", "eth0"])
+            if type == "hardware":
+                command.extend(["--model", "hs21-8853"])
+            self.statustest(command)
+
     def test_200_only_interface(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--interface", "eth0"]
@@ -521,6 +531,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'missing Features in Personality aquilon/compileserver:\s*'
                           r'post_host\s*'
                           r'pre_host\s*'
+                          r'shinynew\s*'
                           r'missing Features in Personality aquilon/inventory:\s*'
                           r'src_route\s*',
                           command)

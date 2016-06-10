@@ -285,7 +285,6 @@ from .test_reset_advertised_status import TestResetAdvertisedStatus
 from .test_add_parameter import TestAddParameter
 from .test_del_parameter import TestDelParameter
 from .test_update_parameter import TestUpdateParameter
-from .test_parameter_feature import TestParameterFeature
 from .test_add_parameter_feature import TestAddParameterFeature
 from .test_del_parameter_feature import TestDelParameterFeature
 from .test_update_parameter_feature import TestUpdateParameterFeature
@@ -377,7 +376,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestChangeStatus, TestResetAdvertisedStatus,
                      TestBindFeature,
                      TestAddParameterFeature,
-                     TestParameterFeature,
                      TestJustification,
                      TestChooserConstraints,
                      TestCompile,

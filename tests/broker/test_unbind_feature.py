@@ -219,6 +219,15 @@ class TestUnbindFeature(TestBrokerCommand):
         self.matchclean(out, 'bond0', command)
         self.matchclean(out, 'src_route', command)
 
+    def test_150_unbind_same_feature_name(self):
+        for type in ["host", "hardware", "interface"]:
+            cmd = ["unbind_feature", "--feature", "shinynew", "--personality", "inventory"]
+            if type == "interface":
+                cmd.extend(["--interface", "eth0"])
+            if type == "hardware":
+                cmd.extend(["--model", "hs21-8853"])
+            self.successtest(cmd)
+
     def test_200_unbind_archetype_again(self):
         command = ["unbind", "feature", "--feature", "pre_host",
                    "--archetype", "aquilon",

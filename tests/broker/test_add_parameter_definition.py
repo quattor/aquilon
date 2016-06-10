@@ -210,6 +210,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
                    "--path=%s" % path]
             self.noouttest(cmd)
 
+    def test_240_add_same_feature_name(self):
+        for type in ["host", "hardware", "interface"]:
+            self.noouttest(["add_parameter_definition",
+                            "--feature", "shinynew", "--type", type,
+                            "--path", "car", "--value_type", "string"])
+
     def test_300_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
                "--path=foo/teststring", "--value_type=string", "--description=blaah",

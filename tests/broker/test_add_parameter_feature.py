@@ -332,6 +332,25 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'//teststring\s*',
                           command)
 
+    def test_140_add_same_feature_name_parameter(self):
+        for type in ["host", "hardware", "interface"]:
+            self.statustest(["add_parameter", "--personality", "inventory",
+                             "--feature", "shinynew", "--type", type,
+                             "--path", "car", "--value", 'bmw' + type])
+
+    def test_620_verify_same_feature_name_parameter(self):
+        command = ["show_parameter", "--personality", "inventory"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Interface Feature: shinynew\s*'
+                          r'car: "bmwinterface"', command)
+        self.searchoutput(out,
+                          r'Hardware Feature: shinynew\s*'
+                          r'car: "bmwhardware"', command)
+        self.searchoutput(out,
+                          r'Host Feature: shinynew\s*'
+                          r'car: "bmwhost"', command)
+
     def test_200_unbound_feature(self):
         command = ["add_parameter", "--personality", "unixeng-test",
                    "--feature", "unused_no_params", "--path", "teststring",
