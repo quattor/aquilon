@@ -20,7 +20,7 @@ import re
 
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
-from aquilon.aqdb.model import Domain, Branch, Sandbox
+from aquilon.aqdb.model import Domain, Branch, Sandbox, Review
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import sync_domain, sync_all_trackers
 from aquilon.worker.dbwrappers.change_management import validate_justification
@@ -67,11 +67,21 @@ class CommandDeploy(BrokerCommand):
                                 "is not allowed. Either re-ryn with --nosync "
                                 "or validate the branch.".format(dbtarget))
 
+        dbreview = Review.get_unique(session, source=dbsource, target=dbtarget)
+        if dbreview and dbreview.approved is False:
+            raise ArgumentError("Deploying {0:l} to {1:l} was explicitly denied."
+                                .format(dbsource, dbtarget))
+
         if dbtarget.requires_change_manager and not dryrun:
             if not justification:
                 raise AuthorizationException(
                     "{0} is under change management control.  Please specify "
                     "--justification.".format(dbtarget))
+
+            if not dbreview or not dbreview.approved:
+                logger.warning("Warning: this deployment request was not "
+                               "approved, this will be an error in the future.")
+
             validate_justification(user, justification, reason)
 
         if dbtarget.archived:
@@ -143,5 +153,10 @@ class CommandDeploy(BrokerCommand):
 
         if sync and dbtarget.autosync:
             sync_all_trackers(dbtarget, logger)
+
+        # TODO: if there are other unmerged changes under review, then trigger
+        # new tests. Note that we cannot roll back the DB transaction at this
+        # point, so the triggering the tests cannot fail. We may need an explict
+        # session.commit() here.
 
         return

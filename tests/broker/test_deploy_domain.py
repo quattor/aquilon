@@ -87,6 +87,57 @@ class TestDeployDomain(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Failed to parse the justification", command)
 
+    def test_125_ask_review(self):
+        command = ["ask_for_review", "--source", "changetest1", "--target", "prod"]
+        self.noouttest(command)
+
+    def head_commit(self, sandbox):
+        sandboxdir = os.path.join(self.sandboxdir, sandbox)
+        head, _ = self.gitcommand(["rev-parse", "HEAD^{commit}"], cwd=sandboxdir)
+        head = head.strip()
+        return head
+
+    def test_126_show_review(self):
+        changetest1_head = self.head_commit("changetest1")
+        command = ["show_review", "--source", "changetest1", "--target", "prod"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Review request
+              Target Domain: prod
+              Source Sandbox: changetest1
+                Commit ID: %s
+              Testing status: Untested
+              Approval status: No decision
+            """ % changetest1_head,
+                           command)
+
+    def test_126_show_review_all(self):
+        changetest1_head = self.head_commit("changetest1")
+        command = ["show_review", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, changetest1_head, command)
+
+    def test_127_update_review(self):
+        changetest1_head = self.head_commit("changetest1")
+        command = ["update_review", "--source", "changetest1", "--target", "prod",
+                   "--commit_id", changetest1_head,
+                   "--testing_succeeded", "--approved"]
+        self.noouttest(command)
+
+    def test_128_show_review(self):
+        changetest1_head = self.head_commit("changetest1")
+        command = ["show_review", "--source", "changetest1", "--target", "prod"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Review request
+              Target Domain: prod
+              Source Sandbox: changetest1
+                Commit ID: %s
+              Testing status: Success
+              Approval status: Approved
+            """ % changetest1_head,
+                           command)
+
     def test_130_deploynosync(self):
         command = ["deploy", "--source", "changetest1", "--target", "prod",
                    "--nosync", "--justification", "tcm=12345678",
@@ -95,6 +146,7 @@ class TestDeployDomain(TestBrokerCommand):
         self.matchoutput(out, "Updating the checked out copy of domain prod...",
                          command)
         self.matchclean(out, "ut-prod", command)
+        self.matchclean(out, "not approved", command)
 
     def test_200_verifynosync(self):
         # The change should be in prod...
@@ -162,6 +214,8 @@ class TestDeployDomain(TestBrokerCommand):
             self.matchoutput(out,
                              "Updating the checked out copy of domain %s..." %
                              domain, command)
+        self.matchoutput(out, "Warning: this deployment request was "
+                         "not approved", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeployDomain)
