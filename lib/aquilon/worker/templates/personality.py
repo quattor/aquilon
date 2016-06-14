@@ -36,13 +36,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 def get_parameters_by_feature(dbstage, dbfeature):
-    ret = {}
     param_def_holder = dbfeature.param_def_holder
-    if not param_def_holder:
-        return ret
+    assert param_def_holder
 
     param = dbstage.parameters.get(param_def_holder, None)
 
+    ret = {}
     for param_def in param_def_holder.param_definitions:
         if param:
             value = param.get_path(param_def.path, compel=False)
@@ -55,25 +54,6 @@ def get_parameters_by_feature(dbstage, dbfeature):
         if value is not None:
             ret[param_def.path] = value
     return ret
-
-
-def helper_feature_template(dbstage, dbfeature, lines):
-    # Only features which are
-    # - bound to the personality directly rather than to the archetype,
-    # - and have parameter definitions
-    # are interesting when generating parameters
-    param_features = set(link.feature for link in dbstage.features
-                         if link.feature.param_def_holder)
-
-    if dbfeature in param_features:
-        base_path = "/system/" + dbfeature.cfg_path
-        params = get_parameters_by_feature(dbstage, dbfeature)
-
-        for key in sorted(params.keys()):
-            pan_assign(lines, base_path + "/" + key, params[key])
-
-    pan_include(lines, dbfeature.cfg_path + "/config")
-    pan_append(lines, "/metadata/features", dbfeature.cfg_path + "/config")
 
 
 def staged_path(prefix, dbstage, suffix):
@@ -148,6 +128,10 @@ class PlenaryPersonalityBase(Plenary):
             pan_variable(lines, "PERSONALITY", "%s+%s" % (dbpers.name,
                                                           self.dbobj.name))
 
+        pan_assign(lines, "/system/personality/name", dbpers.name)
+        if dbpers.staged:
+            pan_assign(lines, "/system/personality/stage", self.dbobj.name)
+
         # process grns
         eon_id_map = defaultdict(set)
 
@@ -172,13 +156,30 @@ class PlenaryPersonalityBase(Plenary):
 
         pre, post = host_features(self.dbobj)
 
+        # Only features which are
+        # - bound to the personality directly rather than to the archetype,
+        # - and have parameter definitions
+        # are interesting when generating parameters
+        param_features = set(link.feature for link in self.dbobj.features
+                             if link.feature.param_def_holder)
+
+        for dbfeature in sorted(frozenset()
+                                .union(pre)
+                                .union(post)
+                                .intersection(param_features),
+                                key=attrgetter('name')):
+            base_path = "/system/" + dbfeature.cfg_path
+            params = get_parameters_by_feature(self.dbobj, dbfeature)
+
+            for key in sorted(params.keys()):
+                pan_assign(lines, base_path + "/" + key, params[key])
+
         for dbfeature in sorted(pre, key=attrgetter('name')):
-            helper_feature_template(self.dbobj, dbfeature, lines)
+            pan_include(lines, dbfeature.cfg_path + "/config")
+            pan_append(lines, "/metadata/features", dbfeature.cfg_path + "/config")
 
         pan_include_if_exists(lines, "personality/config")
-        pan_assign(lines, "/system/personality/name", dbpers.name)
-        if dbpers.staged:
-            pan_assign(lines, "/system/personality/stage", self.dbobj.name)
+
         if dbpers.host_environment.name != 'legacy':
             pan_assign(lines, "/system/personality/host_environment",
                        dbpers.host_environment, True)
@@ -187,7 +188,8 @@ class PlenaryPersonalityBase(Plenary):
             pan_include(lines, "features/personality/config_override/config")
 
         for dbfeature in sorted(post, key=attrgetter('name')):
-            helper_feature_template(self.dbobj, dbfeature, lines)
+            pan_include(lines, dbfeature.cfg_path + "/config")
+            pan_append(lines, "/metadata/features", dbfeature.cfg_path + "/config")
 
     def get_key(self, exclusive=True):
         if self.is_deleted():
