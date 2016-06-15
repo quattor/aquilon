@@ -1,0 +1,3 @@
+ALTER TABLE machine MODIFY (uri VARCHAR2(400 CHAR));
+
+QUIT;
