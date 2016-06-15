@@ -24,8 +24,9 @@ from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import sync_domain
 from aquilon.worker.dbwrappers.change_management import validate_justification
-from aquilon.worker.processes import run_git, sync_domain
+from aquilon.worker.processes import run_git
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import remove_dir
 

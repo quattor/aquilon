@@ -27,6 +27,7 @@ from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  ProcessException)
+from aquilon.config import Config
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
                                 Archetype, Personality, PersonalityStage,
@@ -291,3 +292,38 @@ def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
         raise ArgumentError("\n%s%s" % (e.out, e.err))
     finally:
         remove_dir(tempdir, logger=logger)
+
+
+def sync_domain(dbdomain, logger):
+    """Update templates on disk to match contents of branch in template-king.
+
+    If this domain is tracking another, first update the branch in
+    template-king with the latest from the tracking branch.  Also save
+    the current (previous) commit as a potential rollback point.
+
+    """
+    config = Config()
+    kingdir = config.get("broker", "kingdir")
+    domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
+
+    if dbdomain.tracked_branch:
+        # Might need to revisit if using this helper from rollback...
+        run_git(["push", ".",
+                 "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)],
+                path=kingdir, logger=logger)
+
+    logger.client_info("Updating the checked out copy of {0:l}..."
+                       .format(dbdomain))
+
+    run_git(["fetch", "--prune"], path=domaindir, logger=logger)
+    if dbdomain.tracked_branch:
+        out = run_git(["rev-list", "-n", "1", "HEAD"],
+                      path=domaindir, logger=logger)
+        rollback_commit = out.strip()
+
+    with CompileKey(domain=dbdomain.name, logger=logger):
+        run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
+                path=domaindir, logger=logger)
+
+    if dbdomain.tracked_branch:
+        dbdomain.rollback_commit = rollback_commit

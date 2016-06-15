@@ -37,7 +37,6 @@ from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config, running_from_source
 from aquilon.aqdb.model import Machine
-from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
 
@@ -226,46 +225,6 @@ def cache_version(config, logger=LOGGER):
     except ProcessException as e:
         logger.info("Could not run git describe to get version: %s", e)
         config.set("broker", "version", "Unknown")
-
-
-def sync_domain(dbdomain, logger=LOGGER, locked=False):
-    """Update templates on disk to match contents of branch in template-king.
-
-    If this domain is tracking another, first update the branch in
-    template-king with the latest from the tracking branch.  Also save
-    the current (previous) commit as a potential rollback point.
-
-    """
-    config = Config()
-    kingdir = config.get("broker", "kingdir")
-    domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
-    git_env = {"PATH": os.environ.get("PATH", "")}
-
-    if dbdomain.tracked_branch:
-        # Might need to revisit if using this helper from rollback...
-        run_command(["git", "push", ".",
-                     "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)],
-                    path=kingdir, env=git_env, logger=logger)
-
-    logger.client_info("Updating the checked out copy of {0:l}..."
-                       .format(dbdomain))
-
-    run_command(["git", "fetch", "--prune"], path=domaindir, env=git_env, logger=logger)
-    if dbdomain.tracked_branch:
-        out = run_command(["git", "rev-list", "-n", "1", "HEAD"],
-                          path=domaindir, env=git_env, logger=logger)
-        rollback_commit = out.strip()
-    try:
-        if not locked:
-            key = CompileKey(domain=dbdomain.name, logger=logger)
-            lock_queue.acquire(key)
-        run_command(["git", "reset", "--hard", "origin/%s" % dbdomain.name],
-                    path=domaindir, env=git_env, logger=logger)
-    finally:
-        if not locked:
-            lock_queue.release(key)
-    if dbdomain.tracked_branch:
-        dbdomain.rollback_commit = rollback_commit
 
 
 IP_NOT_DEFINED_RE = re.compile(r"Host with IP address "

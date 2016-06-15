@@ -65,7 +65,7 @@ class CommandRollback(BrokerCommand):
             try:
                 run_git(["push", ".", "+%s:%s" % (ref, dbdomain.name)],
                         path=kingdir, logger=logger)
-                # Duplicated this logic from aquilon.worker.processes.sync_domain()
+                # Duplicated this logic from aquilon.worker.dbwrappers.branch.sync_domain()
                 run_git(["fetch"], path=domaindir, logger=logger)
                 run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
                         path=domaindir, logger=logger)

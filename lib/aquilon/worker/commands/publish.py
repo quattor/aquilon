@@ -24,8 +24,8 @@ from base64 import b64decode
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
-from aquilon.worker.dbwrappers.branch import force_my_sandbox
-from aquilon.worker.processes import run_git, sync_domain
+from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_domain
+from aquilon.worker.processes import run_git
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import remove_dir
 
