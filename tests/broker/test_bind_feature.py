@@ -26,19 +26,6 @@ from broker.brokertest import TestBrokerCommand
 
 AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
-hardware_feature_str = r'include {\n'
-r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
-r'\s*(value("/hardware/template_name") == "hs21-8853")){\n'
-r'\s*return("features/hardware/bios_setup")\n'
-r'\s*} else{ return(undef); };\n'
-r'};'
-r'"/metadata/features"={\n'
-r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
-r'\s(value("/hardware/template_name") == "hs21-8853")){\n'
-r'\sappend("features/hardware/bios_setup");\n'
-r'\s} else { SELF; };\n'
-r'};'
-
 
 class TestBindFeature(TestBrokerCommand):
 
@@ -85,15 +72,6 @@ class TestBindFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/metadata/features" = append\("features/pre_host/config"\);',
                           command)
-
-    def test_105_bind_archetype_param(self):
-        command = ["bind", "feature", "--feature", "pre_host_param",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
-        err = self.statustest(command)
-        self.verify_personality_flush(err, command)
-        # We can't easily check the number of templates that got refreshed since
-        # there's no easy way to query if "make" was run for a host or not
 
     def test_110_bind_personality(self):
         command = ["bind", "feature", "--feature", "post_host",
@@ -168,18 +146,6 @@ class TestBindFeature(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
         self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
 
-    def test_122_undo_redundant_personality(self):
-        command = ["unbind", "feature", "--feature", "pre_host",
-                   "--personality", "inventory"]
-        err = self.statustest(command)
-        self.matchoutput(err, "Flushed 1/1 templates.", command)
-
-    def test_123_verify_undo(self):
-        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Archetype aquilon", command)
-        self.matchclean(out, "inventory", command)
-
     def test_125_bind_archetype_redundant(self):
         command = ["bind", "feature", "--feature", "post_host",
                    "--archetype", "aquilon", "--justification", "tcm=12345678"]
@@ -196,19 +162,6 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
         self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
-
-    def test_127_undo_redundant_archetype(self):
-        command = ["unbind", "feature", "--feature", "post_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
-        err = self.statustest(command)
-        self.verify_personality_flush(err, command)
-
-    def test_128_verify_undo(self):
-        command = ["show", "feature", "--feature", "post_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
-        self.matchclean(out, "Bound to: Archetype aquilon", command)
 
     def test_130_bind_model(self):
         command = ["bind", "feature", "--feature", "bios_setup",
@@ -251,8 +204,17 @@ class TestBindFeature(TestBrokerCommand):
     def test_131_verify_cat_personality(self):
         command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
-        # The feature should be after the OS definition
-        self.searchoutput(out, hardware_feature_str, command)
+        self.searchoutput(out,
+                          r'include \{\s*'
+                          r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
+                          r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\s*\{\s*'
+                          r'if \(exists\("features/hardware/bios_setup/config"\)\) \{\s*'
+                          r'"features/hardware/bios_setup/config";\s*'
+                          r'\} else \{\s*'
+                          r'"features/hardware/bios_setup";\s*'
+                          r'\};\s*'
+                          r'\} else \{\s*undef;\s*\};\s*\};',
+                          command)
 
     def test_140_bind_nic_model_interface(self):
         command = ["bind", "feature", "--feature", "src_route",
@@ -265,7 +227,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver", "--interface", "eth1",
                    "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
     def test_141_verify_show_model(self):
@@ -338,7 +300,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "src_route", command)
 
-    def test_160_bind_interface_personality(self):
+    def test_150_bind_interface_personality(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
@@ -350,7 +312,7 @@ class TestBindFeature(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
-    def test_161_verify_show_personality(self):
+    def test_151_verify_show_personality(self):
         command = ["show", "personality", "--personality", "compileserver"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -358,7 +320,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'^    Interface: bond0$',
                           command)
 
-    def test_161_verify_show_personality_proto(self):
+    def test_151_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "compileserver", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
         features = {feature.interface_name: feature
@@ -379,7 +341,7 @@ class TestBindFeature(TestBrokerCommand):
         self.assertEqual(feature.model.name, "")
         self.assertEqual(feature.model.vendor, "")
 
-    def test_161_verify_show_feature(self):
+    def test_151_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
@@ -387,7 +349,7 @@ class TestBindFeature(TestBrokerCommand):
                          'Bound to: Personality aquilon/compileserver, '
                          'Interface bond0', command)
 
-    def test_161_verify_show_host(self):
+    def test_151_verify_show_host(self):
         command = ["show", "host", "--hostname", "unittest21.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -396,7 +358,7 @@ class TestBindFeature(TestBrokerCommand):
                           r'^    Template: features/interface/src_route',
                           command)
 
-    def test_161_verify_cat_personality(self):
+    def test_151_verify_cat_personality(self):
         command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -405,6 +367,16 @@ class TestBindFeature(TestBrokerCommand):
                           command)
         self.matchclean(out, 'variable CURRENT_INTERFACE = "eth0";', command)
         self.matchoutput(out, 'variable CURRENT_INTERFACE = "eth1";', command)
+
+    def test_160_bind_same_feature_name(self):
+        for type in ["host", "hardware", "interface"]:
+            command = ["bind_feature", "--feature", "shinynew",
+                       "--personality", "inventory"]
+            if type == "interface":
+                command.extend(["--interface", "eth0"])
+            if type == "hardware":
+                command.extend(["--model", "hs21-8853"])
+            self.statustest(command)
 
     def test_200_only_interface(self):
         command = ["bind", "feature", "--feature", "src_route",
@@ -506,7 +478,7 @@ class TestBindFeature(TestBrokerCommand):
                          "stage.", command)
 
     def test_200_bind_model_no_justification(self):
-        command = ["bind", "feature", "--feature", "disable_ht",
+        command = ["bind", "feature", "--feature", "bios_setup",
                    "--model", "utmedium", "--archetype", "aquilon"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out,
@@ -550,6 +522,19 @@ class TestBindFeature(TestBrokerCommand):
                          "deleted.",
                          command)
 
+    def test_400_show_diff(self):
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "compileserver", "--other", "inventory"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Differences for Features:\s*'
+                          r'missing Features in Personality aquilon/compileserver:\s*'
+                          r'post_host\s*'
+                          r'pre_host\s*'
+                          r'shinynew\s*'
+                          r'missing Features in Personality aquilon/inventory:\s*'
+                          r'src_route\s*',
+                          command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindFeature)

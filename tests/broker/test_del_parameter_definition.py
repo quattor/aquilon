@@ -55,17 +55,17 @@ class TestDelParameterDefinition(TestBrokerCommand):
             if "activation" in params:
                 continue
 
-            cmd = ["del_parameter_definition", "--feature", "myfeature",
+            cmd = ["del_parameter_definition", "--feature", "pre_host",
                    "--type=host", "--path", path]
             self.noouttest(cmd)
 
         for path in ["//startslash", "endslash//"]:
-            cmd = ["del_parameter_definition", "--feature", "myfeature",
+            cmd = ["del_parameter_definition", "--feature", "pre_host",
                    "--type=host", "--path", path]
             self.noouttest(cmd)
 
     def test_115_verify_delete(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "pre_host", "--type=host"]
         self.noouttest(cmd)
 
     def test_200_del_bad_feature_type(self):
@@ -78,12 +78,12 @@ class TestDelParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_200_del_bad_feature_path(self):
-        cmd = ["del_parameter_definition", "--feature", "myfeature",
+        cmd = ["del_parameter_definition", "--feature", "pre_host",
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
                          "Path path-does-not-exist does not match any "
-                         "parameter definitions of host feature myfeature.",
+                         "parameter definitions of host feature pre_host.",
                          cmd)
 
 if __name__ == '__main__':

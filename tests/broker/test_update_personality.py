@@ -146,8 +146,12 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          self.grns["grn:/ms/ei/aquilon/ut2"], command)
 
     def test_170_make_staged(self):
+        self.check_plenary_gone("aquilon", "personality",
+                                "compileserver+next", "config")
         self.noouttest(["update_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--staged"])
+        self.check_plenary_exists("aquilon", "personality",
+                                  "compileserver+next", "config")
 
     def test_171_show_current(self):
         command = ["show_personality", "--personality", "compileserver",
@@ -159,7 +163,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.verifycatpersonality("aquilon", "compileserver", stage="current")
 
     def test_172_show_next(self):
-        command = ["show_personality", "--personality", "unixeng-test",
+        command = ["show_personality", "--personality", "compileserver",
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Stage: next", command)
@@ -168,23 +172,29 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.verifycatpersonality("aquilon", "compileserver", stage="next")
 
     def test_174_delete_next(self):
-        self.noouttest(["del_personality", "--personality", "unixeng-test",
+        self.noouttest(["del_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--personality_stage", "next"])
 
     def test_175_verify_next_gone(self):
-        command = ["show_personality", "--personality", "unixeng-test",
+        command = ["show_personality", "--personality", "compileserver",
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality aquilon/unixeng-test does not have "
+        self.matchoutput(out, "Personality aquilon/compileserver does not have "
                          "stage next.", command)
+        self.check_plenary_gone("aquilon", "personality",
+                                "compileserver+next", "config")
+
+    def test_176_create_next_again(self):
+        self.noouttest(["update_personality", "--personality", "compileserver",
+                        "--archetype", "aquilon"])
 
     def test_178_make_unstaged(self):
         self.check_plenary_exists("aquilon", "personality",
-                                  "compileserver+next", "espinfo")
+                                  "compileserver+next", "config")
         self.noouttest(["update_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--unstaged"])
         self.check_plenary_gone("aquilon", "personality",
-                                "compileserver+next", "espinfo")
+                                "compileserver+next", "config")
 
     def test_179_verify_unstaged(self):
         command = ["show_personality", "--personality", "compileserver",

@@ -95,9 +95,9 @@ default_param_defs = {
 }
 
 param_features = {
-    "host": ["myfeature", "hostfeature"],
-    "hardware": ["hardwarefeature"],
-    "interface": ["interfacefeature"],
+    "host": ["pre_host"],
+    "hardware": ["bios_setup"],
+    "interface": ["src_route"],
 }
 
 
@@ -174,18 +174,13 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
             self.noouttest(cmd)
 
-    def test_140_add_src_route_param(self):
-        self.noouttest(["add_parameter_definition",
-                        "--feature", "src_route", "--type", "interface",
-                        "--path", "testparam", "--value_type", "string"])
-
     def test_200_add_feature_all(self):
         for feature_type, features in param_features.items():
             for feature in features:
                 self.load_feature_paramdefs(feature, feature_type)
 
     def test_205_show_testrequired(self):
-        cmd = ["show_parameter_definition", "--feature", "myfeature", "--type=host",
+        cmd = ["show_parameter_definition", "--feature", "pre_host", "--type=host",
                "--path=testrequired"]
         out = self.commandtest(cmd)
         self.output_equals(out, """
@@ -195,10 +190,10 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_220_clean_path(self):
         for path in ["/startslash", "endslash/"]:
-            cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
+            cmd = ["add_parameter_definition", "--feature", "pre_host", "--type=host",
                    "--path=%s" % path, "--value_type=string"]
             self.noouttest(cmd)
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "pre_host", "--type=host"]
         out = self.commandtest(cmd)
         self.searchoutput(out, r'Parameter Definition: startslash\s*', cmd)
         self.searchoutput(out, r'Parameter Definition: endslash\s*', cmd)
@@ -208,12 +203,18 @@ class TestAddParameterDefinition(TestBrokerCommand):
                      "valid/with-dash", "with_under", "with.dot", "with-dash"]:
 
             cmd = ["add_parameter_definition", "--path=%s" % path,
-                   "--feature", "myfeature", "--type=host", "--value_type=string"]
+                   "--feature", "pre_host", "--type=host", "--value_type=string"]
             self.noouttest(cmd)
 
-            cmd = ["del_parameter_definition", "--feature", "myfeature", "--type=host",
+            cmd = ["del_parameter_definition", "--feature", "pre_host", "--type=host",
                    "--path=%s" % path]
             self.noouttest(cmd)
+
+    def test_240_add_same_feature_name(self):
+        for type in ["host", "hardware", "interface"]:
+            self.noouttest(["add_parameter_definition",
+                            "--feature", "shinynew", "--type", type,
+                            "--path", "car", "--value_type", "string"])
 
     def test_300_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
@@ -246,7 +247,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_300_add_feature_existing(self):
-        cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
+        cmd = ["add_parameter_definition", "--feature", "pre_host", "--type=host",
                "--path=teststring", "--value_type=string", "--description=blaah",
                "--required"]
         err = self.badrequesttest(cmd)
@@ -257,7 +258,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_300_path_conflict_feature(self):
         cmd = ["add_parameter_definition",
-               "--feature", "myfeature", "--type=host",
+               "--feature", "pre_host", "--type=host",
                "--path=testjson/subpath", "--value_type=string"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out,
@@ -270,7 +271,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
             if "invalid_default" not in params:
                 continue
 
-            cmd = ["add_parameter_definition", "--feature", "myfeature", "--type", "host",
+            cmd = ["add_parameter_definition", "--feature", "pre_host", "--type", "host",
                    "--path", path + "_invalid_default",
                    "--value_type", params["type"],
                    "--default", params["invalid_default"]]
@@ -334,7 +335,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_invalid_path_feature(self):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
                      "&badchar", "*badchar", ":badchar", ";badcharjk", "+badchar"]:
-            cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
+            cmd = ["add_parameter_definition", "--feature", "pre_host", "--type=host",
                    "--path=%s" % path, "--value_type=string"]
             err = self.badrequesttest(cmd)
             self.matchoutput(err,
@@ -342,7 +343,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                              cmd)
 
     def test_300_add_bad_feature_type(self):
-        cmd = ["add_parameter_definition", "--feature", "myfeature",
+        cmd = ["add_parameter_definition", "--feature", "pre_host",
                "--type=no-such-type",
                "--path=testpath", "--value_type=string"]
         err = self.badrequesttest(cmd)
@@ -352,7 +353,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_300_search_bad_feature_type(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature",
+        cmd = ["search_parameter_definition", "--feature", "pre_host",
                "--type=no-such-type"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
@@ -361,21 +362,21 @@ class TestAddParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_300_show_bad_path_feature(self):
-        cmd = ["show_parameter_definition", "--feature", "myfeature",
+        cmd = ["show_parameter_definition", "--feature", "pre_host",
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
                          "Path path-does-not-exist does not match any "
-                         "parameter definitions of host feature myfeature.",
+                         "parameter definitions of host feature pre_host.",
                          cmd)
 
     def test_300_show_feature_no_params(self):
-        cmd = ["show_parameter_definition", "--feature", "pre_host_no_params",
+        cmd = ["show_parameter_definition", "--feature", "unused_no_params",
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
                          "No parameter definitions found for host feature "
-                         "pre_host_no_params.",
+                         "unused_no_params.",
                          cmd)
 
     def test_400_verify_all(self):
@@ -433,7 +434,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 self.assertEqual(paramdef.activation, self.proto.DISPATCH)
 
     def test_410_verify_feature_all(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "pre_host", "--type=host"]
         out = self.commandtest(cmd)
 
         for path, params in default_param_defs.items():
@@ -458,7 +459,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
         self.matchclean(out, "Activation", cmd)
 
     def test_410_verify_feature_all_proto(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--format=proto", "--type=host"]
+        cmd = ["search_parameter_definition", "--feature", "pre_host", "--format=proto", "--type=host"]
         result = self.protobuftest(cmd, expect=11)[:]
         param_defs = {param_def.path: param_def for param_def in result}
 

@@ -31,11 +31,6 @@ class TestUpdateFeature(TestBrokerCommand):
         super(TestUpdateFeature, cls).setUpClass()
         cls.proto = cls.protocols['aqdsystems_pb2']
 
-    def test_010_bind_personality(self):
-        # We want to check plenary updates
-        self.statustest(["bind_feature", "--feature", "pre_host",
-                         "--personality", "inventory", "--archetype", "aquilon"])
-
     def test_100_update_feature(self):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
                    "--type", "host", "--comments", "New feature comments",
@@ -95,11 +90,6 @@ class TestUpdateFeature(TestBrokerCommand):
                          "Unknown value for deactivation. Valid values are: "
                          "dispatch, reboot, rebuild.",
                          command)
-
-    def test_800_cleanup(self):
-        # Avoid disturbing the rest of the tests
-        self.statustest(["unbind_feature", "--feature", "pre_host",
-                         "--personality", "inventory", "--archetype", "aquilon"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateFeature)

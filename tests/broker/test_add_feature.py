@@ -35,31 +35,15 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "pre_host_param": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "post_host": {
             "visibility": "public",
             "post_personality": True,
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "pre_host_no_params": {
+        "unused_no_params": {
             "visibility": "public",
-            "comments": "Feature which will not have any parameters",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
-        "myfeature": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
-        "hostfeature": {
-            "visibility": "public",
-            "post_personality": True,
+            "comments": "Unused feature which will not have any parameters",
             "activation": "reboot",
             "deactivation": "reboot",
         },
@@ -75,16 +59,6 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "disable_ht": {
-            "visibility": "owner_approved",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
-        "hardwarefeature": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "shinynew": {
             "visibility": "public",
             "activation": "reboot",
@@ -94,11 +68,6 @@ default_features = {
     "interface": {
         "src_route": {
             "visibility": "owner_only",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
-        "interfacefeature": {
-            "visibility": "public",
             "activation": "reboot",
             "deactivation": "reboot",
         },

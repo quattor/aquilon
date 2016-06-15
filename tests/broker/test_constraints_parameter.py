@@ -32,15 +32,13 @@ class TestParameterConstraints(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Parameter with path espinfo/function used by following and cannot be deleted", cmd)
 
-    # This test should eventually be here, but parameter tests need to be
-    # re-organized first
-    #def test_110_feature_validation(self):
-    #    cmd = ["del_parameter_definition", "--feature", "myfeature", "--type=host",
-    #           "--path=teststring"]
-    #    out = self.badrequesttest(cmd)
-    #    self.matchoutput(out, "Parameter with path teststring used by following and cannot be deleted", cmd)
+    def test_110_feature_validation(self):
+        cmd = ["del_parameter_definition", "--feature", "pre_host", "--type=host",
+               "--path=teststring"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Parameter with path teststring used by following and cannot be deleted", cmd)
 
-    def test_120_json_schema_validation(self):
+    def test_120_update_breaks_json_schema(self):
         command = ["del_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--path", "actions/testaction/user"]
         err = self.badrequesttest(command)
@@ -165,6 +163,12 @@ class TestParameterConstraints(TestBrokerCommand):
         self.noouttest(["add_parameter", "--personality", "utpers-dev",
                         "--archetype", "aquilon", "--path", "espinfo/function",
                         "--value", "crash"])
+
+    def test_200_proto_noparam(self):
+        cmd = ["show", "parameter", "--personality", "utunused/dev", "--format=proto"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Not Found: No parameters found for personality "
+                         "aquilon/utunused/dev", cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterConstraints)
