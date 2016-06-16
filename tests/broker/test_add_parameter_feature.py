@@ -234,6 +234,11 @@ class TestAddParameterFeature(TestBrokerCommand):
                             "--feature", "pre_host", "--path", path,
                             "--value", value])
 
+    def test_132_append_to_json_array(self):
+        self.noouttest(["add_parameter", "--personality", "inventory",
+                        "--archetype", "aquilon", "--feature", "pre_host",
+                        "--path", "testjson/values/2", "--value", 3])
+
     def test_135_show_parameter(self):
         command = ["show_parameter", "--personality", "inventory"]
         out = self.commandtest(command)
@@ -242,7 +247,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'testboolean: false\s*'
                           r'testdefault: "host_feature"\s*'
                           r'testint: 0\s*'
-                          r'testjson: {\s*"key":\s*"other_key",\s*"values":\s*\[\s*1,\s*2\s*\]\s*}\s*'
+                          r'testjson: {\s*"key":\s*"other_key",\s*"values":\s*\[\s*1,\s*2,\s*3\s*\]\s*}\s*'
                           r'testlist: \[\s*"host1",\s*"host2"\s*\]\s*'
                           r'teststring: "override"\s*',
                           command)
@@ -278,7 +283,7 @@ class TestAddParameterFeature(TestBrokerCommand):
         # The order of the keys is not deterministic, so we cannot do
         # string-wise comparison here
         self.assertEqual(json.loads(param_values['features/pre_host/testjson']),
-                         json.loads('{"key": "other_key", "values": [1, 2]}'))
+                         json.loads('{"key": "other_key", "values": [1, 2, 3]}'))
 
         self.assertEqual(param_values['features/pre_host/testlist'],
                          'host1,host2')
@@ -296,7 +301,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'"/system/features/pre_host/testint" = 0;\s*'
                           r'"/system/features/pre_host/testjson" = nlist\(\s*'
                           r'"key",\s*"other_key",\s*'
-                          r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
+                          r'"values",\s*list\(\s*1,\s*2,\s*3\s*\)\s*\);\s*'
                           r'"/system/features/pre_host/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
                           r'"/system/features/pre_host/teststring" = "override";\s*',
                           command)
@@ -327,6 +332,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'//testjson/key\s*'
                           r'//testjson/values/0\s*'
                           r'//testjson/values/1\s*'
+                          r'//testjson/values/2\s*'
                           r'//testlist/0\s*'
                           r'//testlist/1\s*'
                           r'//teststring\s*',
@@ -374,6 +380,38 @@ class TestAddParameterFeature(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Parameter with path=testdefault already exists",
                          command)
+
+    def test_200_json_array_index_overflow(self):
+        command = ["add_parameter", "--personality", "inventory",
+                   "--archetype", "aquilon", "--feature", "pre_host",
+                   "--path", "testjson/values/4", "--value", 5]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "No parameter of path=testjson/values/4 defined.",
+                         command)
+
+    def test_200_json_array_negative_index(self):
+        # This could be made to work and mean appending to the list, if we want
+        # to...
+        command = ["add_parameter", "--personality", "inventory",
+                   "--archetype", "aquilon", "--feature", "pre_host",
+                   "--path", "testjson/values/-1", "--value", 5]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid list index '-1'.", command)
+
+    def test_200_json_array_invalid_index(self):
+        command = ["add_parameter", "--personality", "inventory",
+                   "--archetype", "aquilon", "--feature", "pre_host",
+                   "--path", "testjson/values/invalid", "--value", 5]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid list index 'invalid'.", command)
+
+    def test_200_json_extra_property(self):
+        command = ["add_parameter", "--personality", "inventory",
+                   "--archetype", "aquilon", "--feature", "pre_host",
+                   "--path", "testjson/newproperty", "--value", "something"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed validating", command)
 
     def test_300_validate(self):
         command = ["validate_parameter", "--personality", "compileserver"]

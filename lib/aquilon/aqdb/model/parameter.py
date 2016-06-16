@@ -29,6 +29,7 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import JSONEncodedDict, AqStr
 from aquilon.aqdb.model import (Base, PersonalityStage, ParamDefinition,
                                 ParamDefHolder)
+from aquilon.utils import validate_nlist_key
 
 _TN = 'parameter'
 
@@ -91,7 +92,7 @@ class Parameter(Base):
         route = []
         parts = ParamDefinition.split_path(path)
 
-        def handle_vivify(idx, current):
+        def handle_vivify(idx):
             # We need to look ahead at the next path component to figure out if
             # the component to be vivified should be a leaf, a dictionary or a
             # list
@@ -122,13 +123,14 @@ class Parameter(Base):
             if isinstance(current, dict):
                 if part not in current:
                     if vivify:
-                        current[part] = handle_vivify(idx, current)
+                        current[part] = handle_vivify(idx)
                     else:
                         raise ParameterPathNotFound
             elif isinstance(current, list):
                 try:
                     part = int(part)
                     if part < 0:
+                        # We could allow index -1 to mean 'append to the end'...
                         raise ValueError
                 except ValueError:
                     raise ArgumentError("Invalid list index '%s'." % part)
@@ -136,7 +138,8 @@ class Parameter(Base):
                     raise ParameterPathNotFound
                 elif part == len(current):
                     if vivify:
-                        current.append(handle_vivify(idx, current))
+                        # pylint: disable=E1101
+                        current.append(handle_vivify(idx))
                     else:
                         raise ParameterPathNotFound
             else:
@@ -186,6 +189,10 @@ class Parameter(Base):
                                (isinstance(lastvalue[index], list) and
                                 len(lastvalue[index]) == 0)):
             raise ArgumentError("Parameter with path=%s already exists." % path)
+
+        # Dictionary keys must be valid for PAN
+        if isinstance(lastvalue, dict):
+            validate_nlist_key("a path component", index)
 
         lastvalue[index] = value
 

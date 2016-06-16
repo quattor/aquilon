@@ -66,10 +66,20 @@ class TestDelParameterFeature(TestBrokerCommand):
                         "--archetype", "aquilon", "--feature", "pre_host",
                         "--path", "testdefault"])
 
-    def test_125_cat_host_param_gone(self):
+    def test_121_del_json_array_member(self):
+        self.noouttest(["del_parameter", "--personality", "inventory",
+                        "--archetype", "aquilon", "--feature", "pre_host",
+                        "--path", "testjson/values/1"])
+
+    def test_125_cat_host_param(self):
         command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
         self.matchclean(out, "pre_host/testdefault", command)
+        self.searchoutput(out,
+                          r'"/system/features/pre_host/testjson" = nlist\(\s*'
+                          r'"key",\s*"new_key",\s*'
+                          r'"values",\s*list\(\s*1,\s*3\s*\)\s*\);\s*',
+                          command)
 
     def test_130_del_same_feature_name_parameter(self):
         for type in ["host", "hardware", "interface"]:
@@ -82,6 +92,14 @@ class TestDelParameterFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchclean(out, "shinynew", command)
         self.searchclean(out, "car", command)
+
+    def test_200_json_index_invalid(self):
+        command = ["del_parameter", "--personality", "inventory",
+                   "--archetype", "aquilon", "--feature", "pre_host",
+                   "--path", "testjson/values/2"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "No parameter of path=testjson/values/2 defined.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelParameterFeature)

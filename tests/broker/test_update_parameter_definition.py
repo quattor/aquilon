@@ -120,7 +120,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out,
                          "Existing value for personality aquilon/%s "
-                         "conflicts with the new schema: [1, 2] is too long" %
+                         "conflicts with the new schema: [1, 2, 3] is too long" %
                          "inventory",
                          cmd)
 

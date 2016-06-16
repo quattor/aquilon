@@ -98,6 +98,16 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                         "--archetype", "aquilon", "--feature", "pre_host",
                         "--path", "testdefault", "--value", "host_newstring"])
 
+    def test_121_update_json_array(self):
+        self.noouttest(["update_parameter", "--personality", "inventory",
+                        "--archetype", "aquilon", "--feature", "pre_host",
+                        "--path", "testjson/values/1", "--value", 4])
+
+    def test_121_update_json_dict(self):
+        self.noouttest(["update_parameter", "--personality", "inventory",
+                        "--archetype", "aquilon", "--feature", "pre_host",
+                        "--path", "testjson/key", "--value", "new_key"])
+
     def test_125_cat_host_params(self):
         command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
@@ -108,8 +118,8 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                           r'"/system/features/pre_host/testfloat" = 100\.100;\s*'
                           r'"/system/features/pre_host/testint" = 0;\s*'
                           r'"/system/features/pre_host/testjson" = nlist\(\s*'
-                          r'"key",\s*"other_key",\s*'
-                          r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
+                          r'"key",\s*"new_key",\s*'
+                          r'"values",\s*list\(\s*1,\s*4,\s*3\s*\)\s*\);\s*'
                           r'"/system/features/pre_host/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
                           r'"/system/features/pre_host/teststring" = "override";\s*',
                           command)
@@ -140,6 +150,29 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                    "--value", '{"key": "val3", "values": []}']
         out = self.badrequesttest(command)
         self.matchoutput(out, "Failed validating", command)
+
+    def test_200_json_validation_array_member(self):
+        command = ["update_parameter", "--archetype", "aquilon",
+                   "--personality", "inventory", "--feature", "pre_host",
+                   "--path", "testjson/values/1", "--value", "not-an-int"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed validating", command)
+
+    def test_200_json_array_index_overflow(self):
+        command = ["update_parameter", "--archetype", "aquilon",
+                   "--personality", "inventory", "--feature", "pre_host",
+                   "--path", "testjson/values/3", "--value", 5]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "No parameter of path=testjson/values/3 defined.",
+                         command)
+
+    def test_200_json_array_index_negative(self):
+        command = ["update_parameter", "--archetype", "aquilon",
+                   "--personality", "inventory", "--feature", "pre_host",
+                   "--path", "testjson/values/-1", "--value", 5]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid list index '-1'.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateParameterFeature)
