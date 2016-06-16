@@ -38,7 +38,7 @@ class MACAddress(object):
                 # Check to make sure we're good.
                 if not _padded_re.search(address):
                     raise ValueError("Invalid MAC address format.")
-                value = long(address.replace(':', ''), 16)
+                value = int(address.replace(':', ''), 16)
         elif value is None:
             raise ValueError("Must specify either address or value.")
         self.value = value

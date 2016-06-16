@@ -75,7 +75,7 @@ def stmt_2_sqlid(stmt):
     # Based on http://www.slaviks-blog.com/2010/03/30/oracle-sql_id-and-hash-value/
     hash = hashlib.md5(stmt + '\x00').digest()
     _, _, msb, lsb = struct.unpack('IIII', hash)
-    sqln = long(msb) * (2 ** 32) + lsb
+    sqln = (msb << 32) + lsb
     alphabet = '0123456789abcdfghjkmnpqrstuvwxyz'
     sqlid = ''
     while sqln:
