@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
-from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import and_
 
 from aquilon.aqdb.model import (PersonalityStage, Host, Cluster,
@@ -24,7 +24,8 @@ from aquilon.aqdb.model import (PersonalityStage, Host, Cluster,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryPersonalityBase)
 from aquilon.worker.templates.domain import TemplateDomain
 
 
@@ -48,9 +49,12 @@ class CommandCompile(BrokerCommand):
             q = q.filter(and_(cls_.branch == dbdomain,
                               cls_.sandbox_author == dbauthor))
             q = q.reset_joinpoint()
-            q = q.options(subqueryload('parameters'))
+            q = q.options(joinedload('personality'))
 
-            plenaries.extend(Plenary.get_plenary(dbstage) for dbstage in q)
+            # Use PlenaryPersonalityBase to avoid having to load parameters and
+            # other details
+            plenaries.extend(PlenaryPersonalityBase.get_plenary(dbstage)
+                             for dbstage in q)
 
         q = session.query(ServiceInstance)
         q = q.filter(ServiceInstance.clients.any(
