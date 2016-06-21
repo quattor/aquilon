@@ -19,7 +19,7 @@
 import logging
 
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import joinedload, subqueryload, undefer
+from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.util import KeyedTuple
 
 from aquilon.exceptions_ import ArgumentError, PartialError
@@ -135,7 +135,6 @@ class UserSync(object):
                           subqueryload('stages.grns'),
                           subqueryload('stages.features'),
                           joinedload('stages.features.feature'),
-                          undefer('stages.features.feature.comments'),
                           joinedload('stages.features.feature.param_def_holder'),
                           subqueryload('stages.features.feature.param_def_holder.param_definitions'),
                           subqueryload('stages.parameters'))

@@ -1,9 +1,6 @@
 <%
 from aquilon.aqdb.model import HardwareFeature, InterfaceFeature
 %>
-% if record.feature.comments:
-# ${record.feature.comments}
-% endif
 % if isinstance(record.feature, InterfaceFeature):
 variable CURRENT_INTERFACE = "${record.interface_name}";
 % endif

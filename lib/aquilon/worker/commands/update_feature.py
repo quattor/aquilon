@@ -18,8 +18,6 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Feature
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateFeature(BrokerCommand):
@@ -29,9 +27,6 @@ class CommandUpdateFeature(BrokerCommand):
 
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
-
-        plenaries = PlenaryCollection(logger=logger)
-        add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         if visibility:
             dbfeature.visibility = visibility
@@ -51,8 +46,5 @@ class CommandUpdateFeature(BrokerCommand):
             dbfeature.deactivation = deactivation
 
         session.flush()
-
-        # Refresh plenaries as the feature comment is stored there
-        plenaries.write(verbose=True)
 
         return

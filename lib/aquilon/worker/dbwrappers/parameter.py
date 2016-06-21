@@ -19,7 +19,7 @@
 from jsonschema import validate, ValidationError
 from six import iteritems
 
-from sqlalchemy.orm import joinedload, subqueryload, undefer
+from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -227,7 +227,6 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
                   subqueryload('parameters'),
                   subqueryload('features'),
                   joinedload('features.feature'),
-                  undefer('features.feature.comments'),
                   joinedload('features.feature.param_def_holder'),
                   subqueryload('features.feature.param_def_holder.param_definitions'),
                   joinedload('features.model'))
