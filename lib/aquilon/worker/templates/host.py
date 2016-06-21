@@ -122,12 +122,13 @@ class PlenaryHostData(StructurePlenary):
         return cls.prefix + "/" + str(dbhost.fqdn)
 
     def body(self, lines):
+        dbhw_ent = self.dbobj.hardware_entity
         interfaces = dict()
         routers = {}
         default_gateway = None
 
         # FIXME: Enforce that one of the interfaces is marked boot?
-        for dbinterface in self.dbobj.hardware_entity.interfaces:
+        for dbinterface in dbhw_ent.interfaces:
             # Management interfaces are not configured at the host level
             if dbinterface.interface_type == 'management':
                 continue
@@ -163,8 +164,7 @@ class PlenaryHostData(StructurePlenary):
 
                 if addr.label == "":
                     if net.routers:
-                        local_rtrs = select_routers(self.dbobj.hardware_entity,
-                                                    net.routers)
+                        local_rtrs = select_routers(dbhw_ent, net.routers)
                         gateway = local_rtrs[0]
                         if is_default_route(dbinterface):
                             routers[dbinterface.name] = local_rtrs
@@ -219,8 +219,8 @@ class PlenaryHostData(StructurePlenary):
             interfaces[dbinterface.name] = ifdesc
 
         # Okay, here's the real content
-        hwplenary = Plenary.get_plenary(self.dbobj.hardware_entity)
-        path = hwplenary.template_name(self.dbobj.hardware_entity)
+        hwplenary = Plenary.get_plenary(dbhw_ent)
+        path = hwplenary.template_name(dbhw_ent)
         pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")
@@ -236,9 +236,8 @@ class PlenaryHostData(StructurePlenary):
                 pan_assign(lines, "system/network/interfaces/{%s}" % name,
                            interfaces[name])
 
-        if self.dbobj.hardware_entity.primary_ip:
-            pan_assign(lines, "system/network/primary_ip",
-                       self.dbobj.hardware_entity.primary_ip)
+        if dbhw_ent.primary_ip:
+            pan_assign(lines, "system/network/primary_ip", dbhw_ent.primary_ip)
 
         if default_gateway:
             pan_assign(lines, "system/network/default_gateway",
