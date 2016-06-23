@@ -16,13 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq rollback`."""
 
-import os
-import re
-
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import GitRepo
 from aquilon.worker.locks import CompileKey
 
 
@@ -34,41 +31,40 @@ class CommandRollback(BrokerCommand):
         dbdomain = Domain.get_unique(session, domain, compel=True)
         if not dbdomain.tracked_branch:
             # Could check dbdomain.trackers and rollback all of them...
-            raise ArgumentError("rollback requires a tracking domain")
+            raise ArgumentError("Rollback requires a tracking domain.")
+
+        kingrepo = GitRepo.template_king(logger)
+        domainrepo = GitRepo.domain(dbdomain.name, logger)
 
         if lastsync:
             if not dbdomain.rollback_commit:
-                raise ArgumentError("domain %s does not have a rollback "
+                raise ArgumentError("{0} does not have a rollback "
                                     "commit saved, please specify one "
-                                    "explicitly." % dbdomain.name)
-            ref = dbdomain.rollback_commit
+                                    "explicitly.".format(dbdomain))
+            commit_id = dbdomain.rollback_commit
+        else:
+            commit_id = kingrepo.ref_commit(ref)
 
-        if not ref:
+        if not commit_id:
             raise ArgumentError("Commit reference to rollback to required.")
 
-        kingdir = self.config.get("broker", "kingdir")
-        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                 dbdomain.name)
-        out = run_git(["branch", "--contains", ref],
-                      logger=logger, path=kingdir)
-        if not re.search(r'\b%s\b' % dbdomain.tracked_branch.name, out):
+        if not kingrepo.ref_contains_commit(commit_id,
+                                            dbdomain.tracked_branch.name):
             # There's no real technical reason why this needs to be
             # true.  It just seems like a good sanity check.
             raise ArgumentError("Cannot roll back to commit: "
                                 "branch %s does not contain %s" %
-                                (dbdomain.tracked_branch.name, ref))
+                                (dbdomain.tracked_branch.name, commit_id))
 
         dbdomain.tracked_branch.is_sync_valid = False
         dbdomain.rollback_commit = None
 
         with CompileKey(domain=dbdomain.name, logger=logger):
             try:
-                run_git(["push", ".", "+%s:%s" % (ref, dbdomain.name)],
-                        path=kingdir, logger=logger)
+                kingrepo.run(["push", ".", "+%s:%s" % (commit_id, dbdomain.name)])
                 # Duplicated this logic from aquilon.worker.dbwrappers.branch.sync_domain()
-                run_git(["fetch"], path=domaindir, logger=logger)
-                run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
-                        path=domaindir, logger=logger)
+                domainrepo.run(["fetch"])
+                domainrepo.run(["reset", "--hard", "origin/%s" % dbdomain.name])
             except ProcessException as e:
                 raise ArgumentError("Problem encountered updating templates "
                                     "for domain %s: %s", dbdomain.name, e)
