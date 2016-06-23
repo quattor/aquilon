@@ -19,7 +19,6 @@
 import logging
 import os.path
 import re
-from tempfile import mkdtemp
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.session import object_session
@@ -253,8 +252,6 @@ def has_compileable_objects(dbbranch):
 
 def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
     trash_branch = config.get("broker", "trash_branch")
-    kingdir = config.get("broker", "kingdir")
-    rundir = config.get("broker", "rundir")
 
     temp_msg = []
     temp_msg.append("Empty commit to make sure there will be a merge ")
@@ -267,30 +264,20 @@ def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
                            branch)
         return
 
-    tempdir = mkdtemp(prefix="trash_", suffix="_%s" % branch, dir=rundir)
-
     try:
-        run_git(["clone", "--shared", "--branch", trash_branch, "--",
-                 kingdir, trash_branch], path=tempdir, logger=logger,
-                loglevel=loglevel)
-
-        temprepo = os.path.join(tempdir, trash_branch)
-
-        # If branch is already merged into trash, then we need to force a
-        # commit that can be merged
-        hash = run_git(["commit-tree", "origin/" + branch + "^{tree}",
-                        "-p", trash_branch, "-p", "origin/" + branch,
-                        "-m", "\n".join(temp_msg)],
-                       path=temprepo, logger=logger, loglevel=loglevel)
-        hash = hash.strip()
-        run_git(["merge", "-s", "ours", hash, "-m", merge_msg],
-                path=temprepo, logger=logger, loglevel=loglevel)
-        run_git(["push", "origin", trash_branch], path=temprepo, logger=logger,
-                loglevel=loglevel)
+        with kingrepo.temp_clone(trash_branch) as temprepo:
+            # If branch is already merged into trash, then we need to force a
+            # commit that can be merged
+            hash = run_git(["commit-tree", "origin/" + branch + "^{tree}",
+                            "-p", trash_branch, "-p", "origin/" + branch,
+                            "-m", "\n".join(temp_msg)],
+                           path=temprepo.path, logger=logger, loglevel=loglevel)
+            hash = hash.strip()
+            run_git(["merge", "-s", "ours", hash, "-m", merge_msg],
+                    path=temprepo.path, logger=logger, loglevel=loglevel)
+            temprepo.push_origin(trash_branch)
     except ProcessException as e:
         raise ArgumentError("\n%s%s" % (e.out, e.err))
-    finally:
-        remove_dir(tempdir, logger=logger)
 
 
 def sync_domain(dbdomain, logger):

@@ -25,8 +25,10 @@ the chain.
 import os
 import re
 import logging
+from contextlib import contextmanager
 from six import iteritems
 from subprocess import Popen, PIPE
+from tempfile import mkdtemp
 from threading import Thread
 
 from mako.lookup import TemplateLookup
@@ -37,6 +39,7 @@ from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config, running_from_source
 from aquilon.aqdb.model import Machine
+from aquilon.utils import remove_dir
 
 LOGGER = logging.getLogger(__name__)
 
@@ -311,6 +314,36 @@ class GitRepo(object):
                     raise ArgumentError("Ref %s not found.", ref)
                 return None
             raise
+
+    @contextmanager
+    def temp_clone(self, branch):
+        """
+        Create a temporary clone for working on the given branch
+
+        This function is a context manager meant to be used in a with statement.
+        The temporary clone is removed automatically.
+        """
+        config = Config()
+        # TODO: is rundir suitable for this purpose?
+        rundir = config.get("broker", "rundir")
+        tempdir = mkdtemp(prefix="git_clone_", dir=rundir)
+        try:
+            run_git(["clone", "--shared", "--branch", branch, "--",
+                     self.path, branch],
+                    path=tempdir, logger=self.logger, loglevel=self.loglevel)
+            yield GitRepo(os.path.join(tempdir, branch), logger=self.logger,
+                          loglevel=self.loglevel)
+        finally:
+            remove_dir(tempdir, logger=self.logger)
+
+    def push_origin(self, ref, force=False):
+        """
+        Push a ref to the origin remote
+        """
+        if force:
+            self.run(["push", "--force", "origin", ref])
+        else:
+            self.run(["push", "origin", ref])
 
 
 IP_NOT_DEFINED_RE = re.compile(r"Host with IP address "
