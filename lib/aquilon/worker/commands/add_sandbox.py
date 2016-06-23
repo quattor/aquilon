@@ -23,7 +23,7 @@ from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.get import CommandGet
 from aquilon.worker.dbwrappers.branch import add_branch, force_my_sandbox
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 
 
 class CommandAddSandbox(CommandGet):
@@ -58,8 +58,8 @@ class CommandAddSandbox(CommandGet):
         dbstart = Branch.get_unique(session, start, compel=True)
 
         kingdir = self.config.get("broker", "kingdir")
-        base_commit = run_git(["show-ref", "--hash", "refs/heads/" +
-                               dbstart.name], logger=logger, path=kingdir)
+        kingrepo = GitRepo.template_king(logger)
+        base_commit = kingrepo.ref_commit("refs/heads/" + dbstart.name)
 
         dbsandbox = add_branch(session, self.config, dbuser, Sandbox, sandbox,
                                base_commit=base_commit, comments=comments)

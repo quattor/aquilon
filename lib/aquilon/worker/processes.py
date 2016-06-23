@@ -227,6 +227,92 @@ def cache_version(config, logger=LOGGER):
         config.set("broker", "version", "Unknown")
 
 
+class GitRepo(object):
+    """
+    Git repository wrapper
+
+    This class is not meant to be a simple wrapper around git, but rather to
+    implement higher level functions - even if some of those functions can be
+    translated to a single git command.
+    """
+
+    def __init__(self, path, logger, loglevel=logging.INFO):
+        self.path = path
+        self.logger = logger
+        self.loglevel = loglevel
+
+    @staticmethod
+    def template_king(logger, loglevel=logging.INFO):
+        """
+        Constructor for template-king
+        """
+
+        config = Config()
+        return GitRepo(config.get("broker", "kingdir"), logger=logger,
+                       loglevel=loglevel)
+
+    @staticmethod
+    def domain(domain, logger, loglevel=logging.INFO):
+        """
+        Constructor for domains
+        """
+
+        config = Config()
+        domainsdir = config.get('broker', 'domainsdir')
+        return GitRepo(os.path.join(domainsdir, domain), logger=logger,
+                       loglevel=loglevel)
+
+    def run(self, args, filterre=None, stream_level=None):
+        return run_git(args, path=self.path, logger=self.logger,
+                       loglevel=self.loglevel, filterre=filterre,
+                       stream_level=stream_level)
+
+    def ref_contains_commit(self, commit_id, ref='HEAD'):
+        """
+        Check if a given reference (by default, HEAD) contains a given commit ID
+        """
+
+        filterre = re.compile('^' + commit_id + '$')
+        try:
+            found = self.run(['rev-list', ref], filterre=filterre)
+        except ProcessException as pe:
+            if pe.code != 128:
+                raise
+            else:
+                found = None
+
+        return found
+
+    def ref_commit(self, ref='HEAD', compel=True):
+        """
+        Return the top commit of a ref, by default HEAD
+        """
+        try:
+            commit = self.run(['rev-parse', '--verify', '-q', ref + '^{commit}'])
+            return commit.strip()
+        except ProcessException as pe:
+            if pe.code == 1:
+                if compel:
+                    raise ArgumentError("Ref %s could not be translated to an "
+                                        "existing commit ID." % ref)
+                return None
+            raise
+
+    def ref_tree(self, ref='HEAD', compel=True):
+        """
+        Return the tree ID a ref (by default, HEAD) points to
+        """
+        try:
+            tree = self.run(['rev-parse', '--verify', '-q', ref + '^{tree}'])
+            return tree.strip()
+        except ProcessException as pe:
+            if pe.code == 1:
+                if compel:
+                    raise ArgumentError("Ref %s not found.", ref)
+                return None
+            raise
+
+
 IP_NOT_DEFINED_RE = re.compile(r"Host with IP address "
                                r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
                                r" is not defined")

@@ -17,7 +17,6 @@
 """Contains the logic for `aq deploy`."""
 
 import os
-import re
 from tempfile import mkdtemp
 
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
@@ -26,7 +25,7 @@ from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import sync_domain
 from aquilon.worker.dbwrappers.change_management import validate_justification
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import remove_dir
 
@@ -77,11 +76,8 @@ class CommandDeploy(BrokerCommand):
                                 .format(dbtarget))
 
         if isinstance(dbsource, Sandbox):
-            domainsdir = self.config.get('broker', 'domainsdir')
-            targetdir = os.path.join(domainsdir, dbtarget.name)
-            filterre = re.compile('^' + dbsource.base_commit + '$')
-            found = run_git(['rev-list', 'HEAD'], path=targetdir,
-                            logger=logger, filterre=filterre)
+            repo = GitRepo.domain(dbtarget.name, logger)
+            found = repo.ref_contains_commit(dbsource.base_commit)
             if not found:
                 raise ArgumentError("You're trying to deploy a sandbox to a "
                                     "domain that does not contain the commit "

@@ -17,7 +17,6 @@
 """Contains the logic for `aq publish`."""
 
 import os
-import re
 from tempfile import NamedTemporaryFile, mkdtemp
 from base64 import b64decode
 
@@ -25,7 +24,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_domain
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import remove_dir
 
@@ -83,17 +82,9 @@ class CommandPublish(BrokerCommand):
             # start of the sandbox. We don't want to allow that, so verify that
             # the starting point of the sandbox is still part of its history.
             if rebase:
-                filterre = re.compile('^' + dbsandbox.base_commit + '$')
-                try:
-                    found = run_git(['rev-list', dbsandbox.name],
-                                    filterre=filterre, path=temprepo,
-                                    logger=logger)
-                except ProcessException as pe:
-                    if pe.code != 128:
-                        raise
-                    else:
-                        found = False
-
+                repo = GitRepo(temprepo, logger)
+                found = repo.ref_contains_commit(dbsandbox.base_commit,
+                                                 dbsandbox.name)
                 if not found:
                     raise ArgumentError("The published branch no longer "
                                         "contains commit %s it was branched "

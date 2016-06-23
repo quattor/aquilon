@@ -18,9 +18,8 @@
 
 from collections import defaultdict
 import os.path
-import re
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Domain, Sandbox
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -32,7 +31,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             validate_branch_author)
 from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -59,6 +58,10 @@ def validate_branch_commits(dbsource, dbsource_author,
     else:
         target_path = os.path.join(domainsdir, dbtarget.name)
 
+    source_repo = GitRepo(source_path, logger)
+    target_repo = GitRepo(target_path, logger)
+    kingrepo = GitRepo.template_king(logger)
+
     # Check if the source has anything uncommitted
     git_status = run_git(["status", "--porcelain"],
                          path=source_path, logger=logger)
@@ -67,52 +70,28 @@ def validate_branch_commits(dbsource, dbsource_author,
                             .format(dbsource))
 
     # Get latest source commit and tree ID
-    source_commit = run_git(['rev-parse', '--verify', '-q', 'HEAD^{commit}'],
-                            path=source_path, logger=logger)
-    source_commit = source_commit.strip()
-    source_tree = run_git(['rev-parse', '--verify', '-q', 'HEAD^{tree}'],
-                          path=source_path, logger=logger)
-    source_tree = source_commit.strip()
+    source_commit = source_repo.ref_commit()
+    source_tree = source_repo.ref_tree()
     if not source_commit or not source_tree:  # pragma: no cover
         raise ArgumentError("Unable to retrieve the last commit information "
                             "from source {0:l}.".format(dbsource))
 
     # Verify that the source is fully published, i.e. template-king has the same
     # commit
-    kingdir = config.get("broker", "kingdir")
-    try:
-        king_commit = run_git(['rev-parse', '--verify', '-q',
-                               dbsource.name + '^{commit}'],
-                              path=kingdir, logger=logger)
-        king_commit = king_commit.strip()
-    except ProcessException as pe:
-        if pe.code != 1:
-            raise
-        else:
-            king_commit = None
+    king_commit = kingrepo.ref_commit(dbsource.name, compel=False)
     if king_commit != source_commit:
         raise ArgumentError("The latest commit of {0:l} has not been "
                             "published to template-king yet.".format(dbsource))
 
     # Check if target branch has the latest source commit
-    try:
-        filterre = re.compile('^' + source_commit + '$')
-        found = run_git(['rev-list', 'HEAD'], filterre=filterre,
-                        path=target_path, logger=logger)
-    except ProcessException as pe:
-        if pe.code != 128:
-            raise
-        else:
-            found = None
+    found = target_repo.ref_contains_commit(source_commit)
 
     if not found:
         # If the commit itself was not found, try to check if the two heads
         # point to the same tree object, and the difference is only in history
         # (e.g. merging the same sandbox into different domains will create
         # different merge commits).
-        target_tree = run_git(['rev-parse', '--verify', '-q', 'HEAD^{tree}'],
-                              path=target_path, logger=logger)
-        target_tree = target_tree.strip()
+        target_tree = target_repo.ref_tree()
         found = target_tree == source_tree
 
     if not found:

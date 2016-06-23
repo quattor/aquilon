@@ -34,7 +34,7 @@ from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
                                 User)
 from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
 
@@ -166,16 +166,16 @@ def remove_branch(config, logger, dbbranch, dbauthor=None):
             remove_dir(dir, logger=logger)
 
     kingdir = config.get("broker", "kingdir")
-    try:
-        hash = run_git(["rev-parse", "--verify", dbbranch.name],
-                       path=kingdir, logger=logger)
-        hash = hash.strip()
+    kingrepo = GitRepo.template_king(logger)
+    hash = kingrepo.ref_commit("refs/heads/" + dbbranch.name, compel=False)
+    if hash:
         logger.info("{0} head commit was: {1!s}".format(dbbranch, hash))
-        run_git(["branch", "-D", dbbranch.name],
-                path=kingdir, logger=logger)
-    except ProcessException as e:
-        logger.warning("Error removing branch %s from template-king, "
-                       "proceeding anyway: %s", dbbranch.name, e)
+        try:
+            run_git(["branch", "-D", dbbranch.name],
+                    path=kingdir, logger=logger)
+        except ProcessException as e:
+            logger.warning("Error removing branch %s from template-king, "
+                           "proceeding anyway: %s", dbbranch.name, e)
 
 
 def search_branch_query(config, session, cls, owner=None, compiler_version=None,
@@ -260,10 +260,9 @@ def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
     temp_msg.append("Empty commit to make sure there will be a merge ")
     temp_msg.append("commit even if the target branch is already merged.")
 
-    try:
-        run_git(["show-ref", "--verify", "--quiet", "refs/heads/" + branch],
-                path=kingdir, logger=logger, loglevel=loglevel)
-    except ProcessException as e:
+    kingrepo = GitRepo.template_king(logger=logger, loglevel=loglevel)
+    commit = kingrepo.ref_commit("refs/heads/" + branch, compel=False)
+    if not commit:
         logger.client_info("Branch %s does not exist in template-king." %
                            branch)
         return
@@ -305,6 +304,7 @@ def sync_domain(dbdomain, logger):
     config = Config()
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
+    domainrepo = GitRepo.domain(dbdomain.name, logger)
 
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
@@ -317,9 +317,7 @@ def sync_domain(dbdomain, logger):
 
     run_git(["fetch", "--prune"], path=domaindir, logger=logger)
     if dbdomain.tracked_branch:
-        out = run_git(["rev-list", "-n", "1", "HEAD"],
-                      path=domaindir, logger=logger)
-        rollback_commit = out.strip()
+        rollback_commit = domainrepo.ref_commit()
 
     with CompileKey(domain=dbdomain.name, logger=logger):
         run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
