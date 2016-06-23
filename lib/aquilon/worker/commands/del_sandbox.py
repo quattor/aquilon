@@ -36,14 +36,6 @@ class CommandDelSandbox(BrokerCommand):
         branch, dbauthor = parse_sandbox(session, sandbox,
                                          default_author=dbuser.name)
 
-        # We want to print the warning even if the sandbox object no longer
-        # exists
-        templatesdir = self.config.get("broker", "templatesdir")
-        sandboxdir = os.path.join(templatesdir, dbauthor.name, branch)
-        if os.path.exists(sandboxdir):
-            logger.client_info("If you no longer need the working copy of the "
-                               "sandbox, please `rm -rf %s`", sandboxdir)
-
         dbsandbox = Sandbox.get_unique(session, branch, compel=True)
 
         # FIXME: proper authorization
@@ -52,5 +44,13 @@ class CommandDelSandbox(BrokerCommand):
                                          "delete a sandbox.")
 
         remove_branch(self.config, logger, dbsandbox, dbauthor)
+
+        # We want to print the warning even if the sandbox object no longer
+        # exists
+        templatesdir = self.config.get("broker", "templatesdir")
+        sandboxdir = os.path.join(templatesdir, dbauthor.name, branch)
+        if os.path.exists(sandboxdir):
+            logger.client_info("If you no longer need the working copy of the "
+                               "sandbox, please `rm -rf %s`", sandboxdir)
 
         return
