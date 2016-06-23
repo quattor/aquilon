@@ -23,7 +23,7 @@ from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.get import CommandGet
 from aquilon.worker.dbwrappers.branch import add_branch, force_my_sandbox
-from aquilon.worker.processes import run_git, GitRepo
+from aquilon.worker.processes import GitRepo
 
 
 class CommandAddSandbox(CommandGet):
@@ -57,7 +57,6 @@ class CommandAddSandbox(CommandGet):
             start = self.config.get("broker", "default_domain_start")
         dbstart = Branch.get_unique(session, start, compel=True)
 
-        kingdir = self.config.get("broker", "kingdir")
         kingrepo = GitRepo.template_king(logger)
         base_commit = kingrepo.ref_commit("refs/heads/" + dbstart.name)
 
@@ -68,8 +67,7 @@ class CommandAddSandbox(CommandGet):
         # Currently this will fail if the branch already exists...
         # That seems like the right behavior.  It's an internal
         # consistency issue that would need to be addressed explicitly.
-        run_git(["branch", dbsandbox.name, dbstart.name],
-                logger=logger, path=kingdir)
+        kingrepo.run(["branch", dbsandbox.name, dbstart.name])
 
         # If we arrive there the above "git branch" command has succeeded;
         # therefore we should comit the changes to the database.  If this is

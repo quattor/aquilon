@@ -31,7 +31,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             validate_branch_author)
 from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.processes import run_git, GitRepo
+from aquilon.worker.processes import GitRepo
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -63,8 +63,7 @@ def validate_branch_commits(dbsource, dbsource_author,
     kingrepo = GitRepo.template_king(logger)
 
     # Check if the source has anything uncommitted
-    git_status = run_git(["status", "--porcelain"],
-                         path=source_path, logger=logger)
+    git_status = source_repo.run(["status", "--porcelain"])
     if git_status:
         raise ArgumentError("The source {0:l} contains uncommitted files."
                             .format(dbsource))

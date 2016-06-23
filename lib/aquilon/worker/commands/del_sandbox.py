@@ -51,6 +51,6 @@ class CommandDelSandbox(BrokerCommand):
             raise AuthorizationException("Only the owner or an AQD admin can "
                                          "delete a sandbox.")
 
-        remove_branch(self.config, logger, dbsandbox, dbauthor)
+        remove_branch(logger, dbsandbox, dbauthor)
 
         return

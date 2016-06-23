@@ -26,7 +26,6 @@ from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  ProcessException)
-from aquilon.config import Config
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
                                 Archetype, Personality, PersonalityStage,
@@ -150,7 +149,7 @@ def add_branch(session, config, dbuser, cls_, branch, **arguments):
     return dbbranch
 
 
-def remove_branch(config, logger, dbbranch, dbauthor=None):
+def remove_branch(logger, dbbranch, dbauthor=None):
     session = object_session(dbbranch)
     deps = get_branch_dependencies(dbbranch)
     if deps:
@@ -164,14 +163,12 @@ def remove_branch(config, logger, dbbranch, dbauthor=None):
         for dir in domain.directories():
             remove_dir(dir, logger=logger)
 
-    kingdir = config.get("broker", "kingdir")
     kingrepo = GitRepo.template_king(logger)
     hash = kingrepo.ref_commit("refs/heads/" + dbbranch.name, compel=False)
     if hash:
         logger.info("{0} head commit was: {1!s}".format(dbbranch, hash))
         try:
-            run_git(["branch", "-D", dbbranch.name],
-                    path=kingdir, logger=logger)
+            kingrepo.run(["branch", "-D", dbbranch.name])
         except ProcessException as e:
             logger.warning("Error removing branch %s from template-king, "
                            "proceeding anyway: %s", dbbranch.name, e)
@@ -268,13 +265,12 @@ def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
         with kingrepo.temp_clone(trash_branch) as temprepo:
             # If branch is already merged into trash, then we need to force a
             # commit that can be merged
-            hash = run_git(["commit-tree", "origin/" + branch + "^{tree}",
-                            "-p", trash_branch, "-p", "origin/" + branch,
-                            "-m", "\n".join(temp_msg)],
-                           path=temprepo.path, logger=logger, loglevel=loglevel)
+            hash = temprepo.run(["commit-tree", "origin/" + branch + "^{tree}",
+                                 "-p", trash_branch,
+                                 "-p", "origin/" + branch,
+                                 "-m", "\n".join(temp_msg)])
             hash = hash.strip()
-            run_git(["merge", "-s", "ours", hash, "-m", merge_msg],
-                    path=temprepo.path, logger=logger, loglevel=loglevel)
+            temprepo.run(["merge", "-s", "ours", hash, "-m", merge_msg])
             temprepo.push_origin(trash_branch)
     except ProcessException as e:
         raise ArgumentError("\n%s%s" % (e.out, e.err))
@@ -288,27 +284,23 @@ def sync_domain(dbdomain, logger):
     the current (previous) commit as a potential rollback point.
 
     """
-    config = Config()
-    kingdir = config.get("broker", "kingdir")
-    domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
+    kingrepo = GitRepo.template_king(logger)
     domainrepo = GitRepo.domain(dbdomain.name, logger)
 
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
-        run_git(["push", ".",
-                 "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)],
-                path=kingdir, logger=logger)
+        kingrepo.run(["push", ".",
+                      "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)])
 
     logger.client_info("Updating the checked out copy of {0:l}..."
                        .format(dbdomain))
 
-    run_git(["fetch", "--prune"], path=domaindir, logger=logger)
+    domainrepo.run(["fetch", "--prune"])
     if dbdomain.tracked_branch:
         rollback_commit = domainrepo.ref_commit()
 
     with CompileKey(domain=dbdomain.name, logger=logger):
-        run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
-                path=domaindir, logger=logger)
+        domainrepo.run(["reset", "--hard", "origin/%s" % dbdomain.name])
 
     if dbdomain.tracked_branch:
         dbdomain.rollback_commit = rollback_commit

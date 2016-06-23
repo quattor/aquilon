@@ -23,7 +23,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_domain
-from aquilon.worker.processes import run_git, GitRepo
+from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 
 
@@ -62,14 +62,12 @@ class CommandPublish(BrokerCommand):
         kingrepo = GitRepo(kingdir, logger)
         try:
             with kingrepo.temp_clone(dbsandbox.name) as temprepo:
-                run_git(["bundle", "verify", tmpfile.name],
-                        path=temprepo.path, logger=logger)
+                temprepo.run(["bundle", "verify", tmpfile.name])
                 ref = "HEAD:%s" % (dbsandbox.name)
                 command = ["pull", tmpfile.name, ref]
                 if rebase:
                     command.append("--force")
-                run_git(command, path=temprepo.path, logger=logger,
-                        stream_level=CLIENT_INFO)
+                temprepo.run(command, stream_level=CLIENT_INFO)
 
                 # Using --force above allows rewriting any history, even before the
                 # start of the sandbox. We don't want to allow that, so verify that

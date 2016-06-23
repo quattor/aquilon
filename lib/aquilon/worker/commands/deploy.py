@@ -22,7 +22,7 @@ from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import sync_domain
 from aquilon.worker.dbwrappers.change_management import validate_justification
-from aquilon.worker.processes import run_git, GitRepo
+from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 
 
@@ -95,10 +95,9 @@ class CommandDeploy(BrokerCommand):
                 merge_msg.append("Reason: %s" % reason)
 
             try:
-                run_git(["merge", "--no-ff", "origin/%s" % dbsource.name,
-                         "-m", "\n".join(merge_msg)],
-                        path=temprepo.path, logger=logger,
-                        stream_level=CLIENT_INFO)
+                temprepo.run(["merge", "--no-ff", "origin/%s" % dbsource.name,
+                              "-m", "\n".join(merge_msg)],
+                             stream_level=CLIENT_INFO)
             except ProcessException as e:
                 # No need to re-print e, output should have gone to client
                 # immediately via the logger.
