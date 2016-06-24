@@ -27,8 +27,8 @@ class Application(Resource):
     """ Application resources """
     __tablename__ = _TN
 
-    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
-                primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
+                         primary_key=True)
 
     eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
 

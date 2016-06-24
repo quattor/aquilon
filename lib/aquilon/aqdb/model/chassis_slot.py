@@ -37,7 +37,7 @@ class ChassisSlot(Base):
     slot_number = Column(Integer, nullable=False, autoincrement=False)
 
     # TODO: Code constraint that these are Blades...
-    machine_id = Column(ForeignKey(Machine.machine_id), nullable=True)
+    machine_id = Column(ForeignKey(Machine.hardware_entity_id), nullable=True)
 
     chassis = relation(Chassis, innerjoin=True,
                        backref=backref('slots', cascade='delete, delete-orphan',

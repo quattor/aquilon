@@ -52,8 +52,8 @@ class Disk(DeviceLinkMixin, Base):
     address = Column(AqStr(16), nullable=True)
     wwn = Column(AqStr(32), nullable=True)
 
-    machine_id = Column(ForeignKey(Machine.machine_id, ondelete='CASCADE'),
-                        nullable=False)
+    machine_id = Column(ForeignKey(Machine.hardware_entity_id,
+                                   ondelete='CASCADE'), nullable=False)
 
     bootable = Column(Boolean, nullable=False, default=False)
 

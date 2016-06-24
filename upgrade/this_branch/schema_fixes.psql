@@ -1,0 +1,14 @@
+ALTER TABLE application RENAME COLUMN id TO resource_id;
+ALTER TABLE domain RENAME COLUMN domain_id TO branch_id;
+ALTER TABLE sandbox RENAME COLUMN sandbox_id TO branch_id;
+ALTER TABLE compute_cluster RENAME COLUMN id TO cluster_id;
+ALTER TABLE storage_cluster RENAME COLUMN id TO cluster_id;
+ALTER TABLE filesystem RENAME COLUMN id TO resource_id;
+ALTER TABLE hostlink RENAME COLUMN id TO resource_id;
+ALTER TABLE intervention RENAME COLUMN id TO resource_id;
+ALTER TABLE machine RENAME COLUMN machine_id TO hardware_entity_id;
+ALTER TABLE metacluster RENAME COLUMN id TO cluster_id;
+ALTER TABLE reboot_schedule RENAME COLUMN id TO resource_id;
+ALTER TABLE reboot_intervention RENAME COLUMN id TO intervention_id;
+ALTER TABLE resourcegroup RENAME COLUMN id TO resource_id;
+ALTER TABLE share RENAME COLUMN id TO resource_id;

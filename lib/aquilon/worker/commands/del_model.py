@@ -44,7 +44,7 @@ class CommandDelModel(BrokerCommand):
                 raise ArgumentError("{0} is still referenced by machine models and "
                                     "cannot be deleted.".format(dbmodel))
         if dbmodel.model_type.isCpu():
-            q = session.query(Machine.machine_id)
+            q = session.query(Machine.hardware_entity_id)
             q = q.filter_by(cpu_model=dbmodel)
             if q.count():
                 raise ArgumentError("{0} is still in use and cannot be "

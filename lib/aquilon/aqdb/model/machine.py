@@ -29,9 +29,9 @@ class Machine(HardwareEntity):
     __tablename__ = 'machine'
     __mapper_args__ = {'polymorphic_identity': 'machine'}
 
-    # TODO: should this be named hardware_entity_id?
-    machine_id = Column(ForeignKey(HardwareEntity.id, ondelete='CASCADE'),
-                        primary_key=True)
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
+                                           ondelete='CASCADE'),
+                                primary_key=True)
 
     cpu_model_id = Column(ForeignKey(Model.id, name='machine_cpu_model_fk'),
                           nullable=False, index=True)

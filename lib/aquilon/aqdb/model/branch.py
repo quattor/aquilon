@@ -83,7 +83,7 @@ class Domain(Branch):
     """
     __tablename__ = _DMN
 
-    domain_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
+    branch_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
                        primary_key=True)
 
     tracked_branch_id = Column(ForeignKey(Branch.id,
@@ -102,7 +102,7 @@ class Domain(Branch):
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _DMN,
-                       'inherit_condition': domain_id == Branch.id}
+                       'inherit_condition': branch_id == Branch.id}
 
 
 class Sandbox(Branch):
@@ -112,8 +112,8 @@ class Sandbox(Branch):
     """
     __tablename__ = _SBX
 
-    sandbox_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
-                        primary_key=True)
+    branch_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
+                       primary_key=True)
 
     base_commit = Column(AqStr(40), nullable=False)
 
