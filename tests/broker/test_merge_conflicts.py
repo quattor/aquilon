@@ -51,34 +51,26 @@ class TestMergeConflicts(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
         template = self.find_template("aquilon", "archetype", "base",
                                       sandbox="changetest3")
-        f = open(template)
-        try:
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
         contents.append("#Added by changetest3\n")
-        f = open(template, 'w')
-        try:
+
+        with open(template, 'w') as f:
             f.writelines(contents)
-        finally:
-            f.close()
+
         self.gitcommand(["commit", "-a", "-m", "added changetest3 comment"],
                         cwd=sandboxdir)
 
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")
         template = self.find_template("aquilon", "archetype", "base",
                                       sandbox="changetest4")
-        f = open(template)
-        try:
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
         contents.append("#Added by changetest4\n")
-        f = open(template, 'w')
-        try:
+
+        with open(template, 'w') as f:
             f.writelines(contents)
-        finally:
-            f.close()
+
         self.gitcommand(["commit", "-a", "-m", "added changetest4 comment"],
                         cwd=sandboxdir)
 
@@ -101,11 +93,9 @@ class TestMergeConflicts(TestBrokerCommand):
                          "changetarget-tracker...", command)
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="changetarget")
-        f = open(template)
-        try:
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
+
         self.assertEqual(contents[-1], "#Added by changetest3\n")
 
     def test_122_deploychangetest4sandbox(self):

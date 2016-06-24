@@ -47,17 +47,13 @@ class TestManageValidateBranch(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "managetest1")
         template = self.find_template("aquilon", "archetype", "base",
                                       sandbox="managetest1")
-        f = open(template)
-        try:
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
         contents.append("#Added by test_manage unittest %s \n" % sandboxdir)
-        f = open(template, 'w')
-        try:
+
+        with open(template, 'w') as f:
             f.writelines(contents)
-        finally:
-            f.close()
+
         self.gitcommand(["add", template], cwd=sandboxdir)
 
     def test_102_fail_uncommitted_change(self):

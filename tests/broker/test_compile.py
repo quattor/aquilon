@@ -57,6 +57,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
             source = open(index)
         # TODO: hardcode XML profiles for now
         tree = ET.parse(source)
+        source.close()
         mtimes = dict()
         for profile in tree.getiterator('profile'):
             if profile.text and "mtime" in profile.attrib:
@@ -99,17 +100,12 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         # Touch the template used by utsi1 clients to trigger a recompile.
         template = self.template_name("service", "utsvc", "utsi1", "client",
                                       "config", domain="unittest")
-        f = open(template)
-        try:
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
         contents.append("#Added by unittest broker/test_compile\n")
-        f = open(template, 'w')
-        try:
+
+        with open(template, 'w') as f:
             f.writelines(contents)
-        finally:
-            f.close()
 
     def test_200_compileunittest(self):
         out = self.commandtest(["search_host", "--domain=unittest",
