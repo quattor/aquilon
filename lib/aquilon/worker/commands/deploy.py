@@ -53,12 +53,9 @@ class CommandDeploy(BrokerCommand):
                                 (dbtarget.name, dbtarget.tracked_branch.name))
 
         if sync and not dbtarget.is_sync_valid and dbtarget.trackers:
-            # FIXME: Maybe raise an ArgumentError and request that the
-            # command run with --nosync?  Maybe provide a --validate flag?
-            # For now, just auto-flip (below).
-            pass
-        if not dbtarget.is_sync_valid:
-            dbtarget.is_sync_valid = True
+            raise ArgumentError("{0} has not been validated, automatic sync "
+                                "is not allowed. Either re-ryn with --nosync "
+                                "or validate the branch.".format(dbtarget))
 
         if dbtarget.requires_change_manager and not dryrun:
             if not justification:

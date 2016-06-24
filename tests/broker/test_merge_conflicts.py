@@ -243,11 +243,32 @@ class TestMergeConflicts(TestBrokerCommand):
             contents = f.readlines()
         self.assertNotEqual(contents[-1], "#Added by changetest4\n")
 
-    def test_150_validate(self):
+    def test_150_deploy_after_rollback(self):
+        command = ["deploy", "--source", "changetest5",
+                   "--target", "changetarget"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Domain changetarget has not been validated",
+                         command)
+
+    def test_151_deploy_after_rollback_nosync(self):
+        command = ["deploy", "--source", "changetest5",
+                   "--target", "changetarget", "--nosync"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Updating the checked out copy of domain "
+                         "changetarget...", command)
+        self.matchclean(out, "changetarget-tracker", command)
+
+    def test_152_verify_tracker_directory(self):
+        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
+                                 "changetarget-tracker")
+        filename = os.path.join(domaindir, "changetest5.txt")
+        self.assertFalse(os.path.exists(filename))
+
+    def test_160_validate(self):
         command = "validate --branch changetarget"
         self.commandtest(command.split(" "))
 
-    def test_155_reverserollback(self):
+    def test_165_reverserollback(self):
         command = "sync --domain changetarget-tracker"
         out = self.statustest(command.split(" "))
         self.matchoutput(out, "Updating the checked out copy of domain "
@@ -257,6 +278,11 @@ class TestMergeConflicts(TestBrokerCommand):
         with open(template) as f:
             contents = f.readlines()
         self.assertEqual(contents[-1], "#Added by changetest4\n")
+
+        domaindir = os.path.join(self.config.get("broker", "domainsdir"),
+                                 "changetarget-tracker")
+        filename = os.path.join(domaindir, "changetest5.txt")
+        self.assertTrue(os.path.exists(filename))
 
     def test_200_rollback_bad_commit(self):
         # This commit ID is from the Linux kernel sources
