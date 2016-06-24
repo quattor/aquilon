@@ -304,3 +304,15 @@ def sync_domain(dbdomain, logger):
 
     if dbdomain.tracked_branch:
         dbdomain.rollback_commit = rollback_commit
+
+
+def sync_all_trackers(dbbranch, logger):
+    for domain in dbbranch.trackers:
+        if not domain.autosync:
+            logger.warning("{0} has autosync disabled, skipping."
+                           .format(domain))
+            continue
+        try:
+            sync_domain(domain, logger=logger)
+        except ProcessException as e:
+            logger.warning("Error syncing domain %s: %s" % (domain.name, e))

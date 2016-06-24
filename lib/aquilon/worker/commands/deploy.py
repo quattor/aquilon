@@ -20,7 +20,7 @@ from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.branch import sync_domain
+from aquilon.worker.dbwrappers.branch import sync_domain, sync_all_trackers
 from aquilon.worker.dbwrappers.change_management import validate_justification
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
@@ -117,15 +117,7 @@ class CommandDeploy(BrokerCommand):
         except ProcessException as e:
             logger.warning("Error syncing domain %s: %s" % (dbtarget.name, e))
 
-        if not sync or not dbtarget.autosync:
-            return
-
-        for domain in dbtarget.trackers:
-            if not domain.autosync:
-                continue
-            try:
-                sync_domain(domain, logger=logger)
-            except ProcessException as e:
-                logger.warning("Error syncing domain %s: %s" % (domain.name, e))
+        if sync and dbtarget.autosync:
+            sync_all_trackers(dbtarget, logger)
 
         return

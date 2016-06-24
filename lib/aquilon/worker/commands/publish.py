@@ -22,7 +22,7 @@ from base64 import b64decode
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
-from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_domain
+from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_all_trackers
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 
@@ -87,16 +87,8 @@ class CommandPublish(BrokerCommand):
         finally:
             tmpfile.close()
 
+        if sync and dbsandbox.autosync:
+            sync_all_trackers(dbsandbox, logger)
+
         client_command = "git fetch"
-        if not sync or not dbsandbox.autosync:
-            return client_command
-
-        for domain in dbsandbox.trackers:
-            if not domain.autosync:
-                continue
-            try:
-                sync_domain(domain, logger=logger)
-            except ProcessException as e:
-                logger.warning("Error syncing domain %s: %s" % (domain.name, e))
-
         return client_command
