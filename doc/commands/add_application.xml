@@ -38,7 +38,6 @@
 	    </group>
 	    <arg choice="plain"><option>--application <replaceable>NAME</replaceable></option></arg>
 	    <group choice="req">
-		<arg choice="plain"><option>--eonid <replaceable>EONID</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 	    </group>
@@ -116,14 +115,12 @@
 
 	    <varlistentry>
 		<term>
-		    <option>--eonid <replaceable>EONID</replaceable></option>,
 		    <option>--eon_id <replaceable>EONID</replaceable></option>,
 		    <option>--grn <replaceable>GRN</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			The EON reference ID of the application. The <option>--eonid</option> form is
-			deprecated in favor of <option>--eon_id</option>.
+			The EON reference ID of the application.
 		    </para>
 		</listitem>
 	    </varlistentry>

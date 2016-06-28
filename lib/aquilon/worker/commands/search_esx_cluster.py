@@ -45,9 +45,6 @@ class CommandSearchESXCluster(CommandSearchCluster):
             else:
                 gen_arguments[key] = arguments[key]
 
-            # Backwards compat
-            gen_arguments['esx_share'] = None
-
         return CommandSearchCluster.render(self, cluster_type='esx',
                                            allowed_archetype=None,
                                            allowed_personality=None,

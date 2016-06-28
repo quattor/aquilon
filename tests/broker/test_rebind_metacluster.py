@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the rebind metacluster command."""
+"""Module for testing the update_cluster --metacluster command."""
 
 import unittest
 
@@ -29,17 +29,15 @@ from brokertest import TestBrokerCommand
 class TestRebindMetaCluster(TestBrokerCommand):
 
     def testfailinvalidcluster(self):
-        command = ["rebind_metacluster", "--cluster=cluster-does-not-exist",
+        command = ["update_cluster", "--cluster=cluster-does-not-exist",
                    "--metacluster=utmc1"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Command rebind_metacluster is deprecated.",
-                         command)
         self.matchoutput(out,
                          "Cluster cluster-does-not-exist not found.",
                          command)
 
     def testfailinvalidmetacluster(self):
-        command = ["rebind_metacluster", "--cluster=utecl1",
+        command = ["update_cluster", "--cluster=utecl1",
                    "--metacluster=metacluster-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,

@@ -64,16 +64,6 @@ class TestDeprecatedSwitch(TestBrokerCommand):
         self.matchoutput(err, "The --switch option is deprecated.", command)
         self.dsdb_verify()
 
-    def test_200_update_switch(self):
-        self.dsdb_expect_update(self.fqdn_pri, iface='xge48', comments="LANWAN")
-        self.dsdb_expect_update(self.fqdn_vlan, iface='vlan980', comments="LANWAN")
-        command = ["update", "switch",
-                   "--switch", self.fqdn_pri,
-                   "--comments", "LANWAN"]
-        err = self.statustest(command)
-        self.matchoutput(err, "Command update_switch is deprecated.", command)
-        self.dsdb_verify()
-
     def test_210_update_interface(self):
         self.dsdb_expect_update(self.fqdn_pri, "xge48", mac=self.ip_pri.mac)
         command = ["update_interface", "--interface", "xge48",
@@ -98,20 +88,12 @@ class TestDeprecatedSwitch(TestBrokerCommand):
                          self.ip_pri.mac, command)
         self.matchoutput(out, "    Provides: %s [%s]" %
                          (self.fqdn_pri, self.ip_pri), command)
-        self.matchoutput(out, "  Comments: LANWAN", command)
 
     def test_400_search_switch(self):
         command = ["search_switch", "--ip", self.ip_pri]
         (out, err) = self.successtest(command)
         # self.matchoutput(err, "Command show_switch is deprecated.", command)
         self.matchoutput(out, self.fqdn_pri, command)
-
-    def test_500_cat(self):
-        command = ["cat", "--switch", self.fqdn_pri]
-        (out, err) = self.successtest(command)
-        # self.matchoutput(err, "Command show_switch is deprecated.", command)
-        self.matchoutput(out, "structure template switchdata/%s;" %
-                         self.fqdn_pri, command)
 
     def test_600_del_interface_address(self):
         self.dsdb_expect_delete(self.ip_vlan)

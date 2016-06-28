@@ -35,7 +35,7 @@ class TestMetaClusterConstraints(TestBrokerCommand):
                          command)
 
     def testfailrebindmetacluster(self):
-        command = ["rebind_metacluster", "--cluster=utecl1",
+        command = ["update_cluster", "--cluster=utecl1",
                    "--metacluster=utmc2"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

@@ -40,14 +40,14 @@ class TestVendorConstraints(TestBrokerCommand):
 
     # TODO: better place for this test
     def testdelxeon2500(self):
-        command = "del cpu --cpu xeon_2500 --vendor intel"
+        command = "del model --model xeon_2500 --vendor intel"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Model intel/xeon_2500 is still in use and "
                          "cannot be deleted.", command)
 
     # TODO: better place for this test
     def testdelxeon2660(self):
-        command = "del cpu --cpu unused --vendor utvendor"
+        command = "del model --model unused --vendor utvendor"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Model utvendor/unused is still referenced by "
                          "machine models and cannot be deleted.", command)

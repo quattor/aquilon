@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the del esx cluster command."""
+"""Module for testing the del cluster command."""
 
 import unittest
 
@@ -30,13 +30,12 @@ from brokertest import TestBrokerCommand
 class TestDelESXCluster(TestBrokerCommand):
 
     def test_100_del_utecl1(self):
-        command = ["del_esx_cluster", "--cluster=utecl1"]
+        command = ["del_cluster", "--cluster=utecl1"]
         out = self.statustest(command)
-        self.matchoutput(out, "Command del_esx_cluster is deprecated.", command)
         self.check_plenary_gone("cluster", "utecl1", "client",
                                 directory_gone=True)
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False,
-                               command="del_esx_cluster")
+                               command="del_cluster")
 
     def test_105_verify_show_utecl1(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
@@ -66,18 +65,18 @@ class TestDelESXCluster(TestBrokerCommand):
 
     def test_110_del_utmc1(self):
         for i in range(2, 5):
-            self.successtest(["del_esx_cluster", "--cluster=utecl%d" % i])
+            self.successtest(["del_cluster", "--cluster=utecl%d" % i])
 
     def test_120_del_utmc4(self):
         for i in range(5, 11):
-            command = ["del_esx_cluster", "--cluster=utecl%d" % i]
+            command = ["del_cluster", "--cluster=utecl%d" % i]
             self.successtest(command)
 
     def test_130_del_utmc7(self):
-        self.successtest(["del_esx_cluster", "--cluster=utecl11"])
+        self.successtest(["del_cluster", "--cluster=utecl11"])
 
     def test_140_del_sandboxmc(self):
-        self.successtest(["del_esx_cluster", "--cluster=sandboxcl1"])
+        self.successtest(["del_cluster", "--cluster=sandboxcl1"])
 
     def test_150_del_utmc8(self):
         self.statustest(["del_cluster", "--cluster", "utecl12"])
@@ -88,7 +87,7 @@ class TestDelESXCluster(TestBrokerCommand):
         self.statustest(["del_cluster", "--cluster", "utecl15"])
 
     def test_200_del_nonexistent(self):
-        command = ["del_esx_cluster", "--cluster=esx_cluster-does-not-exist"]
+        command = ["del_cluster", "--cluster=esx_cluster-does-not-exist"]
         self.notfoundtest(command)
 
     def test_300_verify_all(self):

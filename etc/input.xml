@@ -350,7 +350,6 @@
 		<option name="esx_guest" type="string">fully qualified host name of a virtual machine</option>
 		<option name="service" type="string">client of service (single service only)</option>
 		<option name="instance" type="string">client of service instance (single instance only)</option>
-		<option name="esx_share" type="string">[Deprecated] Share used by the cluster</option>
 		<option name="share" type="string">Share used by the cluster</option>
 		<option name="esx_switch" type="string">Select clusters bound to the given switch</option>
 	    </optgroup>
@@ -884,33 +883,6 @@
 	    <option name="vendor" requires="cpu" type="string">name of the vendor</option>
 	</optgroup>
 	<transport method="get" path="find/cpu"/>
-    </command>
-
-    <command name="del_cpu">
-	Delete a CPU type from the database
-	<optgroup mandatory="True" fields="all">
-	    <option name="cpu" type="string">CPU type name</option>
-	    <option name="vendor" type="string">name of the vendor</option>
-	</optgroup>
-	<optgroup>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="delete" path="vendor/%(vendor)s/cpu/%(cpu)s"/>
-    </command>
-
-    <command name="update_cpu">
-	Update a CPU type in the database
-	<optgroup mandatory="True" fields="all">
-	    <option name="cpu" type="string">CPU type name</option>
-	    <option name="vendor" type="string">name of the vendor</option>
-	</optgroup>
-	<optgroup>
-	    <option name="comments" type="string">Comments</option>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="vendor/%(vendor)s/cpu/%(cpu)s"/>
     </command>
 
     <command name="add_disk">
@@ -2784,7 +2756,6 @@
 	    <option name="city" type="string">Name of the city</option>
 	    <option name="network_device" type="string">Name of the network device</option>
 	    <option name="networkip" type="ipv4">IP address of a network</option>
-	    <option name="switch" type="string">[Deprecated] Name of the switch</option>
 	    <option name="personality" type="string">Name of personality</option>
 	    <option name="virtual_switch" type="string">Virtual Switch name</option>
 	</optgroup>
@@ -2829,7 +2800,6 @@
 	<transport trigger="city" method="get" path="location/city/%(city)s/plenary"/>
 	<transport trigger="network_device" method="get" path="network_device/%(network_device)s/plenary"/>
 	<transport trigger="networkip" method="get" path="network/plenary/%(networkip)s"/>
-	<transport trigger="switch" method="get" path="switch/%(switch)s/plenary"/>
 	<transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary"/>
 	<transport trigger="virtual_switch" method="get" path="virtual_switch/%(virtual_switch)s/plenary"/>
     </command>
@@ -4043,34 +4013,6 @@
 	<transport method="post" path="network_device/%(network_device)s"/>
     </command>
 
-    <command name="update_switch">
-	DEPRECATED. Update network switch information.  Requires the switch name.  All
-	other fields can be updated.
-	<optgroup mandatory="True" fields="all">
-	    <option name="switch" type="string">Switch fully qualified name</option>
-	</optgroup>
-	<optgroup>
-	    <optgroup fields="one">
-		<option name="rack" type="string">Rack name</option>
-		<option name="building" type="string">Building name</option>
-	    </optgroup>
-	    <option name="model" type="string">Switch model</option>
-	    <option name="type" type="string">Switch type (tor, bor, agg)</option>
-	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="vendor" type="string" requires="model">Switch vendor. Needed if the model name is not unique</option>
-	    <option name="serial" type="string">Serial Number</option>
-	    <option name="comments" type="string">Comments</option>
-	    <option name="rename_to" type="string">New name of the switch</option>
-	    <!-- TODO should be some json type with schema + validation -->
-	    <option name="discovered_macs" type="json">mac/port mapping</option>
-	    <option name="clear" type="flag">clear current mac/port mapping</option>
-	    <option name="discover" type="flag">Do automatic discovery</option>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="switch/%(switch)s"/>
-    </command>
-
     <command name="show_network_device">
 	Show the configuration information for the specified network device.
 	<p/>
@@ -4614,56 +4556,6 @@
 	</format>
     </command>
 
-    <command name="update_esx_cluster">
-	Update an ESX cluster.
-	<p/>
-	The cluster vmhost members are constrained to be in the same location
-	and have the same personality.  An attempt to update any constraint
-	that cannot be satisfied will fail.
-	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Name of the ESX cluster</option>
-	</optgroup>
-	<optgroup>
-	    <option name="personality" type="string">Personality Name</option>
-	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
-	    <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
-	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
-	    <option name="max_members" type="int">Max allowed vmhost members</option>
-	    <option name="switch" type="string" conflicts="virtual_switch">Set the switch in use by the cluster.  An empty string removes the setting.</option>
-	    <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
-	    <option name="comments" type="string">Comments</option>
-	    <option name="virtual_switch" type="string" conflicts="switch">The virtual switch used by the cluster</option>
-	    <optgroup fields="one">
-		<option name="organization" type="string">Organization</option>
-		<option name="hub" type="string">Hub</option>
-		<option name="continent" type="string">Continent</option>
-		<option name="country" type="string">Country</option>
-		<option name="campus" type="string">Campus</option>
-		<option name="city" type="string">City</option>
-		<option name="building" type="string">Building</option>
-		<option name="room" type="string">Room</option>
-		<option name="bunker" type="string">Bunker</option>
-		<option name="rack" type="string">Rack</option>
-		<option name="desk" type="string">Desk</option>
-	    </optgroup>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="cluster/%(cluster)s/esx"/>
-    </command>
-
-    <command name="del_esx_cluster">
-	Delete the ESX cluster.
-	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Name of the cluster</option>
-	</optgroup>
-	<optgroup>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="delete" path="cluster/%(cluster)s/esx"/>
-    </command>
-
     <command name="add_cluster">
 	Add a new cluster.
 	<optgroup mandatory="True" fields="all">
@@ -4791,68 +4683,6 @@
 	</optgroup>
 	<transport method="delete" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
 	<transport method="delete" trigger="metacluster" path="metacluster/%(metacluster)s/allowed/%(archetype)s/%(personality)s"/>
-    </command>
-
-    <command name="rebind_metacluster">
-	Change metacluster bindings.
-	<p/>
-	This will move the cluster into the named metacluster.
-	<optgroup mandatory="True" fields="all">
-	    <option name="metacluster" type="string">MetaCluster name</option>
-	    <option name="cluster" type="string">Cluster name</option>
-	</optgroup>
-	<optgroup>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="metacluster/%(metacluster)s/cluster/%(cluster)s/rebind"/>
-    </command>
-
-    <command name="bind_cluster">
-	Bind a service instance to the named cluster.
-	<p/>
-	If binding a service instance for a service that is already bound to
-	a different instance this command will fail.
-	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Cluster name</option>
-	    <option name="service" type="string">Service name</option>
-	</optgroup>
-	<optgroup>
-	    <option name="instance" type="string">Service instance</option>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="put" trigger="service" path="cluster/%(cluster)s/client_of_service_old/%(service)s"/>
-    </command>
-
-    <command name="rebind_cluster">
-	Bind a service instance to the named cluster.
-	<p/>
-	If binding a service instance for a service that is already bound to
-	a different instance the old binding will be removed.
-	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Cluster name</option>
-	    <option name="service" type="string">Service name</option>
-	</optgroup>
-	<optgroup>
-	    <option name="instance" type="string">Service Instance</option>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" trigger="service" path="cluster/%(cluster)s/client_of_service_old/%(service)s"/>
-    </command>
-
-    <command name="unbind_cluster">
-	Remove the binding of the service instance from the named cluster.
-	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Cluster name</option>
-	    <option name="service" type="string">Service name</option>
-	</optgroup>
-	<optgroup>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="delete" trigger="service" path="cluster/%(cluster)s/client_of_service_old/%(service)s"/>
     </command>
 
     <command name="cluster">
@@ -5722,7 +5552,6 @@
 	    </optgroup>
 	    <option name="application" type="string">Name of applicaiton</option>
 	    <optgroup fields="one">
-		<option name="eonid" type="int">[Deprecated] EON identity</option>
 		<option name="eon_id" type="int">EON identity</option>
 		<option name="grn" type="string">GRN</option>
 	    </optgroup>

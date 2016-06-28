@@ -204,7 +204,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
         command = ["poll", "network_device", "--rack", "ut3", "--type", "bor"]
         err = self.statustest(command)
         self.matchoutput(err, "ut3gd1r01.aqd-unittest.ms.com", command)
-        # update_switch changes the type of ut3gd1r04 to 'bor'
+        # test_update_netdev changes the type of ut3gd1r04 to 'bor'
         self.matchoutput(err, "ut3gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(err, "ut3gd1r07.aqd-unittest.ms.com", command)
         self.matchclean(err, "ut3gd1r05.aqd-unittest.ms.com", command)

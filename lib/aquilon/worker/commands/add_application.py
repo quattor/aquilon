@@ -28,14 +28,8 @@ class CommandAddApplication(CommandAddResource):
     resource_class = Application
     resource_name = "application"
 
-    def add_resource(self, session, logger, application, eonid, eon_id, grn,
+    def add_resource(self, session, logger, application, eon_id, grn,
                      comments, **kwargs):
-        # Backwards compatibility
-        if eonid is not None:
-            self.deprecated_option("eonid", "Please use --eon_id or --grn "
-                                   "instead.", logger=logger, **kwargs)
-            eon_id = eonid
-
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 

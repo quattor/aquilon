@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the update esx_cluster command."""
+"""Module for testing the update cluster command."""
 
 import unittest
 
@@ -46,13 +46,11 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def test_200_updateutecl2(self):
-        command = ["update_esx_cluster", "--cluster=utecl2",
+        command = ["update_cluster", "--cluster=utecl2",
                    "--max_members=97",
                    "--comments", "New ESX cluster comments",
                    "--down_hosts_threshold=0"]
-        out = self.statustest(command)
-        self.matchoutput(out, "Command update_esx_cluster is deprecated",
-                         command)
+        out = self.noouttest(command)
 
     def test_210_verifyutecl2(self):
         command = "show esx_cluster --cluster utecl2"
@@ -89,19 +87,18 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.noouttest(command)
 
     def test_330_updateutecl1switch(self):
-        # Deprecated.
-        command = ["update_esx_cluster", "--cluster=utecl1",
+        command = ["update_cluster", "--cluster=utecl1",
                    "--switch=ut01ga1s04.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_340_updateutecl1switchfail(self):
         # Try something that is not a tor_switch
-        command = ["update_esx_cluster", "--cluster=utecl1",
+        command = ["update_cluster", "--cluster=utecl1",
                    "--switch=unittest02.one-nyp.ms.com"]
         self.badrequesttest(command)
 
     def test_350_failupdatelocation(self):
-        command = ["update_esx_cluster", "--cluster=utecl1", "--rack=ut3"]
+        command = ["update_cluster", "--cluster=utecl1", "--rack=ut3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot set ESX Cluster utecl1 location constraint "
@@ -159,7 +156,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
 
     def test_390_failupdatemaxmembers(self):
-        command = ["update_esx_cluster", "--cluster=utecl1", "--max_members=0"]
+        command = ["update_cluster", "--cluster=utecl1", "--max_members=0"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "ESX Cluster utecl1 has 3 hosts bound, which exceeds "
@@ -167,7 +164,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
 
     def test_420_failupdatedht(self):
-        command = ["update_esx_cluster", "--cluster=utecl1",
+        command = ["update_cluster", "--cluster=utecl1",
                    "--down_hosts_threshold=4"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot support VMs", command)
@@ -194,7 +191,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchclean(out, "utecl2", command)
 
     def test_500_failmissingcluster(self):
-        command = ["update_esx_cluster", "--cluster=cluster-does-not-exist",
+        command = ["update_cluster", "--cluster=cluster-does-not-exist",
                    "--comments=test should fail"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
@@ -218,7 +215,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_600_updatethreshold(self):
         cname = "utecl7"
-        command = ["update_esx_cluster", "--cluster=%s" % cname,
+        command = ["update_cluster", "--cluster=%s" % cname,
                    "--down_hosts_threshold=1%",
                    "--maint_threshold=50%"]
         out = self.successtest(command)

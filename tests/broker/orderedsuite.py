@@ -199,7 +199,6 @@ from .test_update_address_alias import TestUpdateAddressAlias
 from .test_update_interface import TestUpdateInterface
 from .test_update_machine import TestUpdateMachine
 from .test_vm_migration import TestVMMigration
-from .test_update_cpu import TestUpdateCpu
 from .test_update_model import TestUpdateModel
 from .test_update_rack import TestUpdateRack
 from .test_update_network import TestUpdateNetwork
@@ -249,7 +248,6 @@ from .test_del_network import TestDelNetwork
 from .test_del_network_environment import TestDelNetworkEnvironment
 from .test_del_network_compartment import TestDelNetworkCompartment
 from .test_del_model import TestDelModel
-from .test_del_cpu import TestDelCpu
 from .test_del_vendor import TestDelVendor
 from .test_del_desk import TestDelDesk
 from .test_del_rack import TestDelRack
@@ -408,7 +406,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestSearchModel,
                      TestSearchService,
                      TestUpdateInterface, TestUpdateMachine, TestVMMigration,
-                     TestUpdateModel, TestUpdateCpu,
+                     TestUpdateModel,
                      TestUpdateDisk,
                      TestUpdateRack,
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
@@ -456,7 +454,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelRouterAddress, TestDelNetwork, TestDelNetworkEnvironment,
                      TestDelNetworkCompartment,
                      TestDelVlan,
-                     TestDelModel, TestDelCpu, TestDelVendor,
+                     TestDelModel, TestDelVendor,
                      TestDelParameter, TestDelParameterDefinition,
                      TestDelFeature,
                      TestUnmapDnsDomain,
