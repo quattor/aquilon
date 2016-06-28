@@ -35,5 +35,5 @@ ignored-classes = RelationshipProperty, KeyedTuple
 
 [REPORTS]
 
-include-ids = yes
+msg-template = {msg_id}:{line},{column}: {msg}
 reports = no
