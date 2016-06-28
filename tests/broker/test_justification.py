@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the make command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from broker.brokertest import TestBrokerCommand
 from broker.personalitytest import PersonalityTestMixin
 

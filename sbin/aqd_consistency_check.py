@@ -18,6 +18,8 @@
 
 from __future__ import print_function
 
+import argparse
+import logging
 import os
 import sys
 
@@ -35,9 +37,6 @@ import aquilon.aqdb.depends  # pylint: disable=W0611
 import aquilon.worker.depends  # pylint: disable=W0611
 from aquilon.consistency.checks import consistency_check_classes
 from aquilon.config import Config
-
-import argparse
-import logging
 
 
 def main():

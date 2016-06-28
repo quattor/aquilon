@@ -25,9 +25,10 @@ the chain.
 import os
 import re
 import logging
-from six import iteritems
 from subprocess import Popen, PIPE
 from threading import Thread
+
+from six import iteritems
 
 from mako.lookup import TemplateLookup
 from twisted.python import context

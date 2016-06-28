@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the add dynamic range command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 

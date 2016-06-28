@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the add host command."""
 
+import unittest
+
 if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
-import unittest
 from broker.brokertest import TestBrokerCommand
 from networktest import DummyIP
 from machinetest import MachineTestMixin

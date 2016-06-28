@@ -20,20 +20,21 @@
 import os
 import gzip
 import re
-from six.moves import cStringIO as StringIO  # pylint: disable=F0401
-from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
-from six import itervalues
 from shutil import rmtree
 from subprocess import Popen, PIPE
 from datetime import datetime
 import time
+import unittest
+import xml.etree.ElementTree as ET
+
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
+from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
+from six import itervalues
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import xml.etree.ElementTree as ET
-import unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 

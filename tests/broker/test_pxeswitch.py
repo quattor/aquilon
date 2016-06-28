@@ -22,11 +22,12 @@ This may have issues being tested somewhere that the command actually works...
 
 import os.path
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 

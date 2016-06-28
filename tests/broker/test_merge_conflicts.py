@@ -21,11 +21,12 @@ import os
 from shutil import rmtree
 from subprocess import Popen
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 

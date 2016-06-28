@@ -24,6 +24,7 @@ be extended later if that turns out to be useful.
 
 from __future__ import print_function
 
+import argparse
 import sys
 import os
 from subprocess import call
@@ -38,8 +39,6 @@ LIBDIR = os.path.join(BINDIR, "..", "lib")
 if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
-
-import argparse
 
 from aquilon.config import Config, lookup_file_path
 
@@ -158,14 +157,14 @@ def main():
                         help="compiler batch size")
     parser.add_argument("--panc_include", action="store",
                         help="Regex for templates to include in debug " +
-                             "output (None included by default)")
+                        "output (None included by default)")
     parser.add_argument("--panc_exclude", action="store",
                         help="Regex for templates to exclude in debug " +
-                             "output (only useful if pancinclude has " +
-                             "been given)")
+                        "output (only useful if pancinclude has " +
+                        "been given)")
     parser.add_argument("--pancdebug", action="store_true", default=None,
                         help="Alias for pancinclude=.* and " +
-                             "pancexclude=components/spma/functions.*")
+                        "pancexclude=components/spma/functions.*")
     parser.add_argument("--cleandeps", action="store_true", default=None,
                         help="Remove pan dependency files before compiling")
 

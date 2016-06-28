@@ -22,11 +22,12 @@ from __future__ import print_function
 import sys
 import os
 from optparse import OptionParser, OptionValueError
-from lxml import etree
 import re
 from subprocess import Popen
-from six.moves import range  # pylint: disable=F0401
 import textwrap
+
+from six.moves import range  # pylint: disable=F0401
+from lxml import etree
 
 # The code is not exactly pretty. If you want to improve it, here are some
 # suggestions:

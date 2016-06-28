@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing constraints available after cluster creation."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 

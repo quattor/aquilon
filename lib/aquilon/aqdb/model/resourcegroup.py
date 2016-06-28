@@ -16,11 +16,11 @@
 # limitations under the License.
 
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relation, backref
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
-from sqlalchemy.orm import relation, backref
+from aquilon.aqdb.model import Resource, ResourceHolder
 
 
 _TN = 'resourcegroup'

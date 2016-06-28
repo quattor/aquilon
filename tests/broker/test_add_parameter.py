@@ -19,11 +19,12 @@
 
 import json
 
+import unittest
+
 if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
-import unittest
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
 from broker.personalitytest import PersonalityTestMixin

@@ -17,8 +17,9 @@
 """Wrappers to make getting and using hosts simpler."""
 
 from collections import defaultdict, Counter
-from six import itervalues
 from types import ListType
+
+from six import itervalues
 
 from sqlalchemy.orm import (joinedload, contains_eager, with_polymorphic,
                             undefer)

@@ -18,8 +18,9 @@
 
 from datetime import datetime
 import json
-from jsonschema import validate, ValidationError, Draft4Validator
 import re
+
+from jsonschema import validate, ValidationError, Draft4Validator
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         Text, ForeignKey, UniqueConstraint)

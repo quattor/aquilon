@@ -19,9 +19,10 @@
     Adapted from the recipie at http://pylonshq.com/pasties/421
 """
 
-from sqlalchemy import types
-from dateutil.tz import tzutc
 from datetime import datetime
+
+from dateutil.tz import tzutc
+from sqlalchemy import types
 
 
 class UTCDateTime(types.TypeDecorator):

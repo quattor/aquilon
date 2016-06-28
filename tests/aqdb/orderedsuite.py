@@ -16,15 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test module for rebuilding the database."""
+
 import os
+from subprocess import Popen
+import unittest
 
 from utils import load_classpath
 load_classpath()
 
 import nose
-import unittest
 
-from subprocess import Popen
 from aquilon.config import Config
 
 

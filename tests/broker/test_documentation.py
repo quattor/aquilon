@@ -20,11 +20,12 @@
 import os
 from subprocess import Popen, PIPE
 
+import unittest
+
 if __name__ == '__main__':
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 

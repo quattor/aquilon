@@ -18,9 +18,10 @@
     Aquilon. """
 
 from datetime import datetime
+import logging
+
 from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
-import logging
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, CheckConstraint, desc, event)

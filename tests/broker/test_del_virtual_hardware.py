@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing commands that remove virtual hardware."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from eventstest import EventsTestMixin
 

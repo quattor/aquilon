@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing parameter support for features."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from broker.brokertest import TestBrokerCommand
 
 

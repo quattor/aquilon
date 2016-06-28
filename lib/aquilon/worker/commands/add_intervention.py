@@ -16,8 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq add intervention`."""
 
-from dateutil.parser import parse
 from datetime import datetime
+
+from dateutil.parser import parse
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Intervention

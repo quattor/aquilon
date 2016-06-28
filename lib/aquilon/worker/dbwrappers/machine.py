@@ -17,8 +17,9 @@
 """Wrapper to make getting a machine simpler."""
 
 import json
-import jsonschema
 import os.path
+
+import jsonschema
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.types import CpuType

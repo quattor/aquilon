@@ -21,6 +21,7 @@ Parse AQD configuration
 
 from __future__ import print_function
 
+import argparse
 import sys
 import os
 
@@ -36,7 +37,6 @@ if LIBDIR not in sys.path:
 # -- end path_setup --
 
 from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
-import argparse
 
 from aquilon.config import Config
 

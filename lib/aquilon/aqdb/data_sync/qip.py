@@ -16,9 +16,10 @@
 # limitations under the License.
 """ Routines to query information from QIP """
 
+import heapq
+
 from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
-import heapq
 
 from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,

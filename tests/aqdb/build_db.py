@@ -19,6 +19,7 @@
 
 from __future__ import print_function
 
+import argparse
 import sys
 import logging
 import os
@@ -29,8 +30,6 @@ log = logging.getLogger('aqdb.populate')
 
 import utils
 utils.load_classpath()
-
-import argparse
 
 from sqlalchemy.orm import configure_mappers
 

@@ -20,9 +20,10 @@ import re
 
 from json import JSONDecoder
 from random import choice
-from ipaddr import IPv4Address
 from pipes import quote
 from operator import attrgetter
+
+from ipaddr import IPv4Address
 
 from aquilon.exceptions_ import (InternalError, NotFoundException,
                                  ProcessException, ArgumentError)

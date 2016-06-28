@@ -18,14 +18,15 @@
 """Module for testing the generated profiles."""
 
 import os
-from lxml import etree
 import gzip
+import unittest
+
+from lxml import etree
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
