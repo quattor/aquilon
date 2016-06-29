@@ -56,6 +56,7 @@ class CommandAddParameter(BrokerCommand):
         path = ParamDefinition.normalize_path(path, strict=False)
 
         plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbstage))
 
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
@@ -74,7 +75,6 @@ class CommandAddParameter(BrokerCommand):
                                        link.model, link.interface_name)
         else:
             holder_object = dbpersonality.archetype
-            plenaries.append(Plenary.get_plenary(dbstage))
 
         db_paramdef, rel_path = lookup_paramdef(holder_object, path, False)
 

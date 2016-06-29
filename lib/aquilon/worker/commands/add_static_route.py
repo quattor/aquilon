@@ -24,6 +24,7 @@ from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.network import get_network_byip
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddStaticRoute(BrokerCommand):
@@ -70,12 +71,16 @@ class CommandAddStaticRoute(BrokerCommand):
             raise ArgumentError("%s is not a network address; "
                                 "did you mean %s." % (ip, dest.network))
 
+        plenaries = PlenaryCollection(logger=logger)
+
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
             validate_prod_personality(dbstage, user, justification, reason)
+            if dbstage.created_implicitly:
+                plenaries.append(Plenary.get_plenary(dbstage))
         else:
             dbstage = None
 
@@ -98,4 +103,6 @@ class CommandAddStaticRoute(BrokerCommand):
         session.flush()
 
         # TODO: refresh affected host templates
+        plenaries.write()
+
         return
