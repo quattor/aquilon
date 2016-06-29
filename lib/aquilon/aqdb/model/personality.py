@@ -24,6 +24,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import (relation, backref, deferred, object_session,
                             reconstructor)
 from sqlalchemy.orm.collections import column_mapped_collection
+from sqlalchemy.util import memoized_property
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -238,6 +239,18 @@ class PersonalityStage(Base):
     def setup(self):
         # Loading an object from the DB does not call __init__
         self.created_implicitly = False
+
+    @memoized_property
+    def param_features(self):
+        """
+        Return the features which can have parameters set
+
+        The feature should be bound directly to the personality rather than
+        indirectly to the whole archetype, and the feature should at least
+        have a parameter definition holder.
+        """
+        return frozenset(link.feature for link in self.features
+                         if link.feature.param_def_holder)
 
 
 class PersonalityGrnMap(Base):

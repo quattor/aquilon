@@ -156,17 +156,10 @@ class PlenaryPersonalityBase(Plenary):
 
         pre, post = host_features(self.dbobj)
 
-        # Only features which are
-        # - bound to the personality directly rather than to the archetype,
-        # - and have parameter definitions
-        # are interesting when generating parameters
-        param_features = set(link.feature for link in self.dbobj.features
-                             if link.feature.param_def_holder)
-
         for dbfeature in sorted(frozenset()
                                 .union(pre)
                                 .union(post)
-                                .intersection(param_features),
+                                .intersection(self.dbobj.param_features),
                                 key=attrgetter('name')):
             base_path = "/system/" + dbfeature.cfg_path
             params = get_parameters_by_feature(self.dbobj, dbfeature)

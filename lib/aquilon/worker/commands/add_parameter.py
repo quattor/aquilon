@@ -61,18 +61,18 @@ class CommandAddParameter(BrokerCommand):
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                            compel=True)
-            if dbfeature not in [link.feature for link in dbstage.features]:
-                raise ArgumentError("{0} is not bound to {1:l}."
+            if dbfeature not in dbstage.param_features:
+                raise ArgumentError("{0} is not bound to {1:l}, or it does not "
+                                    "have any parameters defined."
                                     .format(dbfeature, dbstage))
             holder_object = dbfeature
 
-            for link in dbstage.archetype.features + dbstage.features:
+            for link in dbstage.features:
                 if link.feature != dbfeature:
                     continue
 
-                get_affected_plenaries(session, dbfeature, plenaries,
-                                       link.personality_stage, link.archetype,
-                                       link.model, link.interface_name)
+                get_affected_plenaries(session, dbfeature, plenaries, dbstage,
+                                       None, link.model, link.interface_name)
         else:
             holder_object = dbpersonality.archetype
 
