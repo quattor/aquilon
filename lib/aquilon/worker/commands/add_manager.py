@@ -36,10 +36,14 @@ class CommandAddManager(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+        audit_results = []
 
         if not manager:
             manager = "%sr.%s" % (dbmachine.primary_name.fqdn.name,
                                   dbmachine.primary_name.fqdn.dns_domain.name)
+            logger.info("Selected manager {0!s} for {1:l}."
+                        .format(manager, dbhost))
+            audit_results.append(('manager', manager))
 
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface, mac=mac,
@@ -51,7 +55,6 @@ class CommandAddManager(BrokerCommand):
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))
 
-        audit_results = []
         ip = generate_ip(session, logger, dbinterface, compel=True,
                          audit_results=audit_results, **arguments)
 

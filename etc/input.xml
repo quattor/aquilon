@@ -1873,8 +1873,11 @@
 	    </optgroup>
 	    <option name="interface" type="string">Name of the interface.</option>
 	</optgroup>
-	<optgroup>
+	<optgroup fields="one">
 	    <option name="fqdn" type="string">FQDN of the new address</option>
+	    <option name="shortname" type="string">Relative part of the FQDN</option>
+	</optgroup>
+	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="label" type="string">Interface alias of the new address</option>
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>

@@ -317,16 +317,24 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           '    Network Environment: utcolo',
                           command)
 
-    def testaddunittest26(self):
+    def testaddunittest26_defaultdomain(self):
         ip = self.net["routing1"].usable[0]
         fqdn = "unittest26-e1.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip, "eth1", ip.mac,
                              primary="unittest26.aqd-unittest.ms.com")
         command = ["add", "interface", "address",
                    "--machine", "unittest26.aqd-unittest.ms.com",
-                   "--interface", "eth1", "--ip", ip, "--fqdn", fqdn]
+                   "--interface", "eth1", "--ip", ip, "--short", "unittest26-e1"]
         self.statustest(command)
         self.dsdb_verify()
+
+    def testverifyaddunittest26_defaultdomain_audit(self):
+        command = ["search_audit", "--keyword",
+                   "unittest26-e1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: fqdn=unittest26-e1.aqd-unittest.ms.com]",
+                         command)
 
     def testaddut3gd1r04vlan110(self):
         ip = self.net["tor_net_12"].usable[1]
@@ -340,6 +348,14 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     contains=str(ip))
+
+    def testverifytestaddut3gd1r04vlan110_audit(self):
+        command = ["search_audit", "--keyword",
+                   "ut3gd1r04-vlan110.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: fqdn=ut3gd1r04-vlan110.aqd-unittest.ms.com]",
+                         command)
 
     def testaddut3gd1r04vlan110hsrp(self):
         ip = self.net["tor_net_12"].usable[2]
