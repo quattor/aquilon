@@ -42,6 +42,8 @@
 		    <arg choice="plain"><option>--personality <replaceable>NAME</replaceable></option></arg>
 		    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 		</group>
+		<arg><option>--cluster_personality <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--cluster_archetype <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 		<arg><option>--osname <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--osversion <replaceable>VERSION</replaceable></option></arg>
@@ -218,6 +220,28 @@
 		<listitem>
 		    <para>
 			Select the stage of the personality to filter for. If not specified, all stages are matched.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cluster_personality <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for hosts in the named cluster personality. Note that personality names are not
+			globally unique, so you may want to also specify the <option>--cluster_archetype</option> option
+			together with <option>--cluster_personality</option>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cluster_archetype <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for hosts in the cluster archetype <replaceable>NAME</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>

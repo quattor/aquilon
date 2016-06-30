@@ -47,6 +47,7 @@ class CommandSearchHost(BrokerCommand):
     def render(self, session, logger, hostname, machine, archetype, buildstatus,
                personality, personality_stage, host_environment, osname, osversion,
                service, instance, model, machine_type, vendor, serial, cluster,
+               cluster_archetype, cluster_personality,
                guest_on_cluster, guest_on_share, member_cluster_share, domain,
                sandbox, branch, sandbox_author, dns_domain, shortname, mac, ip,
                networkip, network_environment, exact_location, metacluster,
@@ -227,6 +228,18 @@ class CommandSearchHost(BrokerCommand):
                 q = q.filter_by(metacluster=dbcluster)
             else:
                 q = q.filter_by(cluster=dbcluster)
+            q = q.reset_joinpoint()
+
+        if cluster_archetype:
+            dbarchetype = Archetype.get_unique(session, cluster_archetype, compel=True)
+            q = q.join('_cluster', 'cluster', 'personality_stage', 'personality', aliased=True)
+            q = q.filter_by(archetype=dbarchetype)
+            q = q.reset_joinpoint()
+
+        if cluster_personality:
+            dbpersonality = Personality.get_unique(session, name=cluster_personality, archetype=cluster_archetype, compel=True)
+            q = q.join('_cluster', 'cluster', 'personality_stage', aliased=True)
+            q = q.filter_by(personality=dbpersonality)
             q = q.reset_joinpoint()
 
         if metacluster:

@@ -121,6 +121,16 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Archetype archetype-does-not-exist not found",
                          command)
 
+    def testclusterarchetype(self):
+        command = "search host --cluster_archetype esx_cluster"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evh1.aqd-unittest.ms.com", command)
+
+    def testclusterpersonality(self):
+        command = "search host --cluster_personality vulcan-10g-server-prod --cluster_archetype esx_cluster"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evh1.aqd-unittest.ms.com", command)
+
     def testbuildstatusavailable(self):
         command = "search host --buildstatus ready"
         out = self.commandtest(command.split(" "))
