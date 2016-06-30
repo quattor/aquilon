@@ -77,12 +77,6 @@ class TestDelMetaCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def test_160_del_vulcan1(self):
-        basetime = datetime.now()
-        command = ["del_metacluster", "--metacluster=vulcan1"]
-        self.statustest(command)
-        self.wait_notification(basetime, 0)
-
     def test_160_del_utmc8(self):
         self.statustest(["del_metacluster", "--metacluster=utmc8"])
 
@@ -97,6 +91,9 @@ class TestDelMetaCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
             "utmc9" + self.xml_suffix)))
+
+    def test_170_del_hamc1(self):
+        self.statustest(["del_metacluster", "--metacluster", "hamc1"])
 
     def test_200_del_nonexistant(self):
         command = ["del_metacluster",

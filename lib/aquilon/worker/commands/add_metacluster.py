@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, MetaCluster, Location
+from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
@@ -40,25 +40,12 @@ class CommandAddMetaCluster(BrokerCommand):
         # error message if a cluster with the same name exists
         Cluster.get_unique(session, metacluster, preclude=True)
 
-        # This should be reverted when virtbuild supports these options
-        if not archetype:
-            archetype = "metacluster"
-
         kw = parse_cluster_arguments(session, self.config, archetype,
                                      personality, personality_stage, domain,
                                      sandbox, buildstatus, max_members)
         max_clusters = kw.pop('max_members')
 
-        dbloc = get_location(session, **arguments)
-
-        # This should be reverted when virtbuild supports this option
-        if not dbloc:
-            section = "archetype_" + kw['personality_stage'].archetype.name
-            dbloc = Location.get_unique(session,
-                                        name=self.config.get(section,
-                                                             "location_name"),
-                                        location_type=self.config.get(section,
-                                                                      "location_type"))
+        dbloc = get_location(session, compel=True, **arguments)
 
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
                                 max_clusters=max_clusters, comments=comments,

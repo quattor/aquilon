@@ -248,8 +248,6 @@ max_members_default = 2
 [archetype_metacluster]
 default_domain = ny-prod
 default_personality = metacluster
-location_type = company
-location_name = ms
 max_members_default = 32
 
 [archetype_netinfra]

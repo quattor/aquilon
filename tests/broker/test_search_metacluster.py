@@ -33,7 +33,7 @@ class TestSearchMetaCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
         self.matchoutput(out, "utmc2", command)
-        self.matchoutput(out, "vulcan1", command)
+        self.matchoutput(out, "hamc1", command)
         self.matchclean(out, "utvcs1", command)
         self.matchclean(out, "utecl1", command)
 
@@ -63,7 +63,7 @@ class TestSearchMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "utmc2", command)
         self.matchoutput(out, "utmc4", command)
         self.matchoutput(out, "utmc7", command)
-        self.matchoutput(out, "vulcan1", command)
+        self.matchoutput(out, "hamc1", command)
 
     def testpersonalityunavailable1(self):
         command = ['search', 'metacluster', '--archetype', 'metacluster',
@@ -100,7 +100,7 @@ class TestSearchMetaCluster(TestBrokerCommand):
         command = "search metacluster --metacluster_building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
-        self.matchclean(out, "vulcan1", command)
+        self.matchclean(out, "hamc1", command)
 
     def testclusterlocationunavailable(self):
         command = ["search_metacluster",
@@ -167,7 +167,7 @@ class TestSearchMetaCluster(TestBrokerCommand):
         command = "search metacluster --member_personality vulcan-10g-server-prod"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
-        self.matchclean(out, "vulcan1", command)
+        self.matchclean(out, "hamc1", command)
 
     def testmemberpersonalityunavailable(self):
         command = ['search', 'metacluster',
@@ -179,7 +179,7 @@ class TestSearchMetaCluster(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
         self.matchoutput(out, "utmc2", command)
-        self.matchclean(out, "vulcan1", command)
+        self.matchclean(out, "hamc1", command)
 
     def testshare(self):
         command = ["search_metacluster", "--share", "test_v2_share"]
