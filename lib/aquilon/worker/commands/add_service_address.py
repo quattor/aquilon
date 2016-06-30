@@ -17,25 +17,30 @@
 """Contains the logic for `aq add service address`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ServiceAddress, Host
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import ServiceAddress, Host, Fqdn, DnsDomain
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import get_interfaces
+from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.resources import get_resource_holder
+from aquilon.worker.dbwrappers.search import search_next
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddServiceAddress(BrokerCommand):
 
-    required_parameters = ["service_address", "name"]
+    required_parameters = ["name"]
 
-    def render(self, session, logger, service_address, ip, name, interfaces,
-               hostname, cluster, metacluster, resourcegroup,
-               network_environment, map_to_primary, shared, comments, **_):
+    def render(self, session, logger, service_address, shortname, prefix,
+               dns_domain, ip, name, interfaces, hostname, cluster, metacluster,
+               resourcegroup, network_environment, map_to_primary, shared,
+               comments, **kwargs):
 
         validate_nlist_key("name", name)
+        audit_results = []
 
         # TODO: generalize the error message - Layer-3 failover may be
         # implemented by other software, not just Zebra.
@@ -57,6 +62,29 @@ class CommandAddServiceAddress(BrokerCommand):
             if not isinstance(toplevel_holder, Host):
                 raise ArgumentError("The --shared option works only "
                                     "for host-based service addresses.")
+
+        if not service_address:
+            if dns_domain:
+                dbdns_domain = DnsDomain.get_unique(session, dns_domain,
+                                                    compel=True)
+            elif isinstance(toplevel_holder, Host):
+                dbdns_domain = toplevel_holder.hardware_entity.primary_name.fqdn.dns_domain
+            else:
+                dbdns_domain = get_default_dns_domain(toplevel_holder.location_constraint)
+
+            if prefix:
+                prefix = AqStr.normalize(prefix)
+                dbdns_domain.lock_row()
+
+                result = search_next(session=session, cls=Fqdn, attr=Fqdn.name,
+                                     value=prefix, dns_domain=dbdns_domain,
+                                     start=None, pack=None)
+                shortname = "%s%d" % (prefix, result)
+
+            service_address = "%s.%s" % (shortname, dbdns_domain)
+            logger.info("Selected FQDN {0!s} for {1:l}."
+                        .format(service_address, toplevel_holder))
+            audit_results.append(('service_address', service_address))
 
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
@@ -107,4 +135,6 @@ class CommandAddServiceAddress(BrokerCommand):
 
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **kwargs)
         return

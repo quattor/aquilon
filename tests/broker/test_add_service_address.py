@@ -100,7 +100,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                              comments="Some service address comments")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
-                   "--service_address", "zebra3.aqd-unittest.ms.com",
+                   "--prefix", "zebra",
                    "--interfaces", "eth0,eth1", "--ip", zebra3_ip,
                    "--name", "zebra3", "--map_to_primary",
                    "--comments", "Some service address comments"]
@@ -115,6 +115,13 @@ class TestAddServiceAddress(TestBrokerCommand):
         command = ["show", "fqdn", "--fqdn", "zebra3.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
+                         command)
+
+    def testverifyzebra3audit(self):
+        command = ["search_audit", "--keyword", "zebra3.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: service_address=zebra3.aqd-unittest.ms.com]",
                          command)
 
     def testverifyunittest20(self):
