@@ -811,6 +811,7 @@
 	    <option name="machine" type="string">Networks the machine is attached to</option>
 	    <option name="fqdn" type="string">Network that contains the IP address for this fully qualified domain name</option>
 	    <option name="cluster" type="string">Networks in use by the cluster switch</option>
+	    <option name="virtual_switch" type="string">Networks used by the virtual switch</option>
 	    <option name="pg" type="string">Networks assigned to the given portgroup</option>
 	    <option name="has_dynamic_ranges" type="flag">Matches networks containing dynamic DHCP ranges</option>
 	    <option name="exact_location" type="flag">match the location exactly</option>
