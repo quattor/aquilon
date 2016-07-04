@@ -485,6 +485,8 @@
 	    <option name="vendor" type="string">Machine vendor name</option>
 	    <option name="serial" type="string">Machine serial number</option>
 	    <option name="cluster" type="string">Cluster or metacluster name</option>
+	    <option name="cluster_archetype" type="string">Cluster archetype</option>
+	    <option name="cluster_personality" type="string">Cluster personality</option>
 	    <option name="metacluster" type="string">Metacluster name</option>
 	    <option name="guest_on_cluster" type="string">Host is a virtual machine guest on this cluster</option>
 	    <option name="guest_on_share" type="string">Host is a virtual machine using this share</option>
