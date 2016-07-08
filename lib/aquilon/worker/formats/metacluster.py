@@ -28,8 +28,9 @@ class MetaClusterFormatter(CompileableFormatter):
     def format_raw(self, metacluster, indent="", embedded=True,
                    indirect_attrs=True):
         details = [indent + "MetaCluster: %s" % metacluster.name]
+        details.append(indent + "  Member Location Constraint:")
         details.append(self.redirect_raw(metacluster.location_constraint,
-                                         indent + "  "))
+                                         indent + "    "))
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
         details.append(self.redirect_raw(metacluster.status, indent + "  "))
         details.append(self.redirect_raw(metacluster.personality_stage,
