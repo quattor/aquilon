@@ -138,3 +138,17 @@ class SyncKey(LockKey):
 
         self.exclusive["sync"].add(data)
         self.transition("initialized")
+
+
+class ExternalKey(LockKey):
+    """
+    Lock used to prevent parallel calls to external services.
+
+    This is a pretty generic kind of lock, it's up to the caller to decide what
+    exactly needs to be locked.
+    """
+    def __init__(self, service, items, logger=LOGGER, loglevel=CLIENT_INFO):
+        super(ExternalKey, self).__init__(logger=logger, loglevel=loglevel,
+                                          lock_queue=lock_queue)
+        self.exclusive["external/" + service].update(str(item) for item in items)
+        self.transition("initalized")
