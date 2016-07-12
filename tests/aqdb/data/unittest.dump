@@ -53,6 +53,7 @@ Role(name="winops")
 
 UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="example.realm"))
 UserPrincipal(name="otheruser", role=Role(name="nobody"), realm=Realm(name="example.realm"))
+UserPrincipal(name="orphantestuser", role=Role(name="nobody"), realm=Realm(name="example.realm"))
 
 DnsEnvironment(name="internal")
 DnsEnvironment(name="external")
@@ -68,11 +69,16 @@ DnsDomain(name="the-ha.ms.com")
 DnsDomain(name="new-york.ms.com")
 
 User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tmp")
+User(name="orphantestuser", uid=1002, gid=1002, full_name="Other user to delete", home_dir="/tmp")
 
 Domain(name="prod", owner=UserPrincipal(name="cdb"),
        compiler="/none/panc.jar",
        comments="Production source domain.")
 Sandbox(name="othersandbox", owner=UserPrincipal(name="otheruser"),
+	compiler="/none/panc.jar",
+        comments="Test if owner is deleted",
+	base_commit='0000000000')
+Sandbox(name="orphantestsandbox", owner=UserPrincipal(name="orphantestuser"),
 	compiler="/none/panc.jar",
         comments="Test if owner is deleted",
 	base_commit='0000000000')
