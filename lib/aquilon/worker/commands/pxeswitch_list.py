@@ -26,6 +26,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size)
 from aquilon.worker.processes import run_command
+from aquilon.worker.locks import ExternalKey
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import first_of
 
@@ -108,5 +109,9 @@ class CommandPXESwitchList(BrokerCommand):
                 groupargs.append("--servers")
                 groupargs.append(" ".join("%s@%s" % (user, s) for s in servers))
 
-                # it would be nice to parallelize this....
-                run_command(groupargs, logger=logger, stream_level=CLIENT_INFO)
+                # It would be nice to connect to connect to the servers of
+                # different instances in parallel, however, we need to avoid
+                # calling AII for the same host simultaneously due to
+                # concurrency issues in AII
+                with ExternalKey("pxeswitch", hostlist, logger=logger):
+                    run_command(groupargs, logger=logger, stream_level=CLIENT_INFO)
