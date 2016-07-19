@@ -35,8 +35,9 @@ from brokertest import TestBrokerCommand
 class TestPollNetworkDevice(TestBrokerCommand):
     def getmacdata(self, switchfile):
         dir = os.path.dirname(os.path.realpath(__file__))
-        out = open(os.path.join(dir, "..", "fakebin", "macdata.d", switchfile),
-                   'r').read()
+        with open(os.path.join(dir, "..", "fakebin", "macdata.d",
+                               switchfile), 'r') as f:
+            out = f.read()
         return re.sub(r"\s+", " ", "".join(out))
 
     # test_prebind_server runs too late...

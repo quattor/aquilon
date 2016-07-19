@@ -51,17 +51,13 @@ class TestPublishSandbox(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
         template = self.find_template("aquilon", "archetype", "base",
                                       sandbox="changetest1")
-        f = open(template)
-        try:
+        with open(template) as f:
             contents = f.readlines()
-        finally:
-            f.close()
         contents.append("#Added by unittest\n")
-        f = open(template, 'w')
-        try:
+
+        with open(template, 'w') as f:
             f.writelines(contents)
-        finally:
-            f.close()
+
         self.gitcommand(["commit", "-a", "-m", "added unittest comment"],
                         cwd=sandboxdir)
 

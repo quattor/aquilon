@@ -16,18 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq publish`."""
 
-import os
-import re
-from tempfile import NamedTemporaryFile, mkdtemp
+from tempfile import NamedTemporaryFile
 from base64 import b64decode
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
-from aquilon.worker.dbwrappers.branch import force_my_sandbox
-from aquilon.worker.processes import run_git, sync_domain
+from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_all_trackers
+from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
-from aquilon.utils import remove_dir
 
 
 class CommandPublish(BrokerCommand):
@@ -57,71 +54,41 @@ class CommandPublish(BrokerCommand):
 
         # Most of the logic here is duplicated in deploy
         kingdir = self.config.get("broker", "kingdir")
-        rundir = self.config.get("broker", "rundir")
 
         tmpfile = NamedTemporaryFile()
         tmpfile.write(b64decode(bundle))
         tmpfile.flush()
 
-        tempdir = mkdtemp(prefix="publish_", suffix="_%s" % dbsandbox.name,
-                          dir=rundir)
+        kingrepo = GitRepo(kingdir, logger)
         try:
-            run_git(["clone", "--shared", "--branch", dbsandbox.name, "--",
-                     kingdir, dbsandbox.name],
-                    path=tempdir, logger=logger)
-            temprepo = os.path.join(tempdir, dbsandbox.name)
-            run_git(["bundle", "verify", tmpfile.name],
-                    path=temprepo, logger=logger)
-            ref = "HEAD:%s" % (dbsandbox.name)
-            command = ["pull", tmpfile.name, ref]
-            if rebase:
-                command.append("--force")
-            run_git(command, path=temprepo, logger=logger,
-                    stream_level=CLIENT_INFO)
+            with kingrepo.temp_clone(dbsandbox.name) as temprepo:
+                temprepo.run(["bundle", "verify", tmpfile.name])
+                ref = "HEAD:%s" % (dbsandbox.name)
+                command = ["pull", tmpfile.name, ref]
+                if rebase:
+                    command.append("--force")
+                temprepo.run(command, stream_level=CLIENT_INFO)
 
-            # Using --force above allows rewriting any history, even before the
-            # start of the sandbox. We don't want to allow that, so verify that
-            # the starting point of the sandbox is still part of its history.
-            if rebase:
-                filterre = re.compile('^' + dbsandbox.base_commit + '$')
-                try:
-                    found = run_git(['rev-list', dbsandbox.name],
-                                    filterre=filterre, path=temprepo,
-                                    logger=logger)
-                except ProcessException as pe:
-                    if pe.code != 128:
-                        raise
-                    else:
-                        found = False
+                # Using --force above allows rewriting any history, even before the
+                # start of the sandbox. We don't want to allow that, so verify that
+                # the starting point of the sandbox is still part of its history.
+                if rebase:
+                    found = temprepo.ref_contains_commit(dbsandbox.base_commit,
+                                                         dbsandbox.name)
+                    if not found:
+                        raise ArgumentError("The published branch no longer "
+                                            "contains commit %s it was branched "
+                                            "from." % dbsandbox.base_commit)
 
-                if not found:
-                    raise ArgumentError("The published branch no longer "
-                                        "contains commit %s it was branched "
-                                        "from." % dbsandbox.base_commit)
-
-            # FIXME: Run tests before pushing back to template-king
-            if rebase:
-                target_ref = "+" + dbsandbox.name
-            else:
-                target_ref = dbsandbox.name
-            run_git(["push", "origin", target_ref],
-                    path=temprepo, logger=logger)
+                # FIXME: Run tests before pushing back to template-king
+                temprepo.push_origin(dbsandbox.name, force=rebase)
         except ProcessException as e:
             raise ArgumentError("\n%s%s" % (e.out, e.err))
         finally:
             tmpfile.close()
-            remove_dir(tempdir, logger=logger)
+
+        if sync and dbsandbox.autosync:
+            sync_all_trackers(dbsandbox, logger)
 
         client_command = "git fetch"
-        if not sync or not dbsandbox.autosync:
-            return client_command
-
-        for domain in dbsandbox.trackers:
-            if not domain.autosync:
-                continue
-            try:
-                sync_domain(domain, logger=logger)
-            except ProcessException as e:
-                logger.warning("Error syncing domain %s: %s" % (domain.name, e))
-
         return client_command

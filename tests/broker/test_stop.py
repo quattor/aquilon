@@ -47,10 +47,9 @@ class TestBrokerStop(unittest.TestCase):
 
     def terminate_daemon(self, pidfile):
         self.assertTrue(os.path.exists(pidfile), msg=pidfile)
-        f = open(pidfile)
-        pid = f.readline()
+        with open(pidfile) as f:
+            pid = f.readline()
         self.assertNotEqual(pid, "")
-        f.close()
         pid = int(pid)
         os.kill(pid, signal.SIGTERM)
 

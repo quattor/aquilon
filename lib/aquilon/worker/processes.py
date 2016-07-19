@@ -25,8 +25,10 @@ the chain.
 import os
 import re
 import logging
+from contextlib import contextmanager
 from six import iteritems
 from subprocess import Popen, PIPE
+from tempfile import mkdtemp
 from threading import Thread
 
 from mako.lookup import TemplateLookup
@@ -37,7 +39,7 @@ from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config, running_from_source
 from aquilon.aqdb.model import Machine
-from aquilon.worker.locks import lock_queue, CompileKey
+from aquilon.utils import remove_dir
 
 LOGGER = logging.getLogger(__name__)
 
@@ -228,44 +230,120 @@ def cache_version(config, logger=LOGGER):
         config.set("broker", "version", "Unknown")
 
 
-def sync_domain(dbdomain, logger=LOGGER, locked=False):
-    """Update templates on disk to match contents of branch in template-king.
-
-    If this domain is tracking another, first update the branch in
-    template-king with the latest from the tracking branch.  Also save
-    the current (previous) commit as a potential rollback point.
-
+class GitRepo(object):
     """
-    config = Config()
-    kingdir = config.get("broker", "kingdir")
-    domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
-    git_env = {"PATH": os.environ.get("PATH", "")}
+    Git repository wrapper
 
-    if dbdomain.tracked_branch:
-        # Might need to revisit if using this helper from rollback...
-        run_command(["git", "push", ".",
-                     "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)],
-                    path=kingdir, env=git_env, logger=logger)
+    This class is not meant to be a simple wrapper around git, but rather to
+    implement higher level functions - even if some of those functions can be
+    translated to a single git command.
+    """
 
-    logger.client_info("Updating the checked out copy of {0:l}..."
-                       .format(dbdomain))
+    def __init__(self, path, logger, loglevel=logging.INFO):
+        self.path = path
+        self.logger = logger
+        self.loglevel = loglevel
 
-    run_command(["git", "fetch", "--prune"], path=domaindir, env=git_env, logger=logger)
-    if dbdomain.tracked_branch:
-        out = run_command(["git", "rev-list", "-n", "1", "HEAD"],
-                          path=domaindir, env=git_env, logger=logger)
-        rollback_commit = out.strip()
-    try:
-        if not locked:
-            key = CompileKey(domain=dbdomain.name, logger=logger)
-            lock_queue.acquire(key)
-        run_command(["git", "reset", "--hard", "origin/%s" % dbdomain.name],
-                    path=domaindir, env=git_env, logger=logger)
-    finally:
-        if not locked:
-            lock_queue.release(key)
-    if dbdomain.tracked_branch:
-        dbdomain.rollback_commit = rollback_commit
+    @staticmethod
+    def template_king(logger, loglevel=logging.INFO):
+        """
+        Constructor for template-king
+        """
+
+        config = Config()
+        return GitRepo(config.get("broker", "kingdir"), logger=logger,
+                       loglevel=loglevel)
+
+    @staticmethod
+    def domain(domain, logger, loglevel=logging.INFO):
+        """
+        Constructor for domains
+        """
+
+        config = Config()
+        domainsdir = config.get('broker', 'domainsdir')
+        return GitRepo(os.path.join(domainsdir, domain), logger=logger,
+                       loglevel=loglevel)
+
+    def run(self, args, filterre=None, stream_level=None):
+        return run_git(args, path=self.path, logger=self.logger,
+                       loglevel=self.loglevel, filterre=filterre,
+                       stream_level=stream_level)
+
+    def ref_contains_commit(self, commit_id, ref='HEAD'):
+        """
+        Check if a given reference (by default, HEAD) contains a given commit ID
+        """
+
+        filterre = re.compile('^' + commit_id + '$')
+        try:
+            found = self.run(['rev-list', ref], filterre=filterre)
+        except ProcessException as pe:
+            if pe.code != 128:
+                raise
+            else:
+                found = None
+
+        return found
+
+    def ref_commit(self, ref='HEAD', compel=True):
+        """
+        Return the top commit of a ref, by default HEAD
+        """
+        try:
+            commit = self.run(['rev-parse', '--verify', '-q', ref + '^{commit}'])
+            return commit.strip()
+        except ProcessException as pe:
+            if pe.code == 1:
+                if compel:
+                    raise ArgumentError("Ref %s could not be translated to an "
+                                        "existing commit ID." % ref)
+                return None
+            raise
+
+    def ref_tree(self, ref='HEAD', compel=True):
+        """
+        Return the tree ID a ref (by default, HEAD) points to
+        """
+        try:
+            tree = self.run(['rev-parse', '--verify', '-q', ref + '^{tree}'])
+            return tree.strip()
+        except ProcessException as pe:
+            if pe.code == 1:
+                if compel:
+                    raise ArgumentError("Ref %s not found.", ref)
+                return None
+            raise
+
+    @contextmanager
+    def temp_clone(self, branch):
+        """
+        Create a temporary clone for working on the given branch
+
+        This function is a context manager meant to be used in a with statement.
+        The temporary clone is removed automatically.
+        """
+        config = Config()
+        # TODO: is rundir suitable for this purpose?
+        rundir = config.get("broker", "rundir")
+        tempdir = mkdtemp(prefix="git_clone_", dir=rundir)
+        try:
+            run_git(["clone", "--shared", "--branch", branch, "--",
+                     self.path, branch],
+                    path=tempdir, logger=self.logger, loglevel=self.loglevel)
+            yield GitRepo(os.path.join(tempdir, branch), logger=self.logger,
+                          loglevel=self.loglevel)
+        finally:
+            remove_dir(tempdir, logger=self.logger)
+
+    def push_origin(self, ref, force=False):
+        """
+        Push a ref to the origin remote
+        """
+        if force:
+            self.run(["push", "--force", "origin", ref])
+        else:
+            self.run(["push", "origin", ref])
 
 
 IP_NOT_DEFINED_RE = re.compile(r"Host with IP address "

@@ -16,18 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq deploy`."""
 
-import os
-import re
-from tempfile import mkdtemp
-
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch, Sandbox
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import sync_domain, sync_all_trackers
 from aquilon.worker.dbwrappers.change_management import validate_justification
-from aquilon.worker.processes import run_git, sync_domain
+from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
-from aquilon.utils import remove_dir
 
 
 class CommandDeploy(BrokerCommand):
@@ -57,12 +53,9 @@ class CommandDeploy(BrokerCommand):
                                 (dbtarget.name, dbtarget.tracked_branch.name))
 
         if sync and not dbtarget.is_sync_valid and dbtarget.trackers:
-            # FIXME: Maybe raise an ArgumentError and request that the
-            # command run with --nosync?  Maybe provide a --validate flag?
-            # For now, just auto-flip (below).
-            pass
-        if not dbtarget.is_sync_valid:
-            dbtarget.is_sync_valid = True
+            raise ArgumentError("{0} has not been validated, automatic sync "
+                                "is not allowed. Either re-ryn with --nosync "
+                                "or validate the branch.".format(dbtarget))
 
         if dbtarget.requires_change_manager and not dryrun:
             if not justification:
@@ -76,27 +69,15 @@ class CommandDeploy(BrokerCommand):
                                 .format(dbtarget))
 
         if isinstance(dbsource, Sandbox):
-            domainsdir = self.config.get('broker', 'domainsdir')
-            targetdir = os.path.join(domainsdir, dbtarget.name)
-            filterre = re.compile('^' + dbsource.base_commit + '$')
-            found = run_git(['rev-list', 'HEAD'], path=targetdir,
-                            logger=logger, filterre=filterre)
+            repo = GitRepo.domain(dbtarget.name, logger)
+            found = repo.ref_contains_commit(dbsource.base_commit)
             if not found:
                 raise ArgumentError("You're trying to deploy a sandbox to a "
                                     "domain that does not contain the commit "
                                     "where the sandbox was branched from.")
 
-        kingdir = self.config.get("broker", "kingdir")
-        rundir = self.config.get("broker", "rundir")
-
-        tempdir = mkdtemp(prefix="deploy_", suffix="_%s" % dbsource.name,
-                          dir=rundir)
-        try:
-            run_git(["clone", "--shared", "--branch", dbtarget.name, "--",
-                     kingdir, dbtarget.name],
-                    path=tempdir, logger=logger)
-            temprepo = os.path.join(tempdir, dbtarget.name)
-
+        kingrepo = GitRepo(self.config.get("broker", "kingdir"), logger)
+        with kingrepo.temp_clone(dbtarget.name) as temprepo:
             # We could try to use fmt-merge-msg but its usage is so obscure that
             # faking it is easier
             merge_msg = []
@@ -111,9 +92,9 @@ class CommandDeploy(BrokerCommand):
                 merge_msg.append("Reason: %s" % reason)
 
             try:
-                run_git(["merge", "--no-ff", "origin/%s" % dbsource.name,
-                         "-m", "\n".join(merge_msg)],
-                        path=temprepo, logger=logger, stream_level=CLIENT_INFO)
+                temprepo.run(["merge", "--no-ff", "origin/%s" % dbsource.name,
+                              "-m", "\n".join(merge_msg)],
+                             stream_level=CLIENT_INFO)
             except ProcessException as e:
                 # No need to re-print e, output should have gone to client
                 # immediately via the logger.
@@ -126,10 +107,7 @@ class CommandDeploy(BrokerCommand):
                 session.rollback()
                 return
 
-            run_git(["push", "origin", dbtarget.name],
-                    path=temprepo, logger=logger)
-        finally:
-            remove_dir(tempdir, logger=logger)
+            temprepo.push_origin(dbtarget.name)
 
         # What to do about errors here and below... rolling back
         # doesn't seem appropriate as there's something more
@@ -139,15 +117,7 @@ class CommandDeploy(BrokerCommand):
         except ProcessException as e:
             logger.warning("Error syncing domain %s: %s" % (dbtarget.name, e))
 
-        if not sync or not dbtarget.autosync:
-            return
-
-        for domain in dbtarget.trackers:
-            if not domain.autosync:
-                continue
-            try:
-                sync_domain(domain, logger=logger)
-            except ProcessException as e:
-                logger.warning("Error syncing domain %s: %s" % (domain.name, e))
+        if sync and dbtarget.autosync:
+            sync_all_trackers(dbtarget, logger)
 
         return

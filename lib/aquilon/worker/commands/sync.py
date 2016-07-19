@@ -19,7 +19,7 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
-from aquilon.worker.processes import sync_domain
+from aquilon.worker.dbwrappers.branch import sync_domain
 
 
 class CommandSync(BrokerCommand):

@@ -57,5 +57,5 @@ class CommandDelDomain(BrokerCommand):
                 merge_into_trash(self.config, logger, dbdomain.name,
                                  "\n".join(merge_msg))
 
-        remove_branch(self.config, logger, dbdomain)
+        remove_branch(logger, dbdomain)
         return

@@ -19,7 +19,6 @@
 import logging
 import os.path
 import re
-from tempfile import mkdtemp
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.session import object_session
@@ -33,7 +32,7 @@ from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
                                 User)
 from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
 
@@ -150,7 +149,7 @@ def add_branch(session, config, dbuser, cls_, branch, **arguments):
     return dbbranch
 
 
-def remove_branch(config, logger, dbbranch, dbauthor=None):
+def remove_branch(logger, dbbranch, dbauthor=None):
     session = object_session(dbbranch)
     deps = get_branch_dependencies(dbbranch)
     if deps:
@@ -164,17 +163,15 @@ def remove_branch(config, logger, dbbranch, dbauthor=None):
         for dir in domain.directories():
             remove_dir(dir, logger=logger)
 
-    kingdir = config.get("broker", "kingdir")
-    try:
-        hash = run_git(["rev-parse", "--verify", dbbranch.name],
-                       path=kingdir, logger=logger)
-        hash = hash.strip()
+    kingrepo = GitRepo.template_king(logger)
+    hash = kingrepo.ref_commit("refs/heads/" + dbbranch.name, compel=False)
+    if hash:
         logger.info("{0} head commit was: {1!s}".format(dbbranch, hash))
-        run_git(["branch", "-D", dbbranch.name],
-                path=kingdir, logger=logger)
-    except ProcessException as e:
-        logger.warning("Error removing branch %s from template-king, "
-                       "proceeding anyway: %s", dbbranch.name, e)
+        try:
+            kingrepo.run(["branch", "-D", dbbranch.name])
+        except ProcessException as e:
+            logger.warning("Error removing branch %s from template-king, "
+                           "proceeding anyway: %s", dbbranch.name, e)
 
 
 def search_branch_query(config, session, cls, owner=None, compiler_version=None,
@@ -252,42 +249,70 @@ def has_compileable_objects(dbbranch):
 
 def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
     trash_branch = config.get("broker", "trash_branch")
-    kingdir = config.get("broker", "kingdir")
-    rundir = config.get("broker", "rundir")
 
     temp_msg = []
     temp_msg.append("Empty commit to make sure there will be a merge ")
     temp_msg.append("commit even if the target branch is already merged.")
 
-    try:
-        run_git(["show-ref", "--verify", "--quiet", "refs/heads/" + branch],
-                path=kingdir, logger=logger, loglevel=loglevel)
-    except ProcessException as e:
+    kingrepo = GitRepo.template_king(logger=logger, loglevel=loglevel)
+    commit = kingrepo.ref_commit("refs/heads/" + branch, compel=False)
+    if not commit:
         logger.client_info("Branch %s does not exist in template-king." %
                            branch)
         return
 
-    tempdir = mkdtemp(prefix="trash_", suffix="_%s" % branch, dir=rundir)
-
     try:
-        run_git(["clone", "--shared", "--branch", trash_branch, "--",
-                 kingdir, trash_branch], path=tempdir, logger=logger,
-                loglevel=loglevel)
-
-        temprepo = os.path.join(tempdir, trash_branch)
-
-        # If branch is already merged into trash, then we need to force a
-        # commit that can be merged
-        hash = run_git(["commit-tree", "origin/" + branch + "^{tree}",
-                        "-p", trash_branch, "-p", "origin/" + branch,
-                        "-m", "\n".join(temp_msg)],
-                       path=temprepo, logger=logger, loglevel=loglevel)
-        hash = hash.strip()
-        run_git(["merge", "-s", "ours", hash, "-m", merge_msg],
-                path=temprepo, logger=logger, loglevel=loglevel)
-        run_git(["push", "origin", trash_branch], path=temprepo, logger=logger,
-                loglevel=loglevel)
+        with kingrepo.temp_clone(trash_branch) as temprepo:
+            # If branch is already merged into trash, then we need to force a
+            # commit that can be merged
+            hash = temprepo.run(["commit-tree", "origin/" + branch + "^{tree}",
+                                 "-p", trash_branch,
+                                 "-p", "origin/" + branch,
+                                 "-m", "\n".join(temp_msg)])
+            hash = hash.strip()
+            temprepo.run(["merge", "-s", "ours", hash, "-m", merge_msg])
+            temprepo.push_origin(trash_branch)
     except ProcessException as e:
         raise ArgumentError("\n%s%s" % (e.out, e.err))
-    finally:
-        remove_dir(tempdir, logger=logger)
+
+
+def sync_domain(dbdomain, logger):
+    """Update templates on disk to match contents of branch in template-king.
+
+    If this domain is tracking another, first update the branch in
+    template-king with the latest from the tracking branch.  Also save
+    the current (previous) commit as a potential rollback point.
+
+    """
+    kingrepo = GitRepo.template_king(logger)
+    domainrepo = GitRepo.domain(dbdomain.name, logger)
+
+    if dbdomain.tracked_branch:
+        # Might need to revisit if using this helper from rollback...
+        kingrepo.run(["push", ".",
+                      "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)])
+
+    logger.client_info("Updating the checked out copy of {0:l}..."
+                       .format(dbdomain))
+
+    domainrepo.run(["fetch", "--prune"])
+    if dbdomain.tracked_branch:
+        rollback_commit = domainrepo.ref_commit()
+
+    with CompileKey(domain=dbdomain.name, logger=logger):
+        domainrepo.run(["reset", "--hard", "origin/%s" % dbdomain.name])
+
+    if dbdomain.tracked_branch:
+        dbdomain.rollback_commit = rollback_commit
+
+
+def sync_all_trackers(dbbranch, logger):
+    for domain in dbbranch.trackers:
+        if not domain.autosync:
+            logger.warning("{0} has autosync disabled, skipping."
+                           .format(domain))
+            continue
+        try:
+            sync_domain(domain, logger=logger)
+        except ProcessException as e:
+            logger.warning("Error syncing domain %s: %s" % (domain.name, e))

@@ -24,7 +24,7 @@ from aquilon.aqdb.model import Domain, Branch
 from aquilon.utils import remove_dir
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import add_branch
-from aquilon.worker.processes import run_git
+from aquilon.worker.processes import run_git, GitRepo
 
 
 class CommandAddDomain(BrokerCommand):
@@ -72,7 +72,9 @@ class CommandAddDomain(BrokerCommand):
             cmd.append("--no-track")
         cmd.append(dbdomain.name)
         cmd.append(dbstart.name)
-        run_git(cmd, path=kingdir, logger=logger)
+
+        kingrepo = GitRepo.template_king(logger)
+        kingrepo.run(cmd)
 
         # If the branch command above fails the DB will roll back as normal.
         # If the command below fails we need to clean up from itself and above.
@@ -83,8 +85,7 @@ class CommandAddDomain(BrokerCommand):
         except ProcessException as e:  # pragma: no cover
             try:
                 remove_dir(clonedir, logger=logger)
-                run_git(["branch", "-D", dbdomain.name],
-                        path=kingdir, logger=logger)
+                kingrepo.run(["branch", "-D", dbdomain.name])
             except ProcessException as e2:
                 logger.info("Exception while cleaning up: %s", e2)
             raise e
