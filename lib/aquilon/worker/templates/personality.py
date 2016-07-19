@@ -178,6 +178,13 @@ class PlenaryPersonalityBase(Plenary):
         path = PlenaryPersonalityPostFeature.template_name(self.dbobj)
         pan_include_if_exists(lines, path)
 
+    def get_key(self, exclusive=True):
+        if inspect(self.dbobj).deleted:
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
+
 
 class PlenaryPersonalityPreFeature(Plenary):
     prefix = "personality"

@@ -49,7 +49,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "ut3gd1r01.aqd-unittest.ms.com", "--format", "csv"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com,%s,bor,"
-                         "ut3,ut,hp,uttorswitch,SNgd1r01,," % ip, command)
+                         "ut3,ut,hp,uttorswitch,SNgd1r01,xge49," % ip, command)
 
     def test_105_add_ut3gd1r04(self):
         ip = self.net["verari_eth1"].usable[0]

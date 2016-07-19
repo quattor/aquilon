@@ -60,26 +60,19 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
         return "\n".join(details)
 
     def csv_fields(self, device):
-        interfaces = [iface for iface in device.interfaces
-                      if iface.mac]
-        if not interfaces:
-            interfaces.append(None)
-
-        for interface in interfaces:
-            details = [device.fqdn,
-                       device.primary_ip,
-                       device.switch_type,
-                       device.location.rack.name if device.location.rack else None,
-                       device.location.building.name,
-                       device.model.vendor.name,
-                       device.model.name,
-                       device.serial_no]
-            if interface:
-                details.extend([interface.name, interface.mac])
-            else:
-                details.extend([None, None])
-
-            yield details
+        base_details = [device.fqdn,
+                        device.primary_ip,
+                        device.switch_type,
+                        device.location.rack.name if device.location.rack else None,
+                        device.location.building.name,
+                        device.model.vendor.name,
+                        device.model.name,
+                        device.serial_no]
+        if not device.interfaces:
+            yield base_details + [None, None]
+        else:
+            for interface in device.interfaces:
+                yield base_details + [interface.name, interface.mac]
 
     def fill_proto(self, device, skeleton, embedded=True,
                    indirect_attrs=True):

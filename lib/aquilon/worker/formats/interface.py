@@ -77,7 +77,7 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  Parent Interface: %s, VLAN ID: %s" %
                            (interface.parent.name, interface.vlan_id))
 
-        if interface.master:
+        if interface.master_id is not None:
             details.append(indent + "  Master Interface: %s" %
                            interface.master.name)
 

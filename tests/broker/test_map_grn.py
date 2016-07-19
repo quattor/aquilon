@@ -74,6 +74,17 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(personality.eonid_maps[2].target, 'esp')
         self.assertEqual(personality.eonid_maps[2].eonid, 3)
 
+    def test_115_verify_diff(self):
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "compileserver", "--other", "inventory"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Differences for Grns:\s*'
+                          r'missing Grns in Personality aquilon/inventory:\s*'
+                          r'atarget: grn:/example/cards\s*'
+                          r'esp: grn:/ms/ei/aquilon/aqd\s*',
+                          command)
+
     def test_120_verify_host(self):
         command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)

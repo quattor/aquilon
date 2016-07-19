@@ -44,7 +44,7 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         ip = self.net["tor_net_12"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r01.aqd-unittest.ms.com,%s,bor,ut3,ut,"
-                         "hp,uttorswitch,SNgd1r01,," % ip,
+                         "hp,uttorswitch,SNgd1r01,xge49," % ip,
                          command)
 
     def testbuilding(self):
@@ -111,7 +111,7 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         ip = self.net["ut_net_mgmt"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r05.aqd-unittest.ms.com,%s,tor,ut4,ut,"
-                         "hp,uttorswitch,SNgd1r05_new,," % ip,
+                         "hp,uttorswitch,SNgd1r05_new,xge49," % ip,
                          command)
 
     def testsearchswitchall(self):
@@ -157,7 +157,7 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         ip = self.net["tor_net_12"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r01.aqd-unittest.ms.com,%s,bor,ut3,ut,"
-                         "hp,uttorswitch,SNgd1r01,," % ip,
+                         "hp,uttorswitch,SNgd1r01,xge49," % ip,
                          command)
 
     def testsearchswitchip(self):

@@ -70,13 +70,38 @@ class TestShowNetworkDevice(TestBrokerCommand):
 
     def testshowswitchallcsv(self):
         command = ["show_network_device", "--all", "--format=csv"]
-        self.commandtest(command)
+        out = self.commandtest(command)
+        ip = self.net["tor_net_12"].usable[0]
+        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com,%s,bor,"
+                         "ut3,ut,hp,uttorswitch,SNgd1r01,xge49," % ip,
+                         command)
+
+        ip = self.net["verari_eth1"].usable[1]
+        self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com,%s,bor,"
+                         "ut3,ut,hp,uttorswitch,,loop0," % ip,
+                         command)
+
+        ip = self.net["np06bals03_v103"][5]
+        self.matchoutput(out, "np06bals03.ms.com,%s,tor,"
+                         "np7,np,bnt,rs g8000,,gigabitethernet0/1,00:18:b1:89:86:00" % ip,
+                         command)
 
     def testshowswitchswitchcsv(self):
         command = ["show_network_device", "--network_device=ut3gd1r04.aqd-unittest.ms.com",
                    "--format=csv"]
-        self.commandtest(command)
+        out = self.commandtest(command)
 
+        oldip = self.net["verari_eth1"].usable[0]
+        newip = self.net["verari_eth1"].usable[1]
+        self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com,%s,bor,"
+                         "ut3,ut,hp,uttorswitch,,loop0," % newip,
+                         command)
+        self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com,%s,bor,"
+                         "ut3,ut,hp,uttorswitch,,vlan110," % newip,
+                         command)
+        self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com,%s,bor,"
+                         "ut3,ut,hp,uttorswitch,,xge49,%s" % (newip, oldip.mac),
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowNetworkDevice)
