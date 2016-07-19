@@ -17,12 +17,12 @@
 """Contains the logic for `aq search network`."""
 
 from sqlalchemy.sql import exists
-from sqlalchemy.orm import undefer, joinedload, subqueryload
+from sqlalchemy.orm import undefer, joinedload, subqueryload, aliased
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup, Cluster,
-                                ARecord, DynamicStub, NetworkEnvironment,
-                                NetworkCompartment)
+                                VirtualSwitch, ARecord, DynamicStub,
+                                NetworkEnvironment, NetworkCompartment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
@@ -35,8 +35,9 @@ class CommandSearchNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, network_environment, ip, type, side,
-               machine, fqdn, cluster, pg, has_dynamic_ranges, exact_location,
-               fullinfo, style, network_compartment, **arguments):
+               machine, fqdn, cluster, virtual_switch, pg, has_dynamic_ranges,
+               exact_location, fullinfo, style, network_compartment,
+               **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -100,19 +101,24 @@ class CommandSearchNetwork(BrokerCommand):
                            dbcluster.hosts if getattr(h.hardware_entity.primary_name,
                                                       "network")]
                 q = q.filter(Network.id.in_(net_ids))
-        if pg:
-            q = q.join(Network.port_group, aliased=True)
-            dbvi = VlanInfo.get_by_pg(session, pg, compel=False)
+        if pg or virtual_switch:
+            PGAlias = aliased(PortGroup)
+            q = q.join(PGAlias, Network.port_group)
+            if pg:
+                dbvi = VlanInfo.get_by_pg(session, pg, compel=False)
 
-            if dbvi:
-                q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
-            else:
-                usage, network_tag = PortGroup.parse_name(pg)
-                if network_tag is not None:
-                    q = q.filter_by(network_tag=network_tag, usage=usage)
+                if dbvi:
+                    q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
                 else:
-                    q = q.filter_by(usage=pg)
-
+                    usage, network_tag = PortGroup.parse_name(pg)
+                    if network_tag is not None:
+                        q = q.filter_by(network_tag=network_tag, usage=usage)
+                    else:
+                        q = q.filter_by(usage=pg)
+            if virtual_switch:
+                dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
+                                                     compel=True)
+                q = q.filter(PGAlias.virtual_switches.contains(dbvswitch))
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:

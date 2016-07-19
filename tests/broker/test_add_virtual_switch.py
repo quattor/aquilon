@@ -98,6 +98,21 @@ class TestAddVirtualSwitch(TestBrokerCommand):
                           (net.netmask, net.ip, net.nettype),
                           command)
 
+    def test_115_search_network_vswitch(self):
+        net1 = self.net["autopg1"]
+        net2 = self.net["vmotion_net"]
+        command = ["search_network", "--virtual_switch", "utvswitch"]
+        out = self.commandtest(command)
+        self.output_equals(out,
+                           "\n".join(str(n) for n in sorted([net1, net2])),
+                           command)
+
+    def test_115_search_network_vswitch_pg(self):
+        net1 = self.net["autopg1"]
+        command = ["search_network", "--virtual_switch", "utvswitch", "--pg", "user"]
+        out = self.commandtest(command)
+        self.output_equals(out, str(net1), command)
+
     def test_120_add_utvswitch2(self):
         self.noouttest(["add_virtual_switch", "--virtual_switc", "utvswitch2",
                         "--comments", "Some virtual switch comments"])
