@@ -130,7 +130,8 @@ class ServiceInstance(Base):
         session = object_session(self)
         q = session.query(Cluster.name)
         q = q.filter(Cluster.services_used.contains(self))
-        return [name for record in q for name in record]
+        q = q.order_by(Cluster.name)
+        return [record.name for record in q]
 
     @property
     def enforced_max_clients(self):
