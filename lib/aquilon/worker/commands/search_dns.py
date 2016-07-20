@@ -16,9 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq search dns `."""
 
-from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
-                                AddressAlias, DnsDomain, DnsEnvironment,
-                                Network, NetworkEnvironment, AddressAssignment,
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import (DnsRecord, ARecord, DynamicStub, Alias,
+                                SrvRecord, Fqdn, AddressAlias, ReservedName,
+                                DnsDomain, DnsEnvironment, Network,
+                                NetworkEnvironment, AddressAssignment,
                                 ServiceAddress)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
@@ -32,6 +34,28 @@ DNS_RRTYPE_MAP = {'a': ARecord,
                   'cname': Alias,
                   'srv': SrvRecord}
 
+# Constants for figuring out which parameters are valid for which record types
+_target_set = frozenset([Alias, SrvRecord, AddressAlias])
+_ip_set = frozenset([ARecord, DynamicStub])
+_primary_name_set = frozenset([ARecord, ReservedName])
+
+
+def update_classes(current_set, allowed_set):
+    """
+    Small helper for filtering options.
+
+    For the first option, we want the set of possible classes initialized; for
+    any further options, we want the existing set to be restricted. If the set
+    becomes empty, then we have conflicting options.
+    """
+    if not current_set:
+        current_set |= allowed_set
+    else:
+        current_set &= allowed_set
+
+    if not current_set:
+        raise ArgumentError("Conflicting search criteria has been specified.")
+
 
 class CommandSearchDns(BrokerCommand):
 
@@ -41,6 +65,21 @@ class CommandSearchDns(BrokerCommand):
                record_type, ip, network, network_environment, target,
                target_domain, target_environment, primary_name, used,
                reverse_override, reverse_ptr, fullinfo, style, **_):
+
+        # Figure out if we can restrict the types of DNS records based on the
+        # options
+        subclasses = set()
+        if ip or network or network_environment or used is not None or \
+           reverse_override is not None or reverse_ptr:
+            update_classes(subclasses, _ip_set)
+        if primary_name is not None:
+            update_classes(subclasses, _primary_name_set)
+        if target or target_domain or target_environment:
+            update_classes(subclasses, _target_set)
+
+        # Figure out the base class of the query. If the options already
+        # restrict the choice to a single subclass of DnsRecord, then we want to
+        # query on that, to force an inner join to be used.
         if record_type:
             record_type = record_type.strip().lower()
             if record_type in DNS_RRTYPE_MAP:
@@ -48,10 +87,20 @@ class CommandSearchDns(BrokerCommand):
             else:
                 cls = DnsRecord.polymorphic_subclass(record_type,
                                                      "Unknown DNS record type")
+            if subclasses and cls not in subclasses:
+                raise ArgumentError("Conflicting search criteria has been specified.")
             q = session.query(cls)
         else:
-            q = session.query(DnsRecord)
-            q = q.with_polymorphic('*')
+            if len(subclasses) == 1:
+                cls = subclasses.pop()
+                q = session.query(cls)
+            else:
+                cls = DnsRecord
+                q = session.query(cls)
+                if subclasses:
+                    q = q.with_polymorphic(subclasses)
+                else:
+                    q = q.with_polymorphic('*')
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -100,16 +149,23 @@ class CommandSearchDns(BrokerCommand):
 
             dbtarget = Fqdn.get_unique(session, fqdn=target,
                                        dns_environment=dbtgt_env, compel=True)
-            q = q.filter(or_(Alias.target == dbtarget,
-                             SrvRecord.target == dbtarget,
-                             AddressAlias.target == dbtarget))
+            if cls != DnsRecord:
+                q = q.filter(cls.target == dbtarget)
+            else:
+                q = q.filter(or_(Alias.target == dbtarget,
+                                 SrvRecord.target == dbtarget,
+                                 AddressAlias.target == dbtarget))
         if target_domain:
             dbdns_domain = DnsDomain.get_unique(session, target_domain,
                                                 compel=True)
             TargetFqdn = aliased(Fqdn)
-            q = q.join((TargetFqdn, or_(Alias.target_id == TargetFqdn.id,
-                                        SrvRecord.target_id == TargetFqdn.id,
-                                        AddressAlias.target_id == TargetFqdn.id)))
+
+            if cls != DnsRecord:
+                q = q.join(TargetFqdn, cls.target)
+            else:
+                q = q.join((TargetFqdn, or_(Alias.target_id == TargetFqdn.id,
+                                            SrvRecord.target_id == TargetFqdn.id,
+                                            AddressAlias.target_id == TargetFqdn.id)))
             q = q.filter(TargetFqdn.dns_domain == dbdns_domain)
         if primary_name is not None:
             if primary_name:
