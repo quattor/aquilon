@@ -25,11 +25,12 @@ from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
                             deferred, aliased, object_session)
 from sqlalchemy.sql import select, func, or_, null
 
-from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
-                                HardwareEntity, Fqdn)
+from aquilon.aqdb.model import (Base, Service, Host, Cluster, MetaCluster,
+                                DnsRecord, DnsDomain, HardwareEntity, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'service_instance'
+_CSB = 'cluster_service_binding'
 
 
 class ServiceInstance(Base):
@@ -70,8 +71,6 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import Cluster, MetaCluster
-
         # Check if the service instance is used by any cluster-bound personality
         persst_ids = self.service.cluster_aligned_personalities
         if not persst_ids:
@@ -126,7 +125,6 @@ class ServiceInstance(Base):
     @property
     def cluster_names(self):
         """Returns all clusters involved, including metaclusters."""
-        from aquilon.aqdb.model import Cluster
         session = object_session(self)
         q = session.query(Cluster.name)
         q = q.filter(Cluster.services_used.contains(self))
@@ -162,3 +160,24 @@ ServiceInstance._client_count = column_property(
     select([func.count()],
            __BuildItem.service_instance_id == ServiceInstance.id)
     .label("_client_count"), deferred=True)
+
+
+class __ClusterServiceBinding(Base):
+    """
+        Makes bindings of service instances to clusters
+    """
+    __tablename__ = _CSB
+    _class_label = 'Cluster Service Binding'
+
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
+                        nullable=False)
+
+    service_instance_id = Column(ForeignKey(ServiceInstance.id),
+                                 nullable=False, index=True)
+
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)
+
+Cluster.services_used = relation(ServiceInstance,
+                                 secondary=__ClusterServiceBinding.__table__,
+                                 passive_deletes=True,
+                                 backref=backref("cluster_clients"))

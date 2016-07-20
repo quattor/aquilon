@@ -67,12 +67,12 @@ from aquilon.aqdb.model.location import LocationLink
 from aquilon.aqdb.model.service import (__ServiceListItem,
                                         PersonalityServiceListItem,
                                         __OSServiceListItem)
-from aquilon.aqdb.model.service_instance import __BuildItem
+from aquilon.aqdb.model.service_instance import (__BuildItem,
+                                                 __ClusterServiceBinding)
 from aquilon.aqdb.model.service_address import __ServiceAddressInterface
 from aquilon.aqdb.model.personality import (__PersonalityRootUser,
                                             __PersonalityRootNetGroup)
-from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
-                                        HostClusterMember,
+from aquilon.aqdb.model.cluster import (HostClusterMember,
                                         __ClusterAllowedPersonality)
 from aquilon.aqdb.model.cluster_group import __ClusterGroupMember
 from aquilon.aqdb.model.metacluster import __MetaClusterMember

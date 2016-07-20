@@ -28,14 +28,13 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Location, Personality,
-                                ClusterLifecycle, ServiceInstance,
-                                NetworkDevice, CompileableMixin)
+                                ClusterLifecycle, NetworkDevice,
+                                CompileableMixin)
 
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
 _ETN = 'esx_cluster'
 _HCM = 'host_cluster_member'
-_CSB = 'cluster_service_binding'
 _CAP = 'clstr_allow_per'
 
 
@@ -347,24 +346,3 @@ class __ClusterAllowedPersonality(Base):
 Cluster.allowed_personalities = relation(Personality,
                                          secondary=__ClusterAllowedPersonality.__table__,
                                          passive_deletes=True)
-
-
-class __ClusterServiceBinding(Base):
-    """
-        Makes bindings of service instances to clusters
-    """
-    __tablename__ = _CSB
-    _class_label = 'Cluster Service Binding'
-
-    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
-                        nullable=False)
-
-    service_instance_id = Column(ForeignKey(ServiceInstance.id),
-                                 nullable=False, index=True)
-
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)
-
-Cluster.services_used = relation(ServiceInstance,
-                                 secondary=__ClusterServiceBinding.__table__,
-                                 passive_deletes=True,
-                                 backref=backref("cluster_clients"))
