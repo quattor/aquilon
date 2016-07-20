@@ -16,6 +16,7 @@
 # limitations under the License.
 """ The majority of the things we're interested in for now are hosts. """
 
+from collections import defaultdict
 from datetime import datetime
 
 from sqlalchemy import (Boolean, DateTime, String, Column, ForeignKey,
@@ -26,7 +27,6 @@ from aquilon.aqdb.model import (Base, HardwareEntity, HostLifecycle, Grn,
                                 OperatingSystem, CompileableMixin)
 
 from aquilon.aqdb.column_types import AqStr
-from collections import defaultdict
 
 _TN = 'host'
 _HOSTGRN = 'host_grn_map'

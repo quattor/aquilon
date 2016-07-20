@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing constraints in commands involving clusters."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -33,9 +34,8 @@ class TestClusterConstraints(TestBrokerCommand):
                          "machines", command)
 
     def test_101_del_esx_cluster_with_machines(self):
-        command = "del esx cluster --cluster utecl1"
+        command = "del cluster --cluster utecl1"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Command del_esx_cluster is deprecated.", command)
         self.matchoutput(out, "ESX Cluster utecl1 is still in use by virtual "
                          "machines", command)
 

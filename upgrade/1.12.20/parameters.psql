@@ -15,7 +15,7 @@ DECLARE
 			JOIN personality ON personality.archetype_id = param_def_holder.archetype_id
 			JOIN personality_stage ON personality_stage.personality_id = personality.id
 			LEFT OUTER JOIN parameter ON parameter.personality_stage_id = personality_stage.id
-		WHERE param_def_holder."TYPE" = 'archetype'
+		WHERE param_def_holder.type = 'archetype'
 		UNION ALL
 		SELECT param_def_holder.id AS defholder_id,
 			personality_stage.id AS personality_stage_id,
@@ -24,7 +24,7 @@ DECLARE
 			JOIN feature_link ON feature_link.feature_id = param_def_holder.feature_id
 			JOIN personality_stage ON personality_stage.id = feature_link.personality_stage_id
 			LEFT OUTER JOIN parameter ON parameter.personality_stage_id = personality_stage.id
-		WHERE param_def_holder."TYPE" = 'feature';
+		WHERE param_def_holder.type = 'feature';
 	param_rec RECORD;
 	cnt INTEGER;
 BEGIN

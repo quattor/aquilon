@@ -21,10 +21,11 @@ import os
 import sys
 import unittest
 from subprocess import Popen, PIPE
-from lxml import etree
 import re
 from difflib import unified_diff
 from textwrap import dedent
+
+from lxml import etree
 
 from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611

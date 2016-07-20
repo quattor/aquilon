@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the search host command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -625,6 +626,37 @@ class TestSearchHost(TestBrokerCommand):
         self.output_equals(out, """
             unittest25.aqd-unittest.ms.com
             """, command)
+
+    def testdomainmismatch(self):
+        ip = self.net["unknown0"].usable[34]
+        self.dsdb_expect_add("mismatch.one-nyp.ms.com", ip,
+                             "eth0_mismatch",
+                             primary="infra1.aqd-unittest.ms.com")
+        self.noouttest(["add_interface_address",
+                        "--machine", "infra1.aqd-unittest.ms.com",
+                        "--interface", "eth0", "--label", "mismatch",
+                        "--fqdn", "mismatch.one-nyp.ms.com", "--ip", ip])
+
+        command = ["search_host", "--hostname", "infra1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.output_equals(out, "infra1.aqd-unittest.ms.com", command)
+
+        command = ["search_host", "--hostname", "infra1.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.output_equals(out, "infra1.one-nyp.ms.com", command)
+
+        command = ["search_host", "--short", "infra1"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            infra1.aqd-unittest.ms.com
+            infra1.one-nyp.ms.com
+            """, command)
+
+        self.dsdb_expect_delete(ip)
+        self.noouttest(["del_interface_address",
+                        "--machine", "infra1.aqd-unittest.ms.com",
+                        "--interface", "eth0", "--label", "mismatch"])
+        self.dsdb_verify()
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)

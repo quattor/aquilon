@@ -23,6 +23,7 @@ templates) in the database.
 
 from __future__ import print_function
 
+import argparse
 import logging
 from shlex import shlex
 from inspect import isclass
@@ -30,10 +31,9 @@ from inspect import isclass
 import utils
 utils.load_classpath()
 
-import argparse
+from sqlalchemy.exc import IntegrityError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from sqlalchemy.exc import IntegrityError
 import aquilon.aqdb.model
 from aquilon.aqdb.db_factory import DbFactory
 

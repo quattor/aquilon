@@ -27,13 +27,14 @@ import logging
 import os
 import re
 import signal
-from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 import time
 from itertools import islice
 from tempfile import mkstemp
 from uuid import UUID
 
 from ipaddr import IPv4Address, AddressValueError
+
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.config import Config

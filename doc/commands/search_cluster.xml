@@ -62,7 +62,6 @@
 		<arg><option>--service <replaceable>SERVICE</replaceable></option></arg>
 		<arg><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
 		<arg><option>--share <replaceable>SHARE</replaceable></option></arg>
-		<arg><option>--esx_share <replaceable>SHARE</replaceable></option></arg>
 		<arg><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
 	    </group>
 	    <group>
@@ -307,12 +306,10 @@
 	    <varlistentry>
 		<term>
 		    <option>--share <replaceable>SHARE</replaceable></option>,
-		    <option>--esx_share <replaceable>SHARE</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			The name of a network share linked to the cluster. The <option>--esx_share</option> variant
-			is deprecated.
+			The name of a network share linked to the cluster.
 		    </para>
 		</listitem>
 	    </varlistentry>

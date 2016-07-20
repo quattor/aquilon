@@ -17,6 +17,7 @@
 # limitations under the License.
 """Give anyone with write access to the database the aqd_admin role."""
 
+import argparse
 import logging
 import re
 import sys
@@ -27,8 +28,6 @@ log = logging.getLogger('aqdb.add_admin')
 
 import utils
 utils.load_classpath()
-
-import argparse
 
 from aquilon.config import Config
 from aquilon.aqdb.model import Base, UserPrincipal, Role, Realm

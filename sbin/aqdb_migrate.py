@@ -30,6 +30,7 @@
 
 from __future__ import print_function
 
+import argparse
 import os
 import signal
 import sys
@@ -43,8 +44,6 @@ if LIBDIR not in sys.path:
 # -- end path_setup --
 
 from aquilon.aqdb import depends  # pylint: disable=W0611
-
-import argparse
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, configure_mappers

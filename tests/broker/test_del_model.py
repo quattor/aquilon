@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the del model command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -78,6 +79,34 @@ class TestDelModel(TestBrokerCommand):
     def test_165_del_unusedcpu(self):
         self.noouttest(["del_model", "--vendor", "utvendor",
                         "--model", "unusedcpu"])
+
+    def test_170_del_utcpu(self):
+        command = "del model --model utcpu --vendor intel"
+        self.noouttest(command.split(" "))
+
+    def test_175_verify_utcpu(self):
+        command = "show cpu --cpu utcpu --vendor intel"
+        self.notfoundtest(command.split(" "))
+
+    def test_180_del_utcpu_1500(self):
+        command = "del model --model utcpu_1500 --vendor intel"
+        self.noouttest(command.split(" "))
+
+    def test_185_del_unused(self):
+        self.noouttest(["del_model", "--model", "unused", "--vendor", "utvendor"])
+
+    def test_200_del_unknwon_model(self):
+        command = ["del_model", "--model", "no-such-cpu", "--vendor", "utvendor"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Model no-such-cpu, vendor utvendor not found.",
+                         command)
+
+    def test_200_del_unknown_vendor(self):
+        command = ["del_model", "--model", "no-such-cpu",
+                   "--vendor", "no-such-vendor"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Vendor no-such-vendor not found.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)

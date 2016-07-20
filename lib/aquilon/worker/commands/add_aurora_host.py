@@ -16,20 +16,20 @@
 # limitations under the License.
 """Contains a wrapper for `aq add aurora host`."""
 
-
 import re
+from socket import gaierror, gethostbyname
+
+from ipaddr import IPv4Address
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_host import CommandAddHost
-from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
                                 Machine, DnsDomain, ReservedName, Fqdn)
 from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from socket import gaierror, gethostbyname
-from ipaddr import IPv4Address
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_host import CommandAddHost
+from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.machine import create_machine
 
 
 class CommandAddAuroraHost(CommandAddHost):

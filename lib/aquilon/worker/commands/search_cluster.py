@@ -44,14 +44,9 @@ class CommandSearchCluster(BrokerCommand):
                down_hosts_threshold, down_maint_threshold, max_members,
                member_archetype, member_hostname, member_personality,
                cluster, esx_guest, instance,
-               metacluster, esx_metacluster, service, share, esx_share,
+               metacluster, esx_metacluster, service, share,
                esx_switch, esx_virtual_machine,
                fullinfo, style, **arguments):
-
-        if esx_share:
-            self.deprecated_option("esx_share", "Please use --share instead.",
-                                   logger=logger, **arguments)
-            share = esx_share
 
         if esx_metacluster:
             self.deprecated_option("esx_metacluster", "Please use "

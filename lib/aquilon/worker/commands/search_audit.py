@@ -19,7 +19,7 @@
 from dateutil.parser import parse
 from dateutil.tz import tzutc
 
-from sqlalchemy.sql.expression import asc, desc, or_, exists
+from sqlalchemy.sql.expression import asc, desc, exists
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Xtn, XtnDetail, XtnEnd

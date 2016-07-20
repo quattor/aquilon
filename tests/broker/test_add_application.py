@@ -17,22 +17,22 @@
 # limitations under the License.
 """Module for testing the add application command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
 class TestAddApplication(TestBrokerCommand):
 
     def test_00_basic_application(self):
-        command = ["add_application", "--application=app1", "--eonid=2",
+        command = ["add_application", "--application=app1", "--eon_id=2",
                    "--host=server1.aqd-unittest.ms.com",
                    "--comments=Some application comments"]
         out = self.statustest(command)
-        self.matchoutput(out, "The --eonid option is deprecated", command)
 
         command = ["show_application", "--application=app1",
                    "--host=server1.aqd-unittest.ms.com"]
@@ -56,7 +56,7 @@ class TestAddApplication(TestBrokerCommand):
 
     def test_16_badeonid(self):
         command = ["add_application", "--application", "app2",
-                   "--eonid", 987654321,
+                   "--eon_id", 987654321,
                    "--host", "server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "EON ID 987654321 not found.", command)

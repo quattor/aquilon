@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import os
 import sys
 import logging
@@ -33,7 +34,6 @@ if LIBDIR not in sys.path:
 
 import aquilon.aqdb.depends  # pylint: disable=W0611
 
-import argparse
 from ipaddr import IPv4Address, IPv4Network  # pylint: disable=W0611
 from IPython.config.loader import Config as IPyConfig
 from IPython import embed

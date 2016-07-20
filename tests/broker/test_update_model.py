@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the update model command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -245,6 +246,28 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["update", "machine", "--machine", "evm1", "--model",
                    "utmedium"]
         self.noouttest(command)
+
+    def test_400_clear_cpu_comments(self):
+        command = ["update_model", "--model", "utcpu", "--vendor", "intel",
+                   "--comments", ""]
+        self.statustest(command)
+
+    def test_405_verify_cpu_comments(self):
+        command = "show model --model utcpu --vendor intel"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Comments", command)
+
+    def test_410_update_cpu(self):
+        command = ["update_model", "--model", "utcpu", "--vendor", "intel",
+                   "--comments", "New CPU comments"]
+        self.statustest(command)
+
+    def test_415_verify_cpu_update(self):
+        command = "show model --model utcpu --vendor intel"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: intel Model: utcpu", command)
+        self.matchoutput(out, "Model Type: cpu", command)
+        self.matchoutput(out, "Comments: New CPU comments", command)
 
     def test_700_failnospecs(self):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",

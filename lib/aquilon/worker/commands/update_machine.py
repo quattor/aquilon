@@ -236,13 +236,9 @@ class CommandUpdateMachine(BrokerCommand):
                 del dbmachine.chassis_slot[:]
             dbmachine.location = dblocation
 
-        if model or vendor:
+        if model:
             # If overriding model, should probably overwrite default
             # machine specs as well.
-            if not model:
-                model = dbmachine.model.name
-            if not vendor:
-                vendor = dbmachine.model.vendor.name
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
             if not dbmodel.model_type.isMachineType():

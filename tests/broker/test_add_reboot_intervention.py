@@ -17,12 +17,12 @@
 # limitations under the License.
 """Module for testing the add reboot_intervention command."""
 
+from datetime import datetime, timedelta
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
-
-import unittest
-from datetime import datetime, timedelta
 
 from brokertest import TestBrokerCommand
 

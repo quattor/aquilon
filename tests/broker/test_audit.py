@@ -21,11 +21,12 @@ import re
 from time import time
 from datetime import datetime, timedelta
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from dateutil.parser import parse
 from dateutil.tz import tzutc
 from six.moves import range  # pylint: disable=F0401

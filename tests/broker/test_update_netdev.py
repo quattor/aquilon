@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the update network device command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from netdevtest import VerifyNetworkDeviceMixin
 
@@ -116,14 +117,6 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "IP address %s is already in use by physical "
                          "interface xge49 of switch "
                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
-                         command)
-
-    def test_200_fail_no_model(self):
-        command = ["update", "network_device", "--vendor", "generic",
-                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Model uttorswitch, vendor generic not found.",
                          command)
 
 if __name__ == '__main__':

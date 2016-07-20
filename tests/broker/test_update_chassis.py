@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the update chassis command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from chassistest import VerifyChassisMixin
 
@@ -72,16 +73,6 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                          "Switch ut3gd1r01.aqd-unittest.ms.com exists, but "
                          "is not a chassis.",
                          command)
-
-    def test_200_no_model(self):
-        command = ["update", "chassis", "--vendor", "generic",
-                   "--chassis", "ut3c1.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Model utchassis, vendor generic, "
-                         "model_type chassis not found.",
-                         command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateChassis)

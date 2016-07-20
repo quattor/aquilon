@@ -69,10 +69,7 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
-	    <group choice="req">
-		<arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
-		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
-	    </group>
+	    <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
@@ -243,7 +240,6 @@
 	    <title>Looking at network device plenaries</title>
 	    <varlistentry>
 		<term>
-		    <option>--switch <replaceable>SWITCH</replaceable></option>,
 		    <option>--network_device <replaceable>NETDEV</replaceable></option>
 		</term>
 		<listitem>

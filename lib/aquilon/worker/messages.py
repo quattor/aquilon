@@ -19,8 +19,9 @@
 from threading import Lock
 from collections import deque
 from logging import DEBUG
-from six import iteritems
 import uuid
+
+from six import iteritems
 
 from twisted.internet import reactor
 

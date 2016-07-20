@@ -18,11 +18,12 @@
 """Module for testing the search cluster command
 (former search esx cluster queries)."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 

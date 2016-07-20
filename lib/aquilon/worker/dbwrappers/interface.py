@@ -20,9 +20,10 @@ To an extent, this has become a dumping ground for any common ip methods.
 
 """
 
-from ipaddr import IPv4Address
 from operator import attrgetter
 import re
+
+from ipaddr import IPv4Address
 
 from sqlalchemy.orm import aliased, object_session
 from sqlalchemy.sql.expression import desc, type_coerce

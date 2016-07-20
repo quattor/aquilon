@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for tests that bypass the aq client."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -25,7 +27,6 @@ from six.moves.urllib_parse import urlencode, quote  # pylint: disable=F0401
 from six.moves.urllib_request import urlopen  # pylint: disable=F0401
 from six.moves.urllib_error import HTTPError  # pylint: disable=F0401
 
-import unittest
 from brokertest import TestBrokerCommand
 
 

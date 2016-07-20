@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the add host command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 # TODO: this file should be merged into test_add_host.py

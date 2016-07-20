@@ -145,10 +145,15 @@ class CommandSearchHost(BrokerCommand):
                                  and_(ARecAlias.ip == AAlias.ip,
                                       ARecAlias.network_id == AAlias.network_id)),
                                 (ARecFqdn, ARecAlias.fqdn_id == ARecFqdn.id))
-                if shortname:
+                if shortname and dbdns_domain:
+                    q = q.filter(or_(and_(ARecFqdn.name == shortname,
+                                          ARecFqdn.dns_domain == dbdns_domain),
+                                     and_(PriFqdn.name == shortname,
+                                          PriFqdn.dns_domain == dbdns_domain)))
+                elif shortname:
                     q = q.filter(or_(ARecFqdn.name == shortname,
                                      PriFqdn.name == shortname))
-                if dbdns_domain:
+                elif dbdns_domain:
                     q = q.filter(or_(ARecFqdn.dns_domain == dbdns_domain,
                                      PriFqdn.dns_domain == dbdns_domain))
             q = q.reset_joinpoint()

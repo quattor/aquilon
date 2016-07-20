@@ -19,11 +19,12 @@
 
 import re
 
+import unittest
+
 if __name__ == "__main__":
     import broker.utils
     broker.utils.import_depends()
 
-import unittest
 from broker.brokertest import TestBrokerCommand
 
 

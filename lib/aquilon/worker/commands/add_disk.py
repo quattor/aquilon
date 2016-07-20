@@ -29,7 +29,7 @@ class CommandAddDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, wwn, bus_address, iops_limit, **kw):
+               snapshot, wwn, bus_address, iops_limit, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         add_disk(dbmachine, disk, controller, share, filesystem, resourcegroup,

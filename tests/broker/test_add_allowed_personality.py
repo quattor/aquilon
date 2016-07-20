@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the add allowed_personality commands."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from personalitytest import PersonalityTestMixin
 

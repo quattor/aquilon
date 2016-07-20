@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the add vlan command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from test_add_vlan import default_vlans
 

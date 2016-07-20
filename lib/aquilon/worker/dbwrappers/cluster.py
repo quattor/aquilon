@@ -48,6 +48,11 @@ def parse_cluster_arguments(session, config, archetype, personality,
        config.has_option(section, "default_domain"):
         domain = config.get(section, "default_domain")
 
+    if not domain and not sandbox:  # pragma: no cover
+        raise ArgumentError("There is no default domain configured for "
+                            "{0:l}, please specify --domain or --sandbox."
+                            .format(dbarchetype))
+
     dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                sandbox=sandbox, compel=True)
 

@@ -16,6 +16,7 @@
 # limitations under the License.
 """Wrappers to make getting and using hardware entities simpler."""
 
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import aliased, contains_eager, joinedload
 from sqlalchemy.sql import and_, or_
 
@@ -262,3 +263,22 @@ def check_only_primary_ip(dbhw_ent):
         raise ArgumentError("{0} still provides the following addresses, "
                             "delete them first: {1}.".format
                             (dbhw_ent, ", ".join(sorted(addrs))))
+
+
+def get_hardware(session, compel=True, **kwargs):
+    mapper = inspect(HardwareEntity)
+
+    dbhw_ent = None
+    for hw_type, submapper in mapper.polymorphic_map.items():
+        if hw_type not in kwargs or not kwargs[hw_type]:
+            continue
+
+        if dbhw_ent:
+            raise ArgumentError("Multiple devices are specified.")
+        dbhw_ent = submapper.class_.get_unique(session, kwargs[hw_type],
+                                               compel=True)
+
+    if not dbhw_ent and compel:
+        raise ArgumentError("Please specify a device.")
+
+    return dbhw_ent

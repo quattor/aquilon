@@ -17,11 +17,12 @@
 # limitations under the License.
 """Module for testing the add metacluster command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from personalitytest import PersonalityTestMixin
 
@@ -37,6 +38,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_100_add_utmc1(self):
         command = ["add_metacluster", "--metacluster=utmc1",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--domain=unittest", "--building=ut"]
         self.noouttest(command)
 
@@ -76,6 +78,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_110_add_utmc2(self):
         command = ["add_metacluster", "--prefix=utmc",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--max_members=99", "--building=ut",
                    "--domain=unittest",
                    "--comments", "Some metacluster comments"]
@@ -109,6 +112,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_120_add_utmc3(self):
         command = ["add_metacluster", "--metacluster=utmc3",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--max_members=0", "--building=ut", "--domain=unittest",
                    "--comments", "MetaCluster with no members allowed"]
         self.noouttest(command)
@@ -124,6 +128,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_130_add_utmc4(self):
         # Sort of a mini-10 Gig design for port group testing...
         command = ["add_metacluster", "--metacluster=utmc4",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--max_members=6", "--building=ut",
                    "--domain=unittest"]
         self.noouttest(command)
@@ -131,20 +136,23 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_140_add_utmc7(self):
         # Test moving machines between metaclusters
         command = ["add_metacluster", "--metacluster=utmc7", "--building=ut",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--domain=unittest"]
         self.noouttest(command)
 
     def test_150_add_sandboxmc(self):
         # Test moving machines between metaclusters
         command = ["add_metacluster", "--metacluster=sandboxmc", "--building=ut",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--sandbox=%s/utsandbox" % self.user]
         self.noouttest(command)
 
-    def test_160_add_metacluster_parameter_defaults(self):
-        # Legacy users do not pass --archetype/--domain etc.
-        # this should be removed when virtbuild supports new options
-        command = ["add_metacluster", "--metacluster=vulcan1"]
-        self.noouttest(command)
+    def test_160_add_hamc1(self):
+        self.noouttest(["add_metacluster", "--metacluster", "hamc1",
+                        "--archetype", "metacluster",
+                        "--personality", "metacluster",
+                        "--organization", "ms",
+                        "--sandbox", "%s/utsandbox" % self.user])
 
     def test_170_addutmc8(self):
         self.create_personality("metacluster", "vulcan2")
@@ -192,6 +200,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_200_add_utmc1_again(self):
         command = ["add_metacluster", "--metacluster=utmc1",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--building=ut", "--domain=unittest"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Metacluster utmc1 already exists.", command)
@@ -202,6 +211,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_200_global_name(self):
         command = ["add_metacluster", "--metacluster=global", "--building=ut",
+                   "--archetype=metacluster", "--personality=metacluster",
                    "--domain=unittest"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name global is reserved", command)

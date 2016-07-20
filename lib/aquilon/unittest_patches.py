@@ -16,8 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import os
+import re
+import socket
+import sys
 
 LIBDIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 SBINDIR = os.path.join(LIBDIR, "..", "sbin")
@@ -31,9 +33,6 @@ if SBINDIR not in sys.path:
 
 from aquilon.worker import depends  # pylint: disable=W0611
 from aquilon.config import Config
-from socket import gaierror
-import socket
-import re
 
 # dwim options parser
 for i in range(0, len(sys.argv)):
@@ -73,13 +72,13 @@ def fake_gethostbyname(hostname):
                     break
 
         if not host_ip:
-            raise gaierror(-2, "Name or service not known")
+            raise socket.gaierror(-2, "Name or service not known")
 
         return host_ip
 
     except IOError as e:
         # To have the cause in aqd.log
-        raise gaierror(-2, "Name or service not known %s" % e)
+        raise socket.gaierror(-2, "Name or service not known %s" % e)
 
 gethostbyname_orig = socket.gethostbyname
 socket.gethostbyname = fake_gethostbyname

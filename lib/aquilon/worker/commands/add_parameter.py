@@ -28,7 +28,6 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
-    strict_path = True
 
     def process_parameter(self, session, dbstage, db_paramdef, path, value):
         try:
@@ -53,7 +52,7 @@ class CommandAddParameter(BrokerCommand):
 
         validate_prod_personality(dbstage, user, justification, reason)
 
-        path = ParamDefinition.normalize_path(path, strict=self.strict_path)
+        path = ParamDefinition.normalize_path(path, strict=False)
 
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,

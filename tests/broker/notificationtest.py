@@ -18,9 +18,10 @@
 
 import os
 import re
-from dateutil.parser import parse
 from time import sleep
 from datetime import datetime, timedelta
+
+from dateutil.parser import parse
 
 # Log format:
 # 2013-07-04 10:34:39,242 [INFO] sent 1 server notifications

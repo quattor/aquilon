@@ -19,11 +19,12 @@
 
 from datetime import datetime, timedelta
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 when = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)

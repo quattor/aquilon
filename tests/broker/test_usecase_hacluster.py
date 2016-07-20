@@ -19,11 +19,12 @@
 
 import os.path
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -210,12 +211,6 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/system/cluster/resources/service_address" = append\(create\("resource/cluster/hacl1/service_address/hacl1/config"\)\);',
                           command)
-
-    def test_160_add_hamc1(self):
-        self.noouttest(["add_metacluster", "--metacluster", "hamc1",
-                        "--archetype", "metacluster",
-                        "--personality", "metacluster",
-                        "--sandbox", "%s/utsandbox" % self.user])
 
     def test_161_add_allowed_personality(self):
         self.noouttest(["add_allowed_personality", "--archetype", "hacluster",
@@ -431,9 +426,6 @@ class TestUsecaseHACluster(TestBrokerCommand):
     def test_370_del_clusters(self):
         self.statustest(["del", "cluster", "--cluster", "hacl1"])
         self.statustest(["del", "cluster", "--cluster", "hacl2"])
-
-    def test_380_del_hamc1(self):
-        self.statustest(["del_metacluster", "--metacluster", "hamc1"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseHACluster)

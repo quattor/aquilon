@@ -52,8 +52,6 @@ class CommandUpdateNetworkDevice(BrokerCommand):
             discover_network_device(session, logger, self.config,
                                     dbnetdev, False)
 
-        if vendor and not model:
-            model = dbnetdev.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)

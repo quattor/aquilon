@@ -15,20 +15,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the unbind cluster command."""
+"""Module for testing the unbind client --cluster command."""
+
+import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
 class TestUnbindCluster(TestBrokerCommand):
 
     def testfailservicemissingcluster(self):
-        command = ["unbind_cluster", "--cluster", "cluster-does-not-exist",
+        command = ["unbind_client", "--cluster", "cluster-does-not-exist",
                    "--service=esx_management_server"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -36,7 +37,7 @@ class TestUnbindCluster(TestBrokerCommand):
                          command)
 
     def testfailservicenotbound(self):
-        command = ["unbind_cluster", "--cluster", "utecl1", "--service=utsvc"]
+        command = ["unbind_client", "--cluster", "utecl1", "--service=utsvc"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Service utsvc is not bound to ESX cluster utecl1.",
@@ -50,7 +51,7 @@ class TestUnbindCluster(TestBrokerCommand):
                           r'esx_management_server Instance (\S+)',
                           command)
 
-        command = ["unbind_cluster", "--cluster=utecl1",
+        command = ["unbind_client", "--cluster=utecl1",
                    "--service=esx_management_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -63,13 +64,11 @@ class TestUnbindCluster(TestBrokerCommand):
         # This also tests binding a non-aligned service...
         # not sure if there should be a test of running make against a
         # cluster (or a cluster with hosts) while bound to such a service...
-        self.statustest(["bind_cluster", "--cluster=utecl4",
+        self.statustest(["bind_client", "--cluster=utecl4",
                          "--service=utsvc", "--instance=utsi1"])
 
-        command = ["unbind_cluster", "--cluster=utecl4", "--service=utsvc"]
-        out = self.statustest(command)
-        self.matchoutput(out, "Command unbind_cluster is deprecated. Please "
-                         "use 'unbind_client --cluster' instead.", command)
+        command = ["unbind_client", "--cluster=utecl4", "--service=utsvc"]
+        out = self.noouttest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindCluster)

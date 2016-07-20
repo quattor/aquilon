@@ -204,7 +204,7 @@ class DnsRecord(Base):
             alias = queue.popleft()
             found[str(alias.fqdn)] = alias
             for a in alias.aliases:
-                if not str(a.fqdn) in found:
+                if str(a.fqdn) not in found:
                     queue.append(a)
 
         # Ensure a deterministic order of the returned values

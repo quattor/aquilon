@@ -46,8 +46,9 @@ ToDo:
 """
 
 import re
-from six import iteritems
 from xml.etree import ElementTree
+
+from six import iteritems
 
 from twisted.web import server, resource, http
 from twisted.internet import defer, threads

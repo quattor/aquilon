@@ -20,20 +20,21 @@
 import os
 import gzip
 import re
-from six.moves import cStringIO as StringIO  # pylint: disable=F0401
-from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
-from six import itervalues
 from shutil import rmtree
 from subprocess import Popen, PIPE
 from datetime import datetime
 import time
+import unittest
+import xml.etree.ElementTree as ET
+
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
+from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
+from six import itervalues
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import xml.etree.ElementTree as ET
-import unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 
@@ -396,8 +397,8 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "All objects must be in the same domain or sandbox",
                          command)
-        self.matchoutput(out, "6 objects in domain unittest", command)
-        self.matchoutput(out, "1 objects in sandbox %s/utsandbox" % self.user,
+        self.matchoutput(out, "5 objects in domain unittest", command)
+        self.matchoutput(out, "2 objects in sandbox %s/utsandbox" % self.user,
                          command)
 
     def test_615_compile_metacluster_pers(self):
@@ -407,7 +408,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         # The only thing we really care about here is the number of objects
         # being larger than the number of metaclusters, to verify members are
         # also included
-        self.matchoutput(out, "0/47 template(s) being processed", command)
+        self.matchoutput(out, "0/46 template(s) being processed", command)
 
     def test_700_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),

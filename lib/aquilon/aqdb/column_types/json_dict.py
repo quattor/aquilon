@@ -15,8 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Generic class to convert json-encoded Text db fields to dict """
-from sqlalchemy.types import TypeDecorator, Text
+
 import json
+
+from sqlalchemy.types import TypeDecorator, Text
 
 
 class JSONEncodedDict(TypeDecorator):

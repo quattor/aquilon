@@ -20,11 +20,12 @@
 import os
 from datetime import datetime
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 from clustertest import ClusterTestMixin

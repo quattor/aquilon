@@ -19,11 +19,12 @@
 
 import json
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from broker.brokertest import TestBrokerCommand
 
 
@@ -120,7 +121,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out,
                          "Existing value for personality aquilon/%s "
-                         "conflicts with the new schema: [1, 2] is too long" %
+                         "conflicts with the new schema: [1, 2, 3] is too long" %
                          "inventory",
                          cmd)
 

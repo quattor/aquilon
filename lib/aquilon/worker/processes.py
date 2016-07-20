@@ -26,10 +26,11 @@ import os
 import re
 import logging
 from contextlib import contextmanager
-from six import iteritems
 from subprocess import Popen, PIPE
 from tempfile import mkdtemp
 from threading import Thread
+
+from six import iteritems
 
 from mako.lookup import TemplateLookup
 from twisted.python import context

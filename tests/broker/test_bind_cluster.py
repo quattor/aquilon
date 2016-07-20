@@ -17,18 +17,19 @@
 # limitations under the License.
 """Module for testing the bind cluster command."""
 
+import unittest
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest
 from brokertest import TestBrokerCommand
 
 
 class TestBindCluster(TestBrokerCommand):
 
     def testfailbindservicemissingcluster(self):
-        command = ["bind_cluster", "--cluster=cluster-does-not-exist",
+        command = ["bind_client", "--cluster=cluster-does-not-exist",
                    "--service=esx_management_server", "--instance=ut.a"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -44,7 +45,7 @@ class TestBindCluster(TestBrokerCommand):
                               r'esx_management_server Instance (\S+)',
                               command)
         next = m.group(1) == 'ut.a' and 'ut.b' or 'ut.a'
-        command = ["bind_cluster", "--cluster=utecl1",
+        command = ["bind_client", "--cluster=utecl1",
                    "--service=esx_management_server", "--instance=%s" % next]
         out = self.badrequesttest(command)
         self.matchoutput(out, "use unbind to clear first or rebind to force",
@@ -60,7 +61,7 @@ class TestBindCluster(TestBrokerCommand):
                               command)
         next = m.group(1) == 'ut.a' and 'ut.b' or 'ut.a'
 
-        command = ["rebind_cluster", "--cluster=utecl1",
+        command = ["rebind_client", "--cluster=utecl1",
                    "--service=esx_management_server", "--instance=%s" % next]
         # Do we need any checks on this output?
         self.statustest(command)
