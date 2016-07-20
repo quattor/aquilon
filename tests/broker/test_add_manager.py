@@ -82,6 +82,13 @@ class TestAddManager(TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3c1n3", command)
         self.matchoutput(out, "Model Type: blade", command)
 
+    def testverifyaddunittest00raudit(self):
+        command = ["search_audit", "--key", "unittest00r.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: manager=unittest00r.one-nyp.ms.com]",
+                         command)
+
     def testverifyunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

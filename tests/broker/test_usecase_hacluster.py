@@ -73,13 +73,13 @@ class TestUsecaseHACluster(TestBrokerCommand):
         ip2 = self.net["unknown0"].usable[27]
         self.dsdb_expect_add("hacl1.aqd-unittest.ms.com", ip1)
         self.statustest(["add", "service", "address",
-                         "--service_address", "hacl1.aqd-unittest.ms.com",
+                         "--shortname", "hacl1",
                          "--name", "hacl1", "--cluster", "hacl1",
                          "--ip", ip1])
 
-        self.dsdb_expect_add("hacl2.aqd-unittest.ms.com", ip2)
+        self.dsdb_expect_add("hacl2.new-york.ms.com", ip2)
         self.statustest(["add", "service", "address",
-                         "--service_address", "hacl2.aqd-unittest.ms.com",
+                         "--shortname", "hacl2",
                          "--name", "hacl2", "--cluster", "hacl2",
                          "--ip", ip2])
         self.dsdb_verify()
@@ -138,13 +138,16 @@ class TestUsecaseHACluster(TestBrokerCommand):
         # grep-friendly syntax
         ips = [self.net["unknown0"].usable[28],
                self.net["unknown0"].usable[29]]
+
+        # Different location, different default DNS domains
+        self.dsdb_expect_add("hacl1g1.aqd-unittest.ms.com", ips[0])
+        self.dsdb_expect_add("hacl2g1.new-york.ms.com", ips[1])
+
         for cl in range(1, 3):
-            self.dsdb_expect_add("hacl%dg1.aqd-unittest.ms.com" % cl,
-                                 ips[cl - 1])
             self.statustest(["add", "service", "address",
                              "--cluster", "hacl%d" % cl,
                              "--resourcegroup", "hacl%dg1" % cl,
-                             "--service_address", "hacl%dg1.aqd-unittest.ms.com" % cl,
+                             "--shortname", "hacl%dg1" % cl,
                              "--name", "hacl%dg1addr" % cl,
                              "--ip", ips[cl - 1]])
             self.check_plenary_exists("resource",

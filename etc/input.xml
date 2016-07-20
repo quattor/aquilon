@@ -1036,7 +1036,7 @@
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
 	    <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="dns_domain" type="string">Override the default DNS domain for --prefix</option>
+	    <option name="dns_domain" type="string" requires="prefix">Override the default DNS domain for --prefix</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -1876,8 +1876,11 @@
 	    </optgroup>
 	    <option name="interface" type="string">Name of the interface.</option>
 	</optgroup>
-	<optgroup>
+	<optgroup fields="one">
 	    <option name="fqdn" type="string">FQDN of the new address</option>
+	    <option name="shortname" type="string">Relative part of the FQDN</option>
+	</optgroup>
+	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="label" type="string">Interface alias of the new address</option>
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
@@ -5903,13 +5906,18 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="service_address" type="string">Fully qualified name to register in the DNS</option>
+	    <optgroup fields="one">
+		<option name="service_address" type="string">Fully qualified name to register in the DNS</option>
+		<option name="shortname" type="string">Short name of the address in the default DNS domain</option>
+		<option name="prefix" type="string">Prefix for generating a name in the default DNS domain</option>
+	    </optgroup>
 	    <option name="name" type="string">Logical name of the service address</option>
 	</optgroup>
 	<optgroup>
 	    <option name="interfaces" type="string">Comma separated list of interfaces</option>
 	    <option name="ip" type="ipv4">IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="dns_domain" type="string" requires="prefix">Override the default DNS domain for --prefix</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
 	    <option name="shared" type="flag">Allow the address to be used multiple times</option>

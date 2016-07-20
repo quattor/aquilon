@@ -19,15 +19,15 @@
 from aquilon.utils import validate_nlist_key
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (HardwareEntity, NetworkEnvironment, Interface,
-                                SharedAddressAssignment)
+                                ManagementInterface, ARecord)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.templates import Plenary, PlenaryCollection
-from sqlalchemy.sql.expression import desc
 
 
 class CommandAddInterfaceAddress(BrokerCommand):
@@ -35,7 +35,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, network_device, fqdn,
-               interface, label, network_environment, map_to_primary,
+               shortname, interface, label, network_environment, map_to_primary,
                shared, priority, **kwargs):
 
         if machine:
@@ -74,31 +74,42 @@ class CommandAddInterfaceAddress(BrokerCommand):
         else:
             relaxed = False
 
-        if shared and not fqdn:
-            dbnetwork = get_net_id_from_ip(session, ip, network_environment)
-            q = session.query(SharedAddressAssignment)
-            q = q.filter_by(network=dbnetwork)
-            q = q.filter_by(ip=ip)
-            q = q.order_by(desc(SharedAddressAssignment.priority))
-            dbsaddr = q.first()
-            # Its common the --ip address is used (without --fqdn) for shared
-            # addresses.  The problem is that the following fqdn logic will
-            # create the wrong fqdn for existing addresses, which in turn
-            # wll cause grab_address to fail.
-            if dbsaddr:
-                fqdn = dbsaddr.fqdns[0].fqdn
-
         if not fqdn:
-            if not dbhw_ent.primary_name:
-                raise ArgumentError("{0} has no primary name, can not "
-                                    "auto-generate the DNS record.  "
-                                    "Please specify --fqdn.".format(dbhw_ent))
-            if label:
-                name = "%s-%s-%s" % (dbhw_ent.primary_name.fqdn.name, interface,
-                                     label)
+            # For shared addresses, we want to re-use the DNS record if it
+            # already exists. We don't want to "steal" non-shared records,
+            # though.
+            if shared and ip and not shortname:
+                dbnetwork = get_net_id_from_ip(session, ip, network_environment)
+                q = session.query(ARecord)
+                q = q.filter_by(ip=ip, network=dbnetwork)
+                dbdns_rec = q.first()
+                if dbdns_rec:
+                    fqdn = str(dbdns_rec)
+
+            if dbhw_ent.primary_name:
+                dbdns_domain = dbhw_ent.primary_name.fqdn.dns_domain
             else:
-                name = "%s-%s" % (dbhw_ent.primary_name.fqdn.name, interface)
-            fqdn = "%s.%s" % (name, dbhw_ent.primary_name.fqdn.dns_domain)
+                dbdns_domain = get_default_dns_domain(dbhw_ent.location)
+
+            if not shortname:
+                if not dbhw_ent.primary_name:
+                    raise ArgumentError("{0} has no primary name, can not "
+                                        "auto-generate the DNS record.  "
+                                        "Please specify --fqdn.".format(dbhw_ent))
+
+                if isinstance(dbinterface, ManagementInterface):
+                    shortname = "%sr" % dbhw_ent.primary_name.fqdn.name
+                elif label:
+                    shortname = "%s-%s-%s" % (dbhw_ent.primary_name.fqdn.name,
+                                              dbinterface.name, label)
+                else:
+                    shortname = "%s-%s" % (dbhw_ent.primary_name.fqdn.name,
+                                           dbinterface.name)
+
+            fqdn = "%s.%s" % (shortname, dbdns_domain)
+            logger.info("Selected FQDN {0!s} for {1:l}."
+                        .format(fqdn, dbinterface))
+            audit_results.append(('fqdn', fqdn))
 
         if label is None:
             label = ""
