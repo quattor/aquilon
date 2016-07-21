@@ -198,7 +198,7 @@ class TestCluster(TestBrokerCommand):
         # containing uncommitted files
         command = ["manage", "--sandbox=%s/utsandbox" % self.user,
                    "--hostname=aquilon61.aqd-unittest.ms.com", "--force"]
-        out = self.commandtest(command)
+        self.successtest(command)
 
         osver = self.config.get("unittest", "linux_version_prev")
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
