@@ -29,7 +29,8 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             preload_machine_data,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates import PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import (PlenaryCollection, TemplateDomain,
+                                      PlenaryHost)
 from aquilon.worker.services import Chooser, ChooserCache
 
 
@@ -42,21 +43,9 @@ class CommandReconfigureList(BrokerCommand):
         options = [joinedload('personality_stage'),
                    joinedload('personality_stage.personality'),
                    subqueryload('personality_stage.grns'),
-                   subqueryload('grns'),
-                   subqueryload('services_used'),
                    undefer('services_used._client_count'),
-                   subqueryload('services_provided'),
-                   joinedload('resholder'),
-                   subqueryload('resholder.resources'),
-                   joinedload('_cluster'),
-                   subqueryload('_cluster.cluster'),
-                   joinedload('hardware_entity.model'),
-                   subqueryload('hardware_entity.interfaces'),
-                   subqueryload('hardware_entity.interfaces.assignments'),
-                   subqueryload('hardware_entity.interfaces.assignments.dns_records'),
-                   joinedload('hardware_entity.interfaces.assignments.network'),
-                   joinedload('hardware_entity.location'),
-                   subqueryload('hardware_entity.location.parents')]
+                   subqueryload('_cluster.cluster')]
+        options += PlenaryHost.query_options()
         dbhosts = hostlist_to_hosts(session, list, options)
         preload_machine_data(session, dbhosts)
         return dbhosts

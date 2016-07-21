@@ -23,8 +23,8 @@ from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 BondingInterface, BridgeInterface,
                                 LoopbackInterface, VirtualInterface,
                                 PhysicalInterface)
+from aquilon.aqdb.model.feature import interface_features
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.dbwrappers.feature import interface_features
 
 
 class InterfaceFormatter(ObjectFormatter):
@@ -34,10 +34,8 @@ class InterfaceFormatter(ObjectFormatter):
 
         if interface.hardware_entity.host:
             dbstage = interface.hardware_entity.host.personality_stage
-            dbarch = dbstage.archetype
         else:
             dbstage = None
-            dbarch = None
 
         flags = []
         if interface.bootable:
@@ -123,9 +121,10 @@ class InterfaceFormatter(ObjectFormatter):
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
-        for feature in sorted(interface_features(interface, dbarch, dbstage),
-                              key=attrgetter('name')):
-            details.append(indent + "  Template: %s" % feature.cfg_path)
+        if dbstage:
+            for feature in sorted(interface_features(dbstage, interface),
+                                  key=attrgetter('name')):
+                details.append(indent + "  Template: %s" % feature.cfg_path)
 
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)

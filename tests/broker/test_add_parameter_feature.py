@@ -46,12 +46,12 @@ class TestAddParameterFeature(TestBrokerCommand):
                          "--model", "hs21-8853"])
 
     def test_100_add_hw_params(self):
-        self.noouttest(["add_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon", "--feature", "bios_setup",
-                        "--path", "testdefault", "--value", "hardware_feature"])
-        self.noouttest(["add_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon", "--feature", "bios_setup",
-                        "--path", "testlist", "--value", "hardware1,hardware2"])
+        self.statustest(["add_parameter", "--personality", "compileserver",
+                         "--archetype", "aquilon", "--feature", "bios_setup",
+                         "--path", "testdefault", "--value", "hardware_feature"])
+        self.statustest(["add_parameter", "--personality", "compileserver",
+                         "--archetype", "aquilon", "--feature", "bios_setup",
+                         "--path", "testlist", "--value", "hardware1,hardware2"])
 
     def test_105_show_hw_params(self):
         command = ["show_parameter", "--personality", "compileserver",
@@ -87,20 +87,19 @@ class TestAddParameterFeature(TestBrokerCommand):
                          'hardware_feature')
 
     def test_105_cat_hw_params(self):
-        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
-                   "--pre_feature"]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/features/hardware/bios_setup/testboolean" = true;\s*'
-                          r'"/system/features/hardware/bios_setup/testdefault" = "hardware_feature";\s*'
-                          r'"/system/features/hardware/bios_setup/testfalsedefault" = false;\s*'
-                          r'"/system/features/hardware/bios_setup/testfloat" = 100\.100;\s*'
-                          r'"/system/features/hardware/bios_setup/testint" = 60;\s*'
-                          r'"/system/features/hardware/bios_setup/testjson" = nlist\(\s*'
+                          r'"system/features/hardware/bios_setup/testboolean" = true;\s*'
+                          r'"system/features/hardware/bios_setup/testdefault" = "hardware_feature";\s*'
+                          r'"system/features/hardware/bios_setup/testfalsedefault" = false;\s*'
+                          r'"system/features/hardware/bios_setup/testfloat" = 100\.100;\s*'
+                          r'"system/features/hardware/bios_setup/testint" = 60;\s*'
+                          r'"system/features/hardware/bios_setup/testjson" = nlist\(\s*'
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/hardware/bios_setup/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
-                          r'"/system/features/hardware/bios_setup/teststring" = "default";\s*',
+                          r'"system/features/hardware/bios_setup/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
+                          r'"system/features/hardware/bios_setup/teststring" = "default";\s*',
                           command)
 
     def test_105_diff_hw_params(self):
@@ -123,14 +122,14 @@ class TestAddParameterFeature(TestBrokerCommand):
                           command)
 
     def test_110_add_iface_params(self):
-        self.noouttest(["add_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon", "--feature", "src_route",
-                        "--path", "testdefault",
-                        "--value", "interface_feature"])
-        self.noouttest(["add_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon", "--feature", "src_route",
-                        "--path", "testlist",
-                        "--value", "iface1,iface2"])
+        self.statustest(["add_parameter", "--personality", "compileserver",
+                         "--archetype", "aquilon", "--feature", "src_route",
+                         "--path", "testdefault",
+                         "--value", "interface_feature"])
+        self.statustest(["add_parameter", "--personality", "compileserver",
+                         "--archetype", "aquilon", "--feature", "src_route",
+                         "--path", "testlist",
+                         "--value", "iface1,iface2"])
 
     def test_115_show_iface_params(self):
         command = ["show_parameter", "--personality", "compileserver",
@@ -168,20 +167,19 @@ class TestAddParameterFeature(TestBrokerCommand):
                          'interface_feature')
 
     def test_115_cat_iface_params(self):
-        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
-                   "--pre_feature"]
+        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/features/interface/src_route/testboolean" = true;\s*'
-                          r'"/system/features/interface/src_route/testdefault" = "interface_feature";\s*'
-                          r'"/system/features/interface/src_route/testfalsedefault" = false;\s*'
-                          r'"/system/features/interface/src_route/testfloat" = 100\.100;\s*'
-                          r'"/system/features/interface/src_route/testint" = 60;\s*'
-                          r'"/system/features/interface/src_route/testjson" = nlist\(\s*'
+                          r'"system/features/interface/src_route/testboolean" = true;\s*'
+                          r'"system/features/interface/src_route/testdefault" = "interface_feature";\s*'
+                          r'"system/features/interface/src_route/testfalsedefault" = false;\s*'
+                          r'"system/features/interface/src_route/testfloat" = 100\.100;\s*'
+                          r'"system/features/interface/src_route/testint" = 60;\s*'
+                          r'"system/features/interface/src_route/testjson" = nlist\(\s*'
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/interface/src_route/testlist" = list\(\s*"iface1",\s*"iface2"\s*\);\s*'
-                          r'"/system/features/interface/src_route/teststring" = "default";\s*',
+                          r'"system/features/interface/src_route/testlist" = list\(\s*"iface1",\s*"iface2"\s*\);\s*'
+                          r'"system/features/interface/src_route/teststring" = "default";\s*',
                           command)
 
     def test_115_diff_iface_params(self):
@@ -203,7 +201,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                           command)
 
     def test_120_verify_host_feature_defaults(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/features/pre_host/testboolean" = true;\s*'
@@ -292,7 +290,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                          'host_feature')
 
     def test_135_verify_cat_host_feature(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/features/pre_host/testboolean" = false;\s*'

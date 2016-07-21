@@ -31,8 +31,6 @@ from aquilon.exceptions_ import (InternalError, IncompleteError,
 from aquilon.config import Config
 from aquilon.aqdb.model import Sandbox, CompileableMixin
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
-from aquilon.worker.processes import build_mako_lookup
-from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
 from aquilon.utils import write_file, remove_file
 
@@ -621,13 +619,6 @@ class PlenaryCollection(object):
             except:
                 self.restore_stash()
                 raise
-
-
-class TemplateFormatter(ObjectFormatter):
-    lookup_raw = build_mako_lookup(ObjectFormatter.config, "pan",
-                                   imports=['from string import rstrip',
-                                            'from aquilon.worker.formats.formatters import shift'],
-                                   default_filters=['unicode', 'rstrip'])
 
 
 def add_location_info(lines, dblocation, prefix=""):

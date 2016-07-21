@@ -19,14 +19,16 @@
 from jsonschema import validate, ValidationError
 from six import iteritems
 
-from sqlalchemy.orm import joinedload, subqueryload, undefer
+from sqlalchemy.orm import contains_eager, joinedload
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import PersonalityStage, PersonalityParameter, Host
+from aquilon.aqdb.model import (PersonalityStage, PersonalityParameter, Host,
+                                FeatureLink, HostFeature, HardwareFeature,
+                                HardwareEntity, Interface)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary, PlenaryHost, PlenaryPersonality
 
 
 def set_parameter(session, parameter, db_paramdef, path, value, update=False):
@@ -188,21 +190,23 @@ def validate_personality_config(dbstage):
     dbarchetype = dbstage.personality.archetype
     error = []
 
+    # Validate archetype-wide parameters
     for param_def_holder in dbarchetype.param_def_holders.values():
         parameter = dbstage.parameters.get(param_def_holder, None)
         error += validate_required_parameter(param_def_holder, parameter)
 
-    # features for personalities
-    for link in dbarchetype.features + dbstage.features:
-        param_def_holder = link.feature.param_def_holder
-        if not param_def_holder:
-            continue
-
+    # Validate feature parameters
+    features = set(link.feature
+                   for link in dbstage.features + dbarchetype.features
+                   if link.feature.param_def_holder)
+    for dbfeature in features:
+        param_def_holder = dbfeature.param_def_holder
         parameter = dbstage.parameters.get(param_def_holder, None)
         tmp_error = validate_required_parameter(param_def_holder, parameter)
         if tmp_error:
-            error.append("Feature Binding: %s" % link.feature)
+            error.append("Feature Binding: %s" % dbfeature)
             error += tmp_error
+
     return error
 
 
@@ -215,25 +219,32 @@ def add_arch_paramdef_plenaries(session, param_def_holder, plenaries):
 
 
 def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
-    # Do the import here, to avoid circles...
-    from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
-                                                      PlenaryPersonalityPostFeature)
+    if isinstance(dbfeature, HostFeature):
+        q = session.query(PersonalityStage)
 
-    q = session.query(PersonalityStage)
+        q = q.join(PersonalityStage.features)
+        q = q.filter_by(feature=dbfeature)
+        q = q.options(PlenaryPersonality.query_options())
+        plenaries.extend(map(Plenary.get_plenary, q))
+    else:
+        q = session.query(Host)
+        q = q.join(PersonalityStage, FeatureLink)
+        q = q.filter_by(feature=dbfeature)
+        q = q.reset_joinpoint()
 
-    q = q.join(PersonalityStage.features)
-    q = q.filter_by(feature=dbfeature)
-    q = q.options(joinedload('personality'),
-                  subqueryload('parameters'),
-                  subqueryload('features'),
-                  joinedload('features.feature'),
-                  undefer('features.feature.comments'),
-                  joinedload('features.feature.param_def_holder'),
-                  subqueryload('features.feature.param_def_holder.param_definitions'),
-                  joinedload('features.model'))
-    for dbstage in q:
-        plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
-        plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))
+        q = q.join(HardwareEntity)
+        if isinstance(dbfeature, HardwareFeature):
+            q = q.filter(FeatureLink.model_id == HardwareEntity.model_id)
+        else:
+            q = q.join(Interface)
+            q = q.filter(or_(FeatureLink.interface_name == Interface.name,
+                             FeatureLink.model_id == Interface.model_id))
+
+        q = q.options(contains_eager('hardware_entity'),
+                      contains_eager('personality_stage'))
+        q = q.options(PlenaryHost.query_options())
+
+        plenaries.extend(map(Plenary.get_plenary, q))
 
 
 def update_paramdef_schema(session, db_paramdef, schema):

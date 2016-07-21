@@ -19,9 +19,7 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
-                                                  PlenaryPersonalityPostFeature,
-                                                  PlenaryPersonalityParameter,
+from aquilon.worker.templates.personality import (PlenaryPersonalityParameter,
                                                   PlenaryPersonalityBase)
 
 
@@ -33,19 +31,12 @@ class CommandCatPersonality(BrokerCommand):
     _is_lock_free = True
 
     def render(self, generate, session, logger, personality,
-               personality_stage, archetype, pre_feature, post_feature,
-               param_tmpl, **_):
+               personality_stage, archetype, param_tmpl, **_):
         dbpersonality = Personality.get_unique(session, archetype=archetype,
                                                name=personality, compel=True)
         dbstage = dbpersonality.default_stage(personality_stage)
 
-        if pre_feature:
-            plenary = PlenaryPersonalityPreFeature.get_plenary(dbstage,
-                                                               logger=logger)
-        elif post_feature:
-            plenary = PlenaryPersonalityPostFeature.get_plenary(dbstage,
-                                                                logger=logger)
-        elif param_tmpl:
+        if param_tmpl:
             try:
                 param_def_holder = dbstage.archetype.param_def_holders[param_tmpl]
             except KeyError:

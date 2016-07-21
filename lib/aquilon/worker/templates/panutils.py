@@ -149,16 +149,6 @@ def pan_variable(lines, variable, value, final=False):
         lines.append('variable %s = %s;' % (variable, pan(value)))
 
 
-def pan_comment(lines, comments):
-    if not isinstance(comments, list):
-        comments = [comments]
-    if not comments:
-        return
-    lines.append('@{')
-    lines.extend(comments)
-    lines.append('}')
-
-
 class PanObject(object):
     def format(self, indent=0):
         pass

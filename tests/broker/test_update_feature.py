@@ -36,8 +36,7 @@ class TestUpdateFeature(TestBrokerCommand):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
                    "--type", "host", "--comments", "New feature comments",
                    "--visibility", "restricted", "--activation", "dispatch", "--deactivation", "rebuild"]
-        out = self.statustest(command)
-        self.matchoutput(out, "Flushed 1/2 templates.", command)
+        self.noouttest(command)
 
     def test_105_verify_show(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
@@ -65,12 +64,6 @@ class TestUpdateFeature(TestBrokerCommand):
         self.assertEqual(feature.activation, self.proto.DISPATCH)
         self.assertEqual(feature.deactivation, self.proto.REBUILD)
         self.assertEqual(feature.comments, "New feature comments")
-
-    def test_105_verify_cat(self):
-        command = ["cat", "--personality", "inventory", "--archetype", "aquilon",
-                   "--pre_feature"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "# New feature comments", command)
 
     def test_200_bad_activation(self):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,

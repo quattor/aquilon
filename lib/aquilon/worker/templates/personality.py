@@ -21,11 +21,13 @@ from operator import attrgetter
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
+from aquilon.aqdb.model.feature import host_features
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
-                                           TemplateFormatter, PlenaryCollection)
+                                           PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
@@ -34,13 +36,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 def get_parameters_by_feature(dbstage, dbfeature):
-    ret = {}
     param_def_holder = dbfeature.param_def_holder
-    if not param_def_holder:
-        return ret
+    assert param_def_holder
 
     param = dbstage.parameters.get(param_def_holder, None)
 
+    ret = {}
     for param_def in param_def_holder.param_definitions:
         if param:
             value = param.get_path(param_def.path, compel=False)
@@ -53,20 +54,6 @@ def get_parameters_by_feature(dbstage, dbfeature):
         if value is not None:
             ret[param_def.path] = value
     return ret
-
-
-def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
-    dbfeature = dbfeaturelink.feature
-    param_def_holder = dbfeature.param_def_holder
-
-    if param_def_holder:
-        base_path = "/system/" + dbfeature.cfg_path
-        params = get_parameters_by_feature(dbstage, dbfeature)
-
-        for key in sorted(params.keys()):
-            pan_assign(lines, base_path + "/" + key, params[key])
-
-    lines.append(featuretemplate.format_raw(dbfeaturelink))
 
 
 def staged_path(prefix, dbstage, suffix):
@@ -87,10 +74,6 @@ class PlenaryPersonality(PlenaryCollection):
 
         self.append(PlenaryPersonalityBase.get_plenary(dbstage,
                                                        allow_incomplete=allow_incomplete))
-        self.append(PlenaryPersonalityPreFeature.get_plenary(dbstage,
-                                                             allow_incomplete=allow_incomplete))
-        self.append(PlenaryPersonalityPostFeature.get_plenary(dbstage,
-                                                              allow_incomplete=allow_incomplete))
 
         for template, defholder in dbstage.archetype.param_def_holders.items():
             if defholder not in dbstage.parameters:
@@ -109,11 +92,20 @@ class PlenaryPersonality(PlenaryCollection):
             return PlenaryKey(personality=self.dbobj, logger=self.logger,
                               exclusive=exclusive)
 
+    @classmethod
+    def query_options(cls, prefix="", load_personality=True):
+        options = []
+        if load_personality:
+            options.append(joinedload(prefix + 'personality'))
+        return options + [subqueryload(prefix + 'parameters'),
+                          subqueryload(prefix + 'features'),
+                          subqueryload(prefix + 'grns'),
+                          joinedload(prefix + 'features.feature'),
+                          joinedload(prefix + 'features.feature.param_def_holder'),
+                          subqueryload(prefix + 'features.feature.param_def_holder.param_definitions'),
+                          joinedload(prefix + 'features.model')]
+
 Plenary.handlers[PersonalityStage] = PlenaryPersonality
-
-
-class FeatureTemplate(TemplateFormatter):
-    template_raw = "feature.mako"
 
 
 class PlenaryPersonalityBase(Plenary):
@@ -135,6 +127,10 @@ class PlenaryPersonalityBase(Plenary):
         else:
             pan_variable(lines, "PERSONALITY", "%s+%s" % (dbpers.name,
                                                           self.dbobj.name))
+
+        pan_assign(lines, "/system/personality/name", dbpers.name)
+        if dbpers.staged:
+            pan_assign(lines, "/system/personality/stage", self.dbobj.name)
 
         # process grns
         eon_id_map = defaultdict(set)
@@ -158,15 +154,32 @@ class PlenaryPersonalityBase(Plenary):
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
 
-        # include pre features
-        path = PlenaryPersonalityPreFeature.template_name(self.dbobj)
-        pan_include_if_exists(lines, path)
+        pre, post = host_features(self.dbobj)
 
-        # process parameter templates
+        # Only features which are
+        # - bound to the personality directly rather than to the archetype,
+        # - and have parameter definitions
+        # are interesting when generating parameters
+        param_features = set(link.feature for link in self.dbobj.features
+                             if link.feature.param_def_holder)
+
+        for dbfeature in sorted(frozenset()
+                                .union(pre)
+                                .union(post)
+                                .intersection(param_features),
+                                key=attrgetter('name')):
+            base_path = "/system/" + dbfeature.cfg_path
+            params = get_parameters_by_feature(self.dbobj, dbfeature)
+
+            for key in sorted(params.keys()):
+                pan_assign(lines, base_path + "/" + key, params[key])
+
+        for dbfeature in sorted(pre, key=attrgetter('name')):
+            pan_include(lines, dbfeature.cfg_path + "/config")
+            pan_append(lines, "/metadata/features", dbfeature.cfg_path + "/config")
+
         pan_include_if_exists(lines, "personality/config")
-        pan_assign(lines, "/system/personality/name", dbpers.name)
-        if dbpers.staged:
-            pan_assign(lines, "/system/personality/stage", self.dbobj.name)
+
         if dbpers.host_environment.name != 'legacy':
             pan_assign(lines, "/system/personality/host_environment",
                        dbpers.host_environment, True)
@@ -174,76 +187,9 @@ class PlenaryPersonalityBase(Plenary):
         if dbpers.config_override:
             pan_include(lines, "features/personality/config_override/config")
 
-        # include post features
-        path = PlenaryPersonalityPostFeature.template_name(self.dbobj)
-        pan_include_if_exists(lines, path)
-
-    def get_key(self, exclusive=True):
-        if inspect(self.dbobj).deleted:
-            return NoLockKey(logger=self.logger)
-        else:
-            return PlenaryKey(personality=self.dbobj, logger=self.logger,
-                              exclusive=exclusive)
-
-
-class PlenaryPersonalityPreFeature(Plenary):
-    prefix = "personality"
-
-    @classmethod
-    def template_name(cls, dbstage):
-        return staged_path(cls.prefix, dbstage, "pre_feature")
-
-    @classmethod
-    def loadpath(cls, dbstage):
-        return dbstage.personality.archetype.name
-
-    def body(self, lines):
-        feat_tmpl = FeatureTemplate()
-        model_feat = []
-        interface_feat = []
-        pre_feat = []
-        dbpers = self.dbobj.personality
-        for link in dbpers.archetype.features + self.dbobj.features:
-            if link.model:
-                model_feat.append(link)
-                continue
-            if link.interface_name:
-                interface_feat.append(link)
-                continue
-            if not link.feature.post_personality:
-                pre_feat.append(link)
-
-        # hardware features should precede host features
-        for link in sorted(model_feat + interface_feat + pre_feat,
-                           key=attrgetter("feature.name")):
-            helper_feature_template(self.dbobj, feat_tmpl, link, lines)
-
-    def get_key(self, exclusive=True):
-        if self.is_deleted():
-            return NoLockKey(logger=self.logger)
-        else:
-            return PlenaryKey(personality=self.dbobj, logger=self.logger,
-                              exclusive=exclusive)
-
-
-class PlenaryPersonalityPostFeature(Plenary):
-    prefix = "personality"
-
-    @classmethod
-    def template_name(cls, dbstage):
-        return staged_path(cls.prefix, dbstage, "post_feature")
-
-    @classmethod
-    def loadpath(cls, dbstage):
-        return dbstage.personality.archetype.name
-
-    def body(self, lines):
-        feat_tmpl = FeatureTemplate()
-        dbpers = self.dbobj.personality
-        for link in sorted(dbpers.archetype.features + self.dbobj.features,
-                           key=attrgetter("feature.name")):
-            if link.feature.post_personality:
-                helper_feature_template(self.dbobj, feat_tmpl, link, lines)
+        for dbfeature in sorted(post, key=attrgetter('name')):
+            pan_include(lines, dbfeature.cfg_path + "/config")
+            pan_append(lines, "/metadata/features", dbfeature.cfg_path + "/config")
 
     def get_key(self, exclusive=True):
         if self.is_deleted():

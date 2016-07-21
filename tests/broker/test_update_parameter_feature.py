@@ -29,10 +29,10 @@ from broker.brokertest import TestBrokerCommand
 class TestUpdateParameterFeature(TestBrokerCommand):
 
     def test_100_hw_update(self):
-        self.noouttest(["update_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon", "--feature", "bios_setup",
-                        "--path", "testdefault",
-                        "--value", "hardware_newstring"])
+        self.statustest(["update_parameter", "--personality", "compileserver",
+                         "--archetype", "aquilon", "--feature", "bios_setup",
+                         "--path", "testdefault",
+                         "--value", "hardware_newstring"])
 
     def test_105_show_hw_params(self):
         command = ["show_parameter", "--personality", "compileserver",
@@ -45,20 +45,19 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                           command)
 
     def test_105_cat_hw_params(self):
-        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
-                   "--pre_feature"]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/features/hardware/bios_setup/testboolean" = true;\s*'
-                          r'"/system/features/hardware/bios_setup/testdefault" = "hardware_newstring";\s*'
-                          r'"/system/features/hardware/bios_setup/testfalsedefault" = false;\s*'
-                          r'"/system/features/hardware/bios_setup/testfloat" = 100\.100;\s*'
-                          r'"/system/features/hardware/bios_setup/testint" = 60;\s*'
-                          r'"/system/features/hardware/bios_setup/testjson" = nlist\(\s*'
+                          r'"system/features/hardware/bios_setup/testboolean" = true;\s*'
+                          r'"system/features/hardware/bios_setup/testdefault" = "hardware_newstring";\s*'
+                          r'"system/features/hardware/bios_setup/testfalsedefault" = false;\s*'
+                          r'"system/features/hardware/bios_setup/testfloat" = 100\.100;\s*'
+                          r'"system/features/hardware/bios_setup/testint" = 60;\s*'
+                          r'"system/features/hardware/bios_setup/testjson" = nlist\(\s*'
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/hardware/bios_setup/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
-                          r'"/system/features/hardware/bios_setup/teststring" = "default";\s*',
+                          r'"system/features/hardware/bios_setup/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
+                          r'"system/features/hardware/bios_setup/teststring" = "default";\s*',
                           command)
 
     def test_110_iface_update(self):
@@ -78,20 +77,19 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                           command)
 
     def test_115_cat_iface_params(self):
-        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
-                   "--pre_feature"]
+        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"/system/features/interface/src_route/testboolean" = true;\s*'
-                          r'"/system/features/interface/src_route/testdefault" = "interface_feature";\s*'
-                          r'"/system/features/interface/src_route/testfalsedefault" = false;\s*'
-                          r'"/system/features/interface/src_route/testfloat" = 100\.100;\s*'
-                          r'"/system/features/interface/src_route/testint" = 60;\s*'
-                          r'"/system/features/interface/src_route/testjson" = nlist\(\s*'
+                          r'"system/features/interface/src_route/testboolean" = true;\s*'
+                          r'"system/features/interface/src_route/testdefault" = "interface_feature";\s*'
+                          r'"system/features/interface/src_route/testfalsedefault" = false;\s*'
+                          r'"system/features/interface/src_route/testfloat" = 100\.100;\s*'
+                          r'"system/features/interface/src_route/testint" = 60;\s*'
+                          r'"system/features/interface/src_route/testjson" = nlist\(\s*'
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/interface/src_route/testlist" = list\(\s*"newiface1",\s*"newiface2",\s*"newiface3"\s*\);\s*'
-                          r'"/system/features/interface/src_route/teststring" = "default";\s*',
+                          r'"system/features/interface/src_route/testlist" = list\(\s*"newiface1",\s*"newiface2",\s*"newiface3"\s*\);\s*'
+                          r'"system/features/interface/src_route/teststring" = "default";\s*',
                           command)
 
     def test_120_host_update(self):
@@ -110,7 +108,7 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                         "--path", "testjson/key", "--value", "new_key"])
 
     def test_125_cat_host_params(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/features/pre_host/testboolean" = false;\s*'

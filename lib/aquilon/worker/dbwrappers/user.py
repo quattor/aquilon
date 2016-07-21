@@ -19,12 +19,13 @@
 import logging
 
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import joinedload, subqueryload, undefer
+from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.util import KeyedTuple
 
 from aquilon.exceptions_ import ArgumentError, PartialError
 from aquilon.aqdb.model import User, Personality
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryPersonality)
 from aquilon.utils import chunk
 
 LOGGER = logging.getLogger(__name__)
@@ -131,14 +132,9 @@ class UserSync(object):
             q = q.filter(User.id.in_(dbuser.id for dbuser in userchunk))
             q = q.options(subqueryload('root_users'),
                           subqueryload('root_netgroups'),
-                          joinedload('stages'),
-                          subqueryload('stages.grns'),
-                          subqueryload('stages.features'),
-                          joinedload('stages.features.feature'),
-                          undefer('stages.features.feature.comments'),
-                          joinedload('stages.features.feature.param_def_holder'),
-                          subqueryload('stages.features.feature.param_def_holder.param_definitions'),
-                          subqueryload('stages.parameters'))
+                          joinedload('stages'))
+            q = q.options(PlenaryPersonality.query_options(prefix="stages.",
+                                                           load_personality=False))
             for p in q:
                 for dbuser in userset & set(p.root_users):
                     p.root_users.remove(dbuser)

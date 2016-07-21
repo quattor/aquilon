@@ -21,11 +21,10 @@ import os.path
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Domain, Sandbox
+from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.feature import (model_features,
-                                               personality_features,
-                                               check_feature_template)
+from aquilon.worker.dbwrappers.feature import check_feature_template
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
@@ -144,14 +143,14 @@ class CommandManageList(BrokerCommand):
                 personality_stages = set()
                 for dbobj in objects:
                     dbstage = dbobj.personality_stage
-                    arch = dbstage.archetype
 
                     personality_stages.add(dbstage)
                     if hasattr(dbobj, 'hardware_entity'):
-                        features[arch].update(model_features(dbobj.hardware_entity.model,
-                                                             arch, dbstage))
+                        feats = hardware_features(dbstage,
+                                                  dbobj.hardware_entity.model)
+                        features[dbstage.archetype].update(feats)
                 for dbstage in personality_stages:
-                    pre, post = personality_features(dbstage)
+                    pre, post = host_features(dbstage)
                     features[dbstage.archetype].update(pre)
                     features[dbstage.archetype].update(post)
 

@@ -15,19 +15,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.exceptions_ import (ArgumentError, InternalError,
-                                 AuthorizationException, UnimplementedError)
-from aquilon.aqdb.model import (Feature, Archetype, Personality,
-                                PersonalityStage, Model, Domain,
-                                CompileableMixin)
+from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
+                                 UnimplementedError)
+from aquilon.aqdb.model import (HostFeature, HardwareFeature, InterfaceFeature,
+                                Archetype, Personality, PersonalityStage, Model,
+                                Domain, CompileableMixin)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import (validate_justification,
+                                                         validate_prod_archetype,
                                                          validate_prod_personality)
-from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.dbwrappers.feature import (add_link, check_feature_template,
+                                               get_affected_plenaries)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindFeature(BrokerCommand):
@@ -37,45 +38,22 @@ class CommandBindFeature(BrokerCommand):
     def render(self, session, logger, feature, archetype, personality,
                personality_stage, model, vendor, interface, justification,
                reason, user, **_):
+        plenaries = PlenaryCollection(logger=logger)
 
-        # Binding a feature to a named interface makes sense in the scope of a
-        # personality, but not for a whole archetype.
-        if interface and not personality:
-            raise ArgumentError("Binding to a named interface needs "
-                                "a personality.")
-
-        if archetype:
-            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        else:
-            dbarchetype = None
-
-        feature_type = "host"
-
-        # Warning: order matters here!
         params = {}
+
+        # Step 1: define the target - either a personality or an archetype
         if personality:
             dbpersonality = Personality.get_unique(session,
                                                    name=personality,
-                                                   archetype=dbarchetype,
+                                                   archetype=archetype,
                                                    compel=True)
-            if not dbarchetype:
-                dbarchetype = dbpersonality.archetype
+            dbarchetype = dbpersonality.archetype
             dbstage = dbpersonality.active_stage(personality_stage)
-
-            personalities = [dbstage]
-
             params["personality_stage"] = dbstage
-            if interface:
-                params["interface_name"] = interface
-                feature_type = "interface"
         elif archetype:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             params["archetype"] = dbarchetype
-
-            q = session.query(PersonalityStage)
-            q = q.join(Personality)
-            q = q.options(contains_eager('personality'))
-            q = q.filter_by(archetype=dbarchetype)
-            personalities = q.all()
         else:
             # It's highly unlikely that a feature template would work for
             # _any_ archetype, so disallow this case for now. As I can't
@@ -84,27 +62,41 @@ class CommandBindFeature(BrokerCommand):
             raise ArgumentError("Please specify either an archetype or "
                                 "a personality when binding a feature.")
 
+        if not dbarchetype.is_compileable:
+            raise UnimplementedError("Binding features to non-compilable "
+                                     "archetypes is not implemented.")
+
+        # Binding a feature to a named interface makes sense in the scope of a
+        # personality, but not for a whole archetype.
+        if interface and not personality:
+            raise ArgumentError("Binding to a named interface needs "
+                                "a personality.")
+
+        # Step 2: parse the modifiers, and identify the feature
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
 
             if dbmodel.model_type.isNic():
-                feature_type = "interface"
+                feature_cls = InterfaceFeature
             else:
-                feature_type = "hardware"
+                feature_cls = HardwareFeature
 
             params["model"] = dbmodel
+        else:
+            feature_cls = HostFeature
+            dbmodel = None
 
-        if dbarchetype and not dbarchetype.is_compileable:
-            raise UnimplementedError("Binding features to non-compilable "
-                                     "archetypes is not implemented.")
+        if interface:
+            if dbmodel and not dbmodel.model_type.isNic():
+                raise ArgumentError("{0} is not a network interface model."
+                                    .format(dbmodel))
+            feature_cls = InterfaceFeature
+            params["interface_name"] = interface
 
-        if not feature_type:  # pragma: no cover
-            raise InternalError("Feature type is not known.")
+        dbfeature = feature_cls.get_unique(session, name=feature, compel=True)
 
-        dbfeature = Feature.get_unique(session, name=feature,
-                                       feature_type=feature_type, compel=True)
-
+        # Step 3: authorization
         if personality:
             if dbpersonality.owner_grn != dbfeature.owner_grn and \
                dbfeature.visibility == 'owner_only':
@@ -116,17 +108,13 @@ class CommandBindFeature(BrokerCommand):
             else:
                 validate_prod_personality(dbstage, user, justification, reason)
         else:
-            if personalities and not justification:
-                raise AuthorizationException("Changing feature bindings for "
-                                             "more than just a personality "
-                                             "requires --justification.")
-            validate_justification(user, justification, reason)
+            validate_prod_archetype(dbarchetype, user, justification, reason)
 
+        # Step 4: do it
+        get_affected_plenaries(session, dbfeature, plenaries, **params)
         self.do_link(session, logger, dbfeature, params)
-        session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(map(Plenary.get_plenary, personalities))
+        session.flush()
 
         plenaries.write(verbose=True)
 

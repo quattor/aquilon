@@ -18,65 +18,14 @@
 
 import os.path
 
+from sqlalchemy.orm import contains_eager, subqueryload
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import FeatureLink, Personality, PersonalityStage
-
+from aquilon.aqdb.model import (FeatureLink, Personality, PersonalityStage,
+                                HardwareFeature, HostFeature, HardwareEntity,
+                                Interface, Host)
+from aquilon.worker.templates import Plenary, PlenaryHost, PlenaryPersonality
 from aquilon.worker.templates.domain import template_branch_basedir
-
-
-def model_features(dbmodel, dbarch, dbstage, interface_name=None):
-    features = set()
-    for link in dbmodel.features:
-        if (link.archetype is None or link.archetype == dbarch) and \
-           (link.personality_stage is None or
-            link.personality_stage == dbstage) and \
-           (link.interface_name is None or link.interface_name == interface_name):
-            features.add(link.feature)
-
-    return features
-
-
-def personality_features(dbstage):
-    pre = set()
-    post = set()
-    for link in dbstage.archetype.features:
-        if link.model or link.interface_name:
-            continue
-        if link.feature.post_personality:
-            post.add(link.feature)
-        else:
-            pre.add(link.feature)
-
-    for link in dbstage.features:
-        if link.model or link.interface_name:
-            continue
-        if link.feature.post_personality:
-            post.add(link.feature)
-        else:
-            pre.add(link.feature)
-
-    return (pre, post)
-
-
-def interface_features(dbinterface, dbarch, dbstage):
-    features = set()
-
-    if dbinterface.model_allowed:
-        # Add features bound to the model
-        features.update(model_features(dbinterface.model, dbarch, dbstage,
-                                       dbinterface.name))
-
-    if dbstage:
-        # Add features bound to the personality, if the interface name matches
-        for link in dbstage.features:
-            # Model features were handled above
-            if link.model:
-                continue
-            if link.interface_name != dbinterface.name:
-                continue
-            features.add(link.feature)
-
-    return features
 
 
 def add_link(session, logger, dbfeature, params):
@@ -127,3 +76,52 @@ def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
 
     raise ArgumentError("{0} does not have templates present in {1:l} "
                         "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
+
+
+def get_affected_plenaries(session, dbfeature, plenaries,
+                           personality_stage=None, archetype=None, model=None,
+                           interface_name=None):
+    if isinstance(dbfeature, HostFeature):
+        if personality_stage:
+            plenaries.append(Plenary.get_plenary(personality_stage))
+        else:
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.filter_by(archetype=archetype)
+            q = q.options(contains_eager('personality'),
+                          subqueryload('personality.root_users'),
+                          subqueryload('personality.root_netgroups'))
+            q = q.options(PlenaryPersonality.query_options(load_personality=False))
+            plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)
+    else:
+        q = session.query(Host)
+        if personality_stage:
+            q = q.filter_by(personality_stage=personality_stage)
+        else:
+            q = q.join(PersonalityStage, Personality)
+            q = q.options(contains_eager('personality_stage'),
+                          contains_eager('personality_stage.personality'))
+            q = q.filter_by(archetype=archetype)
+
+        q = q.reset_joinpoint()
+        q = q.join(HardwareEntity)
+        q = q.options(contains_eager('hardware_entity'))
+
+        if isinstance(dbfeature, HardwareFeature):
+            q = q.filter_by(model=model)
+        else:
+            q = q.join(Interface)
+            # No contains_eager() due to the filtering
+            if model:
+                q = q.filter(Interface.model == model)
+            if interface_name:
+                q = q.filter(Interface.name == interface_name)
+
+        q = q.reset_joinpoint()
+
+        # Do an explicit inner join - using joinedload() would result in an
+        # outer join
+        q = q.join(HardwareEntity.primary_name)
+        q = q.options(contains_eager('hardware_entity.primary_name'))
+        q = q.options(PlenaryHost.query_options())
+        plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)

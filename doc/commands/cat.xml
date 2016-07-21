@@ -87,8 +87,6 @@
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg><option>--pre_feature</option></arg>
-	    <arg><option>--post_feature</option></arg>
 	    <arg><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
 	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
@@ -342,8 +340,7 @@
 		<listitem>
 		    <para>
 			Display the plenary of the given personality. If no other options are specified, the default
-			top-level plenary is displayed. Use options <option>--pre_feature</option>,
-			<option>--post_feature</option>, and <option>--param_tmpl</option> to select other related
+			top-level plenary is displayed. Use option <option>--param_tmpl</option> to select other related
 			templates.
 		    </para>
 		</listitem>
@@ -375,26 +372,6 @@
 		<listitem>
 		    <para>
 			Display the named parameter template.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--pre_feature</option>
-		</term>
-		<listitem>
-		    <para>
-			Display the template including features before the personality body.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--post_feature</option>
-		</term>
-		<listitem>
-		    <para>
-			Display the template including features after the personality body.
 		    </para>
 		</listitem>
 	    </varlistentry>
