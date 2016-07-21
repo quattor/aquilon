@@ -20,8 +20,8 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DnsRecord, ARecord, DynamicStub, Alias,
                                 SrvRecord, Fqdn, AddressAlias, ReservedName,
                                 DnsDomain, DnsEnvironment, Network,
-                                NetworkEnvironment, AddressAssignment,
-                                ServiceAddress)
+                                AddressAssignment, ServiceAddress)
+from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
@@ -102,14 +102,8 @@ class CommandSearchDns(BrokerCommand):
                 else:
                     q = q.with_polymorphic('*')
 
-        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
-                                                             network_environment)
-        if network_environment:
-            # The network environment determines the DNS environment
-            dbdns_env = dbnet_env.dns_environment
-        else:
-            dbdns_env = DnsEnvironment.get_unique_or_default(session,
-                                                             dns_environment)
+        dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
+                                               dns_environment)
 
         if fqdn:
             dbfqdn = Fqdn.get_unique(session, fqdn=fqdn,
