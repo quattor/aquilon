@@ -24,7 +24,7 @@ from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
                                  ProcessException)
-from aquilon.utils import force_ipv4
+from aquilon.utils import force_ipv4, validate_json
 from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import (NetworkDevice, ObservedMac, PortGroup, Network,
                                 NetworkEnvironment, VlanInfo)
@@ -109,6 +109,8 @@ class CommandPollNetworkDevice(BrokerCommand):
             raise ArgumentError("Failed to run network device discovery: %s" % err)
 
         macports = JSONDecoder().decode(out)
+        validate_json(self.config, macports, "discovered_macs",
+                      "discovered MACs")
         for (mac, port) in macports:
             update_or_create_observed_mac(session, netdev, port,
                                           MACAddress(mac), now)

@@ -16,40 +16,18 @@
 # limitations under the License.
 """Wrapper to make getting a machine simpler."""
 
-import json
-import os.path
-
-import jsonschema
-
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.types import CpuType
 from aquilon.aqdb.model import (Model, LocalDisk, VirtualDisk, Machine,
                                 VirtualMachine, Share, Filesystem)
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  generate_mac, set_port_group)
 from aquilon.worker.dbwrappers.resources import find_resource
-from aquilon.utils import force_mac
+from aquilon.utils import force_mac, validate_json
 
 
 def validate_recipe(config, recipe):
-    srcdir = config.get("broker", "srcdir")
-    schema_dir = os.path.join(srcdir, "etc", "schema")
-    schema_file = os.path.join(schema_dir, "machine_recipe.json")
-    resolver = jsonschema.RefResolver("file://" + schema_file, "machine_recipe.json")
-    format_checker = jsonschema.FormatChecker()
-
-    try:
-        with open(schema_file) as fp:
-            schema = json.load(fp)
-        jsonschema.Draft4Validator.check_schema(schema)
-    except Exception as err:
-        raise AquilonError("Failed to load %s: %s" % (schema_file, err))
-
-    try:
-        jsonschema.validate(recipe, schema, resolver=resolver,
-                            format_checker=format_checker)
-    except jsonschema.ValidationError as err:
-        raise ArgumentError("recipe validation failed: %s" % err)
+    validate_json(config, recipe, "machine_recipe", "recipe")
 
     # Type conversions not covered by the schema
     if "interfaces" in recipe:
