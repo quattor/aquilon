@@ -18,13 +18,17 @@
 
 from ipaddr import IPv4Network
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
+from aquilon.aqdb.model import (NetworkEnvironment, StaticRoute, Personality,
+                                PersonalityStage, Archetype, Host,
+                                HardwareEntity, Interface, AddressAssignment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.network import get_network_byip
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection, PlenaryHost
 
 
 class CommandAddStaticRoute(BrokerCommand):
@@ -102,7 +106,21 @@ class CommandAddStaticRoute(BrokerCommand):
         session.add(route)
         session.flush()
 
-        # TODO: refresh affected host templates
-        plenaries.write()
+        q = session.query(Host)
+        if dbstage:
+            q = q.filter_by(personality_stage=dbstage)
+        q = q.join(PersonalityStage, Personality, Archetype)
+        q = q.filter_by(is_compileable=True)
+        q = q.options(contains_eager('personality_stage'),
+                      contains_eager('personality_stage.personality'),
+                      contains_eager('personality_stage.personality.archetype'))
+        q = q.reset_joinpoint()
+
+        q = q.join(HardwareEntity, Interface, AddressAssignment)
+        q = q.filter_by(network=dbnetwork)
+        q = q.options(PlenaryHost.query_options())
+        plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+
+        plenaries.write(verbose=True)
 
         return
