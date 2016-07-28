@@ -36,7 +36,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record, grab_address
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address,
                                                  rename_interface)
-from aquilon.utils import first_of
+from aquilon.utils import first_of, validate_json
 
 
 def determine_helper_hostname(session, logger, config, dbnetdev):
@@ -229,6 +229,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
         raise ArgumentError("Failed to run switch discovery: %s" % err)
 
     data = JSONDecoder().decode(out)
+    validate_json(config, data, "network_device_discover", "discovered data")
 
     # Safety net: if the discovery program did not manage to collect any usable
     # information, do not do anything.
