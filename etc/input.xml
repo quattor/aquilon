@@ -6355,7 +6355,13 @@
 	<p/>
 	Supported options for --format: raw.
 	<optgroup mandatory="True" fields="all">
-	    <option name="archetype" type="string">Archetype</option>
+	    <optgroup fields="one">
+		<option name="archetype" type="string">Archetype</option>
+		<optgroup fields="all">
+		    <option name="feature" type="string">Feature</option>
+		    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+		</optgroup>
+	    </optgroup>
 	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
 	<transport method="get" path="find/parameter"/>

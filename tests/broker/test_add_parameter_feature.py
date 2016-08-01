@@ -427,6 +427,20 @@ class TestAddParameterFeature(TestBrokerCommand):
                           r'Type: string\s*',
                           command)
 
+    def test_310_search_parameter(self):
+        command = ["search_parameter", "--feature", "pre_host",
+                   "--type", "host", "--path", "testjson/values"]
+        out = self.commandtest(command)
+        self.output_equals(out,
+                           """
+                           Host Personality: inventory Archetype: aquilon
+                             testjson/values: [
+                                                1, 
+                                                2, 
+                                                3
+                                              ]
+                           """, command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddParameterFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)

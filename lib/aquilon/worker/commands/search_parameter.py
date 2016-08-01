@@ -17,7 +17,7 @@
 
 from six import iteritems
 
-from aquilon.aqdb.model import Archetype
+from aquilon.aqdb.model import Archetype, Feature
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
                                                  lookup_paramdef)
@@ -26,13 +26,15 @@ from aquilon.worker.formats.parameter import SimpleParameterList
 
 class CommandSearchParameter(BrokerCommand):
 
-    required_parameters = ['archetype', 'path']
+    required_parameters = ['path']
 
-    def render(self, session, archetype, path, **_):
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if not dbarchetype.param_def_holders:
-            return
+    def render(self, session, archetype, feature, type, path, **_):
+        if archetype:
+            defholder = Archetype.get_unique(session, archetype, compel=True)
+        else:
+            cls = Feature.polymorphic_subclass(type, "Unknown feature type")
+            defholder = cls.get_unique(session, name=feature, compel=True)
 
-        db_paramdef, _ = lookup_paramdef(dbarchetype, path)
-        params = search_path_in_personas(session, db_paramdef)
+        db_paramdef, rel_path = lookup_paramdef(defholder, path, strict=False)
+        params = search_path_in_personas(session, db_paramdef, rel_path)
         return SimpleParameterList(path, iteritems(params))
