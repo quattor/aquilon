@@ -19,9 +19,9 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import UnimplementedError
-from aquilon.aqdb.model import (DnsDomain, DnsRecord, Fqdn, ARecord,
-                                DnsEnvironment, NetworkEnvironment)
+from aquilon.aqdb.model import DnsDomain, DnsRecord, Fqdn, ARecord
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.dbwrappers.network import get_network_byip
 
 
@@ -32,9 +32,10 @@ def search_system_query(session, dns_record_type=DnsRecord, **kwargs):
     if dns_record_type is DnsRecord:
         q = q.with_polymorphic('*')
 
-    dbdns_env = DnsEnvironment.get_unique_or_default(session,
-                                                     kwargs.get("dns_environment",
-                                                                None))
+    dbnet_env, dbdns_env = get_net_dns_env(session,
+                                           kwargs.get('network_environment', None),
+                                           kwargs.get("dns_environment", None))
+
     q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id))
     q = q.filter_by(dns_environment=dbdns_env)
     q = q.options(contains_eager('fqdn'))
@@ -52,8 +53,6 @@ def search_system_query(session, dns_record_type=DnsRecord, **kwargs):
     if kwargs.get('ip', None):
         q = q.filter(ARecord.ip == kwargs['ip'])
     if kwargs.get('networkip', None):
-        net_env = kwargs.get('network_environment', None)
-        dbnet_env = NetworkEnvironment.get_unique_or_default(session, net_env)
         dbnetwork = get_network_byip(session, kwargs['networkip'], dbnet_env)
         q = q.filter(ARecord.network == dbnetwork)
     if kwargs.get('mac', None):

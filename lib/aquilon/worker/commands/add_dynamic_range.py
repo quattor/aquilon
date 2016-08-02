@@ -19,8 +19,8 @@ from ipaddr import IPv4Address
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
-                                AddressAssignment, NetworkEnvironment,
-                                DnsEnvironment)
+                                AddressAssignment)
+from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -35,8 +35,7 @@ class CommandAddDynamicRange(BrokerCommand):
     def render(self, session, logger, startip, endip, dns_domain, prefix, **_):
         if not prefix:
             prefix = 'dynamic'
-        dbnet_env = NetworkEnvironment.get_unique_or_default(session)
-        dbdns_env = DnsEnvironment.get_unique_or_default(session)
+        dbnet_env, dbdns_env = get_net_dns_env(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)
         if startnet != endnet:

@@ -80,6 +80,8 @@ from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.hostlifecycle import HostLifecycle
 from aquilon.aqdb.model.network_device import NetworkDevice
 from aquilon.aqdb.model.chassis import Chassis
+from aquilon.aqdb.model.disk import Disk, LocalDisk
+from aquilon.aqdb.model.machine_specs import MachineSpecs
 
 # HOST
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
@@ -105,13 +107,6 @@ from aquilon.aqdb.model.parameter_definition import (ParamDefinition, ParamDefHo
                                                      ArchetypeParamDef, FeatureParamDef)
 from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 
-# SERVICE
-from aquilon.aqdb.model.service import Service, PersonalityServiceListItem
-from aquilon.aqdb.model.service_instance import ServiceInstance
-from aquilon.aqdb.model.service_map import ServiceMap
-
-from aquilon.aqdb.model.disk import Disk, LocalDisk
-
 # CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
@@ -122,7 +117,11 @@ from aquilon.aqdb.model.cluster_group import ClusterGroup
 
 from aquilon.aqdb.model.virtual_switch import VirtualSwitch
 from aquilon.aqdb.model.metacluster import MetaCluster
-from aquilon.aqdb.model.machine_specs import MachineSpecs
+
+# SERVICE
+from aquilon.aqdb.model.service import Service, PersonalityServiceListItem
+from aquilon.aqdb.model.service_instance import ServiceInstance
+from aquilon.aqdb.model.service_map import ServiceMap
 
 from aquilon.aqdb.model.xtn import Xtn, XtnDetail, XtnEnd
 

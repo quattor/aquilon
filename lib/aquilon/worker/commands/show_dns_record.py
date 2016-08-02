@@ -19,11 +19,10 @@
 from sqlalchemy.orm import undefer, lazyload
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord,
-                                DnsEnvironment, NetworkEnvironment,
-                                Fqdn)
+from aquilon.aqdb.model import DnsRecord, ARecord, Alias, SrvRecord, Fqdn
+from aquilon.aqdb.model.network_environment import get_net_dns_env
+from aquilon.worker.broker import BrokerCommand
 
 
 DNS_RRTYPE_MAP = {'a': ARecord,
@@ -37,38 +36,30 @@ class CommandShowDnsRecord(BrokerCommand):
 
     def render(self, session, fqdn, record_type, dns_environment,
                network_environment=None, **_):
+        _, dbdns_env = get_net_dns_env(session, network_environment,
+                                       dns_environment)
 
-        if network_environment:
-            if not isinstance(network_environment, NetworkEnvironment):
-                network_environment = NetworkEnvironment.get_unique_or_default(session,
-                                                                               network_environment)
-            if not dns_environment:
-                dns_environment = network_environment.dns_environment
-
-        dbdns_env = DnsEnvironment.get_unique_or_default(session,
-                                                         dns_environment)
         # No compel here. query(DnsRecord).filter_by(fqdn=None) will fail if the
         # FQDN is invalid, and that will give a better error message.
-        dbfqdn = Fqdn.get_unique(session, fqdn=fqdn,
-                                 dns_environment=dbdns_env)
+        dbfqdn = Fqdn.get_unique(session, fqdn=fqdn, dns_environment=dbdns_env)
 
+        # We want to query(ARecord) instead of
+        # query(DnsRecord).filter_by(record_type='a_record'), because the former
+        # works for DynamicStub as well
         if record_type:
             if record_type in DNS_RRTYPE_MAP:
                 cls = DNS_RRTYPE_MAP[record_type]
             else:
                 cls = DnsRecord.polymorphic_subclass(record_type,
                                                      "Unknown DNS record type")
+            q = session.query(cls)
         else:
             cls = DnsRecord
+            q = session.query(cls)
+            q = q.with_polymorphic('*')
 
-        # We want to query(ARecord) instead of
-        # query(DnsRecord).filter_by(record_type='a_record'), because the former
-        # works for DynamicStub as well
-        q = session.query(cls)
         q = q.options(undefer('comments'),
                       lazyload('fqdn'))
-        if cls == DnsRecord:
-            q = q.with_polymorphic('*')
         q = q.filter_by(fqdn=dbfqdn)
         result = q.all()
         if not result:

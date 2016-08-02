@@ -162,7 +162,7 @@ def validate_required_parameter(param_def_holder, parameter):
     return errors
 
 
-def search_path_in_personas(session, db_paramdef):
+def search_path_in_personas(session, db_paramdef, path=None):
     q = session.query(PersonalityParameter)
     q = q.filter_by(param_def_holder=db_paramdef.holder)
     q = q.options(joinedload('personality_stage'),
@@ -170,7 +170,9 @@ def search_path_in_personas(session, db_paramdef):
 
     params = {}
 
-    path = db_paramdef.path
+    if not path:
+        path = db_paramdef.path
+
     for parameter in q:
         try:
             value = parameter.get_path(path)

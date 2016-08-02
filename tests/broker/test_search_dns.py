@@ -286,6 +286,21 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
         self.matchoutput(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
+    def testconflict1(self):
+        # The option is not valid for the given record type
+        command = ["search_dns", "--target", "foo.aqd-unittest.ms.com",
+                   "--record_type", "a"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Conflicting search criteria has been specified.",
+                         command)
+
+    def testconflict2(self):
+        # There is no record type which would support all of the options
+        command = ["search_dns", "--target", "foo.aqd-unittest.ms.com",
+                   "--ip", "10.0.0.1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Conflicting search criteria has been specified.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchDns)
