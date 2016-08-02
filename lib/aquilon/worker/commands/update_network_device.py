@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
+from aquilon.utils import validate_json
 
 
 class CommandUpdateNetworkDevice(BrokerCommand):
@@ -93,6 +94,9 @@ class CommandUpdateNetworkDevice(BrokerCommand):
             session.query(ObservedMac).filter_by(network_device=dbnetdev).delete()
 
         if discovered_macs:
+            validate_json(self.config, discovered_macs, "discovered_macs",
+                          "discovered MACs")
+
             now = datetime.now()
             for (macaddr, port) in discovered_macs:
                 update_or_create_observed_mac(session, dbnetdev, port,

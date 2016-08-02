@@ -145,6 +145,19 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown switch type 'no-such-type'.", command)
 
+    def testbadmac(self):
+        data = json.dumps([("bad-mac", "po1")])
+        command = ["update_network_device", "--network_device",
+                   "ut3gd1r01.aqd-unittest.ms.com", "--discovered_macs", data]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed validating u'pattern'", command)
+
+    def testmissingport(self):
+        data = json.dumps([("00:11:22:33:44:55",)])
+        command = ["update_network_device", "--network_device",
+                   "ut3gd1r01.aqd-unittest.ms.com", "--discovered_macs", data]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed validating u'minItems'", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkDeviceMac)

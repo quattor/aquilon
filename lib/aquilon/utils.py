@@ -33,10 +33,11 @@ from tempfile import mkstemp
 from uuid import UUID
 
 from ipaddr import IPv4Address, AddressValueError
+import jsonschema
 
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.config import Config
 from aquilon.aqdb.types.mac_address import MACAddress
 
@@ -349,3 +350,24 @@ class ProgressReport(object):
             self.last_report = now
             self.logger.client_info("Processing %s %d of %d..." %
                                     (self.item_name, self.count, self.total))
+
+
+def validate_json(config, data, schema_name, msg):
+    srcdir = config.get("broker", "srcdir")
+    schema_dir = os.path.join(srcdir, "etc", "schema")
+    schema_file = os.path.join(schema_dir, schema_name + ".json")
+    resolver = jsonschema.RefResolver("file://" + schema_file, schema_name + ".json")
+    format_checker = jsonschema.FormatChecker()
+
+    try:
+        with open(schema_file) as fp:
+            schema = json.load(fp)
+        jsonschema.Draft4Validator.check_schema(schema)
+    except Exception as err:
+        raise AquilonError("Failed to load %s: %s" % (schema_file, err))
+
+    try:
+        jsonschema.validate(data, schema, resolver=resolver,
+                            format_checker=format_checker)
+    except jsonschema.ValidationError as err:
+        raise ArgumentError("Failed to validate %s: %s" % (msg, err))
