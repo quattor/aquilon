@@ -49,10 +49,11 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                                              "max_members_default")
         self.output_equals(out, """
             MetaCluster: utmc1
-              Building: ut
-                Fullname: Unittest-building
-                Address: unittest address
-                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Member Location Constraint:
+                Building: ut
+                  Fullname: Unittest-building
+                  Address: unittest address
+                  Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: %s
               Build Status: build
               Cluster Personality: metacluster Archetype: metacluster
@@ -90,10 +91,11 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.output_equals(out, """
             MetaCluster: utmc2
-              Building: ut
-                Fullname: Unittest-building
-                Address: unittest address
-                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Member Location Constraint:
+                Building: ut
+                  Fullname: Unittest-building
+                  Address: unittest address
+                  Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: 99
               Build Status: build
               Cluster Personality: metacluster Archetype: metacluster

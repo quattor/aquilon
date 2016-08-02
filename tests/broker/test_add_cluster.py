@@ -47,10 +47,11 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                                          "max_members_default")
         self.output_equals(out, """
             High Availability Cluster: utvcs1
-              Building: ut
-                Fullname: Unittest-building
-                Address: unittest address
-                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Member Location Constraint:
+                Building: ut
+                  Fullname: Unittest-building
+                  Address: unittest address
+                  Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: %s
               Down Hosts Threshold: 0
               Build Status: build
@@ -116,10 +117,11 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.output_equals(out, """
             Grid Cluster: utgrid1
-              Building: ut
-                Fullname: Unittest-building
-                Address: unittest address
-                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Member Location Constraint:
+                Building: ut
+                  Fullname: Unittest-building
+                  Address: unittest address
+                  Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: unlimited
               Down Hosts Threshold: 0 (5%)
               Maintenance Threshold: 0 (6%)
