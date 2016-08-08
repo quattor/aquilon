@@ -27,19 +27,19 @@ from aquilon.aqdb.model.host_environment import Production
 
 TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
 SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
-EMERG_RE = re.compile("emergency")
+EMERG_RE = re.compile("^emergency$")
 
 
 def validate_justification(user, justification, reason):
-    result = None
     for valid_re in [TCM_RE, SN_RE, EMERG_RE]:
         result = valid_re.search(justification)
         if result:
             break
-    if not result:
+    else:
         raise ArgumentError("Failed to parse the justification: expected "
-                            "tcm=NNNNNNNNN or sn=XXXNNNNN.")
-    if justification == 'emergency' and not reason:
+                            "tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.")
+
+    if EMERG_RE.search(justification) and not reason:
         raise AuthorizationException("Justification of 'emergency' requires "
                                      "--reason to be specified.")
 

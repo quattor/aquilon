@@ -63,7 +63,10 @@ class TestRootAccess(TestBrokerCommand):
         command = ["grant_root_access", "--user", "testuser1",
                    "--personality", "unknownpersonality", "--justification", "foo"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Failed to parse the justification: expected tcm=NNNNNNNNN or sn=XXXNNNNN", command)
+        self.matchoutput(out,
+                         "Failed to parse the justification: "
+                         "expected tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.",
+                         command)
 
     def test_230_map_personality_invalidpersonality(self):
         command = ["grant_root_access", "--user", "testuser1",
