@@ -312,10 +312,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_300_show_personality_all(self):
         command = "show_personality --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out, "Personality: generic Archetype: aurora",
-                         command)
+        self.matchoutput(out, "aquilon/utunused/dev", command)
+        self.matchoutput(out, "aurora/generic", command)
 
     def test_300_show_personality_all_proto(self):
         command = "show_personality --all --format=proto"
@@ -342,29 +340,12 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.assertFalse("current" in archetypes["aquilon"]["unixeng-test"])
         self.assertTrue("next" in archetypes["aquilon"]["unixeng-test"])
 
-    def test_300_show_personality_archetype(self):
-        command = "show_personality --archetype aquilon"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out, "Personality: inventory Archetype: aquilon",
-                         command)
-        self.matchclean(out, "aurora", command)
-
     def test_300_show_personality_name(self):
         command = "show_personality --personality generic"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: generic Archetype: aurora",
-                         command)
-        self.matchoutput(out, "Personality: generic Archetype: windows",
-                         command)
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Personality generic is not unique.", command)
 
     def test_400_show_archetype_unavailable(self):
-        command = "show_personality --archetype archetype-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Archetype archetype-does-not-exist", command)
-
-    def test_400_show_archetype_unavailable2(self):
         command = ["show_personality",
                    "--archetype", "archetype-does-not-exist",
                    "--personality", "personality-does-not-exist"]
@@ -381,7 +362,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_400_show_personality_unavailable2(self):
         command = ["show_personality",
                    "--personality", "personality-does-not-exist"]
-        self.noouttest(command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist not found.",
+                         command)
 
     def test_400_show_missing_stage(self):
         command = ["show_personality", "--personality", "nostage",

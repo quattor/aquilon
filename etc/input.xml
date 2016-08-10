@@ -3756,18 +3756,16 @@
     <command name="show_personality">
 	Show personality details.  Specifying both name and archetype will
 	uniquely identify a personality.
-	<p/>
-	If the domain option is given that domain will be searched for
-	information about the personality's thresholds.
-	<optgroup mandatory="True">
-	    <option name="personality" type="string" conflicts="all">Personality name (same name may be in multiple archetypes)</option>
-	    <option name="archetype" type="string" conflicts="all">Which archetype to use</option>
-	    <option name="all" type="flag" conflicts="personality archetype">Show all</option>
+	<optgroup mandatory="True" fields="one">
+	    <option name="personality" type="string">Personality name (same name may be in multiple archetypes)</option>
+	    <option name="all" type="flag">List all personalities</option>
 	</optgroup>
 	<optgroup>
-	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
+	    <option name="archetype" requires="personality" type="string" conflicts="all">Which archetype to use</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	</optgroup>
-	<transport method="get" path="personality"/>
+	<transport trigger="personality" method="get" path="personality/guess_archetype/%(personality)s"/>
+	<transport trigger="all" method="get" path="personality"/>
 	<format name="proto" >
 	    <message_class name="PersonalityList" module="aqdsystems_pb2"/>
 	</format>

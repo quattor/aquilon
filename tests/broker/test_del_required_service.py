@@ -132,8 +132,8 @@ class TestDelRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
         self.matchclean(out, "Service: vmseasoning", command)
-        command = ["show_personality",
-                   "--archetype=esx_cluster"]
+
+        command = ["search_personality", "--archetype=esx_cluster", "--fullinfo"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
 
