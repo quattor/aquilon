@@ -59,7 +59,6 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1001_verify_machine_plenary(self):
         command = ["cat", "--machine=ut9s03p45"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"rack/room" = "utroom2";', command)
         self.matchoutput(out, '"sysloc/room" = "utroom2";', command)
         self.matchoutput(out, '"sysloc/bunker" = "bucket2.ut";', command)
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
