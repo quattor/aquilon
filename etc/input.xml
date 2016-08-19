@@ -2650,6 +2650,8 @@
 	<optgroup>
 	    <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
 	    <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
+	    <option name="merge_strategy" type="string">Git merge strategy to use</option>
+	    <option name="strategy_options" type="string" requires="merge_strategy">Extra options to pass to the merge strategy</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Reason of the deployment to record in the commit log. Mandatory if justification is emergency</option>
 	</optgroup>

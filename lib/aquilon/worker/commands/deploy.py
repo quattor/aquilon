@@ -16,6 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq deploy`."""
 
+import re
+
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch, Sandbox
@@ -25,13 +27,21 @@ from aquilon.worker.dbwrappers.change_management import validate_justification
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 
+# Merge strategies and strategy option regexes we accept. The list intentionally
+# contains just a small subset of what git can do.
+_git_strategies = {
+    "resolve": None,
+    "recursive": re.compile("^(no-renames)$"),
+}
+
 
 class CommandDeploy(BrokerCommand):
 
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               justification, reason, user, requestid, **_):
+               merge_strategy, strategy_options, justification, reason, user,
+               requestid, **_):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -76,6 +86,17 @@ class CommandDeploy(BrokerCommand):
                                     "domain that does not contain the commit "
                                     "where the sandbox was branched from.")
 
+        merge_args = []
+        if merge_strategy:
+            if merge_strategy not in _git_strategies:
+                raise ArgumentError("Unknown or unsupported merge strategy.")
+            merge_args.extend("-s", merge_strategy)
+            if strategy_options:
+                if not _git_strategies[merge_strategy] or \
+                   not _git_strategies[merge_strategy].search(strategy_options):
+                    raise ArgumentError("Unknown or unsupported strategy options.")
+                merge_args.extend("-X", strategy_options)
+
         kingrepo = GitRepo(self.config.get("broker", "kingdir"), logger)
         with kingrepo.temp_clone(dbtarget.name) as temprepo:
             # We could try to use fmt-merge-msg but its usage is so obscure that
@@ -92,9 +113,12 @@ class CommandDeploy(BrokerCommand):
                 merge_msg.append("Reason: %s" % reason)
 
             try:
-                temprepo.run(["merge", "--no-ff", "origin/%s" % dbsource.name,
-                              "-m", "\n".join(merge_msg)],
-                             stream_level=CLIENT_INFO)
+                cmd = ["merge", "--no-ff", "origin/%s" % dbsource.name,
+                       "-m", "\n".join(merge_msg)]
+                if merge_args:
+                    cmd.extend(merge_args)
+
+                temprepo.run(cmd, stream_level=CLIENT_INFO)
             except ProcessException as e:
                 # No need to re-print e, output should have gone to client
                 # immediately via the logger.
