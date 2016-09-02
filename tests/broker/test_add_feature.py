@@ -30,15 +30,15 @@ from brokertest import TestBrokerCommand
 
 default_features = {
     "host": {
-        "pre_host": {
+        "post_host": {
             "visibility": "public",
             "comments": "Some feature comments",
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "post_host": {
+        "pre_host": {
             "visibility": "public",
-            "post_personality": True,
+            "pre_personality": True,
             "activation": "reboot",
             "deactivation": "reboot",
         },
@@ -106,8 +106,8 @@ class TestAddFeature(TestBrokerCommand):
                     command.extend(["--activation", params["activation"]])
                 if "deactivation" in params:
                     command.extend(["--deactivation", params["deactivation"]])
-                if params.get("post_personality", False):
-                    command.append("--post_personality")
+                if params.get("pre_personality", False):
+                    command.append("--pre_personality")
                 if "comments" in params:
                     command.extend(["--comments", params["comments"]])
 
@@ -124,7 +124,6 @@ class TestAddFeature(TestBrokerCommand):
               Activation: reboot
               Deactivation: reboot
               Template: features/pre_host
-              Comments: Some feature comments
             """, command)
 
     def test_105_verify_post_host(self):
@@ -138,6 +137,7 @@ class TestAddFeature(TestBrokerCommand):
               Activation: reboot
               Deactivation: reboot
               Template: features/post_host
+              Comments: Some feature comments
             """, command)
 
     def test_105_verify_hw(self):
@@ -211,21 +211,17 @@ class TestAddFeature(TestBrokerCommand):
         self.assertIn("shinynew", result["hardware"])
         self.assertIn("shinynew", result["interface"])
 
-    def test_200_post_hw(self):
-        command = ["add", "feature", "--feature", "post_hw",
-                   "--eon_id", 2, "--type", "hardware", "--post_personality"]
+    def test_200_pre_hw(self):
+        command = ["add", "feature", "--feature", "pre_hw",
+                   "--eon_id", 2, "--type", "hardware", "--pre_personality"]
         command.extend(default_activation)
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out, "The post_personality attribute is implemented "
-                         "only for host features.", command)
+        out = self.noouttest(command)
 
-    def test_200_post_iface(self):
-        command = ["add", "feature", "--feature", "post_iface",
-                   "--eon_id", 2, "--type", "interface", "--post_personality"]
+    def test_200_pre_iface(self):
+        command = ["add", "feature", "--feature", "pre_iface",
+                   "--eon_id", 2, "--type", "interface", "--pre_personality"]
         command.extend(default_activation)
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out, "The post_personality attribute is implemented "
-                         "only for host features.", command)
+        self.noouttest(command)
 
     def test_200_hw_prefix(self):
         command = ["add", "feature", "--feature", "hardware/host",
@@ -278,18 +274,30 @@ class TestAddFeature(TestBrokerCommand):
                          "start with a dot.", command)
 
     def test_210_verify_post_hw(self):
-        command = ["show", "feature", "--feature", "post_hw",
+        command = ["show", "feature", "--feature", "pre_hw",
                    "--type", "hardware"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Hardware Feature post_hw not found.",
-                         command)
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Hardware Feature: pre_hw
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: restricted
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/hardware/pre_hw
+            """, command)
 
-    def test_210_verify_post_iface(self):
-        command = ["show", "feature", "--feature", "post_iface",
+    def test_210_verify_pre_iface(self):
+        command = ["show", "feature", "--feature", "pre_iface",
                    "--type", "interface"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Interface Feature post_iface not found.",
-                         command)
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Interface Feature: pre_iface
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: restricted
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/interface/pre_iface
+            """, command)
 
     def test_210_verify_hw_prefix(self):
         command = ["show", "feature", "--feature", "hardware/host",

@@ -6019,7 +6019,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="post_personality" type="flag">Call the feature after the personality</option>
+	    <option name="pre_personality" type="flag">Call the feature before the personality</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="visibility" type="string">scope of the feature
         values are public, restricted (default), owner_only, owner_approved</option>
