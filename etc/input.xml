@@ -2568,8 +2568,9 @@
 
     <command name="del_domain">
 	Removes the specified template domain.  This will fail if there are
-	hosts still being managed by the domain: you must use the "manage"
-	command to reassign those hosts to other domains.
+	hosts still being managed by the domain (use the "manage"
+	command to reassign those hosts to other domains), or if the
+    domain is a non-tracking domain which has not been set as archived.
 	<optgroup mandatory="True" fields="all">
 	    <option name="domain" type="string">Name of the domain to be deleted</option>
 	</optgroup>
