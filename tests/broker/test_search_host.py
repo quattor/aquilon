@@ -29,14 +29,14 @@ from brokertest import TestBrokerCommand
 class TestSearchHost(TestBrokerCommand):
     def testorphaned(self):
         command = "manage --hostname unittest02.one-nyp.ms.com --sandbox orphantestuser/orphantestsandbox --force"
-        self.noouttest(command.split(" "))
+        self.statustest(command.split(" "))
         command = "del user --username orphantestuser"
         self.noouttest(command.split(" "))
         command = "search host --orphaned"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
         command = "manage --hostname unittest02.one-nyp.ms.com --domain unittest --force"
-        self.noouttest(command.split(" "))
+        self.statustest(command.split(" "))
         command = "reconfigure --hostname unittest02.one-nyp.ms.com"
         self.successtest(command.split(" "))
         
