@@ -367,7 +367,15 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD, "--personality_stage", "next"]
         self.statustest(command)
 
-    def test_600_update_personality_reason(self):
+    def test_601_bad_justification(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "something emergency"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Failed to parse the justification", command)
+
+    def test_605_update_personality_reason(self):
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", PPROD,
