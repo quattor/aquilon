@@ -21,6 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, HostEnvironment, Service,
                                 PersonalityServiceListItem)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
@@ -57,6 +58,12 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
             dbenv = None
         validate_prod_personality(dbstage, user, justification, reason)
 
+        plenaries = PlenaryCollection(logger=logger)
+        if dbstage.created_implicitly:
+            plenaries.append(Plenary.get_plenary(dbstage))
+
         self._update_dbobj(logger, dbstage, dbservice, dbenv)
         session.flush()
+
+        plenaries.write()
         return

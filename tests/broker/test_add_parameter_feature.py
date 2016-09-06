@@ -38,7 +38,8 @@ class TestAddParameterFeature(TestBrokerCommand):
                    "--path", "testdefault", "--value", "testvalue"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Hardware Feature bios_setup is not bound to "
-                         "personality aquilon/compileserver.", command)
+                         "personality aquilon/compileserver, or it "
+                         "does not have any parameters defined.", command)
 
     def test_020_bind_hardware_feature(self):
         self.statustest(["bind_feature", "--feature", "bios_setup",
@@ -362,7 +363,8 @@ class TestAddParameterFeature(TestBrokerCommand):
                    "--value", "some_value"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Host Feature unused_no_params is not bound to "
-                         "personality aquilon/unixeng-test@next.", command)
+                         "personality aquilon/unixeng-test@next, or it "
+                         "does not have any parameters defined.", command)
 
     def test_200_add_hw_existing(self):
         command = ["add_parameter", "--personality", "compileserver",

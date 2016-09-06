@@ -18,20 +18,24 @@
 
 from ipaddr import IPv4Network
 
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
+from aquilon.aqdb.model import (NetworkEnvironment, StaticRoute, Personality,
+                                PersonalityStage, Archetype, Host,
+                                HardwareEntity, Interface, AddressAssignment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.templates import Plenary, PlenaryCollection, PlenaryHost
 
 
 class CommandDelStaticRoute(BrokerCommand):
 
     required_parameters = ["gateway", "ip"]
 
-    def render(self, session, gateway, ip, netmask, prefixlen,
+    def render(self, session, logger, gateway, ip, netmask, prefixlen,
                network_environment, archetype, personality, personality_stage,
                justification, reason, user, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -43,21 +47,22 @@ class CommandDelStaticRoute(BrokerCommand):
         else:
             dest = IPv4Network("%s/%s" % (ip, prefixlen))
 
+        plenaries = PlenaryCollection(logger=logger)
+
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
             validate_prod_personality(dbstage, user, justification, reason)
+            if dbstage.created_implicitly:
+                plenaries.append(Plenary.get_plenary(dbstage))
         else:
             dbstage = None
 
         q = session.query(StaticRoute)
-        q = q.filter_by(network=dbnetwork)
-        q = q.filter_by(gateway_ip=gateway)
-        q = q.filter_by(dest_ip=dest.ip)
-        q = q.filter_by(dest_cidr=dest.prefixlen)
-        q = q.filter_by(personality_stage=dbstage)
+        q = q.filter_by(network=dbnetwork, gateway_ip=gateway, dest_ip=dest.ip,
+                        dest_cidr=dest.prefixlen, personality_stage=dbstage)
 
         try:
             dbroute = q.one()
@@ -68,5 +73,21 @@ class CommandDelStaticRoute(BrokerCommand):
         session.delete(dbroute)
         session.flush()
 
-        # TODO: refresh affected host templates
+        q = session.query(Host)
+        if dbstage:
+            q = q.filter_by(personality_stage=dbstage)
+        q = q.join(PersonalityStage, Personality, Archetype)
+        q = q.filter_by(is_compileable=True)
+        q = q.options(contains_eager('personality_stage'),
+                      contains_eager('personality_stage.personality'),
+                      contains_eager('personality_stage.personality.archetype'))
+        q = q.reset_joinpoint()
+
+        q = q.join(HardwareEntity, Interface, AddressAssignment)
+        q = q.filter_by(network=dbnetwork)
+        q = q.options(PlenaryHost.query_options())
+        plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+
+        plenaries.write(verbose=True)
+
         return

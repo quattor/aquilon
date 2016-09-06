@@ -21,8 +21,10 @@ import re
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import relation, backref, deferred, object_session
+from sqlalchemy.orm import (relation, backref, deferred, object_session,
+                            reconstructor)
 from sqlalchemy.orm.collections import column_mapped_collection
+from sqlalchemy.util import memoized_property
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -133,6 +135,7 @@ class Personality(Base):
                 session = object_session(self)
                 with session.no_autoflush:
                     dbstage = self.stages["current"].copy(name="next")
+                    dbstage.created_implicitly = True
                     self.stages["next"] = dbstage
 
             return self.stages["next"]
@@ -222,6 +225,32 @@ class PersonalityStage(Base):
                 session.add(dst_route)
 
         return new
+
+    def __init__(self, *args, **kwargs):
+        # This flag is used to track if plenaries need to be created for a newly
+        # created 'next' stage, even if existing plenaries would not have to be
+        # updated.
+        # TODO: can we just ask this information from SQLAlchemy?
+        self.created_implicitly = False
+
+        super(PersonalityStage, self).__init__(*args, **kwargs)
+
+    @reconstructor
+    def setup(self):
+        # Loading an object from the DB does not call __init__
+        self.created_implicitly = False
+
+    @memoized_property
+    def param_features(self):
+        """
+        Return the features which can have parameters set
+
+        The feature should be bound directly to the personality rather than
+        indirectly to the whole archetype, and the feature should at least
+        have a parameter definition holder.
+        """
+        return frozenset(link.feature for link in self.features
+                         if link.feature.param_def_holder)
 
 
 class PersonalityGrnMap(Base):

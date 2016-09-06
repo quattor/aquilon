@@ -198,10 +198,7 @@ def validate_personality_config(dbstage):
         error += validate_required_parameter(param_def_holder, parameter)
 
     # Validate feature parameters
-    features = set(link.feature
-                   for link in dbstage.features + dbarchetype.features
-                   if link.feature.param_def_holder)
-    for dbfeature in features:
+    for dbfeature in dbstage.param_features:
         param_def_holder = dbfeature.param_def_holder
         parameter = dbstage.parameters.get(param_def_holder, None)
         tmp_error = validate_required_parameter(param_def_holder, parameter)

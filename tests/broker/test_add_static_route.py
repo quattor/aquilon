@@ -44,14 +44,14 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23",
                    "--comments", "Some route comments"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_100_add_route1_personality(self):
         gw = self.net["routing1"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", "inventory"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_100_add_route2(self):
         gw = self.net["routing2"].usable[-1]
@@ -93,7 +93,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
         gw = self.net["unknown0"].gateway
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "250.250.0.0", "--prefixlen", "16"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_130_add_non_network_ip(self):
         gw = self.net["unknown0"].gateway
@@ -139,8 +139,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
         eth1_net = self.net["routing1"]
         eth1_ip = eth1_net.usable[0]
         eth1_gw = eth1_net.usable[-1]
-        command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
-                   "--data", "--generate"]
+        command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"system/network/interfaces/eth0" = nlist\(\s*'
@@ -187,8 +186,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
         eth1_net = self.net["routing1"]
         eth1_ip = eth1_net.usable[1]
         eth1_gw = eth1_net.usable[-1]
-        command = ["cat", "--hostname", "unittest27.aqd-unittest.ms.com",
-                   "--data", "--generate"]
+        command = ["cat", "--hostname", "unittest27.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"system/network/interfaces/eth0" = nlist\(\s*'
@@ -243,8 +241,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
     def test_240_verify_cat_unittest02(self):
         net = self.net["unknown0"]
         eth0_ip = net.usable[0]
-        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data",
-                   "--generate"]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"system/network/interfaces/eth0" = nlist\(\s*'

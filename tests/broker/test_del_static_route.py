@@ -33,7 +33,7 @@ class TestDelStaticRoute(MachineTestMixin, TestBrokerCommand):
         gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def testdelroute1again(self):
         gw = self.net["routing1"].usable[-1]
@@ -50,7 +50,7 @@ class TestDelStaticRoute(MachineTestMixin, TestBrokerCommand):
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", "inventory"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def testdelroute2(self):
         gw = self.net["routing2"].usable[-1]
@@ -75,7 +75,7 @@ class TestDelStaticRoute(MachineTestMixin, TestBrokerCommand):
         gw = self.net["unknown0"].gateway
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "250.250.0.0", "--prefixlen", "16"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def testverifynetwork(self):
         command = ["show", "network", "--ip", self.net["routing1"].ip]
@@ -90,8 +90,7 @@ class TestDelStaticRoute(MachineTestMixin, TestBrokerCommand):
     def testverifyunittest26(self):
         net = self.net["routing1"]
         ip = net.usable[0]
-        command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com",
-                   "--data", "--generate"]
+        command = ["cat", "--hostname", "unittest26.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"system/network/interfaces/eth1" = nlist\(\s*'
