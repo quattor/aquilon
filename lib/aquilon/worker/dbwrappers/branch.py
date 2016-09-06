@@ -58,7 +58,7 @@ def parse_sandbox(session, sandbox, default_author=None):
 
 
 def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
-                          compel=False):
+                          orphaned=False, compel=False):
     dbbranch = None
     dbauthor = None
 
@@ -73,7 +73,8 @@ def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
             raise ArgumentError("Expected sandbox as 'author/branch', author "
                                 "name and branch name separated by a slash.")
         dbbranch = Sandbox.get_unique(session, name, compel=True)
-        dbauthor = User.get_unique(session, author, compel=True)
+        if not orphaned:
+            dbauthor = User.get_unique(session, author, compel=True)
     elif compel:
         raise ArgumentError("Please specify either sandbox or domain.")
 

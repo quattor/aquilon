@@ -63,6 +63,7 @@
 		    <arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
 		    <arg choice="plain"><option>--branch <replaceable>NAME</replaceable></option></arg>
 		    <arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
+		    <arg><option>--orphaned</option></arg>
 		</group>
 		<arg><option>--server_of_service <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
@@ -399,6 +400,16 @@
 		    <para>
 			Look for hosts that are in the given template branch (domain or sandbox). The <option>--branch</option>
 			variant matches both domains and sandboxes.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--orphaned</option>
+		</term>
+		<listitem>
+		    <para>
+			Look for hosts that are in any sandbox which does not have a valid owner.
 		    </para>
 		</listitem>
 	    </varlistentry>

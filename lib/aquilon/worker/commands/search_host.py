@@ -29,7 +29,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 Fqdn, DnsDomain, Interface, AddressAssignment,
                                 NetworkEnvironment, Network, MetaCluster,
                                 VirtualMachine, ClusterResource, HardwareEntity,
-                                HostEnvironment, User)
+                                HostEnvironment, User, Branch)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
@@ -52,7 +52,7 @@ class CommandSearchHost(BrokerCommand):
                sandbox, branch, sandbox_author, dns_domain, shortname, mac, ip,
                networkip, network_environment, exact_location, metacluster,
                server_of_service, server_of_instance, grn, eon_id, fullinfo,
-               style, **arguments):
+               orphaned, style, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -160,13 +160,18 @@ class CommandSearchHost(BrokerCommand):
 
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox,
-                                                   branch=branch)
+                                                   branch=branch, orphaned=orphaned)
         if sandbox_author:
             dbauthor = User.get_unique(session, sandbox_author, compel=True)
 
         if dbbranch:
             q = q.filter_by(branch=dbbranch)
-        if dbauthor:
+
+        if orphaned:
+            q = q.join(Branch)
+            q = q.filter(Branch.branch_type == "sandbox")
+            q = q.filter(Host.sandbox_author_id == None)
+        elif dbauthor:
             q = q.filter_by(sandbox_author=dbauthor)
 
         # Just do the lookup here, filtering will happen later
