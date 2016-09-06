@@ -36,8 +36,9 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                                want_exist=True)
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
-        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                        "--sandbox", "%s/changetest1" % self.user, "--force"])
+        command = ["manage", "--hostname", "unittest02.one-nyp.ms.com", "--sandbox", "%s/changetest1" % self.user, "--force"]
+        out, err = self.successtest(command)
+        self.matchoutput(err, 'Moving host unittest02.one-nyp.ms.com from domain unittest to sandbox changetest1', command)
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
 
@@ -75,7 +76,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(host.domain.type, host.domain.SANDBOX)
 
     def test_108_manage_unittest02_again(self):
-        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+        self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
                         "--sandbox", "%s/changetest1" % self.user])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
@@ -90,7 +91,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
     def test_110_manage_server1(self):
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
-        self.noouttest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
+        self.successtest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
                         "--domain", "unittest", "--force"])
         command = ["cat", "--hostname", "server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -108,7 +109,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                                want_exist=True)
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
-        self.noouttest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
+        self.successtest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
                         "--sandbox", "%s/changetest2" % self.user, "--force"])
         self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
                                want_exist=False)
@@ -135,7 +136,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         # latest commit does not exist in template-king
         command = ["manage", "--metacluster", "utmc1",
                    "--sandbox", "%s/utsandbox" % self.user, "--force"]
-        self.noouttest(command)
+        self.successtest(command)
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False)
         for host in hosts:
             self.verify_buildfiles("unittest", host, want_exist=False)
@@ -187,14 +188,14 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(mc.domain.type, mc.domain.SANDBOX)
 
     def test_140_xml_profiles(self):
-        self.noouttest(["manage", "--domain", "unittest-xml", "--force",
+        self.successtest(["manage", "--domain", "unittest-xml", "--force",
                         "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-xml", "unittest20.aqd-unittest.ms.com",
                                xml=True, json=False)
 
     def test_145_json_profiles(self):
-        self.noouttest(["manage", "--domain", "unittest-json", "--force",
+        self.successtest(["manage", "--domain", "unittest-json", "--force",
                         "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-json", "unittest20.aqd-unittest.ms.com",
@@ -206,7 +207,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                         "--type", "host", "--eon_id", 2,
                         "--visibility", "public",
                         "--activation", "rebuild", "--deactivation", "reboot"])
-        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+        self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
                         "--domain", "unittest", "--force"])
         self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
                          "--personality", "featuretest"])
@@ -221,7 +222,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                          command)
 
     def test_152_move_aquilon68_to_sandbox(self):
-        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+        self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
                         "--sandbox", "%s/utsandbox" % self.user, "--force"])
 
     def test_153_bind_feature(self):
@@ -243,11 +244,11 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_155_manage_notemplate_force(self):
         # --force means you know what you're doing...
-        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+        self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
                         "--domain", "unittest", "--force"])
 
     def test_159_cleanup_featuretest(self):
-        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+        self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
                         "--sandbox", "%s/utsandbox" % self.user, "--force"])
         self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
                          "--personality", "inventory"])
@@ -266,7 +267,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.gitcommand(["clone", kingdir, dst_dir, "--branch", "othersandbox"])
 
     def test_161_manage_host(self):
-        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+        self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
                         "--sandbox", "otheruser/othersandbox", "--force"])
 
     def test_162_del_otheruser(self):
@@ -297,7 +298,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                          "is missing sandbox author information.", command)
 
     def test_169_manage_back(self):
-        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+        self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
                         "--sandbox", "%s/changetest1" % self.user, "--force"])
 
     def test_200_nomanage_host(self):
