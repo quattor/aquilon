@@ -49,6 +49,13 @@ class TestDelSandbox(TestBrokerCommand):
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
         rmtree(sandboxdir, ignore_errors=True)
 
+    def test_121_del_umasktest(self):
+        command = "del sandbox --sandbox umasktest"
+        err = self.statustest(command.split(" "))
+        sandboxdir = os.path.join(self.sandboxdir, "umasktest")
+        self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
+
     def test_130_del_changetest2(self):
         command = "del sandbox --sandbox changetest2"
         sandboxdir = os.path.join(self.sandboxdir, "changetest2")
