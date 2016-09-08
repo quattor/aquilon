@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_update_disk"
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+	<refentrytitle>aq_update_filesystem</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+	<refname>aq update filesystem</refname>
+	<refpurpose>
+	    Update the parameters of a filesystem
+	</refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update filesystem</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+                <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+                <arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+                <arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+            </group>
+            <arg choice="plain"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
+            <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+            <arg choice="plain"><option>--mountpoint <replaceable>PATHNAME</replaceable></option></arg>
+            <arg choice="plain"><option>--blockdevice <replaceable>PATHNAME</replaceable></option></arg>
+            <group choice="req">
+                <arg choice="plain"><option>--bootmount</option></arg>
+                <arg choice="plain"><option>--nobootmount</option></arg>
+            </group>
+            <arg><option>--dumpfreq <replaceable>DUMPFREQ</replaceable></option></arg>
+            <arg><option>--fsckpass <replaceable>PASSNO</replaceable></option></arg>
+            <arg><option>--options <replaceable>OPTIONS</replaceable></option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+	<title>Description</title>
+	<para>
+	    The <command>aq update filesystem</command> command updates the parameters of an existing filesystem.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+                </term>
+                <listitem>
+                    <para>
+                        Specify the target host for the filesystem.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target cluster for the filesystem.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target metacluster for the filesystem.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target resourcegroup for the filesystem.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--filesystem <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        A name for the filesystem. This is the internal name
+                        which must be unique for the specific host.
+                        For example, "root" or "datadisk1".  The name
+                        must consist of only alphanumeric characters.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--type <replaceable>TYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The type of the filesystem. For example "ext3", "nfs",
+                        etc.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--mountpoint <replaceable>MOUNTPOINT</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The path for where to mount the filesystem. For example,
+                        /mnt, or /d/d1.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--blockdevice <replaceable>DEVICEPATH</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The path of the block device to mount. For example,
+                        /dev/vx/dg.0/vg.0.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--bootmount</option>
+                    <option>--nobootmount</option>
+                </term>
+                <listitem>
+                    <para>
+                        If the filesystem should be mounted on boot.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--dumpfreq <replaceable>FREQ</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The value for dump frequency, as per
+            <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+                        This defaults to 0.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--fsckpass <replaceable>PASSNO</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The value for fsck pass, as per
+            <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+                        This defaults to 2.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--options <replaceable>OPTIONS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The value for mount options, as per
+            <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+                        For
+                        example, "rw,nosuid".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Free-form comments for the filesystem resource.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_filesystem</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_filesystem</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
