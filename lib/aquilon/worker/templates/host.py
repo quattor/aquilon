@@ -346,6 +346,7 @@ class PlenaryHostObject(ObjectPlenary):
     def body(self, lines):
         dbstage = self.dbobj.personality_stage
         dbhw_ent = self.dbobj.hardware_entity
+        dbarch = self.dbobj.archetype
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbobj.hardware_entity.interfaces:
@@ -374,10 +375,19 @@ class PlenaryHostObject(ObjectPlenary):
         services.sort()
         provides.sort()
 
-        # Okay, here's the real content
+        # Set global variable with archetype name
+        pan_variable(lines, "ARCHETYPE", dbarch)
+        lines.append("")
+
+        # Allow settings such as loadpath to be modified by the archetype before anything else happens
+        pan_include_if_exists(lines, "archetype/preface")
+        lines.append("")
+
+        # Load units and functions that may be used by hostdata
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
+        # Okay, here's the real content
         path = PlenaryHostData.template_name(self.dbobj)
         pan_assign(lines, "/",
                    StructureTemplate(path,
