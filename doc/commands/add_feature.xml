@@ -37,7 +37,7 @@
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg><option>--post_personality</option></arg>
+	    <arg><option>--pre_personality</option></arg>
 	    <arg><option>--visibility <replaceable>VISIBILITY</replaceable></option></arg>
 	    <arg><option>--activation <replaceable>ACTIVATION</replaceable></option></arg>
 	    <arg><option>--deactivation <replaceable>DEACTIVATION</replaceable></option></arg>
@@ -67,9 +67,9 @@
 	    Host features are the most generic, and usually control software that gets installed on the host.
 	    If a host template is active, then
 	    <filename>features/<replaceable>NAME</replaceable>/config.tpl</filename>
-	    will be included either before or after the personality template. If the <option>--post_personality</option>
-	    option is specified, then the feature template will be included after the personality template; if
-	    this option is missing, then the feature template will be included before the personality template.
+	    will be included either before or after the personality template. If the <option>--pre_personality</option>
+	    option is specified, then the feature template will be included before the personality template; if
+	    this option is missing, then the feature template will be included after the personality template.
 	</para>
 	<para>
 	    The position where the feature template gets included depends on how the feature is implemented.
@@ -130,11 +130,11 @@
 	    </varlistentry>
 	    <varlistentry>
 		<term>
-		    <option>--post_personality</option>
+		    <option>--pre_personality</option>
 		</term>
 		<listitem>
 		    <para>
-			Indicate that the feature template should be included after the personality
+			Indicate that the feature template should be included before the personality
 			template. This option may be specified for host features only.
 		    </para>
 		</listitem>

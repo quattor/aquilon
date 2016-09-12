@@ -31,13 +31,21 @@ class CommandAddFeature(BrokerCommand):
 
     required_parameters = ['feature', 'type']
 
-    def render(self, session, feature, type, post_personality, comments,
+    def render(self, session, feature, type, pre_personality, comments,
                grn, eon_id, visibility, activation, deactivation, logger, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
 
         if _name_re.search(feature):
             raise ArgumentError("Path components in the feature name must not "
                                 "start with a dot.")
+
+        # For host features we want post_personality to be the default
+        # because otherwise the feature cannot take advantage of
+        # personality attributes such as host_environment.
+        # For other types of feature, only pre_personality is supported.
+        post_personality = True
+        if pre_personality or not cls.post_personality_allowed:
+            post_personality = False
 
         if post_personality and not cls.post_personality_allowed:
             raise UnimplementedError("The post_personality attribute is "
