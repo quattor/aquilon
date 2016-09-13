@@ -3701,6 +3701,7 @@
 	    <option name="host_environment" type="string" >Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
 	    <option name="required_service" type="string">Show personalities requiring the given service</option>
 	    <option name="environment_override" type="string" requires="required_service">Show personalities which have an environment override for the specified service</option>
+	    <option name="used" type="boolean" reverse="unused">Look for used/unused personalities</option>
 	    <option name="fullinfo" type="flag">show full information for the matching personalities</option>
 	</optgroup>
 	<transport method="get" path="find/personality"/>

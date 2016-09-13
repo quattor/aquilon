@@ -135,6 +135,23 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "aquilon/unixeng-test@current", command)
         self.matchclean(out, "compileserver", command)
 
+    def test_used(self):
+        command = ["search_personality", "--used"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aquilon/compileserver", command)
+        self.matchoutput(out, "aquilon/unixeng-test@current", command)
+        self.matchoutput(out, "aurora/generic", command)
+        self.matchoutput(out, "esx_cluster/vulcan2-server-dev", command)
+
+    def test_unused(self):
+        command = ["search_personality", "--unused"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aquilon/badpersonality", command)
+        self.matchoutput(out, "aquilon/nostage@next", command)
+        self.matchoutput(out, "aquilon/utunused/dev", command)
+        self.matchoutput(out, "esx_cluster/nostage@next", command)
+        self.matchoutput(out, "vmhost/nostage@next", command)
+
     def test_110_show_diff_1(self):
         command = ["show_diff", "--personality=utunused/dev",
                    "--archetype=aquilon", "--other=inventory"]
