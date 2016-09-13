@@ -29,7 +29,6 @@ from brokertest import TestBrokerCommand
 
 
 class TestAddSandbox(TestBrokerCommand):
-
     def test_100_default_untrusted(self):
         # When the broker auto-creates a realm, it should be untrusted by
         # default
@@ -121,6 +120,15 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.assertTrue(os.path.exists(sandboxdir),
                         "Expected directory '%s' to exist" % sandboxdir)
+
+    def test_121_umask(self):
+        old_umask = os.umask(0000)
+        command = ["add", "sandbox", "--sandbox", "umasktest"]
+        self.successtest(command)
+        sandboxdir = os.path.join(self.sandboxdir, "umasktest")
+        sandboxmode = oct(os.stat(sandboxdir).st_mode & 0777)
+        os.umask(old_umask)
+        self.assertEqual(sandboxmode, "0755")
 
     def test_125_verify_changetest1(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
