@@ -111,7 +111,11 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
                          self.net["unknown0"].gateway, command)
-        self.matchoutput(out, '"system/advertise_status" = false', command)
+        self.matchoutput(out, '"system/advertise_status" = false;', command)
+        self.matchoutput(out, '"system/archetype/os" = "linux";', command)
+        self.matchoutput(out,
+                         '"system/archetype/model" = "%s";' % self.linux_version_prev,
+                         command)
 
         command = "cat --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

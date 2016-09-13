@@ -232,6 +232,11 @@ class PlenaryHostData(StructurePlenary):
         pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")
+        dbos = self.dbobj.operating_system
+        pan_assign(lines, "system/archetype/os", dbos.name)
+        pan_assign(lines, "system/archetype/model", dbos.version)
+
+        lines.append("")
         for name in sorted(interfaces):
             # This is ugly. We can't blindly escape, because that would affect
             # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
@@ -377,8 +382,8 @@ class PlenaryHostObject(ObjectPlenary):
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
-        opsys = self.dbobj.operating_system
-        pan_include(lines, "os/%s/%s/config" % (opsys.name, opsys.version))
+        dbos = self.dbobj.operating_system
+        pan_include(lines, "os/%s/%s/config" % (dbos.name, dbos.version))
 
         hw_features, iface_features = nonhost_features(dbstage, dbhw_ent)
 
