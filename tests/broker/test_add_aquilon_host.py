@@ -228,7 +228,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--hostname", "unittest21.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "ut3c5n3",
                         "--domain", "unittest",
-                        "--personality", "compileserver"])
+                        "--personality", "compileserver",
+                        "--grn", "grn:/ms/ei/aquilon/unittest"])
         self.dsdb_verify()
 
     def test_145_verify_unittest21_network(self):
