@@ -61,10 +61,10 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.output_equals(out, """
             Virtual Switch: utvswitch
               Port Group: user-v710
-                Network: %s
+                Network: %s [%s]
               Port Group: vmotion-v800
-                Network: %s
-            """ % (net1.ip, net2.ip), command)
+                Network: %s [%s]
+            """ % (net1.name, net1, net2.name, net2), command)
 
     def test_115_show_utvswitch_proto(self):
         nets = {
@@ -98,6 +98,12 @@ class TestAddVirtualSwitch(TestBrokerCommand):
                           r'"usage", "user"\s*\);' %
                           (net.netmask, net.ip, net.nettype),
                           command)
+
+    def test_115_show_network(self):
+        net1 = self.net["autopg1"]
+        command = ["show_network", "--ip", net1.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Port Group: user-v710", command)
 
     def test_115_search_network_vswitch(self):
         net1 = self.net["autopg1"]

@@ -113,6 +113,10 @@ class NetworkFormatter(ObjectFormatter):
                                        for rtr in network.routers))
             details.append(indent + "  Routers: %s" % routers)
 
+        if network.port_group:
+            details.append(indent + "  Port Group: %s" %
+                           network.port_group.name)
+
         # Look for dynamic DHCP ranges
         ranges = summarize_ranges(network.dynamic_stubs)
         if ranges:

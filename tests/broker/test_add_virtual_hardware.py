@@ -940,9 +940,15 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
         self.statustest(command)
 
     def test_455_show_host_evm50(self):
+        net = self.net["autopg2"]
         command = ["show", "host", "--hostname", "evm50.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
+        self.searchoutput(out,
+                          r'Port Group: user-v710\s*'
+                          r'Network: %s \[%s\]$'
+                          % (net.name, net),
+                          command)
 
     # FIXME: we need a more generic test to check if a host/cluster may contain
     # VMs. Perhaps an attribute of Archetype or Personality?

@@ -30,7 +30,7 @@ class VirtualSwitchFormatter(ObjectFormatter):
         for pg in sorted(vswitch.port_groups,
                          key=attrgetter("usage", "network_tag")):
             details.append(indent + "  Port Group: %s" % pg.name)
-            details.append(indent + "    Network: %s" % pg.network.ip)
+            details.append(indent + "    Network: %s" % pg.network)
 
         if not embedded:
             for host in sorted(vswitch.hosts, key=attrgetter("fqdn")):
