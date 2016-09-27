@@ -156,7 +156,7 @@ model_group = {
     },
     'branch': {
         'title': 'Configuration Branches',
-        'classes': [Branch, Sandbox, Domain],
+        'classes': [Branch, Sandbox, Domain, Review],
     },
     'users': {
         'title': 'Users',
