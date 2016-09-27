@@ -260,7 +260,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"rack/name" = "ut3";', command)
         self.matchoutput(out, '"rack/row" = "a";', command)
         self.matchoutput(out, '"rack/column" = "3";', command)
-        self.matchoutput(out, '"rack/room" = "utroom1";', command)
         self.matchoutput(out, '"sysloc/room" = "utroom1";', command)
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
