@@ -30,8 +30,8 @@ class Share(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'share'}
 
-    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
-                primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
+                         primary_key=True)
 
     # threshold for Storage I/O Control throttle in millisecs.
     latency_threshold = Column(Integer)

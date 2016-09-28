@@ -221,7 +221,7 @@ class ComputeCluster(Cluster):
     __tablename__ = 'compute_cluster'
     _class_label = 'Compute Cluster'
 
-    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'compute'}
@@ -234,7 +234,7 @@ class StorageCluster(Cluster):
     __tablename__ = 'storage_cluster'
     _class_label = 'Storage Cluster'
 
-    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'storage'}

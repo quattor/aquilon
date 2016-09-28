@@ -84,7 +84,7 @@ from aquilon.aqdb.model.disk import Disk, LocalDisk
 from aquilon.aqdb.model.machine_specs import MachineSpecs
 
 # HOST
-from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
+from aquilon.aqdb.model.branch import Branch, Domain, Sandbox, Review
 from aquilon.aqdb.model.compileable import CompileableMixin
 from aquilon.aqdb.model.host import Host, HostGrnMap
 

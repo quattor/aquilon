@@ -44,7 +44,8 @@ class MetaCluster(Cluster):
     __tablename__ = _MCT
     _class_label = "Metacluster"
 
-    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
+                        primary_key=True)
 
     max_clusters = Column(Integer, nullable=True)
 
@@ -112,8 +113,8 @@ class __MetaClusterMember(Base):
     """ Binds clusters to metaclusters """
     __tablename__ = _MCM
 
-    metacluster_id = Column(ForeignKey(MetaCluster.id, ondelete='CASCADE'),
-                            nullable=False)
+    metacluster_id = Column(ForeignKey(MetaCluster.cluster_id,
+                                       ondelete='CASCADE'), nullable=False)
 
     cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False, unique=True)

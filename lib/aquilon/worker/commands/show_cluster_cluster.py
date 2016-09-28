@@ -56,6 +56,6 @@ class CommandShowClusterCluster(BrokerCommand):
 
         # Manual eager-loading of VM resources. All the code does is making sure
         # the data is pinned in the session's cache
-        machines = {vm.machine.machine_id: vm for vm in vm_q}  # pylint: disable=W0612
+        machines = {vm.machine.hardware_entity_id: vm for vm in vm_q}  # pylint: disable=W0612
 
         return dbclusters

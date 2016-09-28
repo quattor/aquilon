@@ -34,8 +34,7 @@ class CommandPublish(BrokerCommand):
     def render(self, session, logger, dbuser, branch, sandbox, bundle, sync,
                rebase, **_):
         if sandbox:
-            # pylint: disable=W0612
-            sandbox, dbauthor = force_my_sandbox(session, dbuser, sandbox)
+            sandbox, _ = force_my_sandbox(session, dbuser, sandbox)
             dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
         elif branch:
             dbsandbox = Sandbox.get_unique(session, branch, compel=True)
@@ -89,6 +88,19 @@ class CommandPublish(BrokerCommand):
 
         if sync and dbsandbox.autosync:
             sync_all_trackers(dbsandbox, logger)
+
+        # Invalidate previous reviews
+        new_head = kingrepo.ref_commit(dbsandbox.name)
+        for dbreview in dbsandbox.reviews:
+            dbreview.commit_id = new_head
+            dbreview.tested = None
+            dbreview.testing_url = None
+
+            # Explicit denials should be kept
+            if dbreview.approved is True:
+                dbreview.approved = None
+
+        session.flush()
 
         client_command = "git fetch"
         return client_command

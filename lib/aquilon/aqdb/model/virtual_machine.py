@@ -31,7 +31,7 @@ class VirtualMachine(Resource):
     resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
     # A machine can be assigned to one holder only.
-    machine_id = Column(ForeignKey(Machine.machine_id), nullable=False,
+    machine_id = Column(ForeignKey(Machine.hardware_entity_id), nullable=False,
                         unique=True)
 
     machine = relation(Machine, innerjoin=True,

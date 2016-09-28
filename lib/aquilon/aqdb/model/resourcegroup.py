@@ -33,8 +33,8 @@ class ResourceGroup(Resource):
     __tablename__ = _TN
     _class_label = 'Resource Group'
 
-    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
-                primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
+                         primary_key=True)
 
     # declare any per-group attributes here (none for now)
 
@@ -54,7 +54,7 @@ class ResourceGroup(Resource):
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
 
-    resourcegroup_id = Column(ForeignKey(ResourceGroup.id,
+    resourcegroup_id = Column(ForeignKey(ResourceGroup.resource_id,
                                          name='%s_bundle_fk' % _RESHOLDER,
                                          ondelete='CASCADE',
                                          deferrable=True,

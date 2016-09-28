@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,24 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.orm import relation
-
-from aquilon.aqdb.model import Resource, Grn
-
-_TN = 'application'
+from aquilon.aqdb.model import Branch, Domain, Review
+from aquilon.worker.broker import BrokerCommand
 
 
-class Application(Resource):
-    """ Application resources """
-    __tablename__ = _TN
+class CommandShowReview(BrokerCommand):
 
-    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
-                         primary_key=True)
+    required_parameters = ["source", "target"]
 
-    eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
+    def render(self, session, source, target, **_):
+        dbsource = Branch.get_unique(session, source, compel=True)
+        dbtarget = Domain.get_unique(session, target, compel=True)
 
-    grn = relation(Grn, innerjoin=True)
-
-    __mapper_args__ = {'polymorphic_identity': _TN}
-    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
+        dbreview = Review.get_unique(session, source=dbsource, target=dbtarget,
+                                     compel=True)
+        return dbreview

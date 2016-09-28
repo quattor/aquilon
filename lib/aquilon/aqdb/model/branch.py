@@ -19,16 +19,17 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
-                        Column, ForeignKey)
+                        Column, ForeignKey, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred, backref, validates
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, UserPrincipal
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr
 
 _TN = "branch"
 _DMN = "domain"
 _SBX = "sandbox"
+_RV = "review"
 
 
 class Branch(Base):
@@ -83,7 +84,7 @@ class Domain(Branch):
     """
     __tablename__ = _DMN
 
-    domain_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
+    branch_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
                        primary_key=True)
 
     tracked_branch_id = Column(ForeignKey(Branch.id,
@@ -102,7 +103,7 @@ class Domain(Branch):
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _DMN,
-                       'inherit_condition': domain_id == Branch.id}
+                       'inherit_condition': branch_id == Branch.id}
 
 
 class Sandbox(Branch):
@@ -112,10 +113,40 @@ class Sandbox(Branch):
     """
     __tablename__ = _SBX
 
-    sandbox_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
-                        primary_key=True)
+    branch_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
+                       primary_key=True)
 
     base_commit = Column(AqStr(40), nullable=False)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _SBX}
+
+
+class Review(Base):
+    __tablename__ = _RV
+    _class_label = 'Review Request'
+
+    source_id = Column(Integer, ForeignKey(Branch.id, ondelete="CASCADE"),
+                       nullable=False)
+    target_id = Column(Integer, ForeignKey(Domain.branch_id, ondelete="CASCADE"),
+                       nullable=False, index=True)
+
+    commit_id = Column(AqStr(40), nullable=False)
+
+    testing_url = Column(String(255), nullable=True)
+    target_commit_id = Column(AqStr(40), nullable=True)
+    tested = Column(Boolean, nullable=True)
+
+    review_url = Column(String(255), nullable=True)
+
+    approved = Column(Boolean, nullable=True)
+
+    target = relation(Domain, innerjoin=True, foreign_keys=target_id)
+
+    source = relation(Branch, innerjoin=True, foreign_keys=source_id,
+                      backref=backref('reviews',
+                                      cascade="all, delete-orphan",
+                                      passive_deletes=True))
+
+    __table_args__ = (PrimaryKeyConstraint(source_id, target_id),
+                      {'info': {'unique_fields': ['source', 'target']}})

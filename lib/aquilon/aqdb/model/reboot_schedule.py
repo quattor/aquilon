@@ -27,7 +27,8 @@ class RebootSchedule(Resource):
     """ RebootSchedule resources """
     __tablename__ = _TN_RES
 
-    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'), primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
+                         primary_key=True)
 
     # str representation of time '00:00'
     time = Column(String(5), nullable=True)
@@ -47,8 +48,8 @@ class RebootIntervention(Intervention):
     # Hack: Should probably just increase the length of the field to
     # support the string reboot_intervention.
 
-    id = Column(ForeignKey(Intervention.id, ondelete='CASCADE'),
-                primary_key=True)
+    intervention_id = Column(ForeignKey(Intervention.resource_id,
+                                        ondelete='CASCADE'), primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': 'reboot_iv'}

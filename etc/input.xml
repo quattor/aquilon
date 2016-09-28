@@ -2633,6 +2633,65 @@
 	<transport method="post" path="command/publish" custom="create_bundle" expect="command"/>
     </command>
 
+    <command name="ask_for_review">
+	Announce the intention of deploying a sandbox or domain into a target domain, and ask for review and testing.
+	<optgroup mandatory="True" fields="all">
+	    <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+	    <option name="target" type="string">Name of the target domain</option>
+	</optgroup>
+	<transport method="put" path="review/target/%(target)s/source/%(source)s"/>
+    </command>
+
+    <command name="del_review">
+	<optgroup mandatory="True" fields="all">
+	    <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+	    <option name="target" type="string">Name of the target domain</option>
+	</optgroup>
+	<transport method="delete" path="review/target/%(target)s/source/%(source)s"/>
+    </command>
+
+    <command name="update_review">
+	<optgroup mandatory="True" fields="all">
+	    <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+	    <option name="target" type="string">Name of the target domain</option>
+	</optgroup>
+	<optgroup>
+	    <option name="commit_id" type="string">Commit ID of the source the update is valid for</option>
+	    <option name="testing_succeeded" reverse="testing_failed" type="boolean" requires="commit_id">Update the testing status</option>
+	    <option name="testing_url" type="string" requires="commit_id">Update the test artifact URL</option>
+	    <option name="target_commit_tested" type="string" requires="testing_succeeded">Commit ID of the target which was tested</option>
+	    <option name="review_url" type="string">Update the code review URL</option>
+	    <option name="approved" reverse="denied" type="boolean">Approve/deny the change</option>
+	</optgroup>
+	<transport method="post" path="review/target/%(target)s"/>
+    </command>
+
+    <command name="search_review">
+	<optgroup mandatory="True">
+	    <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+	    <option name="target" type="string">Name of the target domain</option>
+	    <option name="testing_succeeded" reverse="testing_failed" type="boolean" conflicts="untested">Select tested reviews</option>
+	    <option name="untested" type="flag" conflicts="testing_succeeded">Select untested reviews</option>
+	    <option name="approved" reverse="denied" type="boolean" conflicts="undecided">Select approved/denied reviews</option>
+	    <option name="undecided" type="flag" conflicts="approved">Select undecided reviews</option>
+	    <option name="testing_url" type="string">Select reviews with the given testing URL</option>
+	    <option name="review_url" type="string">Select reviews with the given review URL</option>
+	</optgroup>
+	<transport method="get" path="find/review"/>
+    </command>
+
+    <command name="show_review">
+	<optgroup fields="one">
+	    <optgroup fields="all">
+		<option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+		<option name="target" type="string">Name of the target domain</option>
+	    </optgroup>
+	    <option name="all" type="flag">Show all reviews</option>
+	</optgroup>
+	<transport method="get" path="review/target/%(target)s/source/%(source)s"/>
+	<transport trigger="all" method="get" path="review"/>
+    </command>
+
     <command name="deploy">
 	Take a template branch as a source (the name of either a domain or
 	a sandbox) and deploy its changes to the target domain specified.
@@ -2652,6 +2711,8 @@
 	<optgroup>
 	    <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
 	    <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
+	    <option name="merge_strategy" type="string">Git merge strategy to use</option>
+	    <option name="strategy_options" type="string" requires="merge_strategy">Extra options to pass to the merge strategy</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Reason of the deployment to record in the commit log. Mandatory if justification is emergency</option>
 	</optgroup>

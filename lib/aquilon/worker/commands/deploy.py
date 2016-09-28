@@ -16,14 +16,23 @@
 # limitations under the License.
 """Contains the logic for `aq deploy`."""
 
+import re
+
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
-from aquilon.aqdb.model import Domain, Branch, Sandbox
+from aquilon.aqdb.model import Domain, Branch, Sandbox, Review
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import sync_domain, sync_all_trackers
 from aquilon.worker.dbwrappers.change_management import validate_justification
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
+
+# Merge strategies and strategy option regexes we accept. The list intentionally
+# contains just a small subset of what git can do.
+_git_strategies = {
+    "resolve": None,
+    "recursive": re.compile("^(no-renames)$"),
+}
 
 
 class CommandDeploy(BrokerCommand):
@@ -31,7 +40,8 @@ class CommandDeploy(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               justification, reason, user, requestid, **_):
+               merge_strategy, strategy_options, justification, reason, user,
+               requestid, **_):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -57,11 +67,21 @@ class CommandDeploy(BrokerCommand):
                                 "is not allowed. Either re-ryn with --nosync "
                                 "or validate the branch.".format(dbtarget))
 
+        dbreview = Review.get_unique(session, source=dbsource, target=dbtarget)
+        if dbreview and dbreview.approved is False:
+            raise ArgumentError("Deploying {0:l} to {1:l} was explicitly denied."
+                                .format(dbsource, dbtarget))
+
         if dbtarget.requires_change_manager and not dryrun:
             if not justification:
                 raise AuthorizationException(
                     "{0} is under change management control.  Please specify "
                     "--justification.".format(dbtarget))
+
+            #if not dbreview or not dbreview.approved:
+            #    logger.warning("Warning: this deployment request was not "
+            #                   "approved, this will be an error in the future.")
+
             validate_justification(user, justification, reason)
 
         if dbtarget.archived:
@@ -75,6 +95,17 @@ class CommandDeploy(BrokerCommand):
                 raise ArgumentError("You're trying to deploy a sandbox to a "
                                     "domain that does not contain the commit "
                                     "where the sandbox was branched from.")
+
+        merge_args = []
+        if merge_strategy:
+            if merge_strategy not in _git_strategies:
+                raise ArgumentError("Unknown or unsupported merge strategy.")
+            merge_args.extend("-s", merge_strategy)
+            if strategy_options:
+                if not _git_strategies[merge_strategy] or \
+                   not _git_strategies[merge_strategy].search(strategy_options):
+                    raise ArgumentError("Unknown or unsupported strategy options.")
+                merge_args.extend("-X", strategy_options)
 
         kingrepo = GitRepo(self.config.get("broker", "kingdir"), logger)
         with kingrepo.temp_clone(dbtarget.name) as temprepo:
@@ -92,9 +123,12 @@ class CommandDeploy(BrokerCommand):
                 merge_msg.append("Reason: %s" % reason)
 
             try:
-                temprepo.run(["merge", "--no-ff", "origin/%s" % dbsource.name,
-                              "-m", "\n".join(merge_msg)],
-                             stream_level=CLIENT_INFO)
+                cmd = ["merge", "--no-ff", "origin/%s" % dbsource.name,
+                       "-m", "\n".join(merge_msg)]
+                if merge_args:
+                    cmd.extend(merge_args)
+
+                temprepo.run(cmd, stream_level=CLIENT_INFO)
             except ProcessException as e:
                 # No need to re-print e, output should have gone to client
                 # immediately via the logger.
@@ -119,5 +153,10 @@ class CommandDeploy(BrokerCommand):
 
         if sync and dbtarget.autosync:
             sync_all_trackers(dbtarget, logger)
+
+        # TODO: if there are other unmerged changes under review, then trigger
+        # new tests. Note that we cannot roll back the DB transaction at this
+        # point, so the triggering the tests cannot fail. We may need an explict
+        # session.commit() here.
 
         return
