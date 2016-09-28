@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (Personality, PersonalityStage, Cluster, Host,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection, PlenaryHost
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -125,6 +125,15 @@ class CommandUpdatePersonality(BrokerCommand):
             old_grn = dbpersona.owner_grn
             dbpersona.owner_grn = dbgrn
 
+            # Hosts which inherit the ownership from the personality need to be
+            # updated
+            q = session.query(Host)
+            q = q.filter_by(owner_grn=None)
+            q = q.join(PersonalityStage)
+            q = q.filter_by(personality=dbpersona)
+            q = q.options(PlenaryHost.query_options())
+            plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+
             if not leave_existing:
                 # If this is a public personality, then there may be hosts with
                 # various GRNs inside the personality, so make sure we preserve
@@ -133,6 +142,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = q.filter_by(owner_grn=old_grn)
                 q = q.join(PersonalityStage)
                 q = q.filter_by(personality=dbpersona)
+                q = q.options(PlenaryHost.query_options())
                 for dbhost in q:
                     dbhost.owner_grn = dbgrn
                     plenaries.append(Plenary.get_plenary(dbhost))

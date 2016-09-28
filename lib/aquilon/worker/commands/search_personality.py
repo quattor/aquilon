@@ -17,11 +17,11 @@
 """Contains the logic for `aq search personality`."""
 
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_, null
 
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
                                 HostEnvironment, PersonalityGrnMap, Service,
-                                PersonalityServiceListItem)
+                                PersonalityServiceListItem, Host, Cluster)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.formats.list import StringAttributeList
@@ -33,7 +33,7 @@ class CommandSearchPersonality(BrokerCommand):
 
     def render(self, session, personality, personality_stage, archetype, grn,
                eon_id, host_environment, config_override, required_service,
-               environment_override, fullinfo, style, **_):
+               environment_override, used, fullinfo, style, **_):
         q = session.query(PersonalityStage)
         if personality_stage:
             Personality.force_valid_stage(personality_stage)
@@ -70,6 +70,19 @@ class CommandSearchPersonality(BrokerCommand):
                                                      environment_override)
                 q = q.filter_by(host_environment=dbenv)
             q = q.reset_joinpoint()
+
+        if used is not None:
+            if used:
+                q1 = session.query(Host.hardware_entity_id)
+                q1 = q1.filter_by(personality_stage_id=PersonalityStage.id)
+                q2 = session.query(Cluster.id)
+                q2 = q2.filter_by(personality_stage_id=PersonalityStage.id)
+                q = q.filter(or_(q1.exists(), q2.exists()))
+            else:
+                q = q.outerjoin(Host)
+                q = q.outerjoin(Cluster)
+                q = q.filter(and_(Host.hardware_entity_id == null(),
+                                  Cluster.id == null()))
 
         q = q.join(Archetype)
         q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)

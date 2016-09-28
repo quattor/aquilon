@@ -143,6 +143,9 @@ class MachineTestMixin(EventsTestMixin):
 
             if "pg" in params:
                 regexp += r"\s+Port Group: %s" % params["pg"]
+                # TODO: We don't know the network, and there's no network when
+                # --pg is used for physical machines
+                regexp += r"(\s+Network: .*\[.*/.*\])?"
 
             if "ip" in params:
                 regexp += r"\s+Network Environment: internal$"

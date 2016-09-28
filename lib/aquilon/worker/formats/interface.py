@@ -68,6 +68,8 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.port_group:
             details.append(indent + "  {0:c}: {0.name}"
                            .format(interface.port_group))
+            details.append(indent + "    Network: %s" %
+                           interface.port_group.network)
         elif interface.port_group_name:
             details.append(indent + "  Port Group: %s" % interface.port_group_name)
 
