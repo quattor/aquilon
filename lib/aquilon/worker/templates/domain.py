@@ -116,8 +116,10 @@ class TemplateDomain(object):
                     raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
 
         nothing_to_do = True
-        if only:
-            nothing_to_do = False
+        if only is not None:
+            # "only" may be a generator, which may not yield any entries
+            only = set(only)
+            nothing_to_do = len(only) == 0
         else:
             hostnames = session.query(Fqdn.name.concat(".")
                                       .concat(DnsDomain.name).label('hostname'))

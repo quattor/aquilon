@@ -180,15 +180,14 @@ class CommandReconfigureList(BrokerCommand):
         logger.client_info("Verifying service bindings.")
         chooser_cache = ChooserCache()
         for dbhost in dbhosts:
-            if dbhost.archetype.is_compileable:
-                chooser = Chooser(dbhost, logger=logger,
-                                  required_only=not keepbindings,
-                                  cache=chooser_cache)
-                try:
-                    chooser.set_required()
-                    plenaries.extend(chooser.plenaries)
-                except ArgumentError as e:
-                    failed.append(str(e))
+            chooser = Chooser(dbhost, logger=logger,
+                              required_only=not keepbindings,
+                              cache=chooser_cache)
+            try:
+                chooser.set_required()
+                plenaries.extend(chooser.plenaries)
+            except ArgumentError as e:
+                failed.append(str(e))
 
         if failed:
             raise ArgumentError("The following hosts failed service "

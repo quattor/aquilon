@@ -50,15 +50,14 @@ class CommandMakeClusterCluster(BrokerCommand):
         chooser_cache = ChooserCache()
         failed = []
         for dbobj in dbcluster.all_objects():
-            if dbobj.archetype.is_compileable:
-                chooser = Chooser(dbobj, logger=logger,
-                                  required_only=not keepbindings,
-                                  cache=chooser_cache)
-                try:
-                    chooser.set_required()
-                    plenaries.extend(chooser.plenaries)
-                except ArgumentError as err:
-                    failed.append(str(err))
+            chooser = Chooser(dbobj, logger=logger,
+                              required_only=not keepbindings,
+                              cache=chooser_cache)
+            try:
+                chooser.set_required()
+                plenaries.extend(chooser.plenaries)
+            except ArgumentError as err:
+                failed.append(str(err))
 
         if failed:
             raise ArgumentError("The following objects failed service "
