@@ -9,6 +9,7 @@
 
 [DEFAULT]
 basedir = /var/tmp/%(user)s
+quattordir = %(basedir)s/quattor
 
 [database]
 database_section = database_sqlite
@@ -17,8 +18,6 @@ database_section = database_sqlite
 #log_unique_plans_only = yes
 
 [broker]
-quattordir = %(basedir)s/quattor
-#knc = /ms/dev/kerberos/knc/1.4/install/exec/bin/knc
 run_git_daemon = True
 dsdb_use_testdb = True
 #server_notifications = cdb2sql bootserver
@@ -26,7 +25,6 @@ client_notifications = no
 
 [panc]
 version = beta
-pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
 
 [tool_locations]
 dsdb = /bin/echo
