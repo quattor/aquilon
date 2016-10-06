@@ -16,14 +16,17 @@
 # limitations under the License.
 """ Pull dependencies onto sys.path via ms.version """
 
-import ms.version
-
-ms.version.addpkg('sqlalchemy', '1.0.11')
-ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
-ms.version.addpkg('psycopg2', '2.5-9.2.4')
-ms.version.addpkg('ms.modulecmd', '1.0.4')
-ms.version.addpkg('ipaddr', '2.1.9')
-ms.version.addpkg('dateutil', '1.5')
-ms.version.addpkg('cdb', '0.34')
-ms.version.addpkg('six', '1.7.3')
-ms.version.addpkg('jsonschema', '2.3.0')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('sqlalchemy', '1.0.11')
+    ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
+    ms.version.addpkg('psycopg2', '2.5-9.2.4')
+    ms.version.addpkg('ms.modulecmd', '1.0.4')
+    ms.version.addpkg('ipaddr', '2.1.9')
+    ms.version.addpkg('dateutil', '1.5')
+    ms.version.addpkg('cdb', '0.34')
+    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('jsonschema', '2.3.0')

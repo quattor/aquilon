@@ -18,18 +18,22 @@
     binaries shipped.
 """
 
-import sys
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    import sys
 
-import ms.version
+    ms.version.addpkg('lxml', '3.2.5')
+    ms.version.addpkg('six', '1.7.3')
 
-ms.version.addpkg('lxml', '3.2.5')
-ms.version.addpkg('six', '1.7.3')
+    if sys.platform == "sunos5":
+        # ctypes is missing from the default Python build on Solaris, due to
+        # http://bugs.python.org/issue2552. It is available as a separate package
+        # though.
+        ms.version.addpkg("ctypes", "1.0.2")
 
-if sys.platform == "sunos5":
-    # ctypes is missing from the default Python build on Solaris, due to
-    # http://bugs.python.org/issue2552. It is available as a separate package
-    # though.
-    ms.version.addpkg("ctypes", "1.0.2")
-
-    # required to move the ctypes path  before the core paths
-    sys.path.insert(0, sys.path.pop())
+        # ms.version.addpkg() appends to sys.path, but we need the entry at the
+        # front
+        sys.path.insert(0, sys.path.pop())
