@@ -12,7 +12,6 @@ Under Scientific Linux 7, install the following RPMs:
 *   python-devel
 *   python-setuptools
 *   python-dateutil
-*   python-cdb
 *   python-lxml
 *   python-virtualenv
 *   PyYAML
@@ -22,6 +21,8 @@ Under Scientific Linux 7, install the following RPMs:
 *   git
 *   git-daemon
 *   ant-contrib-1.0
+*   libxslt-devel
+*   libxml2-devel
 *   make
 
 * real version of java (not GCJ!); openjdk?, oracle?
@@ -46,7 +47,8 @@ If using a different distribution, you will need python 2.7.x and git
 
 Install the knc package from the
 [Quattor repository](http://yum.quattor.org/external), or build your own from
-sources at http://oskt.secure-endpoints.com/knc.html
+sources at http://oskt.secure-endpoints.com/knc.html. If you want to rebuild it,
+you will need to install krb5-devel RPM
 ```bash
 easy_install virtualenv
 ```
@@ -59,7 +61,7 @@ Protocols:
 
 ```bash
 cd ~
-git clone git://quattor.git.sourceforge.net/gitroot/quattor/protocols
+git clone https://github.com/quattor/aquilon-protocols.git
 ```
 
 Pass in an alternate INSTALLDIR if desired.  Compiling the protocol
@@ -74,7 +76,7 @@ Aquilon itself:
 
 ```bash
 cd /opt/
-git clone git://quattor.git.sourceforge.net/gitroot/quattor/aquilon
+git clone https://github.com/quattor/aquilon.git
 ```
 
 Installation
@@ -126,9 +128,13 @@ database back-end.
 (add directories `/var/quattor` `/var/quattor/logs` `/var/quattor/aquilondb`)
 
 Take a look at the example load file for the database in the aquilon
-source repository's tests/aqdb/example.dump.  Update as desired for
+source repository's tests/aqdb/data/example.dump.  Update as desired for
 the site.  When ready, a database can be initialized (or recreated)
 with the following command.
+
+```bash
+sqlite3 /var/quattor/aquilondb/aquilon.db < /opt/aquilon/tests/data/example.dump 
+```
 
 Set up AQDCONF (or have an /etc/aqd.conf) as described above first.
 Create the database directory if using sqlite and it does not exist.
