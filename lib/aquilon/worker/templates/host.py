@@ -37,9 +37,8 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.personality import get_parameters_by_feature
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
-                                               pan_include,
-                                               pan_include_if_exists,
-                                               pan_variable)
+                                               pan_include, pan_variable,
+                                               pan_include_if_exists)
 from aquilon.utils import nlist_key_re
 
 LOGGER = logging.getLogger(__name__)
@@ -372,10 +371,19 @@ class PlenaryHostObject(ObjectPlenary):
         services.sort()
         provides.sort()
 
-        # Okay, here's the real content
+        # Set global variable with archetype name
+        pan_variable(lines, "ARCHETYPE", arch);
+        lines.append("")
+
+        # Allow settings such as loadpath to be modified by the archetype before anything else happens
+        pan_include_if_exists(lines, "archetype/preface")
+        lines.append("")
+
+        # Load units and functions that may be used by hostdata
         pan_include(lines, ["pan/units", "pan/functions"])
         lines.append("")
 
+        # Okay, here's the real content
         path = PlenaryHostData.template_name(self.dbobj)
         pan_assign(lines, "/",
                    StructureTemplate(path,

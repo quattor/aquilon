@@ -1,0 +1,38 @@
+#!/usr/bin/python
+
+# Originally based on Show Status by Mike Pearce <mike@mikepearce.net>
+# See: https://github.com/MikePearce/Git-Status
+
+import sys
+import os
+import glob
+import commands
+import json
+
+dirname = "/var/quattor/templates"
+
+if __name__ == "__main__":
+    repos = {}
+
+    for infile in glob.glob( os.path.join(dirname, '*', '*') ):
+        if os.path.exists( os.path.join(infile, ".git") ):
+            repos[infile] = {}
+
+            out = commands.getoutput('cd %s; git status' % (infile)).splitlines()
+            for line in out:
+                if line.startswith("# On branch"):
+                    repos[infile]['branch'] = line.split()[-1]
+                elif line.startswith("# Your branch is"):
+                    line = line.split()
+                    sign = "+"
+                    if line[4] == "behind":
+                        sign = "-"
+                    repos[infile]['position'] = "%s%s" % (sign, line[8])
+
+            changes = commands.getoutput('cd %s; git status --porcelain' % (infile))
+            changes = changes.splitlines()
+            changes = [c.strip().split() for c in changes]
+            if changes:
+                repos[infile]['changes'] = changes
+
+    print json.dumps(repos)

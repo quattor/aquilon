@@ -175,8 +175,8 @@ class AQDMaker(object):
 
         sockdir = config.get("broker", "sockdir")
         if not os.path.exists(sockdir):
-            os.makedirs(sockdir, 0o700)
-        os.chmod(sockdir, 0o700)
+            os.makedirs(sockdir, 0o750)
+        os.chmod(sockdir, 0o750)
 
         if options["usesock"]:
             return strports.service("unix:%s/aqdsock" % sockdir, openSite)

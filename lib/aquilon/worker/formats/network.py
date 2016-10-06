@@ -353,20 +353,21 @@ class SimpleNetworkList(list):
 
 class SimpleNetworkListFormatter(NetworkListFormatter):
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
+    format_string = '%-16s  %-16s  %-16s  %-32s  %-8s  %-4s  %-14s  %-14s  %-14s  %s'
 
     def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
-        details = [indent + "\t".join(self.fields)]
-        for network in sorted(nlist, key=attrgetter("ip")):
-            details.append(indent + "\t".join([network.name,
-                                               str(network.ip),
-                                               str(network.netmask),
-                                               str(network.location.sysloc()),
-                                               str(network.location.country),
-                                               network.side,
-                                               network.network_type,
-                                               "False",
-                                               "False",
-                                               str(network.comments)]))
+        details = [indent + self.format_string % tuple(self.fields)]
+        for network in nlist:
+            details.append(indent + self.format_string % (network.name,
+                                                     str(network.ip),
+                                                     str(network.netmask),
+                                                     str(network.location.sysloc()),
+                                                     str(network.location.country),
+                                                     network.side,
+                                                     network.network_type,
+                                                     "False",
+                                                     "False",
+                                                     str(network.comments)))
         return "\n".join(details)
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
