@@ -4321,6 +4321,40 @@
 	<transport method="post" path="realm/%(realm)s"/>
     </command>
 
+    <command name="add_role">
+	Add a new role.
+	<optgroup mandatory="True">
+	    <option name="role" type="string">Role name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="role/%(role)s"/>
+    </command>
+
+    <command name="del_role">
+	Delete a role.
+	<optgroup mandatory="True">
+	    <option name="role" type="string">Role name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="role/%(role)s"/>
+    </command>
+
+    <command name="show_role">
+	Show the properties of a role, or list all roles.
+	<optgroup mandatory="True" fields="one">
+	    <option name="role" type="string">Role name</option>
+	    <option name="all" type="flag"></option>
+	</optgroup>
+	<transport method="get" trigger="role" path="role/%(role)s"/>
+	<transport method="get" trigger="all" path="role"/>
+    </command>
+
     <command name="permission">
 	Modify the entitlements for a user.
 	<optgroup mandatory="True" fields="all">

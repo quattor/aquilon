@@ -32,6 +32,8 @@ from .test_start import TestBrokerStart
 from .test_ping import TestPing
 from .test_status import TestStatus
 from .test_show_active_commands import TestShowActiveCommands
+from .test_add_role import TestAddRole
+from .test_del_role import TestDelRole
 from .test_permission import TestPermission
 from .test_add_dns_domain import TestAddDnsDomain
 from .test_map_dns_domain import TestMapDnsDomain
@@ -311,7 +313,7 @@ class BrokerTestSuite(unittest.TestSuite):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart,
                      TestPing, TestStatus,
-                     TestPermission,
+                     TestAddRole, TestPermission,
                      TestAddDnsDomain, TestAddDnsEnvironment,
                      TestAddUser,
                      TestAddSandbox, TestAddDomain, TestUpdateBranch,
@@ -465,7 +467,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelService,
                      TestDelDomain, TestDelSandbox,
                      TestDelUser,
-                     TestDelDnsEnvironment, TestDelDnsDomain,
+                     TestDelDnsEnvironment, TestDelDnsDomain, TestDelRole,
                      TestClientFailure, TestAudit, TestShowActiveCommands,
                      TestDocumentation,
                      TestBrokerStop]:

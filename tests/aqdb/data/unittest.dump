@@ -44,12 +44,7 @@
 Realm(name="example.realm", trusted=False)
 
 Role(name="nobody")
-Role(name="operations")
-Role(name="engineering")
 Role(name="aqd_admin")
-Role(name="maintech")
-Role(name="unixops_l2")
-Role(name="winops")
 
 UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="example.realm"))
 UserPrincipal(name="otheruser", role=Role(name="nobody"), realm=Realm(name="example.realm"))
