@@ -69,7 +69,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                                 environment="prod",
                                 required=["esx_management_server",
                                           "vmseasoning"],
-                                maps=vmhost_maps)
+                                maps=vmhost_maps,
+                                config_override=True)
         self.create_personality("vmhost", "vulcan-local-disk",
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 maps=vmhost_maps,
@@ -77,21 +78,25 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.create_personality("esx_cluster", "vulcan-10g-server-prod",
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 environment="prod",
-                                maps=esx_cluster_maps)
+                                maps=esx_cluster_maps,
+                                config_override=True)
         self.create_personality("esx_cluster", "nostage", staged=True)
         self.create_personality("esx_cluster", "vulcan-local-disk",
                                 grn="grn:/ms/ei/aquilon/aqd",
-                                maps=esx_cluster_maps)
+                                maps=esx_cluster_maps,
+                                config_override=True)
 
         # We can't set up the vcenter as required here, because the first
         # batch of tests do not work with it. Sigh.
         self.create_personality("vmhost", "vulcan2-server-dev",
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 required=["esx_management_server"],
-                                maps=vmhost_maps)
+                                maps=vmhost_maps,
+                                config_override=True)
         self.create_personality("esx_cluster", "vulcan2-server-dev",
                                 grn="grn:/ms/ei/aquilon/aqd",
-                                maps=esx_cluster_maps)
+                                maps=esx_cluster_maps,
+                                config_override=True)
 
     def test_110_add_utecl1(self):
         # For this cluster, we'll use the default for buildstatus

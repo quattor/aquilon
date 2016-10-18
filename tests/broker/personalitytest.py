@@ -23,6 +23,10 @@ default_parameters = {
         "espinfo/users": "IT / TECHNOLOGY",
         "windows/windows": '[{"duration": 8, "start": "08:00", "day": "Sun"}]',
     },
+    'esx_cluster': {
+        "espinfo/class": "INFRASTRUCTURE",
+        "windows/windows": '[{"duration": 8, "start": "08:00", "day": "Sun"}]',
+    },
     'hacluster': {
         "espinfo/class": "INFRASTRUCTURE",
     },
@@ -30,6 +34,7 @@ default_parameters = {
         "espinfo/function": "development",
         "espinfo/class": "INFRASTRUCTURE",
         "espinfo/users": "IT / TECHNOLOGY",
+        "windows/windows": '[{"duration": 8, "start": "08:00", "day": "Sun"}]',
     },
 }
 
@@ -65,7 +70,7 @@ class PersonalityTestMixin(object):
     def create_personality(self, archetype, name, environment="dev",
                            grn="grn:/ms/ei/aquilon/unittest", staged=False,
                            comments=None, maps=None, required=None,
-                           cluster_required=None):
+                           cluster_required=None, config_override=None):
         """ Create the given personality with reasonable defaults. """
 
         command = ["add_personality", "--archetype", archetype,
@@ -73,6 +78,8 @@ class PersonalityTestMixin(object):
                    "--host_environment", environment]
         if cluster_required or archetype in clustered_archetypes:
             command.append("--cluster_required")
+        if config_override:
+            command.append("--config_override")
         if staged:
             command.append("--staged")
         if comments:

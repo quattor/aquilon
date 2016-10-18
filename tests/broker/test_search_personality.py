@@ -174,9 +174,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.searchoutput(out,
                           r'matching Options with different values:\s+Environment value=dev, othervalue=prod',
                           command)
-        self.searchoutput(out,
-                          r'missing Options in Personality vmhost/vulcan-10g-server-prod:\s+ConfigOverride',
-                          command)
 
     def test_200_no_match(self):
         command = ["search", "personality", "--archetype", "aurora",

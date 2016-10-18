@@ -96,6 +96,12 @@ class TestAddOS(TestBrokerCommand):
         self.noouttest(["add_os", "--archetype", "aquilon", "--osname", "solaris",
                         "--osversion", "11.1-x86_64"])
 
+    def test_150_add_esxi(self):
+        self.noouttest(["add_os", "--archetype", "vmhost", "--osname", "esxi",
+                        "--osversion", "5.0.0"])
+        self.noouttest(["add_os", "--archetype", "vmhost", "--osname", "esxi",
+                        "--osversion", "5.0.2"])
+
     def test_200_add_existing(self):
         command = ["add_os", "--archetype", "aquilon", "--osname", "linux",
                    "--osversion", self.linux_version_prev]

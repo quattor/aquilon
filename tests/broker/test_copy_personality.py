@@ -65,9 +65,9 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
 
     def test_120_clone_esx_attributes(self):
-        self.noouttest(["add_personality", "--personality", "vulcan-1g-clone",
-                        "--archetype", "esx_cluster",
-                        "--copy_from", "vulcan-10g-server-prod"])
+        self.statustest(["add_personality", "--personality", "vulcan-1g-clone",
+                         "--archetype", "esx_cluster",
+                         "--copy_from", "vulcan-10g-server-prod"])
 
     def test_121_verify_esx_clone(self):
         command = ["show_personality", "--personality", "vulcan-1g-clone",
@@ -78,6 +78,7 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out,
                          "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
                          command)
+        self.matchclean(out, "Config override", command)
 
     def test_121_verify_esx_clone_proto(self):
         command = ["show_personality", "--personality", "vulcan-1g-clone",
