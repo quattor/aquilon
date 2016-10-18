@@ -90,7 +90,7 @@ class TestAddModel(TestBrokerCommand):
     def test_150_add_utmedium(self):
         # Use the old --mem name here
         command = ["add_model", "--model=utmedium", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cpuname=xeon_5150",
+                   "--type=virtual_machine", "--cpuname=l5520",
                    "--cpunum=1", "--mem=8192", "--disktype=virtual_disk",
                    "--diskcontroller=sata", "--disksize=15",
                    "--nicmodel", "default", "--nicvendor", "utvirt"]
@@ -105,14 +105,14 @@ class TestAddModel(TestBrokerCommand):
 
     def test_160_add_utlarge(self):
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cpuname=xeon_5150",
+                   "--type=virtual_machine", "--cpuname=l5520",
                    "--cpunum=4", "--memory=16384", "--disktype=virtual_disk",
                    "--diskcontroller=sata", "--disksize=45"]
         self.noouttest(command)
 
     def test_170_add_utcciss(self):
         command = ["add_model", "--model=utccissmodel", "--vendor=hp",
-                   "--type=rackmount", "--cpuname=xeon_2500", "--cpunum=2",
+                   "--type=rackmount", "--cpuname=e5-2640", "--cpunum=2",
                    "--memory=49152", "--disktype=local",
                    "--diskcontroller=cciss",
                    "--disksize=466"]
@@ -124,7 +124,7 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
         self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
-        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2640 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
@@ -184,7 +184,7 @@ class TestAddModel(TestBrokerCommand):
 
     def test_300_bad_disktype(self):
         command = ["add_model", "--model=bad-disk-type", "--vendor=utvendor",
-                   "--type=virtual_machine", "--cpuname=xeon_5150",
+                   "--type=virtual_machine", "--cpuname=l5520",
                    "--cpunum=1", "--mem=8192", "--disktype=bad-disk-type",
                    "--diskcontroller=sata", "--disksize=15"]
         out = self.badrequesttest(command)

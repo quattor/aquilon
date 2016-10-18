@@ -371,6 +371,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_180_add_utmc8_vmhosts(self):
         pri_net = self.net["ut14_net"]
         storage_net = self.net["vm_storage_net"]
+        mgmt_net = self.net["ut14_oob"]
         for i in range(0, 2):
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 80)
             machine = "ut14s1p%d" % i
@@ -378,11 +379,13 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             eth0_mac = ip.mac
             eth1_ip = storage_net.usable[i + 26]
             eth1_mac = eth1_ip.mac
+            mgmt_ip = mgmt_net.usable[i]
 
             self.create_host(hostname, ip, machine,
-                             model="vb1205xm", rack="ut14",
+                             model="dl360g9", rack="ut14",
                              eth0_mac=eth0_mac,
                              eth1_mac=eth1_mac, eth1_ip=eth1_ip,
+                             manager_iface="mgmt0", manager_ip=mgmt_ip,
                              osname="esxi", osversion="5.0.0",
                              archetype="vmhost", personality="vulcan2-server-dev")
 
@@ -390,13 +393,17 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         # This machine will be moved into the right rack later
         self.create_host("evh82.aqd-unittest.ms.com",
                          self.net["ut14_net"].usable[2],
-                         "ut14s1p2", model="vb1205xm", rack="ut3",
+                         "ut14s1p2", model="dl360g9", rack="ut3",
+                         manager_iface="mgmt0",
+                         manager_ip=self.net["ut14_oob"].usable[2],
                          archetype="vmhost", personality="vulcan-local-disk",
                          osname="esxi", osversion="5.0.0",
                          domain="alt-unittest")
         self.create_host("evh83.aqd-unittest.ms.com",
                          self.net["ut14_net"].usable[3],
-                         "ut14s1p3", model="vb1205xm", rack="ut14",
+                         "ut14s1p3", model="dl360g9", rack="ut14",
+                         manager_iface="mgmt0",
+                         manager_ip=self.net["ut14_oob"].usable[3],
                          archetype="vmhost", personality="vulcan-local-disk",
                          osname="esxi", osversion="5.0.0",
                          domain="alt-unittest")
@@ -452,7 +459,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             port = i - 50
             machine = "ut9s03p%d" % port
             self.create_host(hostname, net.usable[port], machine, rack="ut9",
-                             model="bl260c", sandbox="%s/utsandbox" % self.user,
+                             model="bl460cg8", sandbox="%s/utsandbox" % self.user,
                              manager_iface="ilo",
                              manager_ip=mgmt_net.usable[port],
                              personality=personality)
@@ -488,18 +495,22 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         # The other hosts are left for future use.
         eth0_net = self.net["verari_eth0"]
         eth1_net = self.net["verari_eth1"]
+        mgmt_net = self.net["ut10_oob"]
         # number 100 is in use by the tor_switch.
         for i in range(101, 111):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
             machine = "ut10s04p%d" % port
             ip = eth0_net.usable[port]
+            mgmt_ip = mgmt_net.usable[port]
             eth0_mac = ip.mac
             eth1_mac = eth1_net.usable[port].mac
             # The virtual machine tests require quite a bit of memory...
             self.create_host(hostname, ip, machine,
-                             model="vb1205xm", memory=81920, rack="ut10",
+                             model="dl360g9", memory=81920, rack="ut10",
+                             cpuname="e5-2660-v3", cpucount=2,
                              eth0_mac=eth0_mac, eth1_mac=eth1_mac,
+                             manager_iface="mgmt0", manager_ip=mgmt_ip,
                              archetype="vmhost",
                              personality="vulcan-10g-server-prod",
                              osname="esxi", osversion="5.0.0")
@@ -515,10 +526,10 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                 j = port - 1 + offset
                 eth0_mac = self.net["vmotion_net"].usable[i].mac
                 eth1_mac = self.net["vm_storage_net"].usable[j].mac
-                self.create_machine_verari(machine, rack=rack,
-                                           eth0_mac=eth0_mac,
-                                           eth1_mac=eth1_mac,
-                                           eth1_pg="storage-v701")
+                self.create_machine_dl360g9(machine, rack=rack,
+                                            eth0_mac=eth0_mac,
+                                            eth1_mac=eth1_mac,
+                                            eth1_pg="storage-v701")
 
     def test_321_auxiliary_no_host(self):
         # Test port group based IP address allocation when there is no host yet
@@ -537,19 +548,27 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         net = self.net["vmotion_net"]
         for i in range(1, 25):
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
+            manager = "evh%dr.aqd-unittest.ms.com" % (i + 50)
             if i < 13:
                 port = i
                 machine = "ut11s01p%d" % port
+                mgmt_net = self.net["ut11_oob"]
             else:
                 port = i - 12
                 machine = "ut12s02p%d" % port
+                mgmt_net = self.net["ut12_oob"]
             self.dsdb_expect_add(hostname, net.usable[i + 1], "eth0",
                                  net.usable[i + 1].mac)
+            self.dsdb_expect_add(manager, mgmt_net[port], "mgmt0",
+                                 mgmt_net[port].mac)
             command = ["add", "host", "--hostname", hostname, "--autoip",
                        "--machine", machine,
                        "--domain", "unittest",
                        "--osname", "esxi", "--osversion", "5.0.0",
                        "--archetype", "vmhost", "--personality", "vulcan-10g-server-prod"]
+            self.noouttest(command)
+            command = ["add_manager", "--hostname", hostname, "--interface", "mgmt0",
+                       "--ip", mgmt_net[port], "--mac", mgmt_net[port].mac]
             self.noouttest(command)
         self.dsdb_verify()
 
@@ -603,21 +622,27 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(host.operating_system.version, "5.0.0")
         self.assertEqual(host.ip, str(self.net["verari_eth0"].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
-        self.assertEqual(len(host.machine.interfaces), 2)
+        self.assertEqual(len(host.machine.interfaces), 3)
         self.assertEqual(host.machine.location.name, 'ut10')
         self.assertEqual(' '.join('%s:%s' % (str(loc.location_type),
                                              str(loc.name))
                                   for loc in host.machine.location.parents),
                          "company:ms hub:ny continent:na country:us "
                          "campus:ny city:ny building:ut")
+        eth0_net = self.net["verari_eth0"]
+        mgmt_net = self.net["ut10_oob"]
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, str(self.net["verari_eth0"].usable[1]))
+                self.assertEqual(i.ip, str(eth0_net.usable[1]))
+                self.assertEqual(i.mac, str(eth0_net.usable[1].mac))
                 # We're not using this field anymore...
                 self.assertEqual(i.network_id, 0)
             elif i.device == 'eth1':
                 self.assertEqual(i.ip, "")
                 self.assertEqual(i.network_id, 0)
+            elif i.device == 'mgmt0':
+                self.assertEqual(i.ip, str(mgmt_net.usable[1]))
+                self.assertEqual(i.mac, str(mgmt_net.usable[1].mac))
             else:
                 self.fail("Unrecognized interface '%s'" % i.device)
 

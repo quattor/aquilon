@@ -79,7 +79,7 @@ class TestDelMachine(EventsTestMixin, TestBrokerCommand):
         self.noouttest(command.split(" "))
         self.events_verify()
 
-    def testdelverariut8(self):
+    def testdelut8(self):
         # The first 3 are deleted in test_del_host
         for port in range(4, 6):
             machine = "ut8s02p%d" % port

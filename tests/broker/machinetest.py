@@ -282,7 +282,7 @@ class MachineTestMixin(EventsTestMixin):
         if "vendor" not in kwargs:
             kwargs["vendor"] = "ibm"
         if "cpuname" not in kwargs:
-            kwargs["cpuname"] = "xeon_2660"
+            kwargs["cpuname"] = "e5-2660"
         if "cpucount" not in kwargs:
             kwargs["cpucount"] = 2
         if "memory" not in kwargs:
@@ -295,28 +295,29 @@ class MachineTestMixin(EventsTestMixin):
         self.matchclean(show_out, "Primary Name:", show_cmd)
         return show_cmd, show_out
 
-    def create_machine_verari(self, name, interfaces=None, **orig_kwargs):
+    def create_machine_dl360g9(self, name, interfaces=None, **orig_kwargs):
         kwargs = orig_kwargs.copy()
         if not interfaces:
             interfaces = guess_interfaces(kwargs)
 
-        self.create_machine(name, "vb1205xm", interfaces, **kwargs)
+        self.create_machine(name, "dl360g9", interfaces, **kwargs)
 
         # Now fill in default values needed for verification
-        kwargs["model"] = "vb1205xm"
+        kwargs["model"] = "dl360g9"
         if "vendor" not in kwargs:
-            kwargs["vendor"] = "verari"
+            kwargs["vendor"] = "hp"
         if "cpuname" not in kwargs:
-            kwargs["cpuname"] = "xeon_2500"
+            kwargs["cpuname"] = "e5-2660-v3"
         if "cpucount" not in kwargs:
             kwargs["cpucount"] = 2
         if "memory" not in kwargs:
+            # TODO: update this to something more realistic...
             kwargs["memory"] = 24576
 
         show_cmd, show_out = self.verify_show_machine(name, interfaces,
                                                       **kwargs)
         self.matchoutput(show_out, "Machine: %s" % name.lower(), show_cmd)
-        self.matchoutput(show_out, "Model Type: blade", show_cmd)
+        self.matchoutput(show_out, "Model Type: rackmount", show_cmd)
         self.matchclean(show_out, "Primary Name:", show_cmd)
         return show_cmd, show_out
 
