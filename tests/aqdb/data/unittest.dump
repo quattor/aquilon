@@ -63,8 +63,7 @@ DnsDomain(name="new-york.ms.com")
 User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tmp")
 User(name="orphantestuser", uid=1002, gid=1002, full_name="Other user to delete", home_dir="/tmp")
 
-Domain(name="prod", owner=UserPrincipal(name="cdb"),
-       compiler="/none/panc.jar",
+Domain(name="prod", compiler="/none/panc.jar",
        comments="Production source domain.")
 Sandbox(name="othersandbox", owner=UserPrincipal(name="otheruser"),
 	compiler="/none/panc.jar",

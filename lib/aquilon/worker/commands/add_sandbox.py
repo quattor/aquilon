@@ -60,8 +60,9 @@ class CommandAddSandbox(CommandGet):
         kingrepo = GitRepo.template_king(logger)
         base_commit = kingrepo.ref_commit("refs/heads/" + dbstart.name)
 
-        dbsandbox = add_branch(session, self.config, dbuser, Sandbox, sandbox,
-                               base_commit=base_commit, comments=comments)
+        dbsandbox = add_branch(session, self.config, Sandbox, sandbox,
+                               owner=dbuser, base_commit=base_commit,
+                               comments=comments)
         session.flush()
 
         # Currently this will fail if the branch already exists...
