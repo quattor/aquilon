@@ -56,11 +56,8 @@ DnsEnvironment(name="external")
 NetworkEnvironment(name="internal", dns_environment=DnsEnvironment(name="internal"))
 
 DnsDomain(name="ms.com")
-DnsDomain(name="devin1.ms.com")
-DnsDomain(name="devin2.ms.com")
 DnsDomain(name="msad.ms.com", restricted=True)
 DnsDomain(name="one-nyp.ms.com")
-DnsDomain(name="the-ha.ms.com")
 DnsDomain(name="new-york.ms.com")
 
 User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tmp")
@@ -78,36 +75,7 @@ Sandbox(name="orphantestsandbox", owner=UserPrincipal(name="orphantestuser"),
         comments="Test if owner is deleted",
 	base_commit='0000000000')
 
-Archetype(name="aquilon", is_compileable=True)
-Archetype(name="aurora", is_compileable=True)
-Archetype(name="filer", is_compileable=True)
-Archetype(name="storagecluster", cluster_type="storage", outputdesc="Storage")
-Archetype(name="vmhost", is_compileable=True)
-Archetype(name="esx_cluster", is_compileable=True, cluster_type="esx", outputdesc="ESX")
-Archetype(name="netinfra", is_compileable=True)
-
-Archetype(name="windows")
-Archetype(name="f5")
-
 # Define some macros for later use
-@aquilon Archetype(name="aquilon")
-@aurora Archetype(name="aurora")
-@vmhost Archetype(name="vmhost")
-@esxcluster Archetype(name="esx_cluster")
-@windows Archetype(name="windows")
-
-OperatingSystem(archetype=@aurora, name="linux", version="generic")
-OperatingSystem(archetype=@windows, name="windows", version="generic")
-OperatingSystem(archetype=@windows, name="windows", version="nt61e")
-OperatingSystem(archetype=Archetype(name="filer"), name="ontap", version="7.3.3p1")
-OperatingSystem(archetype=Archetype(name="f5"), name="f5", version="generic")
-OperatingSystem(archetype=Archetype(name="netinfra"), name="generic", version="generic")
-
-# Vulcan2.0
-Archetype(name="metacluster", is_compileable=True, cluster_type="meta", outputdesc="ESX")
-Archetype(name="metacluster-old", cluster_type="meta", outputdesc="ESX")
-
-Vendor(name="amd")
 Vendor(name="intel")
 Vendor(name="generic")
 Vendor(name="dell")
@@ -120,14 +88,11 @@ Vendor(name="cisco")
 Vendor(name="aurora_vendor")
 Vendor(name="f5")
 
-@amd Vendor(name="amd")
 @intel Vendor(name="intel")
 @hp Vendor(name="hp")
 @ibm Vendor(name="ibm")
 @dell Vendor(name="dell")
 
-Model(vendor=@amd, name="opteron_2212", model_type="cpu")
-Model(vendor=@intel, name="l5420", model_type="cpu")
 Model(vendor=@intel, name="e5-2640", model_type="cpu")
 Model(vendor=@intel, name="e5-2660", model_type="cpu")
 Model(vendor=@intel, name="e5-2697-v3", model_type="cpu")

@@ -25,80 +25,100 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
+archetypes = {
+    'aquilon': {
+        'compilable': True,
+    },
+    'aurora': {
+        'compilable': True,
+    },
+    'esx_cluster': {
+        'cluster_type': 'esx',
+        'compilable': True,
+        'description': 'ESX',
+    },
+    'f5': {},
+    'filer': {
+        'compilable': True,
+    },
+    'gridcluster': {
+        'cluster_type': 'compute',
+        'compilable': True,
+        'description': 'Grid',
+    },
+    'hacluster': {
+        'cluster_type': 'compute',
+        'compilable': True,
+        'description': 'High Availability',
+    },
+    'metacluster': {
+        'cluster_type': 'meta',
+        'compilable': True,
+        'description': 'ESX',
+    },
+    'netinfra': {
+        'compilable': True,
+    },
+    'storagecluster': {
+        'cluster_type': 'storage',
+        'description': 'Storage',
+    },
+    'utappliance': {},
+    'utarchetype1': {},
+    'utarchetype2': {
+        'comments': 'Some arch comments',
+    },
+    'utarchetype3': {},
+    'vmhost': {
+        'compilable': True,
+    },
+    'windows': {},
+}
+
 
 class TestAddArchetype(TestBrokerCommand):
 
-    def test_100_add_gridcluster(self):
-        command = ["add_archetype", "--archetype=gridcluster", "--cluster=compute",
-                   "--compilable", "--description=Grid"]
-        self.noouttest(command)
+    def test_100_add_archetypes(self):
+        for arch, params in archetypes.items():
+            command = ["add_archetype", "--archetype", arch]
+            if params.get("compilable", False):
+                command.append("--compilable")
+            for opt in ("cluster_type", "description", "comments"):
+                if opt in params:
+                    command.extend(["--" + opt, params[opt]])
 
-    def test_105_show_gridcluster(self):
-        command = "show archetype --archetype gridcluster"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cluster Archetype: gridcluster", command)
-        self.matchoutput(out, "compilable", command)
+            self.noouttest(command)
 
-    def test_105_show_gridcluster_proto(self):
-        command = ["show_archetype", "--archetype", "gridcluster",
-                   "--format", "proto"]
-        arch = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(arch.name, "gridcluster")
-        self.assertEqual(arch.compileable, True)
-        self.assertEqual(arch.cluster_type, "compute")
+    def test_105_show_archetypes(self):
+        for arch, params in archetypes.items():
+            command = ["show_archetype", "--archetype", arch]
+            out = self.commandtest(command)
 
-    def test_110_add_hacluster(self):
-        command = ["add_archetype", "--archetype=hacluster",
-                   "--cluster=compute", "--compilable",
-                   "--description=High Availability"]
-        self.noouttest(command)
+            if "cluster_type" in params:
+                self.matchoutput(out, "Cluster Archetype: " + arch, command)
+            else:
+                self.matchoutput(out, "Host Archetype: " + arch, command)
 
-    def test_115_show_hacluster(self):
-        command = "show archetype --archetype hacluster"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cluster Archetype: hacluster", command)
-        self.matchoutput(out, "compilable", command)
+            if params.get("compilable", False):
+                self.matchoutput(out, "compilable", command)
+            else:
+                self.matchclean(out, "compilable", command)
 
-    def test_120_add_utarchetype1(self):
-        command = "add archetype --archetype utarchetype1"
-        self.noouttest(command.split(" "))
+            if "comments" in params:
+                self.matchoutput(out, "Comments: " + params["comments"],
+                                 command)
+            self.matchclean(out, "Required Service", command)
 
-    def test_120_add_utarchetype2(self):
-        command = ["add_archetype", "--archetype", "utarchetype2",
-                   "--comments", "Some arch comments"]
-        self.noouttest(command)
-
-    def test_120_add_utarchetype3(self):
-        command = "add archetype --archetype utarchetype3"
-        self.noouttest(command.split(" "))
-
-    def test_125_show_utarchetype1(self):
-        command = "show archetype --archetype utarchetype1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Archetype: utarchetype1", command)
-        self.matchclean(out, "compilable", command)
-        self.matchclean(out, "[", command)
-        self.matchclean(out, "Required Service", command)
-
-    def test_125_show_utarchetype2(self):
-        command = "show archetype --archetype utarchetype2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Archetype: utarchetype2", command)
-        self.matchoutput(out, "Some arch comments", command)
-        self.matchclean(out, "compilable", command)
-        self.matchclean(out, "[", command)
-        self.matchclean(out, "Required Service", command)
-
-    def test_130_add_utappliance(self):
-        command = "add archetype --archetype utappliance --nocompilable"
-        self.noouttest(command.split(" "))
-
-    def test_135_show_utappliance_proto(self):
-        command = ["show_archetype", "--archetype", "utappliance",
-                   "--format", "proto"]
-        arch = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(arch.name, "utappliance")
-        self.assertEqual(arch.compileable, False)
+    def test_105_show_archetypes_proto(self):
+        for arch, params in archetypes.items():
+            command = ["show_archetype", "--archetype", arch, "--format", "proto"]
+            res = self.protobuftest(command, expect=1)[0]
+            self.assertEqual(res.name, arch)
+            self.assertEqual(res.compileable, params.get("compilable", False))
+            if "cluster_type" in params:
+                self.assertEqual(res.cluster_type, params["cluster_type"])
+            else:
+                self.assertEqual(res.cluster_type, "")
 
     def test_200_add_reserved_name(self):
         command = "add archetype --archetype hardware"
@@ -135,6 +155,7 @@ class TestAddArchetype(TestBrokerCommand):
         self.matchoutput(out, "Archetype: utarchetype1", command)
         self.matchoutput(out, "Archetype: utarchetype2", command)
         self.matchoutput(out, "Archetype: aquilon [compilable]", command)
+        self.matchoutput(out, "Cluster Archetype: hacluster", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddArchetype)
