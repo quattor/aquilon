@@ -346,7 +346,7 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                            "--service_address", "renametest"])
 
     def test_200_update_bad_mac(self):
-        mac = self.net["verari_eth1"].usable[0].mac
+        mac = self.net["ut10_eth1"].usable[0].mac
         command = ["update", "interface", "--interface", "eth0",
                    "--machine", "ut3c5n10", "--mac", mac]
         out = self.badrequesttest(command)

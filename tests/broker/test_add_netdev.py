@@ -53,7 +53,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "ut3,ut,hp,uttorswitch,SNgd1r01,xge49," % ip, command)
 
     def test_105_add_ut3gd1r04(self):
-        ip = self.net["verari_eth1"].usable[0]
+        ip = self.net["ut10_eth1"].usable[0]
         self.dsdb_expect_add("ut3gd1r04.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac, comments="Some switch comments")
         self.successtest(["add", "network_device", "--type", "tor",
@@ -220,7 +220,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           ip=ip, mac=ip.mac, interface="xge49")
 
     def test_150_add_ut01ga1s04(self):
-        ip = self.net["verari_eth0"].usable[0]
+        ip = self.net["ut10_eth0"].usable[0]
         self.dsdb_expect_add("ut01ga1s04.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
         command = ["add", "network_device", "--type", "tor",

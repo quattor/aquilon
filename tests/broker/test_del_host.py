@@ -268,8 +268,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             self.delete_host(hostname, net.usable[port], machine,
                              manager_ip=mgmt_net.usable[port])
 
-    def test_300_del_verari_rack_hosts(self):
-        net = self.net["verari_eth0"]
+    def test_300_del_ut10_hosts(self):
+        net = self.net["ut10_eth0"]
         mgmt_net = self.net["ut10_oob"]
         for i in range(101, 111):
             port = i - 100

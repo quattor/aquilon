@@ -386,9 +386,9 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: rackmount", command)
 
     # When doing an end-to-end test, these entries should be
-    # created as part of a sweep of a Verari rack
+    # created as part of a sweep of a rack
     # (ut01ga1s02.aqd-unittest.ms.com).
-    def test_190_add_verari_ut8(self):
+    def test_190_add_ut8(self):
         net = self.net["tor_net_0"]
         for port in range(1, 6):
             machine = "ut8s02p%d" % port

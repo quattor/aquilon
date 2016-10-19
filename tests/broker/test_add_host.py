@@ -479,7 +479,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "changetest1", command)
         self.matchoutput(out, "othersandbox", command)
 
-    def test_310_populate_verari_rack_hosts(self):
+    def test_310_populate_ut10_hosts(self):
         # These are used in add_virtual_hardware:
         # evh1.aqd-unittest.ms.com
         # evh2.aqd-unittest.ms.com
@@ -493,8 +493,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         # This is used for utmc7 and update_machine testing:
         # evh10.aqd-unittest.ms.com
         # The other hosts are left for future use.
-        eth0_net = self.net["verari_eth0"]
-        eth1_net = self.net["verari_eth1"]
+        eth0_net = self.net["ut10_eth0"]
+        eth1_net = self.net["ut10_eth1"]
         mgmt_net = self.net["ut10_oob"]
         # number 100 is in use by the tor_switch.
         for i in range(101, 111):
@@ -620,7 +620,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(host.operating_system.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.name, "esxi")
         self.assertEqual(host.operating_system.version, "5.0.0")
-        self.assertEqual(host.ip, str(self.net["verari_eth0"].usable[1]))
+        self.assertEqual(host.ip, str(self.net["ut10_eth0"].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 3)
         self.assertEqual(host.machine.location.name, 'ut10')
@@ -629,7 +629,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                                   for loc in host.machine.location.parents),
                          "company:ms hub:ny continent:na country:us "
                          "campus:ny city:ny building:ut")
-        eth0_net = self.net["verari_eth0"]
+        eth0_net = self.net["ut10_eth0"]
         mgmt_net = self.net["ut10_oob"]
         for i in host.machine.interfaces:
             if i.device == 'eth0':
