@@ -68,12 +68,8 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(personality.name, "compileserver")
         self.assertEqual(personality.owner_eonid,
                          self.grns["grn:/ms/ei/aquilon/unittest"])
-        self.assertEqual(personality.eonid_maps[0].target, 'atarget')
-        self.assertEqual(personality.eonid_maps[0].eonid, 6)
-        self.assertEqual(personality.eonid_maps[1].target, 'esp')
-        self.assertEqual(personality.eonid_maps[1].eonid, 2)
-        self.assertEqual(personality.eonid_maps[2].target, 'esp')
-        self.assertEqual(personality.eonid_maps[2].eonid, 3)
+        grns = set((rec.target, rec.eonid) for rec in personality.eonid_maps)
+        self.assertEqual(grns, set([('atarget', 6), ('esp', 2), ('esp', 3)]))
 
     def test_115_verify_diff(self):
         command = ["show_diff", "--archetype", "aquilon",
@@ -125,6 +121,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
               Owned by GRN: grn:/ms/ei/aquilon/unittest [inherited]
               Used by GRN: grn:/example/cards [target: atarget]
               Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]
+              Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp, inherited]
             """ % ip, command)
 
     def test_140_search(self):
@@ -438,7 +435,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
             command = ["show_host", "--hostname", host, "--grns"]
             out = self.commandtest(command)
             self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
-            self.matchclean(out, "Used by GRN: grn:/ms/ei/aquilon/aqd", command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp, inherited]", command)
 
         command = ["unmap", "grn", "--clearall", "--membersof", cluster, "--target", "esp"]
         self.statustest(command)

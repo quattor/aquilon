@@ -104,9 +104,9 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(host.personality.host_environment, "dev")
         self.assertEqual(host.domain.name, "unittest")
         self.assertEqual(host.owner_eonid, 3)
-        self.assertEqual(host.eonid_maps[0].target, 'esp')
-        self.assertEqual(host.eonid_maps[0].eonid, 3)
+        self.assertEqual(len(host.eonid_maps), 0)
         self.assertEqual(host.personality.owner_eonid, 3)
+        self.assertEqual(len(host.personality.eonid_maps), 1)
         self.assertEqual(host.personality.eonid_maps[0].target, 'esp')
         self.assertEqual(host.personality.eonid_maps[0].eonid, 3)
 
@@ -139,9 +139,9 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(host.status, "build")
         self.assertEqual(host.domain.name, "unittest")
         self.assertEqual(host.owner_eonid, 3)
-        self.assertEqual(host.eonid_maps[0].target, 'esp')
-        self.assertEqual(host.eonid_maps[0].eonid, 3)
+        self.assertEqual(len(host.eonid_maps), 0)
         self.assertEqual(host.personality.owner_eonid, 3)
+        self.assertEqual(len(host.personality.eonid_maps), 1)
         self.assertEqual(host.personality.eonid_maps[0].target, 'esp')
         self.assertEqual(host.personality.eonid_maps[0].eonid, 3)
 

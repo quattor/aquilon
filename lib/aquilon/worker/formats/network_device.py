@@ -18,7 +18,6 @@
 
 from collections import defaultdict
 from operator import attrgetter
-from six import iteritems
 
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -143,11 +142,9 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
                             skeleton.services_provided, indirect_attrs=False)
 
         skeleton.owner_eonid = host.effective_owner_grn.eon_id
-        for target, eon_id_set in iteritems(host.effective_grns):
-            for grn_rec in eon_id_set:
-                map = skeleton.eonid_maps.add()
-                map.target = target
-                map.eonid = grn_rec.eon_id
-
+        for grn_rec in host.grns:
+            map = skeleton.eonid_maps.add()
+            map.target = grn_rec.target
+            map.eonid = grn_rec.eon_id
 
 ObjectFormatter.handlers[NetworkDevice] = NetworkDeviceFormatter()

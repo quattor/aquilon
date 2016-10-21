@@ -138,8 +138,7 @@ class PersonalityStageFormatter(PersonalityFormatter):
                 if link.interface_name:
                     feat_msg.interface_name = link.interface_name
 
-            for grn_rec in sorted(persst.grns,
-                                  key=attrgetter("target", "eon_id")):
+            for grn_rec in persst.grns:
                 map = skeleton.eonid_maps.add()
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
