@@ -187,7 +187,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
-        self.check_grns(out, {"esp": self.grn_list}, command)
+        self.matchclean(out, "eon_id_maps", command)
 
     def test_220_verify_unittest12(self):
         command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
@@ -267,23 +267,21 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
-        self.check_grns(out, {"esp": [self.grn_list[1]]}, command)
+        self.matchclean(out, "eon_id_maps/esp", command)
 
     def test_410_verify_unittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the personality only
-        self.check_grns(out, {"esp": ["grn:/ms/ei/aquilon/unittest"]},
-                        command)
+        self.matchclean(out, "eon_id_maps", command)
 
     def test_420_verify_unittest12(self):
         command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the host only
-        self.check_grns(out, {"esp": ["grn:/ms/ei/aquilon/unittest"]},
-                        command)
+        self.matchclean(out, "eon_id_maps", command)
 
     def test_500_fail_map_overlimitlist(self):
         hostlimit = self.config.getint("broker", "map_grn_max_list_size")
