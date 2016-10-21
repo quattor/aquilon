@@ -123,7 +123,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                    "--hostname=unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest [inherited]", command)
-        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp] [inherited]", command)
+        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp, inherited]", command)
 
     def test_106_verify_show_host_grns_proto(self):
         command = ["show_host", "--format=proto", "--grns",

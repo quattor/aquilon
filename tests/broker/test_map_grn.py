@@ -115,6 +115,18 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                    "--hostname", "unittest00.one-nyp.ms.com", "--target", "atarget"]
         self.noouttest(command)
 
+    def test_135_show_unitesst00_grns(self):
+        ip = self.net["unknown0"].usable[2]
+        command = ["show_host", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--grns"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Primary Name: unittest00.one-nyp.ms.com [%s]
+              Owned by GRN: grn:/ms/ei/aquilon/unittest [inherited]
+              Used by GRN: grn:/example/cards [target: atarget]
+              Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]
+            """ % ip, command)
+
     def test_140_search(self):
         command = ["search", "host", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
@@ -435,7 +447,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         for host in hosts:
             command = ["show_host", "--hostname", host, "--grns"]
             out = self.commandtest(command)
-            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp] [inherited]", command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp, inherited]", command)
 
 
 if __name__ == '__main__':
