@@ -56,10 +56,10 @@ class QIPInfo(object):
         self.routers = routers
         self.compartment = compartment
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         # The refresh algorithm depends on QIPInfo objects being ordered by the
         # network IP address
-        return cmp(self.address.ip, other.address.ip)
+        return self.address.ip < other.address.ip
 
 
 class QIPRefresh(object):
