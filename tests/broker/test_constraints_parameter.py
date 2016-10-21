@@ -166,10 +166,11 @@ class TestParameterConstraints(TestBrokerCommand):
                         "--value", "crash"])
 
     def test_200_proto_noparam(self):
-        cmd = ["show", "parameter", "--personality", "utunused/dev", "--format=proto"]
+        cmd = ["show", "parameter", "--personality", "utunused/dev", 
+               "--personality_stage", "next", "--format=proto"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out, "Not Found: No parameters found for personality "
-                         "aquilon/utunused/dev", cmd)
+                         "aquilon/utunused/dev@next", cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterConstraints)
