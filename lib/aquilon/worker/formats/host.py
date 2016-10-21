@@ -31,9 +31,10 @@ class HostFormatter(CompileableFormatter):
         super(HostFormatter, self).fill_proto(host, skeleton)
         skeleton.type = "host"  # Deprecated
         dbhw_ent = host.hardware_entity
-        skeleton.hostname = dbhw_ent.primary_name.fqdn.name
-        skeleton.fqdn = str(dbhw_ent.primary_name.fqdn)
-        skeleton.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
+        dbfqdn = dbhw_ent.primary_name.fqdn
+        skeleton.hostname = dbfqdn.name
+        skeleton.fqdn = str(dbfqdn)
+        skeleton.dns_domain = dbfqdn.dns_domain.name
 
         sysloc = dbhw_ent.location.sysloc()
         if sysloc:
@@ -192,10 +193,10 @@ class GrnHostListFormatter(ListFormatter):
         for host in hostlist:
             msg = container.add()
             dbhw_ent = host.hardware_entity
-            # FIXME: this is wrong, hostname should be the short name
-            msg.hostname = str(dbhw_ent.primary_name)
-            msg.fqdn = str(dbhw_ent.primary_name)
-            msg.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
+            dbfqdn = dbhw_ent.primary_name.fqdn
+            msg.hostname = dbfqdn.name
+            msg.fqdn = str(dbfqdn)
+            msg.dns_domain = dbfqdn.dns_domain.name
             self.redirect_proto(host.branch, msg.domain)
             msg.status = host.status.name
             msg.owner_eonid = host.effective_owner_grn.eon_id
