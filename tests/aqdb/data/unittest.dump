@@ -75,7 +75,6 @@ Sandbox(name="orphantestsandbox", owner=UserPrincipal(name="orphantestuser"),
         comments="Test if owner is deleted",
 	base_commit='0000000000')
 
-# Define some macros for later use
 Vendor(name="intel")
 Vendor(name="generic")
 Vendor(name="dell")

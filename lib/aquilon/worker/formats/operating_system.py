@@ -31,6 +31,7 @@ class OSFormatter(ObjectFormatter):
             details.append(indent + "  Archetype: %s" % os.archetype)
         for dbsrv in sorted(os.required_services, key=attrgetter("name")):
             details.append(indent + "  Required Service: %s" % dbsrv.name)
+        details.append(indent + "  Lifecycle: %s" % os.lifecycle)
         if os.comments:
             details.append(indent + "  Comments: %s" % os.comments)
 
@@ -39,6 +40,10 @@ class OSFormatter(ObjectFormatter):
     def fill_proto(self, os, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = os.name
         skeleton.version = os.version
+
+        lifecycle_enum = skeleton.DESCRIPTOR.fields_by_name['lifecycle'].enum_type
+        skeleton.lifecycle = lifecycle_enum.values_by_name[os.lifecycle.name.upper()].number
+
         # We don't need the services here, so don't call redirect_proto()
         self.redirect_proto(os.archetype, skeleton.archetype,
                             indirect_attrs=False)

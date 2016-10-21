@@ -94,6 +94,9 @@ class TestAddOS(TestBrokerCommand):
         cls.linux_version_curr = cls.config.get("unittest",
                                                 "linux_version_curr")
 
+        cls.proto = cls.protocols['aqdsystems_pb2']
+        cls.lifecycle_type = cls.proto.OperatingSystem.DESCRIPTOR.fields_by_name["lifecycle"].enum_type
+
     def test_100_add_aquilon_prev(self):
         self.noouttest(["add_os", "--archetype", "aquilon", "--osname", "linux",
                         "--osversion", self.linux_version_prev])
@@ -121,6 +124,7 @@ class TestAddOS(TestBrokerCommand):
             Operating System: utos
               Version: 1.0
               Archetype: utarchetype1
+              Lifecycle: evaluation
             """, command)
 
     def test_121_show_utos_proto(self):
@@ -130,6 +134,7 @@ class TestAddOS(TestBrokerCommand):
         self.assertEqual(utos.archetype.name, "utarchetype1")
         self.assertEqual(utos.name, "utos")
         self.assertEqual(utos.version, "1.0")
+        self.assertEqual(utos.lifecycle, self.proto.EVALUATION)
 
     def test_121_verify_os_only(self):
         command = "show os --osname utos --archetype utarchetype1"
@@ -153,13 +158,15 @@ class TestAddOS(TestBrokerCommand):
                          command)
 
     def test_200_add_bad_name(self):
-        command = "add os --archetype aquilon --osname oops@! --osversion 1.0"
+        command = "add os --archetype aquilon --osname oops@!" \
+                  " --osversion 1.0"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "'oops@!' is not a valid value for --osname.",
                          command)
 
     def test_200_add_bad_version(self):
-        command = "add os --archetype aquilon --osname newos --osversion oops@!"
+        command = "add os --archetype aquilon --osname newos" \
+                  " --osversion oops@!"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "'oops@!' is not a valid value for --osversion.",
                          command)
@@ -204,6 +211,82 @@ class TestAddOS(TestBrokerCommand):
         command = "show os --archetype windows --osname windows --osversion nt61e"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Comments: Windows 7 Enterprise (x86)", command)
+
+    def test_420_update_os_lifecycle(self):
+        command = ["add_os", "--osname", "lctestos", "--osversion", "1.0",
+                   "--archetype", "aquilon"]
+        self.noouttest(command)
+
+        stages = [ 'pre_prod', 'early_prod',
+                   'production', 'pre_decommission',
+                   'inactive','decommissioned']
+
+        for lifecycle in stages:
+            command = ["update_os", "--osname", "lctestos",
+                       "--osversion", "1.0", "--archetype", "aquilon",
+                       "--lifecycle", lifecycle]
+            self.noouttest(command)
+
+            command = "show os --archetype aquilon --osname lctestos --osversion 1.0"
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, "Lifecycle: %s" % lifecycle, command)
+
+            command = command + " --format=proto"
+            os = self.protobuftest(command.split(), expect=1)[0]
+            val = self.lifecycle_type.values_by_name[lifecycle.upper()]
+            self.assertEqual(os.lifecycle, val.number)
+
+        command = ["del_os", "--osname", "lctestos", "--osversion", "1.0",
+                   "--archetype", "aquilon"]
+        self.noouttest(command)
+
+    def test_430_update_os_lifecycle(self):
+        command = ["add_os", "--osname", "lctestos", "--osversion", "1.0",
+                   "--archetype", "aquilon"]
+        self.noouttest(command)
+
+        lifecycle = 'withdrawn'
+        command = ["update_os", "--osname", "lctestos",
+                   "--osversion", "1.0", "--archetype", "aquilon",
+                   "--lifecycle", lifecycle]
+        self.noouttest(command)
+
+        command = "show os --archetype aquilon --osname lctestos --osversion 1.0"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Lifecycle: %s" % lifecycle, command)
+
+        command = command + " --format=proto"
+        os = self.protobuftest(command.split(), expect=1)[0]
+        val = self.lifecycle_type.values_by_name[lifecycle.upper()]
+        self.assertEqual(os.lifecycle, val.number)
+
+        command = ["del_os", "--osname", "lctestos", "--osversion", "1.0",
+                   "--archetype", "aquilon"]
+        self.noouttest(command)
+
+    def test_440_update_os_status_invalid(self):
+        command = ["update_os", "--osname", "windows", "--osversion", "nt61e",
+                   "--archetype", "windows",
+                   "--lifecycle", "invalidstat"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown asset lifecycle"
+                              " 'invalidstat'. The valid values are:"
+                              " decommissioned, early_prod, evaluation,"
+                              " inactive, pre_decommission, pre_prod,"
+                              " production, withdrawn.",
+                         command)
+
+    def test_450_update_os_lifecycle_invalid_transition(self):
+        command = ["update_os", "--osname", "windows", "--osversion", "nt61e",
+                   "--archetype", "windows",
+                   "--lifecycle", "production"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot change lifecycle stage to production"
+                              " from evaluation. Legal states are: pre_prod"
+                              ", withdrawn",
+                         command)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)
