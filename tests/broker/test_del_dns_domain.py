@@ -62,20 +62,6 @@ class TestDelDnsDomain(TestBrokerCommand):
                              "Domain %s appears in list %s" %
                              (domain, dns_names))
 
-    def testdeltd1(self):
-        self.dsdb_expect("delete_dns_domain -domain_name td1.aqd-unittest.ms.com")
-        command = ["del", "dns", "domain",
-                   "--dns_domain", "td1.aqd-unittest.ms.com"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def testdeltd2(self):
-        self.dsdb_expect("delete_dns_domain -domain_name td2.aqd-unittest.ms.com")
-        command = ["del", "dns", "domain",
-                   "--dns_domain", "td2.aqd-unittest.ms.com"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
     def testdelut_env(self):
         self.dsdb_expect("delete_dns_domain -domain_name aqd-unittest-ut-env.ms.com")
         command = ["del", "dns", "domain",

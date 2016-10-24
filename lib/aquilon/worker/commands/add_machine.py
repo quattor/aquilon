@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq add machine`."""
 
-from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy.orm import subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis, ChassisSlot, Model, Machine
@@ -35,8 +35,7 @@ class CommandAddMachine(BrokerCommand):
                chassis, slot, cpuname, cpuvendor, cpucount, memory, recipe,
                cluster, metacluster, vmhost, uri, comments, **arguments):
         dblocation = get_location(session,
-                                  query_options=[subqueryload('parents'),
-                                                 joinedload('parents.dns_maps')],
+                                  query_options=[subqueryload('parents')],
                                   **arguments)
         if chassis:
             dbchassis = Chassis.get_unique(session, chassis, compel=True)

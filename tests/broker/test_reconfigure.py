@@ -49,61 +49,32 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         cls.linux_version_curr = cls.config.get("unittest",
                                                 "linux_version_curr")
 
-    # If we end up fixing map dns domain, it may be harder to do this test.
-    # Also, these tests would just "keep working", but they wouldn't
-    # actually be testing anything...
-    def test_1000_reconfigure_aquilon95(self):
+    def test_1000_edit_machine_plenary(self):
+        # "aq reconfigure" should refresh the machine plenary. We verify that by
+        # intentionally breaking it first.
+        path = self.plenary_name("machine", "americas", "ut", "ut9",
+                                 "ut9s03p45")
+        with open(path, "a") as fp:
+            fp.write('\n"broken" = "template";\n')
+
+        command = ["cat", "--machine=ut9s03p45"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"broken" = "template";', command)
+
+    def test_1001_reconfigure_aquilon95(self):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
         self.successtest(command)
 
-    def test_1001_verify_machine_plenary(self):
+    def test_1002_verify_machine_plenary(self):
         command = ["cat", "--machine=ut9s03p45"]
         out = self.commandtest(command)
+        self.matchclean(out, "broken", command)
         self.matchoutput(out, '"sysloc/room" = "utroom2";', command)
         self.matchoutput(out, '"sysloc/bunker" = "bucket2.ut";', command)
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
         self.matchoutput(out, '"sysloc/continent" = "na";', command)
         self.matchoutput(out, '"sysloc/country" = "us";', command)
-        self.searchoutput(out,
-                          r'"sysloc/dns_search_domains" = '
-                          r'list\(\s*"new-york.ms.com"\s*\);',
-                          command)
-
-    def test_1002_map_dns_domain(self):
-        self.noouttest(['map_dns_domain', '--building=ut',
-                        '--dns_domain=aqd-unittest.ms.com'])
-
-    def test_1003_reconfigure_aquilon95(self):
-        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
-        err = self.statustest(command)
-        self.matchoutput(err, "1/1 template", command)
-
-    def test_1004_verify_machine_plenary(self):
-        command = ["cat", "--machine=ut9s03p45"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r'"sysloc/dns_search_domains" = '
-                          r'list\(\s*"aqd-unittest.ms.com",\s*'
-                          r'"new-york.ms.com"\s*\);',
-                          command)
-
-    def test_1005_unmap_dns_domain(self):
-        self.noouttest(['unmap_dns_domain', '--building=ut',
-                        '--dns_domain=aqd-unittest.ms.com'])
-
-    def test_1006_reconfigure_aquilon95(self):
-        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
-        err = self.statustest(command)
-        self.matchoutput(err, "1/1 template", command)
-
-    def test_1007_verify_machine_plenary(self):
-        command = ["cat", "--machine=ut9s03p45"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r'"sysloc/dns_search_domains" = '
-                          r'list\(\s*"new-york.ms.com"\s*\);',
-                          command)
 
     def test_1010_reconfigurelist_grn_pre(self):
         hosts = ["aquilon95.aqd-unittest.ms.com",

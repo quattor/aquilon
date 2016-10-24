@@ -36,7 +36,6 @@ from .test_add_role import TestAddRole
 from .test_del_role import TestDelRole
 from .test_permission import TestPermission
 from .test_add_dns_domain import TestAddDnsDomain
-from .test_map_dns_domain import TestMapDnsDomain
 from .test_add_dns_environment import TestAddDnsEnvironment
 from .test_update_dns_environment import TestUpdateDnsEnvironment
 from .test_add_sandbox import TestAddSandbox
@@ -273,7 +272,6 @@ from .test_del_user import TestDelUser
 from .test_del_domain import TestDelDomain
 from .test_del_sandbox import TestDelSandbox
 from .test_del_ns_record import TestDelNSRecord
-from .test_unmap_dns_domain import TestUnmapDnsDomain
 from .test_del_dns_domain import TestDelDnsDomain
 from .test_del_dns_environment import TestDelDnsEnvironment
 from .test_del_feature import TestDelFeature
@@ -350,7 +348,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddVendor, TestAddCpu, TestAddModel,
                      TestAddNetworkCompartment,
                      TestAddNetworkEnvironment, TestAddNetwork,
-                     TestAddNSRecord, TestMapDnsDomain,
+                     TestAddNSRecord,
                      TestAddVlan,
                      TestAddVirtualSwitch,
                      TestAddMetaCluster, TestAddESXCluster,
@@ -485,7 +483,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelModel, TestDelVendor,
                      TestDelParameter, TestDelParameterDefinition,
                      TestDelFeature,
-                     TestUnmapDnsDomain,
                      TestDelDesk, TestDelRack, TestDelBunker, TestDelRoom,
                      TestDelBuilding, TestDelRequiredService,
                      TestDelCity, TestDelCampus,
