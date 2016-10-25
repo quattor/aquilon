@@ -206,6 +206,15 @@
 				</para>
 			    </listitem>
 			</varlistentry>
+			<varlistentry>
+			    <term><literal>legacy</literal></term>
+			    <listitem>
+				<para>
+				    The feature should not be added to new personalities, but self-service tools
+				    should allow it to be removed.
+				</para>
+			    </listitem>
+			</varlistentry>
 		    </variablelist>
 		    <para>
 			The default value is <literal>restricted</literal>.

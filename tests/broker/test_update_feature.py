@@ -65,6 +65,16 @@ class TestUpdateFeature(TestBrokerCommand):
         self.assertEqual(feature.deactivation, self.proto.REBUILD)
         self.assertEqual(feature.comments, "New feature comments")
 
+    def test_110_update_feature_legacy(self):
+        command = ["update", "feature", "--feature", "pre_host", "--type", "host",
+                   "--visibility", "legacy"]
+        self.noouttest(command)
+
+    def test_115_verify_show(self):
+        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Visibility: legacy", command)
+
     def test_200_bad_activation(self):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
                    "--type", "host", "--comments", "New feature comments",

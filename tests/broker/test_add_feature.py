@@ -215,7 +215,7 @@ class TestAddFeature(TestBrokerCommand):
         command = ["add", "feature", "--feature", "pre_hw",
                    "--eon_id", 2, "--type", "hardware", "--pre_personality"]
         command.extend(default_activation)
-        out = self.noouttest(command)
+        self.noouttest(command)
 
     def test_200_pre_iface(self):
         command = ["add", "feature", "--feature", "pre_iface",
@@ -351,7 +351,7 @@ class TestAddFeature(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Unknown value for visibility. Valid values are: "
-                         "owner_approved, owner_only, public, restricted.",
+                         "legacy, owner_approved, owner_only, public, restricted.",
                          command)
 
     def test_255_bad_activation(self):
