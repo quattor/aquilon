@@ -3572,7 +3572,7 @@
 	    <option name="cluster_required" type="flag">Does this personality require hosts to be clustered?</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="config_override" type="flag">Include external personality config override template</option>
-	    <option name="staged" type="flag">Enable staged personality updates</option>
+	    <option name="staged" type="boolean" reverse="unstaged">Enable staged personality updates</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

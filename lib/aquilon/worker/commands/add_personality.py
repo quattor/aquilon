@@ -76,6 +76,9 @@ class CommandAddPersonality(BrokerCommand):
                                .format(dbfrom_persona))
             dbfrom_vers = dbfrom_persona.default_stage(copy_stage)
 
+        if staged is None:
+            staged = True
+
         if not grn and not eon_id:
             raise ArgumentError("GRN or EON ID is required for adding a "
                                 "personality.")

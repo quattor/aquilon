@@ -78,6 +78,12 @@ class PersonalityTestMixin(object):
                    "--host_environment", environment]
         if cluster_required or archetype in clustered_archetypes:
             command.append("--cluster_required")
+
+        if staged is not None:
+            if staged:
+                command.append("--staged")
+            else:
+                command.append("--unstaged")
         if config_override:
             command.append("--config_override")
         if staged:
