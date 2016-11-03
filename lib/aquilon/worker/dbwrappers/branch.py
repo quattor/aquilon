@@ -124,7 +124,7 @@ def get_branch_dependencies(dbbranch):
     return ret
 
 
-def add_branch(session, config, dbuser, cls_, branch, **arguments):
+def add_branch(session, config, cls_, branch, **arguments):
     if cls_ == Domain:
         label = "--domain"
     else:
@@ -139,7 +139,7 @@ def add_branch(session, config, dbuser, cls_, branch, **arguments):
     Branch.get_unique(session, branch, preclude=True)
 
     compiler = config.get("panc", "pan_compiler")
-    dbbranch = cls_(name=branch, owner=dbuser, compiler=compiler, **arguments)
+    dbbranch = cls_(name=branch, compiler=compiler, **arguments)
 
     if config.has_option("broker", "trash_branch"):
         trash_branch = config.get("broker", "trash_branch")

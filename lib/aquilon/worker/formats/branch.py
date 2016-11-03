@@ -33,7 +33,6 @@ class DomainFormatter(ObjectFormatter):
             details.append(indent + "  Rollback commit: %s" %
                            domain.rollback_commit)
         details.append(indent + "  Validated: %s" % domain.is_sync_valid)
-        details.append(indent + "  Owner: %s" % domain.owner)
         details.append(indent + "  Compiler: %s" % domain.compiler)
         details.append(indent + "  Requires Change Manager: %s" %
                        domain.requires_change_manager)
@@ -48,7 +47,6 @@ class DomainFormatter(ObjectFormatter):
 
     def fill_proto(self, domain, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = domain.name
-        skeleton.owner = str(domain.owner)
         skeleton.type = skeleton.DOMAIN
         skeleton.allow_manage = domain.allow_manage
         if domain.tracked_branch:

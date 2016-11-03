@@ -701,7 +701,6 @@
 	    <option name="track" type="string" conflicts="no_tracking">Name of tracked branch</option>
 	    <option name="not_tracking" type="flag" conflicts="track">Do not include tracking domains</option>
 	    <option name="change_manager" type="boolean">Change manager required</option>
-	    <option name="owner" type="string">Show only domains of a given user</option>
 	    <option name="compiler_version" type="string">Version of panc to use</option>
 	    <option name="autosync" type="boolean">Filter by the autosync flag</option>
 	    <option name="validated" type="boolean">Filter by the validated flag</option>
