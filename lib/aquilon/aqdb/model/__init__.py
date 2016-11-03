@@ -19,6 +19,7 @@ import aquilon.aqdb.depends
 
 from aquilon.aqdb.model.base import Base, SingleInstanceMixin
 from aquilon.aqdb.model.stateengine import StateEngine
+from aquilon.aqdb.model.lifecycleengine import LifecycleEngine
 
 # AUTHORIZATION
 from aquilon.aqdb.model.role import Role
@@ -70,6 +71,7 @@ from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.host_environment import HostEnvironment
 from aquilon.aqdb.model.personality import (Personality, PersonalityGrnMap,
                                             PersonalityStage)
+from aquilon.aqdb.model.asset_lifecycle import AssetLifecycle
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
 # HARDWARE

@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.aqdb.model import OperatingSystem, Archetype
+from aquilon.aqdb.model import (OperatingSystem, Archetype,
+                                AssetLifecycle)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.utils import validate_template_name, validate_nlist_key
 
@@ -42,8 +43,12 @@ class CommandAddOS(BrokerCommand):
             if comments is None:
                 comments = dbprev_os.comments
 
+        dblifecycle = AssetLifecycle.get_instance(session, "evaluation")
+
         dbos = OperatingSystem(name=osname, version=osversion,
-                               archetype=dbarchetype, comments=comments)
+                               archetype=dbarchetype,
+                               lifecycle=dblifecycle,
+                               comments=comments)
         session.add(dbos)
 
         if copy_version:

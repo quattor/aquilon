@@ -3652,6 +3652,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
+	    <option name="lifecycle" type="string">Lifecycle status of OS being update to</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

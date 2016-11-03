@@ -1,0 +1,3 @@
+ALTER TABLE operating_system ADD lifecycle VARCHAR(20);
+UPDATE operating_system SET lifecycle = 'production';
+ALTER TABLE operating_system ALTER lifecycle SET NOT NULL;
