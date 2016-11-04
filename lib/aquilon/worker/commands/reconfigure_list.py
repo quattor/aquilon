@@ -56,12 +56,12 @@ class CommandReconfigureList(BrokerCommand):
         dbhosts = self.get_hostlist(session, **arguments)
 
         if archetype:
-            target_archetype = Archetype.get_unique(session, archetype, compel=True)
-            if target_archetype.cluster_type is not None:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+            if dbarchetype.cluster_type is not None:
                 raise ArgumentError("{0} is a cluster archetype, it cannot be "
-                                    "used for hosts.".format(target_archetype))
+                                    "used for hosts.".format(dbarchetype))
         else:
-            target_archetype = None
+            dbarchetype = None
 
         if buildstatus:
             dbstatus = HostLifecycle.get_instance(session, buildstatus)
@@ -82,27 +82,27 @@ class CommandReconfigureList(BrokerCommand):
 
         for dbhost in dbhosts:
             old_archetype = dbhost.archetype
-            if target_archetype:
-                dbarchetype = target_archetype
+            if dbarchetype:
+                target_archetype = dbarchetype
             else:
-                dbarchetype = dbhost.archetype
+                target_archetype = dbhost.archetype
 
-            if personality or personality_stage or old_archetype != dbarchetype:
+            if personality or personality_stage or old_archetype != target_archetype:
                 if not personality:
                     personality = dbhost.personality.name
 
                 # Cache personalities to avoid looking up the same data many
                 # times
-                if personality in personality_cache[dbarchetype]:
-                    dbstage = personality_cache[dbarchetype][personality]
+                if personality in personality_cache[target_archetype]:
+                    dbstage = personality_cache[target_archetype][personality]
                     dbpersonality = dbstage.personality
                 else:
                     try:
                         dbpersonality = Personality.get_unique(session, name=personality,
-                                                               archetype=dbarchetype,
+                                                               archetype=target_archetype,
                                                                compel=True)
                         dbstage = dbpersonality.default_stage(personality_stage)
-                        personality_cache[dbarchetype][personality] = dbstage
+                        personality_cache[target_archetype][personality] = dbstage
                     except NotFoundException as err:
                         failed.append("%s: %s" % (dbhost.fqdn, err))
                         continue
@@ -119,22 +119,22 @@ class CommandReconfigureList(BrokerCommand):
 
                 dbhost.personality_stage = dbstage
 
-            if osname or osversion or old_archetype != dbarchetype:
+            if osname or osversion or old_archetype != target_archetype:
                 if not osname:
                     osname = dbhost.operating_system.name
                 if not osversion:
                     osversion = dbhost.operating_system.version
 
                 oskey = "%s/%s" % (osname, osversion)
-                if oskey in os_cache[dbarchetype]:
-                    dbos = os_cache[dbarchetype][oskey]
+                if oskey in os_cache[target_archetype]:
+                    dbos = os_cache[target_archetype][oskey]
                 else:
                     try:
                         dbos = OperatingSystem.get_unique(session, name=osname,
                                                           version=osversion,
-                                                          archetype=dbarchetype,
+                                                          archetype=target_archetype,
                                                           compel=True)
-                        os_cache[dbarchetype][oskey] = dbos
+                        os_cache[target_archetype][oskey] = dbos
                     except NotFoundException as err:
                         failed.append("%s: %s" % (dbhost.fqdn, err))
                         continue
