@@ -34,6 +34,40 @@ from aquilon.worker.templates import (PlenaryCollection, TemplateDomain,
 from aquilon.worker.services import Chooser, ChooserCache
 
 
+def select_personality(session, cache, dbhost, personality, personality_stage,
+                       target_archetype):
+    if not personality:
+        personality = dbhost.personality.name
+
+    try:
+        return cache[target_archetype][personality]
+    except KeyError:
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=target_archetype, compel=True)
+        dbstage = dbpersonality.default_stage(personality_stage)
+        cache[target_archetype][personality] = dbstage
+        return dbstage
+
+
+def select_os(session, cache, dbhost, osname, osversion, target_archetype):
+    if not osname:
+        osname = dbhost.operating_system.name
+    if not osversion:
+        osversion = dbhost.operating_system.version
+
+    oskey = "%s/%s" % (osname, osversion)
+
+    try:
+        return cache[target_archetype][oskey]
+    except KeyError:
+        dbos = OperatingSystem.get_unique(session, name=osname,
+                                          version=osversion,
+                                          archetype=target_archetype,
+                                          compel=True)
+        cache[target_archetype][oskey] = dbos
+        return dbos
+
+
 class CommandReconfigureList(BrokerCommand):
 
     required_parameters = ["list"]
@@ -88,56 +122,34 @@ class CommandReconfigureList(BrokerCommand):
                 target_archetype = dbhost.archetype
 
             if personality or personality_stage or old_archetype != target_archetype:
-                if not personality:
-                    personality = dbhost.personality.name
-
-                # Cache personalities to avoid looking up the same data many
-                # times
-                if personality in personality_cache[target_archetype]:
-                    dbstage = personality_cache[target_archetype][personality]
-                    dbpersonality = dbstage.personality
-                else:
-                    try:
-                        dbpersonality = Personality.get_unique(session, name=personality,
-                                                               archetype=target_archetype,
-                                                               compel=True)
-                        dbstage = dbpersonality.default_stage(personality_stage)
-                        personality_cache[target_archetype][personality] = dbstage
-                    except NotFoundException as err:
-                        failed.append("%s: %s" % (dbhost.fqdn, err))
-                        continue
+                try:
+                    dbstage = select_personality(session, personality_cache,
+                                                 dbhost, personality,
+                                                 personality_stage,
+                                                 target_archetype)
+                except NotFoundException as err:
+                    failed.append("%s: %s" % (dbhost.fqdn, err))
+                    continue
 
                 if dbhost.cluster and dbhost.cluster.allowed_personalities and \
-                   dbpersonality not in dbhost.cluster.allowed_personalities:
+                   dbstage.personality not in dbhost.cluster.allowed_personalities:
                     allowed = sorted(p.qualified_name for p in
                                      dbhost.cluster.allowed_personalities)
                     failed.append("{0}: {1} is not allowed by {2}.  "
                                   "Specify one of: {3}."
-                                  .format(dbhost.fqdn, dbpersonality,
+                                  .format(dbhost.fqdn, dbstage.personality,
                                           dbhost.cluster, ", ".join(allowed)))
                     continue
 
                 dbhost.personality_stage = dbstage
 
             if osname or osversion or old_archetype != target_archetype:
-                if not osname:
-                    osname = dbhost.operating_system.name
-                if not osversion:
-                    osversion = dbhost.operating_system.version
-
-                oskey = "%s/%s" % (osname, osversion)
-                if oskey in os_cache[target_archetype]:
-                    dbos = os_cache[target_archetype][oskey]
-                else:
-                    try:
-                        dbos = OperatingSystem.get_unique(session, name=osname,
-                                                          version=osversion,
-                                                          archetype=target_archetype,
-                                                          compel=True)
-                        os_cache[target_archetype][oskey] = dbos
-                    except NotFoundException as err:
-                        failed.append("%s: %s" % (dbhost.fqdn, err))
-                        continue
+                try:
+                    dbos = select_os(session, os_cache, dbhost, osname,
+                                     osversion, target_archetype)
+                except NotFoundException as err:
+                    failed.append("%s: %s" % (dbhost.fqdn, err))
+                    continue
 
                 dbhost.operating_system = dbos
 
