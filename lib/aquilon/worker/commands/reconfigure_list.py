@@ -110,6 +110,11 @@ class CommandReconfigureList(BrokerCommand):
 
         dbbranch, dbauthor = validate_branch_author(dbhosts)
 
+        if personality_stage and not personality and \
+           len(set(dbhost.personality for dbhost in dbhosts)) > 1:
+            raise ArgumentError("Promoting hosts in multiple personalities is "
+                                "not supported.")
+
         failed = []
         personality_cache = defaultdict(dict)
         os_cache = defaultdict(dict)
