@@ -18,7 +18,6 @@
 import logging
 from collections import defaultdict
 from operator import attrgetter
-from six import iteritems
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, subqueryload
@@ -132,15 +131,12 @@ class PlenaryPersonalityBase(Plenary):
         if dbpers.staged:
             pan_assign(lines, "/system/personality/stage", self.dbobj.name)
 
-        # process grns
         eon_id_map = defaultdict(set)
-
-        # own == pers level
         for grn_rec in self.dbobj.grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
-        for target, eon_id_set in iteritems(eon_id_map):
-            for eon_id in sorted(eon_id_set):
+        for target in sorted(eon_id_map):
+            for eon_id in sorted(eon_id_map[target]):
                 pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
 
         pan_assign(lines, "/system/personality/owner_eon_id",

@@ -17,9 +17,10 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 import logging
+from collections import defaultdict
 from itertools import chain
 from operator import attrgetter
-from six import iteritems, itervalues
+from six import itervalues
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, lazyload, subqueryload
@@ -264,11 +265,12 @@ class PlenaryHostData(StructurePlenary):
         pan_assign(lines, "system/build", self.dbobj.status.name)
         pan_assign(lines, "system/advertise_status", self.dbobj.advertise_status)
 
-        # process grns
-        eon_id_map = self.dbobj.effective_grns
+        eon_id_map = defaultdict(set)
+        for grn_rec in self.dbobj.grns:
+            eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
-        for target, eon_id_set in iteritems(eon_id_map):
-            eon_id_list = sorted(grn.eon_id for grn in eon_id_set)
+        for target in sorted(eon_id_map):
+            eon_id_list = list(sorted(eon_id_map[target]))
             pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
 
         pan_assign(lines, "system/owner_eon_id", self.dbobj.effective_owner_grn.eon_id)

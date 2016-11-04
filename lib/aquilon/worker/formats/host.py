@@ -16,8 +16,8 @@
 # limitations under the License.
 """Host formatter."""
 
+from collections import defaultdict
 from operator import attrgetter
-from six import iteritems
 
 from aquilon.aqdb.model import Host
 from aquilon.aqdb.model.feature import hardware_features, host_features
@@ -31,9 +31,10 @@ class HostFormatter(CompileableFormatter):
         super(HostFormatter, self).fill_proto(host, skeleton)
         skeleton.type = "host"  # Deprecated
         dbhw_ent = host.hardware_entity
-        skeleton.hostname = dbhw_ent.primary_name.fqdn.name
-        skeleton.fqdn = str(dbhw_ent.primary_name.fqdn)
-        skeleton.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
+        dbfqdn = dbhw_ent.primary_name.fqdn
+        skeleton.hostname = dbfqdn.name
+        skeleton.fqdn = str(dbfqdn)
+        skeleton.dns_domain = dbfqdn.dns_domain.name
 
         sysloc = dbhw_ent.location.sysloc()
         if sysloc:
@@ -62,11 +63,10 @@ class HostFormatter(CompileableFormatter):
         self.redirect_proto([srv.service_instance for srv in host.services_provided],
                             skeleton.services_provided, indirect_attrs=False)
 
-        for target, eon_id_set in iteritems(host.effective_grns):
-            for grn_rec in eon_id_set:
-                map = skeleton.eonid_maps.add()
-                map.target = target
-                map.eonid = grn_rec.eon_id
+        for grn_rec in host.grns:
+            map = skeleton.eonid_maps.add()
+            map.target = grn_rec.target
+            map.eonid = grn_rec.eon_id
 
         if host.virtual_switch:
             self.redirect_proto(host.virtual_switch, skeleton.virtual_switch)
@@ -166,20 +166,26 @@ class GrnHostListFormatter(ListFormatter):
                                         "{0:a}".format(host.hardware_entity.primary_name))
             hstr = "  Owned by {0:c}: {0.grn}".format(host.effective_owner_grn)
 
-            if host.effective_owner_grn == host.owner_grn:
+            if host.owner_grn:
                 details.append(indent + hstr)
             else:
                 details.append(indent + hstr + " [inherited]")
 
-            eon_targets = [grn.target for grn in host.grns]
-            for target, eon_id_set in iteritems(host.effective_grns):
-                inherited = ""
-                if target not in eon_targets:
-                    inherited = " [inherited]"
-                for grn_rec in sorted(eon_id_set):
-                    details.append(indent + "  Used by {0:c}: {0.grn} "
-                                            "[target: {1}]{2}"
-                                   .format(grn_rec, target, inherited))
+            host_grns = defaultdict(set)
+            all_grns = defaultdict(set)
+            for grn_rec in host.grns:
+                host_grns[grn_rec.target].add(grn_rec.grn)
+                all_grns[grn_rec.target].add(grn_rec.grn)
+            for grn_rec in host.personality_stage.grns:
+                all_grns[grn_rec.target].add(grn_rec.grn)
+
+            for target in sorted(all_grns):
+                for grn in sorted(all_grns[target], key=attrgetter("eon_id")):
+                    attrs = ["target: " + target]
+                    if grn not in host_grns[target]:
+                        attrs.append("inherited")
+                    details.append(indent + "  Used by {0:c}: {0.grn} [{1}]"
+                                   .format(grn, ", ".join(attrs)))
         return "\n".join(details)
 
     def format_proto(self, hostlist, container, embedded=True,
@@ -187,10 +193,10 @@ class GrnHostListFormatter(ListFormatter):
         for host in hostlist:
             msg = container.add()
             dbhw_ent = host.hardware_entity
-            # FIXME: this is wrong, hostname should be the short name
-            msg.hostname = str(dbhw_ent.primary_name)
-            msg.fqdn = str(dbhw_ent.primary_name)
-            msg.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
+            dbfqdn = dbhw_ent.primary_name.fqdn
+            msg.hostname = dbfqdn.name
+            msg.fqdn = str(dbfqdn)
+            msg.dns_domain = dbfqdn.dns_domain.name
             self.redirect_proto(host.branch, msg.domain)
             msg.status = host.status.name
             msg.owner_eonid = host.effective_owner_grn.eon_id
@@ -198,17 +204,14 @@ class GrnHostListFormatter(ListFormatter):
             self.redirect_proto(host.personality_stage, msg.personality,
                                 indirect_attrs=False)
 
-            # eon id maps TBD need both effective and actual
-            for grn_rec in sorted(host.personality_stage.grns,
-                                  key=attrgetter("target", "eon_id")):
+            for grn_rec in host.personality_stage.grns:
                 map = msg.personality.eonid_maps.add()
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
 
-            for target, eon_id_set in iteritems(host.effective_grns):
-                for grn_rec in eon_id_set:
-                    map = msg.eonid_maps.add()
-                    map.target = target
-                    map.eonid = grn_rec.eon_id
+            for grn_rec in host.grns:
+                map = msg.eonid_maps.add()
+                map.target = grn_rec.target
+                map.eonid = grn_rec.eon_id
 
 ObjectFormatter.handlers[GrnHostList] = GrnHostListFormatter()
