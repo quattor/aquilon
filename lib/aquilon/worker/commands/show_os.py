@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, subqueryload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import OperatingSystem, Archetype
@@ -34,7 +34,8 @@ class CommandShowOS(BrokerCommand):
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             q = q.filter_by(archetype=dbarchetype)
         q = q.join(Archetype)
-        q = q.options(contains_eager('archetype'))
+        q = q.options(contains_eager('archetype'),
+                      subqueryload('required_services'))
         q = q.order_by(Archetype.name, OperatingSystem.name,
                        OperatingSystem.version)
         oslist = q.all()
