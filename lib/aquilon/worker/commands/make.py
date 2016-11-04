@@ -94,20 +94,16 @@ class CommandMake(BrokerCommand):
         session.flush()
 
         if dbhost.archetype.is_compileable:
-            self.compile(session, dbhost, logger, keepbindings)
-
-        return
-
-    def compile(self, session, dbhost, logger, keepbindings):
-        chooser = Chooser(dbhost, logger=logger,
-                          required_only=not keepbindings)
-        chooser.set_required()
+            chooser = Chooser(dbhost, logger=logger,
+                              required_only=not keepbindings)
+            chooser.set_required()
 
         session.flush()
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
-        with chooser.plenaries.transaction():
-            td.compile(session, only=chooser.plenaries.object_templates)
+        if dbhost.archetype.is_compileable:
+            with chooser.plenaries.transaction():
+                td.compile(session, only=chooser.plenaries.object_templates)
 
         return

@@ -40,6 +40,6 @@ class CommandBindClientHostname(BrokerCommand):
 
         session.flush()
 
-        chooser.write_plenary_templates()
+        chooser.plenaries.write()
 
         return

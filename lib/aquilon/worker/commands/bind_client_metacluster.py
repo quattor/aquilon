@@ -37,8 +37,8 @@ class CommandBindClientMetacluster(BrokerCommand):
         else:
             dbinstance = None
 
+        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         # FIXME: this logic should be in the chooser
         for dbobj in dbmeta.all_objects():
@@ -46,9 +46,9 @@ class CommandBindClientMetacluster(BrokerCommand):
             if dbobj == dbmeta or dbservice in dbobj.required_services:
                 chooser = Chooser(dbobj, logger=logger, required_only=False,
                                   cache=chooser_cache)
-                choosers.append(chooser)
                 try:
                     chooser.set_single(dbservice, dbinstance, force=force)
+                    plenaries.extend(chooser.plenaries)
                 except ArgumentError as err:
                     failed.append(str(err))
 
@@ -58,10 +58,7 @@ class CommandBindClientMetacluster(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
-
         plenaries.write()
 
         return

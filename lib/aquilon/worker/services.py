@@ -539,10 +539,6 @@ class Chooser(object):
     def get_key(self):
         return self.plenaries.get_key()
 
-    def write_plenary_templates(self, locked=False):
-        self.plenaries.stash()
-        self.plenaries.write(locked=locked)
-
     def prestash_primary(self, allow_incomplete=False):
         for dbobj in self.dbobj.all_objects():
             self.plenaries.append(Plenary.get_plenary(dbobj,

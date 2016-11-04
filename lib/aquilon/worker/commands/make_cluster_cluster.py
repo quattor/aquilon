@@ -43,19 +43,20 @@ class CommandMakeClusterCluster(BrokerCommand):
                                 "({1!s}).".format(dbcluster,
                                                   dbcluster.archetype))
 
+        plenaries = PlenaryCollection(logger=logger)
+
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         for dbobj in dbcluster.all_objects():
             if dbobj.archetype.is_compileable:
                 chooser = Chooser(dbobj, logger=logger,
                                   required_only=not keepbindings,
                                   cache=chooser_cache)
-                choosers.append(chooser)
                 try:
                     chooser.set_required()
+                    plenaries.extend(chooser.plenaries)
                 except ArgumentError as err:
                     failed.append(str(err))
 
@@ -65,8 +66,6 @@ class CommandMakeClusterCluster(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
