@@ -24,7 +24,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import LifecycleEngine, Base
 from aquilon.aqdb.column_types import Enum
 
-_TN = 'Assetlifecycle'
+_TN = 'asset_lifecycle'
 
 
 class AssetLifecycle(LifecycleEngine, Base):
