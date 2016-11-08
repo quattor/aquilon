@@ -45,7 +45,6 @@ class PlenaryCluster(PlenaryCollection):
         super(PlenaryCluster, self).__init__(logger=logger,
                                              allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbcluster
         self.append(PlenaryClusterObject.get_plenary(dbcluster,
                                                      allow_incomplete=allow_incomplete))
         self.append(PlenaryClusterData.get_plenary(dbcluster,

@@ -16,12 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq cat --metacluster`."""
 
-from aquilon.aqdb.model import MetaCluster
+from aquilon.aqdb.model import MetaCluster, ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary,
                                       PlenaryMetaClusterObject,
-                                      PlenaryMetaClusterData)
+                                      PlenaryMetaClusterData,
+                                      PlenaryResource)
 
 
 class CommandCatMetaCluster(BrokerCommand):
@@ -35,7 +36,11 @@ class CommandCatMetaCluster(BrokerCommand):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbresource = get_resource(session, dbmeta, **arguments)
         if dbresource:
-            plenary_info = Plenary.get_plenary(dbresource, logger=logger)
+            if isinstance(dbresource, ResourceGroup):
+                cls = PlenaryResource
+            else:
+                cls = Plenary
+            plenary_info = cls.get_plenary(dbresource, logger=logger)
         else:
             if data:
                 cls = PlenaryMetaClusterData

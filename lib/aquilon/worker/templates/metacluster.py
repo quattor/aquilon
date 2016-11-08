@@ -44,7 +44,6 @@ class PlenaryMetaCluster(PlenaryCollection):
         super(PlenaryMetaCluster, self).__init__(logger=logger,
                                                  allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbcluster
         self.append(PlenaryMetaClusterObject.get_plenary(dbcluster,
                                                          allow_incomplete=allow_incomplete))
         self.append(PlenaryMetaClusterData.get_plenary(dbcluster,

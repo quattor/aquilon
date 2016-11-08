@@ -19,7 +19,6 @@ import logging
 from collections import defaultdict
 from operator import attrgetter
 
-from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
@@ -69,8 +68,6 @@ class PlenaryPersonality(PlenaryCollection):
         super(PlenaryPersonality, self).__init__(logger=logger,
                                                  allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbstage
-
         self.append(PlenaryPersonalityBase.get_plenary(dbstage,
                                                        allow_incomplete=allow_incomplete))
 
@@ -83,13 +80,6 @@ class PlenaryPersonality(PlenaryCollection):
             plenary = PlenaryPersonalityParameter.get_plenary(dbstage.parameters[defholder],
                                                               allow_incomplete=allow_incomplete)
             self.append(plenary)
-
-    def get_key(self, exclusive=True):
-        if inspect(self.dbobj).deleted:
-            return NoLockKey(logger=self.logger)
-        else:
-            return PlenaryKey(personality=self.dbobj, logger=self.logger,
-                              exclusive=exclusive)
 
     @classmethod
     def query_options(cls, prefix="", load_personality=True):
