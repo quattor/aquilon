@@ -16,8 +16,6 @@
 # limitations under the License.
 """ Helper functions for change management """
 
-import re
-
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import AuthorizationException, ArgumentError
@@ -25,24 +23,10 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityStage)
 from aquilon.aqdb.model.host_environment import Production
 
-TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
-SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
-EMERG_RE = re.compile("^emergency$")
-
 
 def validate_justification(user, justification, reason):
-    for valid_re in [TCM_RE, SN_RE, EMERG_RE]:
-        result = valid_re.search(justification)
-        if result:
-            break
-    else:
-        raise ArgumentError("Failed to parse the justification: expected "
-                            "tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.")
 
-    if EMERG_RE.search(justification) and not reason:
-        raise AuthorizationException("Justification of 'emergency' requires "
-                                     "--reason to be specified.")
-
+    justification.check_reason(reason)
     # TODO: EDM validation
     # edm_validate(result.group(0))
 
