@@ -29,7 +29,7 @@ class InterventionFormatter(ResourceFormatter):
         details = []
         details.append("  Start: %s" % intervention.start_date)
         details.append("  Expires: %s" % intervention.expiry_date)
-        details.append("  Justification: %s" % intervention.justification)
+        details.append("  Reason: %s" % intervention.reason)
         if intervention.users:
             details.append("  Allow Users: %s" % intervention.users)
         if intervention.groups:
@@ -47,7 +47,7 @@ class InterventionFormatter(ResourceFormatter):
             skeleton.ivdata.users = resource.users
         if resource.groups is not None:
             skeleton.ivdata.groups = resource.groups
-        skeleton.ivdata.justification = resource.justification
+        skeleton.ivdata.justification = resource.reason
         if resource.disabled is not None:
             skeleton.ivdata.disabled = resource.disabled
 

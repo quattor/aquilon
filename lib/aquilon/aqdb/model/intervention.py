@@ -34,7 +34,7 @@ class Intervention(Resource):
 
     start_date = Column(DateTime, default=datetime.now, nullable=False)
     expiry_date = Column(DateTime, default=datetime.now, nullable=False)
-    justification = Column(String(255), nullable=True)
+    reason = Column(String(255), nullable=True)
 
     # what users/groups to allow access during the intervention
     # this as a string will go away and become association proxies

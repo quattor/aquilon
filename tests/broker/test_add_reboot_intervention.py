@@ -42,7 +42,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
         out = self.notfoundtest(command)
 
         command = ["add_reboot_intervention", "--expiry", EXPIRY,
-                   "--justification=test",
+                   "--reason=test",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
@@ -82,7 +82,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
     def test_11_addexisting(self):
         EXPIRY = datetime.utcnow().replace(microsecond=0) + timedelta(days=2)
         command = ["add_reboot_intervention", "--expiry", EXPIRY,
-                   "--justification=test",
+                   "--reason=test",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already exists", command)
@@ -90,7 +90,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
     def test_12_addbadtime(self):
         command = ["add_reboot_intervention", "--start_time=2013/01/01",
                    "--expiry=2013/01/14",
-                   "--justification=test",
+                   "--reason=test",
                    "--hostname=server2.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The start time or expiry time are in the past.", command)
