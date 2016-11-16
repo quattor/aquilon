@@ -113,7 +113,7 @@ class CommandSearchCluster(BrokerCommand):
         # Go through the arguments and make special dicts for each
         # specific set of location arguments that are stripped of the
         # given prefix.
-        location_args = {'cluster_': {}, 'member_': {}}
+        location_args = {'cluster_': {}, 'member_': {}, 'preferred_': {}}
         for prefix, values in location_args.items():
             for k, v in arguments.items():
                 if k.startswith(prefix):
@@ -129,6 +129,7 @@ class CommandSearchCluster(BrokerCommand):
             else:
                 childids = dblocation.offspring_ids()
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
+
         dblocations = get_location_list(session, **location_args['member_'])
         for dblocation in dblocations:
             HWLoc = aliased(Location)
@@ -145,6 +146,10 @@ class CommandSearchCluster(BrokerCommand):
                                    Parent.id == dblocation.id))
 
             q = q.filter(Cluster.id.in_(q1.subquery()))
+
+        dblocation = get_location(session, **location_args['preferred_'])
+        if dblocation:
+            q = q.filter_by(preferred_location=dblocation)
 
         # esx stuff
         if cluster:

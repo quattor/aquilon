@@ -75,6 +75,9 @@ class ClusterFormatter(CompileableFormatter):
         details.append(indent + "  Member Location Constraint:")
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "    "))
+        if cluster.preferred_location:
+            details.append(indent + "  Preferred {0:c}: {0.name}"
+                           .format(cluster.preferred_location))
         if cluster.max_hosts is None:
             details.append(indent + "  Max members: unlimited")
         else:

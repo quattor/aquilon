@@ -16,10 +16,14 @@
 # limitations under the License.
 """ Contains the logic for `aq show building preference --all`. """
 
-from sqlalchemy.orm import aliased, contains_eager
+from collections import defaultdict
 
-from aquilon.aqdb.model import BuildingPreference, Building, Archetype
+from sqlalchemy.orm import aliased, contains_eager, joinedload, subqueryload
+from sqlalchemy.sql import null
+
+from aquilon.aqdb.model import BuildingPreference, Building, Archetype, Cluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.formats.building_preference import ClusterBuildingPreference
 
 
 class CommandShowBuildingPreferenceAll(BrokerCommand):
@@ -35,5 +39,29 @@ class CommandShowBuildingPreferenceAll(BrokerCommand):
         q = q.options(contains_eager('a', alias=AB),
                       contains_eager('b', alias=BB),
                       contains_eager('archetype'))
-        q = q.order_by(AB.name, BB.name, Archetype.name)
-        return q.all()
+
+        pairs = defaultdict(list)
+
+        for db_pref in q:
+            key = db_pref.sorted_name + "," + db_pref.archetype.name
+            pairs[key].append(db_pref)
+
+        # Add clusters which have a preference override
+        q = session.query(Cluster)
+        q = q.filter(Cluster.preferred_location != null())
+        q = q.options(subqueryload('_hosts'),
+                      joinedload('_hosts.host'),
+                      joinedload('_hosts.host.hardware_entity'),
+                      joinedload('_hosts.host.hardware_entity.location'))
+        for dbcluster in q:
+            buildings = dbcluster.member_locations(location_class=Building)
+            if len(buildings) != 2:
+                continue
+
+            key = ",".join(sorted(building.name for building in buildings))
+            key = key + "," + dbcluster.archetype.name
+            clpref = ClusterBuildingPreference(cluster=dbcluster)
+            pairs[key].append(clpref)
+
+        # Flatten lists within lists, need to return only a simple list
+        return [item for key in sorted(pairs.keys()) for item in pairs[key]]

@@ -107,6 +107,9 @@ def get_clusters_by_locations(session, locations, archetype):
 
 
 def get_cluster_location_preference(dbcluster):
+    if dbcluster.preferred_location:
+        return dbcluster.preferred_location
+
     if not dbcluster.archetype.has_building_preferences:
         return None
 

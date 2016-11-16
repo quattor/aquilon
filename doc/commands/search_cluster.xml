@@ -63,6 +63,7 @@
 		<arg><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
 		<arg><option>--share <replaceable>SHARE</replaceable></option></arg>
 		<arg><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
+		<arg><option>--preferred_building <replaceable>BUILDING</replaceable></option></arg>
 	    </group>
 	    <group>
 		<arg><option>--fullinfo</option></arg>
@@ -228,6 +229,16 @@
 		    <para>
 			Match clusters which are grouped with <replaceable>CLUSTER</replaceable>.
 			If <replaceable>CLUSTER</replaceable> is not a member of any cluster groups, then the result will be empty.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--preferred_building <replaceable>BUILDING</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Match clusters which have an override for the preferred side set to <replaceable>BUILDING</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>

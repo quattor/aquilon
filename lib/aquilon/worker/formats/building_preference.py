@@ -14,10 +14,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Formatter for building preference tables. """
+""" Formatter for building and cluster preference tables. """
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import BuildingPreference
+
+class ClusterBuildingPreference(object):
+    __slots__ = ['cluster']
+    def __init__(self, cluster):
+        self.cluster = cluster
+
 
 class BuildingPreferenceFormatter(ObjectFormatter):
 
@@ -41,3 +47,21 @@ class BuildingPreferenceFormatter(ObjectFormatter):
         #skeleton.archetype.name = db_pref.archetype.name
 
 ObjectFormatter.handlers[BuildingPreference] = BuildingPreferenceFormatter()
+
+
+class ClusterBuildingPreferenceFormatter(ObjectFormatter):
+
+    def format_raw(self, db_pref, indent="", embedded=True,
+                   indirect_attrs=True):
+        details = []
+        details.append(indent + "{0:c}: {0.name}".format(db_pref.cluster))
+        details.append(indent + "  Preferred {0:c}: {0.name}"
+                       .format(db_pref.cluster.preferred_location))
+        return "\n".join(details)
+
+    def fill_proto(self, db_pref, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.cluster = db_pref.cluster.name
+        self.redirect_proto(db_pref.cluster.preferred_location, skeleton.prefer,
+                            indirect_attrs=False)
+
+ObjectFormatter.handlers[ClusterBuildingPreference] = ClusterBuildingPreferenceFormatter()

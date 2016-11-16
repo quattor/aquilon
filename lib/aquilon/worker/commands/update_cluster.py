@@ -39,12 +39,14 @@ class CommandUpdateCluster(BrokerCommand):
                                         forbid._get_class_label(tolower=True)))
 
     def update_cluster_common(self, session, logger, dbcluster, plenaries,
-                              personality, personality_stage, max_members, fix_location,
+                              personality, personality_stage, max_members,
+                              fix_location, clear_location_preference,
                               virtual_switch, comments, **arguments):
         plenaries.append(Plenary.get_plenary(dbcluster))
 
         update_cluster_location(session, logger, dbcluster, fix_location,
-                                plenaries, **arguments)
+                                clear_location_preference, plenaries,
+                                **arguments)
 
         if personality or personality_stage:
             archetype = dbcluster.archetype.name
@@ -88,17 +90,18 @@ class CommandUpdateCluster(BrokerCommand):
             dbcluster.comments = comments
 
     def render(self, session, logger, cluster, personality, personality_stage,
-               max_members, fix_location, down_hosts_threshold, maint_threshold,
-               comments, switch, virtual_switch, metacluster, group_with,
-               clear_group, **arguments):
+               max_members, fix_location, clear_location_preference,
+               down_hosts_threshold, maint_threshold, comments, switch,
+               virtual_switch, metacluster, group_with, clear_group,
+               **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
         plenaries = PlenaryCollection(logger=logger)
 
         self.update_cluster_common(session, logger, dbcluster, plenaries,
                                    personality, personality_stage, max_members,
-                                   fix_location, virtual_switch, comments,
-                                   **arguments)
+                                   fix_location, clear_location_preference,
+                                   virtual_switch, comments, **arguments)
 
         if switch is not None:
             self.check_cluster_type(dbcluster, require=EsxCluster)
@@ -198,8 +201,8 @@ class CommandUpdateCluster(BrokerCommand):
         return
 
 
-def update_cluster_location(session, logger, dbcluster,
-                            fix_location, plenaries, **arguments):
+def update_cluster_location(session, logger, dbcluster, fix_location,
+                            clear_location_preference, plenaries, **arguments):
     dblocation = get_location(session, **arguments)
     if fix_location:
         dblocation = dbcluster.minimum_location
@@ -238,5 +241,14 @@ def update_cluster_location(session, logger, dbcluster,
                 dbmachine.location = dblocation
 
             dbcluster.location_constraint = dblocation
+
+    preferred_loc_args = {key[10:]: value
+                          for key, value in arguments.items()
+                          if key.startswith("preferred_")}
+    dbpref_loc = get_location(session, **preferred_loc_args)
+    if dbpref_loc:
+        dbcluster.preferred_location = dbpref_loc
+    elif clear_location_preference:
+        dbcluster.preferred_location = None
 
     return

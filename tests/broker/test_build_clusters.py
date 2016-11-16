@@ -220,6 +220,8 @@ class TestBuildClusters(MachineTestMixin, TestBrokerCommand):
             for host in config["cluster"][cluster]["hosts"]:
                 self.ignoreoutputtest(["cluster", "--cluster", cluster,
                                        "--hostn", host_fqdn(host)])
+            self.noouttest(["update_cluster", "--cluster", cluster,
+                            "--fix_location"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBuildClusters)

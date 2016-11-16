@@ -1,3 +1,8 @@
+ALTER TABLE clstr ADD preferred_location_id INTEGER;
+ALTER TABLE clstr ADD CONSTRAINT clstr_preferred_location_fk FOREIGN KEY (preferred_location_id) REFERENCES location (id);
+
+CREATE INDEX clstr_preferred_location_idx ON clstr (preferred_location_id);
+
 CREATE TABLE building_preference (
 	a_id INTEGER CONSTRAINT building_preference_a_id_nn NOT NULL,
 	b_id INTEGER CONSTRAINT building_preference_b_id_nn NOT NULL,
