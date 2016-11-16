@@ -23,8 +23,7 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceMap, MetaCluster
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
+from aquilon.worker.templates import Plenary, PlenaryServiceInstanceServer
 
 
 class ChooserCache(object):
@@ -79,7 +78,7 @@ class Chooser(object):
 
         return chooser
 
-    def __init__(self, dbobj, logger, required_only=False, cache=None):
+    def __init__(self, dbobj, plenaries, logger, required_only=False, cache=None):
         """Initialize the chooser.
 
         To clear out bindings that are not required, pass in
@@ -138,7 +137,7 @@ class Chooser(object):
         self.chosen_services = {}
 
         # Keep stashed plenaries for rollback purposes
-        self.plenaries = PlenaryCollection(logger=logger)
+        self.plenaries = plenaries
 
         # Cache the original service bindings
         self.original_service_instances = {}
@@ -539,10 +538,6 @@ class Chooser(object):
     def get_key(self):
         return self.plenaries.get_key()
 
-    def write_plenary_templates(self, locked=False):
-        self.plenaries.stash()
-        self.plenaries.write(locked=locked)
-
     def prestash_primary(self, allow_incomplete=False):
         for dbobj in self.dbobj.all_objects():
             self.plenaries.append(Plenary.get_plenary(dbobj,
@@ -556,9 +551,6 @@ class Chooser(object):
                     self.plenaries.append(Plenary.get_plenary(dbres))
             if hasattr(dbobj, 'hardware_entity'):
                 self.plenaries.append(Plenary.get_plenary(dbobj.hardware_entity))
-
-    def restore_stash(self):
-        self.plenaries.restore_stash()
 
 
 class HostChooser(Chooser):

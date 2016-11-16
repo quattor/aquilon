@@ -112,11 +112,10 @@ class CommandCluster(BrokerCommand):
 
         # Enforce that service instances are set correctly for the
         # new cluster association.
-        chooser = Chooser(dbhost, logger=logger)
+        chooser = Chooser(dbhost, plenaries, logger=logger)
         chooser.set_required()
 
         # the chooser will include the host plenary
-        plenaries.extend(chooser.plenaries)
         plenaries.flatten()
 
         session.flush()

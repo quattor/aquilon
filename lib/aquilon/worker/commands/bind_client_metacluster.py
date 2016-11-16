@@ -37,6 +37,7 @@ class CommandBindClientMetacluster(BrokerCommand):
         else:
             dbinstance = None
 
+        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
         choosers = []
         failed = []
@@ -44,8 +45,8 @@ class CommandBindClientMetacluster(BrokerCommand):
         for dbobj in dbmeta.all_objects():
             # Always add the binding on the cluster we were called on
             if dbobj == dbmeta or dbservice in dbobj.required_services:
-                chooser = Chooser(dbobj, logger=logger, required_only=False,
-                                  cache=chooser_cache)
+                chooser = Chooser(dbobj, plenaries, logger=logger,
+                                  required_only=False, cache=chooser_cache)
                 choosers.append(chooser)
                 try:
                     chooser.set_single(dbservice, dbinstance, force=force)
@@ -58,10 +59,7 @@ class CommandBindClientMetacluster(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
-
         plenaries.write()
 
         return

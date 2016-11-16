@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (Archetype, HostLifecycle,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import TemplateDomain
+from aquilon.worker.templates import TemplateDomain, PlenaryCollection
 from aquilon.worker.services import Chooser
 
 
@@ -93,21 +93,17 @@ class CommandMake(BrokerCommand):
 
         session.flush()
 
+        plenaries = PlenaryCollection(logger=logger)
         if dbhost.archetype.is_compileable:
-            self.compile(session, dbhost, logger, keepbindings)
+            chooser = Chooser(dbhost, plenaries, logger=logger,
+                              required_only=not keepbindings)
+            chooser.set_required()
 
-        return
+            session.flush()
 
-    def compile(self, session, dbhost, logger, keepbindings):
-        chooser = Chooser(dbhost, logger=logger,
-                          required_only=not keepbindings)
-        chooser.set_required()
+            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
-        session.flush()
-
-        td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
-
-        with chooser.plenaries.transaction():
-            td.compile(session, only=chooser.plenaries.object_templates)
+            with plenaries.transaction():
+                td.compile(session, only=plenaries.object_templates)
 
         return

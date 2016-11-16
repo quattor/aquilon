@@ -176,11 +176,12 @@ class CommandReconfigureList(BrokerCommand):
         session.flush()
 
         logger.client_info("Verifying service bindings.")
+        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
         choosers = []
         for dbhost in dbhosts:
             if dbhost.archetype.is_compileable:
-                chooser = Chooser(dbhost, logger=logger,
+                chooser = Chooser(dbhost, plenaries, logger=logger,
                                   required_only=not keepbindings,
                                   cache=chooser_cache)
                 choosers.append(chooser)
@@ -194,8 +195,6 @@ class CommandReconfigureList(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
