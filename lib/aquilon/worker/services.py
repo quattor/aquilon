@@ -540,8 +540,7 @@ class Chooser(object):
 
     def prestash_primary(self, allow_incomplete=False):
         for dbobj in self.dbobj.all_objects():
-            self.plenaries.append(Plenary.get_plenary(dbobj,
-                                                      allow_incomplete=allow_incomplete))
+            self.plenaries.add(dbobj, allow_incomplete=allow_incomplete)
 
             # This may be too much action at a distance... however, if
             # we are potentially re-writing a host plenary, it seems like

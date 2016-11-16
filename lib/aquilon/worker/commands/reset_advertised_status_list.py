@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 
 
 class CommandResetAdvertisedStatusList(BrokerCommand):
@@ -49,8 +49,7 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
             dbhost.advertise_status = False
-            plenaries.append(Plenary.get_plenary(dbhost,
-                                                 allow_incomplete=False))
+            plenaries.add(dbhost, allow_incomplete=False)
 
         session.flush()
 

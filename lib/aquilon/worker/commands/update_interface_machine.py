@@ -23,7 +23,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (set_port_group,
                                                  assign_address,
                                                  rename_interface)
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
 
@@ -181,8 +181,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         # Interface renaming affects the host and service addresses
         if dbhw_ent.host:
             plenaries.add(dbhw_ent.host)
-        plenaries.extend(map(Plenary.get_plenary,
-                             dbinterface.service_addresses))
+        plenaries.add(dbinterface.service_addresses)
 
         with plenaries.transaction():
             if not dbhw_ent.host or dbhw_ent.host.archetype.name != "aurora":

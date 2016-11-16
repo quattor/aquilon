@@ -412,8 +412,7 @@ class QIPRefresh(object):
         qipinfo = heap_pop(qipnets)
         while aqnet or qipinfo:
             if aqnet and aqnet != prev_aqnet:
-                plenary = Plenary.get_plenary(aqnet)
-                self.plenaries.append(plenary)
+                self.plenaries.add(aqnet)
                 prev_aqnet = aqnet
 
             # We have 3 cases regarding aqnet/qipinfo:

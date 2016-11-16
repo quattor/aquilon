@@ -22,7 +22,7 @@ from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
+from aquilon.worker.templates import (PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
 
@@ -60,8 +60,7 @@ def del_cluster(session, logger, dbcluster, config):
         dbmetacluster.validate()
 
     if dbcluster.resholder:
-        plenaries.extend(map(Plenary.get_plenary,
-                             dbcluster.resholder.resources))
+        plenaries.add(dbcluster.resholder.resources)
 
     # Clean up service bindings
     for si in dbcluster.services_used:

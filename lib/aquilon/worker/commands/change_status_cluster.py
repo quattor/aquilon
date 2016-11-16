@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import Cluster, MetaCluster, ClusterLifecycle
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 
 
 class CommandChangeClusterStatus(BrokerCommand):
@@ -47,10 +47,8 @@ class CommandChangeClusterStatus(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster,
-                                             allow_incomplete=False))
-        plenaries.extend(Plenary.get_plenary(dbhost, allow_incomplete=False)
-                         for dbhost in dbcluster.hosts)
+        plenaries.add(dbcluster, allow_incomplete=False)
+        plenaries.add(dbcluster.hosts, allow_incomplete=False)
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                             logger=logger)
