@@ -23,7 +23,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host, remove_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelHost(BrokerCommand):

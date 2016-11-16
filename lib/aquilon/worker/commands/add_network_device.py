@@ -27,7 +27,7 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 

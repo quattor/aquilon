@@ -19,7 +19,7 @@
 from aquilon.aqdb.model import HostLifecycle
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 
 
 class CommandChangeStatus(BrokerCommand):

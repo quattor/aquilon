@@ -29,8 +29,7 @@ from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
-from aquilon.worker.templates.switchdata import PlenarySwitchData
+from aquilon.worker.templates import PlenaryCollection, PlenarySwitchData
 from aquilon.utils import validate_json
 
 

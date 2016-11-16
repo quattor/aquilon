@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelInterface(BrokerCommand):

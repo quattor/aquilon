@@ -24,8 +24,7 @@ from sqlalchemy.util import KeyedTuple
 
 from aquilon.exceptions_ import ArgumentError, PartialError
 from aquilon.aqdb.model import User, Personality
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryPersonality)
+from aquilon.worker.templates import PlenaryCollection, PlenaryPersonality
 from aquilon.utils import chunk
 
 LOGGER = logging.getLogger(__name__)

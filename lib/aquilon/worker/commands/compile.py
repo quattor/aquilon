@@ -24,8 +24,7 @@ from aquilon.aqdb.model import (PersonalityStage, Host, Cluster,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryPersonalityBase)
+from aquilon.worker.templates import PlenaryCollection, PlenaryPersonalityBase
 from aquilon.worker.templates.domain import TemplateDomain
 
 

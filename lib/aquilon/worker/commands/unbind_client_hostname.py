@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
+from aquilon.worker.templates import (PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 from aquilon.utils import first_of
 

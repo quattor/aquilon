@@ -28,7 +28,7 @@ from aquilon.aqdb.model import (PersonalityStage, PersonalityParameter, Host,
                                 HardwareEntity, Interface)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
-from aquilon.worker.templates import Plenary, PlenaryHost, PlenaryPersonality
+from aquilon.worker.templates import PlenaryHost, PlenaryPersonality
 
 
 def set_parameter(session, parameter, db_paramdef, path, value, update=False):

@@ -20,7 +20,7 @@ from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.services import Chooser
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClientHostname(BrokerCommand):

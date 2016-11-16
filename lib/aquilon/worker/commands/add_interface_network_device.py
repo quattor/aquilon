@@ -22,7 +22,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddInterfaceNetworkDevice(BrokerCommand):

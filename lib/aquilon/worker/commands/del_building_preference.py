@@ -20,7 +20,7 @@ from aquilon.aqdb.model import BuildingPreference
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
 from aquilon.worker.dbwrappers.cluster import get_clusters_by_locations
-from aquilon.worker.templates import PlenaryCollection, Plenary
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelBuildingPreference(BrokerCommand):

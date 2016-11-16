@@ -21,7 +21,7 @@ from aquilon.aqdb.model import NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateInterfaceNetworkDevice(BrokerCommand):

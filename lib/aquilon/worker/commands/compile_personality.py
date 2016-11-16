@@ -22,7 +22,7 @@ from aquilon.aqdb.model import Host, Cluster, Personality, PersonalityStage
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 
 
 class CommandCompilePersonality(BrokerCommand):

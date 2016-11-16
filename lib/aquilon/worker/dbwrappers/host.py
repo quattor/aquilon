@@ -38,7 +38,7 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.feature import check_feature_template
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
-from aquilon.worker.templates import Plenary, PlenaryServiceInstanceServer
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 from aquilon.utils import chunk
 
 

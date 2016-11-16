@@ -24,7 +24,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (FeatureLink, Personality, PersonalityStage,
                                 HardwareFeature, HostFeature, HardwareEntity,
                                 Interface, Host)
-from aquilon.worker.templates import Plenary, PlenaryHost, PlenaryPersonality
+from aquilon.worker.templates import PlenaryHost, PlenaryPersonality
 from aquilon.worker.templates.domain import template_branch_basedir
 
 

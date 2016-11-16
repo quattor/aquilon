@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (Personality, PersonalityStage, Cluster, Host,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.templates import Plenary, PlenaryCollection, PlenaryHost
+from aquilon.worker.templates import PlenaryCollection, PlenaryHost
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
