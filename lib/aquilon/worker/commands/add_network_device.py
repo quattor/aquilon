@@ -94,7 +94,7 @@ class CommandAddNetworkDevice(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
         plenaries.append(Plenary.get_plenary(dbnetdev))
         plenaries.append(Plenary.get_plenary(dbhost))
 

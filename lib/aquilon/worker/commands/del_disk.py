@@ -32,7 +32,7 @@ class CommandDelDisk(BrokerCommand):
         plenaries.append(Plenary.get_plenary(dbmachine))
         dbcontainer = dbmachine.vm_container
         if dbcontainer:
-            plenaries.append(Plenary.get_plenary(dbcontainer, logger=logger))
+            plenaries.append(Plenary.get_plenary(dbcontainer))
 
         if disk:
             dbdisk = Disk.get_unique(session, machine=dbmachine,

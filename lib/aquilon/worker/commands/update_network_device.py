@@ -45,7 +45,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
         plenaries.append(Plenary.get_plenary(dbnetdev))
         plenaries.append(Plenary.get_plenary(dbnetdev.host))
 

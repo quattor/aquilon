@@ -33,7 +33,7 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
                                                compel=True)
         plenaries = PlenaryCollection(logger=logger)
 
-        self.update_cluster_common(session, logger, dbmetacluster, plenaries,
+        self.update_cluster_common(session, dbmetacluster, plenaries,
                                    personality, personality_stage, max_members,
                                    fix_location, clear_location_preference,
                                    virtual_switch, comments, **arguments)

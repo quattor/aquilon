@@ -38,13 +38,13 @@ class CommandUpdateCluster(BrokerCommand):
                                 .format(dbcluster,
                                         forbid._get_class_label(tolower=True)))
 
-    def update_cluster_common(self, session, logger, dbcluster, plenaries,
+    def update_cluster_common(self, session, dbcluster, plenaries,
                               personality, personality_stage, max_members,
                               fix_location, clear_location_preference,
                               virtual_switch, comments, **arguments):
         plenaries.append(Plenary.get_plenary(dbcluster))
 
-        update_cluster_location(session, logger, dbcluster, fix_location,
+        update_cluster_location(session, dbcluster, fix_location,
                                 clear_location_preference, plenaries,
                                 **arguments)
 
@@ -98,7 +98,7 @@ class CommandUpdateCluster(BrokerCommand):
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
         plenaries = PlenaryCollection(logger=logger)
 
-        self.update_cluster_common(session, logger, dbcluster, plenaries,
+        self.update_cluster_common(session, dbcluster, plenaries,
                                    personality, personality_stage, max_members,
                                    fix_location, clear_location_preference,
                                    virtual_switch, comments, **arguments)
@@ -201,7 +201,7 @@ class CommandUpdateCluster(BrokerCommand):
         return
 
 
-def update_cluster_location(session, logger, dbcluster, fix_location,
+def update_cluster_location(session, dbcluster, fix_location,
                             clear_location_preference, plenaries, **arguments):
     dblocation = get_location(session, **arguments)
     if fix_location:
@@ -233,8 +233,7 @@ def update_cluster_location(session, logger, dbcluster, fix_location,
             for dbmachine in dbcluster.virtual_machines:
                 # The plenary objects should be created before changing the
                 # location, so they can track the change
-                plenaries.append(Plenary.get_plenary(dbmachine,
-                                                     logger=logger))
+                plenaries.append(Plenary.get_plenary(dbmachine))
                 # Update the path to the machine plenary in the container
                 # resource
                 plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
