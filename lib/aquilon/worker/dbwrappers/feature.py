@@ -92,7 +92,7 @@ def get_affected_plenaries(session, dbfeature, plenaries,
                           subqueryload('personality.root_users'),
                           subqueryload('personality.root_netgroups'))
             q = q.options(PlenaryPersonality.query_options(load_personality=False))
-            plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)
+            plenaries.add(q)
     else:
         q = session.query(Host)
         if personality_stage:
@@ -126,4 +126,4 @@ def get_affected_plenaries(session, dbfeature, plenaries,
         q = q.join(HardwareEntity.primary_name)
         q = q.options(contains_eager('hardware_entity.primary_name'))
         q = q.options(PlenaryHost.query_options())
-        plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)
+        plenaries.add(q)

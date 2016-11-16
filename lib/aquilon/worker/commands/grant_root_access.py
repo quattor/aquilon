@@ -51,7 +51,7 @@ class CommandGrantRootAccess(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(map(Plenary.get_plenary, dbobj.stages.values()))
+        plenaries.add(dbobj.stages.values())
         plenaries.write()
 
         return

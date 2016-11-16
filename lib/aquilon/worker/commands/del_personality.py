@@ -42,7 +42,7 @@ class CommandDelPersonality(BrokerCommand):
                                     .format(dbpersona))
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
+        plenaries.add(dbpersona.stages.values())
 
         q = session.query(Cluster)
         q = q.filter(Cluster.allowed_personalities.contains(dbpersona))

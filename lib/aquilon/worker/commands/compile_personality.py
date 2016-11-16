@@ -83,7 +83,7 @@ class CommandCompilePersonality(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         for dbobj in objects:
-            plenaries.extend(map(Plenary.get_plenary, dbobj.all_objects()))
+            plenaries.add(dbobj.all_objects())
 
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         with plenaries.get_key():

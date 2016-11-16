@@ -77,15 +77,15 @@ class CommandUpdateBuilding(BrokerCommand):
                                    "the new location as needed."
                                    .format(maps, dbbuilding.city))
 
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             q = session.query(Cluster)
             q = q.filter(Cluster.location_constraint_id.in_(dbbuilding.offspring_ids()))
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbbuilding.offspring_ids()))
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             dbbuilding.update_parent(parent=dbcity)
 

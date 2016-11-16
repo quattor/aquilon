@@ -214,7 +214,7 @@ def add_arch_paramdef_plenaries(session, param_def_holder, plenaries):
     q = q.filter_by(param_def_holder=param_def_holder)
     q = q.options(joinedload('personality_stage'),
                   joinedload('personality_stage.personality'))
-    plenaries.extend(Plenary.get_plenary(dbparam) for dbparam in q)
+    plenaries.add(q)
 
 
 def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
@@ -224,7 +224,7 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
         q = q.join(PersonalityStage.features)
         q = q.filter_by(feature=dbfeature)
         q = q.options(PlenaryPersonality.query_options())
-        plenaries.extend(map(Plenary.get_plenary, q))
+        plenaries.add(q)
     else:
         q = session.query(Host)
         q = q.join(PersonalityStage, FeatureLink)
@@ -243,7 +243,7 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
                       contains_eager('personality_stage'))
         q = q.options(PlenaryHost.query_options())
 
-        plenaries.extend(map(Plenary.get_plenary, q))
+        plenaries.add(q)
 
 
 def update_paramdef_schema(session, db_paramdef, schema):

@@ -132,7 +132,7 @@ class CommandUpdatePersonality(BrokerCommand):
             q = q.join(PersonalityStage)
             q = q.filter_by(personality=dbpersona)
             q = q.options(PlenaryHost.query_options())
-            plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+            plenaries.add(q)
 
             if not leave_existing:
                 # If this is a public personality, then there may be hosts with
@@ -184,7 +184,7 @@ class CommandUpdatePersonality(BrokerCommand):
         elif vmhost_capacity_function == "":
             dbstage.cluster_infos["esx"].vmhost_capacity_function = None
 
-        plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
+        plenaries.add(dbpersona.stages.values())
 
         session.flush()
 

@@ -66,15 +66,15 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbcampus.hub,
                                         dbcity, dbcity.hub))
 
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             q = session.query(Cluster)
             q = q.filter(Cluster.location_constraint_id.in_(dbcity.offspring_ids()))
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbcity.offspring_ids()))
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             if dbcity.campus:
                 prev_campus = dbcity.campus

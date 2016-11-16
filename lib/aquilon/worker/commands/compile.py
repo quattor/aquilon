@@ -68,7 +68,7 @@ class CommandCompile(BrokerCommand):
                  Cluster.sandbox_author == dbauthor)))
         services.update(q)
 
-        plenaries.extend(Plenary.get_plenary(si) for si in services)
+        plenaries.add(services)
 
         if pancdebug:
             pancinclude = r'.*'

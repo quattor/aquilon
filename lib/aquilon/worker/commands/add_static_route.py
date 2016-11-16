@@ -119,7 +119,7 @@ class CommandAddStaticRoute(BrokerCommand):
         q = q.join(HardwareEntity, Interface, AddressAssignment)
         q = q.filter_by(network=dbnetwork)
         q = q.options(PlenaryHost.query_options())
-        plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+        plenaries.add(q)
 
         plenaries.write(verbose=True)
 

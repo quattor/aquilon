@@ -141,7 +141,7 @@ class UserSync(object):
 
                 stages.update(p.stages.values())
 
-        self.plenaries.extend(map(Plenary.get_plenary, stages))
+        self.plenaries.add(stages)
 
         for dbuser in userlist:
             self.session.delete(dbuser)

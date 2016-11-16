@@ -58,5 +58,5 @@ class CommandUpdateRack(BrokerCommand):
         q = q.filter(Machine.location_id.in_(dbrack.offspring_ids()))
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(map(Plenary.get_plenary, q))
+        plenaries.add(q)
         plenaries.write()

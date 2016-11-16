@@ -40,7 +40,7 @@ class CommandDelNetworkDevice(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         # Update cluster plenaries connected to this network device
-        plenaries.extend(map(Plenary.get_plenary, dbnetdev.esx_clusters))
+        plenaries.add(dbnetdev.esx_clusters)
 
         plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
         plenaries.add(dbnetdev)

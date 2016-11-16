@@ -141,7 +141,7 @@ def remove_host(logger, dbhw, plenaries):
     del dbhost.services_used[:]
 
     if dbhost.resholder:
-        plenaries.extend(map(Plenary.get_plenary, dbhost.resholder.resources))
+        plenaries.add(dbhost.resholder.resources)
 
     if dbhost.cluster:
         dbcluster = dbhost.cluster
