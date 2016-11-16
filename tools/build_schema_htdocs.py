@@ -144,7 +144,8 @@ model_group = {
                     MetaCluster, __MetaClusterMember,
                     ClusterLifecycle, __ClusterAllowedPersonality,
                     VirtualSwitch, __VSwitchClusterAssignment,
-                    __VSwitchPGAssignment],
+                    __VSwitchPGAssignment,
+                    BuildingPreference],
     },
     'network': {
         'title': 'Network',

@@ -18,6 +18,9 @@
 import os
 from inspect import isclass
 
+# FIXME - this is a workaround for dependency issues between templates/ and
+# dbwrappers/
+from aquilon.worker.templates import TemplateDomain
 
 __all__ = []
 consistency_check_classes = []

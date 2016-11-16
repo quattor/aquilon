@@ -30,6 +30,7 @@ from aquilon.exceptions_ import AquilonError
 _table_abbrev = {
     'address_assignment': 'addr_assign',
     'archetype': 'arch',
+    'building_preference': 'bldg_pref',
     'cluster_service_binding': 'clstr_svc_bndg',
     'cluster_group': 'clstr_grp',
     'cluster_group_member': 'clstr_grp_mmbr',

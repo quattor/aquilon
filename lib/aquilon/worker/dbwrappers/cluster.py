@@ -15,8 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import aliased, object_session
+from sqlalchemy.sql import or_
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Archetype, Personality, ClusterLifecycle
+from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
+                                ClusterLifecycle, Cluster, Host, HardwareEntity,
+                                Location, Building, BuildingPreference)
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 
 
@@ -70,3 +75,50 @@ def parse_cluster_arguments(session, config, archetype, personality,
           'max_members': max_members}
 
     return kw
+
+
+def get_clusters_by_locations(session, locations, archetype):
+    """
+    Return clusters which has members inside all the locations specified.
+
+    The most common use case is looking for clusters which span a given pair
+    of buildings, but nothing below is limited to buildings or only two
+    locations.
+    """
+    q = session.query(Cluster)
+    q = q.join(PersonalityStage, Personality)
+    q = q.filter_by(archetype=archetype)
+    q = q.reset_joinpoint()
+
+    for side in locations:
+        HWLoc = aliased(Location)
+        Parent = aliased(Location)
+
+        q1 = session.query(Cluster.id)
+        q1 = q1.join(Cluster._hosts, Host, HardwareEntity)
+        q1 = q1.join(HWLoc, HardwareEntity.location)
+        q1 = q1.outerjoin(Parent, HWLoc.parents)
+        q1 = q1.filter(or_(HWLoc.id == side.id, Parent.id == side.id))
+
+        q = q.filter(Cluster.id.in_(q1.subquery()))
+
+    # TODO: Add eager-loading options
+    return q.all()
+
+
+def get_cluster_location_preference(dbcluster):
+    if not dbcluster.archetype.has_building_preferences:
+        return None
+
+    buildings = dbcluster.member_locations(location_class=Building)
+    if not buildings or len(buildings) != 2:
+        return None
+
+    pair = BuildingPreference.ordered_pair(buildings)
+    session = object_session(dbcluster)
+    db_pref = BuildingPreference.get_unique(session, building_pair=pair,
+                                            archetype=dbcluster.archetype)
+    if db_pref:
+        return db_pref.prefer
+    else:
+        return None

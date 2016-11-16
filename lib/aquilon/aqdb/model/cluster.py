@@ -114,6 +114,21 @@ class Cluster(CompileableMixin, Base):
             is_percent = True
         return (is_percent, thresh_value)
 
+    def member_locations(self, location_class=None):
+        if location_class:
+            attr = location_class.__mapper__.polymorphic_identity
+        else:
+            attr = None
+
+        def filter(dblocation, attr):
+            if attr is None:
+                return dblocation
+            # TODO: This may return None. Do we care?
+            return getattr(dblocation, attr)
+
+        return set(filter(host.hardware_entity.location, attr)
+                   for host in self.hosts)
+
     @property
     def minimum_location(self):
         location = None

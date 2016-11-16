@@ -67,7 +67,14 @@ class TestDemolishClusters(MachineTestMixin, TestBrokerCommand):
         for rack in config["rack"]:
             self.runcommand(["del_rack", "--rack", rack])
 
-    def test_140_del_building(self):
+    def test_140_pre_condition(self):
+        # This pair should still exist, and should be gone with the buildings
+        command = ["show_building_preference", "--building_pair", "utb2,utb3",
+                   "--archetype", "hacluster"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Building Pair: utb2,utb3", command)
+
+    def test_141_del_building(self):
         """ Remove buildings that were added for the use case """
         for building in config["building"]:
             for service in config["map"]:

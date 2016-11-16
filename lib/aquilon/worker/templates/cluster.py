@@ -30,6 +30,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
+from aquilon.worker.dbwrappers.cluster import get_cluster_location_preference
 from aquilon.worker.locks import CompileKey, PlenaryKey
 
 
@@ -118,6 +119,12 @@ class PlenaryClusterData(StructurePlenary):
         if self.dbobj.metacluster:
             pan_assign(lines, "system/cluster/metacluster/name",
                        self.dbobj.metacluster.name)
+
+        preferred_location = get_cluster_location_preference(self.dbobj)
+        if preferred_location:
+            path = "system/cluster/preferred_location"
+            path = path + "/" + preferred_location.location_type
+            pan_assign(lines, path, preferred_location.name)
 
         fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):

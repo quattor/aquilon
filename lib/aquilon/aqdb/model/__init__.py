@@ -111,6 +111,7 @@ from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 
 # CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
+from aquilon.aqdb.model.building_preference import BuildingPreference
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
