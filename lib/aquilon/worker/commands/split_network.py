@@ -47,7 +47,7 @@ class CommandSplitNetwork(BrokerCommand):
                                        network_environment=dbnet_env)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbnetwork)
 
         if prefixlen <= dbnetwork.cidr:
             raise ArgumentError("The specified --prefixlen must be bigger "
@@ -116,7 +116,7 @@ class CommandSplitNetwork(BrokerCommand):
                              network_environment=dbnet_env,
                              location=dbnetwork.location, side=dbnetwork.side)
             session.add(newnet)
-            plenaries.append(Plenary.get_plenary(newnet))
+            plenaries.add(newnet)
             dbnets.append(newnet)
 
         dbnetwork.cidr = prefixlen

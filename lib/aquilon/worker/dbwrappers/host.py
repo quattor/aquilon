@@ -129,7 +129,7 @@ def remove_host(logger, dbhw, plenaries):
 
     dbhost.lock_row()
 
-    plenaries.append(Plenary.get_plenary(dbhost))
+    plenaries.add(dbhost)
 
     check_no_provided_service(dbhost)
 
@@ -148,7 +148,7 @@ def remove_host(logger, dbhw, plenaries):
         dbcluster.hosts.remove(dbhost)
         set_committed_value(dbhost, '_cluster', None)
         dbcluster.validate()
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
 
     dbhw.host = None
 

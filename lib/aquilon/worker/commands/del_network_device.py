@@ -43,7 +43,7 @@ class CommandDelNetworkDevice(BrokerCommand):
         plenaries.extend(map(Plenary.get_plenary, dbnetdev.esx_clusters))
 
         plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbnetdev))
+        plenaries.add(dbnetdev)
 
         remove_host(logger, dbnetdev, plenaries)
 

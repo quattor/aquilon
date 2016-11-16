@@ -87,7 +87,7 @@ class CommandMapGrn(BrokerCommand):
                                     (target, obj.archetype.name,
                                      ", ".join(valid_targets)))
 
-            plenaries.append(Plenary.get_plenary(obj))
+            plenaries.add(obj)
             self._update_dbobj(obj, target, dbgrn, mapcls)
 
         session.flush()

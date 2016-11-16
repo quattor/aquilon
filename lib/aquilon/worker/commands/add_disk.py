@@ -37,7 +37,7 @@ class CommandAddDisk(BrokerCommand):
                  comments)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         plenaries.write()
 
         return

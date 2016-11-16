@@ -73,7 +73,7 @@ class CommandAddRouterAddress(BrokerCommand):
 
         # TODO: update the templates of Zebra hosts on the network
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbnetwork)
         plenaries.write()
 
         return

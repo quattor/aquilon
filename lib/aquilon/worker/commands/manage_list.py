@@ -165,7 +165,7 @@ class CommandManageList(BrokerCommand):
             if dbsource != dbbranch:
                 logger.client_info("Moving {0:l} from {1:l} to {2:l}"
                                    .format(dbobj, dbsource, dbbranch))
-            plenaries.append(Plenary.get_plenary(dbobj))
+            plenaries.add(dbobj)
 
             dbobj.branch = dbbranch
             dbobj.sandbox_author = dbauthor

@@ -35,7 +35,7 @@ class CommandDelNetwork(BrokerCommand):
                                        ip=ip, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbnetwork)
 
         # Lock order: DNS domain(s), network
         DnsDomain.lock_rows(set(rec.fqdn.dns_domain

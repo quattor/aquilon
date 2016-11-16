@@ -38,7 +38,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
             dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbclus))
+        plenaries.add(dbclus)
 
         if len(dbclus.allowed_personalities) > 1:
             members = dbclus.hosts[:]

@@ -99,7 +99,7 @@ class CommandAddNetwork(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(net))
+        plenaries.add(net)
         plenaries.write()
 
         return

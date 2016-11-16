@@ -39,8 +39,8 @@ class CommandUpdateServiceAddress(BrokerCommand):
                                           compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbsrv))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbsrv)
 
         dsdb_runner = DSDBRunner(logger=logger)
 

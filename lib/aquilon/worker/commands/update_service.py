@@ -50,7 +50,7 @@ class CommandUpdateService(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbservice))
+        plenaries.add(dbservice)
         plenaries.extend(map(Plenary.get_plenary, dbservice.instances))
         plenaries.write()
 

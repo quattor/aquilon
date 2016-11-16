@@ -35,7 +35,7 @@ class CommandDelCity(CommandDelLocation):
         fullname = dbcity.fullname
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcity))
+        plenaries.add(dbcity)
 
         CommandDelLocation.render(self, session=session, name=city,
                                   type='city', **arguments)

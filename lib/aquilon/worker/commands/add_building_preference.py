@@ -49,7 +49,7 @@ class CommandAddBuildingPreference(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         for db_clus in get_clusters_by_locations(session, pair, dbarchetype):
-            plenaries.append(Plenary.get_plenary(db_clus))
+            plenaries.add(db_clus)
 
         plenaries.write(verbose=True)
 

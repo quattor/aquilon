@@ -51,11 +51,11 @@ def del_cluster(session, logger, dbcluster, config):
                                 "it first.".format(dbcluster, res))
 
     plenaries = PlenaryCollection(logger=logger)
-    plenaries.append(Plenary.get_plenary(dbcluster))
+    plenaries.add(dbcluster)
 
     if dbcluster.metacluster:
         dbmetacluster = dbcluster.metacluster
-        plenaries.append(Plenary.get_plenary(dbmetacluster))
+        plenaries.add(dbmetacluster)
         dbmetacluster.members.remove(dbcluster)
         dbmetacluster.validate()
 

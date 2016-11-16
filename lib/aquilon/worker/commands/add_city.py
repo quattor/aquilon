@@ -40,7 +40,7 @@ class CommandAddCity(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcity))
+        plenaries.add(dbcity)
 
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)

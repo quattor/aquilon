@@ -120,8 +120,8 @@ class CommandAddServiceAddress(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbsrv))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbsrv)
 
         with plenaries.transaction():
             if not newly_created and not shared:

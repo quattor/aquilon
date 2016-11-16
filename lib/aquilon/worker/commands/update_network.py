@@ -69,7 +69,7 @@ class CommandUpdateNetwork(BrokerCommand):
                 dbnetwork.network_compartment = dbcomp
             if comments is not None:
                 dbnetwork.comments = comments
-            plenaries.append(Plenary.get_plenary(dbnetwork))
+            plenaries.add(dbnetwork)
 
         session.flush()
         plenaries.write()

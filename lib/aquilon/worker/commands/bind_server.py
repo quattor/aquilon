@@ -50,10 +50,10 @@ def lookup_target(session, logger, plenaries, hostname, ip, cluster,
 
     if hostname:
         params["host"] = hostname_to_host(session, hostname)
-        plenaries.append(Plenary.get_plenary(params["host"]))
+        plenaries.add(params["host"])
     if cluster:
         params["cluster"] = Cluster.get_unique(session, cluster, compel=True)
-        plenaries.append(Plenary.get_plenary(params["cluster"]))
+        plenaries.add(params["cluster"])
 
     if service_address:
         # TODO: calling get_resource_holder() means doing redundant DB lookups
@@ -133,7 +133,7 @@ class CommandBindServer(BrokerCommand):
         validate_prod_service_instance(dbinstance, user, justification, reason)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbinstance))
+        plenaries.add(dbinstance)
 
         if alias and not dbinstance.service.allow_alias_bindings:
             raise ArgumentError("Service %s is not configured to allow alias "

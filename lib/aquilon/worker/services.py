@@ -533,7 +533,7 @@ class Chooser(object):
             # Ignore IncompleteError for servers of service instances. It is
             # debatable if this is the right thing to do, but it preserves the
             # status quo, and can be revisited later.
-            self.plenaries.append(Plenary.get_plenary(dbobj))
+            self.plenaries.add(dbobj)
 
     def get_key(self):
         return self.plenaries.get_key()
@@ -548,9 +548,9 @@ class Chooser(object):
             # a good idea to also verify and refresh known dependencies.
             if dbobj.resholder:
                 for dbres in dbobj.resholder.resources:
-                    self.plenaries.append(Plenary.get_plenary(dbres))
+                    self.plenaries.add(dbres)
             if hasattr(dbobj, 'hardware_entity'):
-                self.plenaries.append(Plenary.get_plenary(dbobj.hardware_entity))
+                self.plenaries.add(dbobj.hardware_entity)
 
 
 class HostChooser(Chooser):

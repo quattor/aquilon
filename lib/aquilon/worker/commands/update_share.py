@@ -46,7 +46,7 @@ class CommandUpdateShare(BrokerCommand):
             if comments is not None:
                 dbshare.comments = comments
 
-            plenaries.append(Plenary.get_plenary(dbshare))
+            plenaries.add(dbshare)
 
         session.flush()
         plenaries.write()

@@ -77,7 +77,7 @@ class CommandUpdatePersonality(BrokerCommand):
                         continue
 
                     _check_stage_unused(session, dbstage)
-                    plenaries.append(Plenary.get_plenary(dbstage))
+                    plenaries.add(dbstage)
                     del dbpersona.stages[stage]
 
             dbpersona.staged = staged
@@ -145,7 +145,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = q.options(PlenaryHost.query_options())
                 for dbhost in q:
                     dbhost.owner_grn = dbgrn
-                    plenaries.append(Plenary.get_plenary(dbhost))
+                    plenaries.add(dbhost)
 
         if config_override is not None and \
            dbpersona.config_override != config_override:

@@ -52,8 +52,8 @@ class CommandUpdateResource(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbresource))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbresource)
 
         self.update_resource(dbresource=dbresource, session=session,
                              logger=logger, **kwargs)

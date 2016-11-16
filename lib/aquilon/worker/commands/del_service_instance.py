@@ -41,7 +41,7 @@ class CommandDelServiceInstance(BrokerCommand):
                                 (dbservice.name, dbsi.name, msg))
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbsi))
+        plenaries.add(dbsi)
 
         # Depend on cascading to remove any mappings
         session.delete(dbsi)

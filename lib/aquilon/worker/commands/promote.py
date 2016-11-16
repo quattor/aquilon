@@ -55,8 +55,8 @@ class CommandPromote(BrokerCommand):
         next = dbpersonality.stages["next"]
 
         if current:
-            plenaries.append(Plenary.get_plenary(current))
-        plenaries.append(Plenary.get_plenary(next))
+            plenaries.add(current)
+        plenaries.add(next)
 
         with session.no_autoflush:
             for cls in (Host, Cluster):
@@ -68,7 +68,7 @@ class CommandPromote(BrokerCommand):
                 # We need to refresh all plenaries, even if the stage does not
                 # change
                 for dbobj in q:
-                    plenaries.append(Plenary.get_plenary(dbobj))
+                    plenaries.add(dbobj)
                     dbobj.personality_stage = next
 
             if current:

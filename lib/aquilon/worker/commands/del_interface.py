@@ -89,8 +89,8 @@ class CommandDelInterface(BrokerCommand):
 
         if dbhw_ent.hardware_type != 'chassis':
             plenaries = PlenaryCollection(logger=logger)
-            plenaries.append(Plenary.get_plenary(dbhw_ent))
+            plenaries.add(dbhw_ent)
             if dbhw_ent.host:
-                plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+                plenaries.add(dbhw_ent.host)
             plenaries.write()
         return

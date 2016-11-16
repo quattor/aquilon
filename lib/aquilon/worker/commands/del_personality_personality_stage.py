@@ -45,7 +45,7 @@ class CommandDelPersonalityPersonalityStage(BrokerCommand):
                                 .format(dbstage))
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.add(dbstage)
 
         del dbpersonality.stages[personality_stage]
 

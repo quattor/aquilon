@@ -84,7 +84,7 @@ class CommandAddStaticRoute(BrokerCommand):
             dbstage = dbpersonality.active_stage(personality_stage)
             validate_prod_personality(dbstage, user, justification, reason)
             if dbstage.created_implicitly:
-                plenaries.append(Plenary.get_plenary(dbstage))
+                plenaries.add(dbstage)
         else:
             dbstage = None
 

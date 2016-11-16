@@ -79,7 +79,7 @@ class CommandAddAuxiliary(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbmachine, oldinfo)

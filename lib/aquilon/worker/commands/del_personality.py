@@ -47,7 +47,7 @@ class CommandDelPersonality(BrokerCommand):
         q = session.query(Cluster)
         q = q.filter(Cluster.allowed_personalities.contains(dbpersona))
         for dbobj in q:
-            plenaries.append(Plenary.get_plenary(dbobj))
+            plenaries.add(dbobj)
 
         session.delete(dbpersona)
 

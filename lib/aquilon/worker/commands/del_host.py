@@ -56,7 +56,7 @@ class CommandDelHost(BrokerCommand):
         remove_host(logger, dbmachine, plenaries)
 
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
 
         # In case of Zebra, the IP may be configured on multiple interfaces
         ip = dbmachine.primary_ip

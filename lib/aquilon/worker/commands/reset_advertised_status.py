@@ -41,7 +41,7 @@ class CommandResetAdvertisedStatus(BrokerCommand):
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhost, allow_incomplete=False))
+        plenaries.add(dbhost, allow_incomplete=False)
         # Force a host lock as pan might overwrite the profile...
         with plenaries.transaction():
             td.compile(session, only=plenaries.object_templates)

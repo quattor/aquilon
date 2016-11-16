@@ -50,8 +50,8 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbnetdev.host))
+        plenaries.add(dbnetdev)
+        plenaries.add(dbnetdev.host)
 
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)

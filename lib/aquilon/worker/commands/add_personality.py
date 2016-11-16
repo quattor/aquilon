@@ -151,7 +151,7 @@ class CommandAddPersonality(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.add(dbstage)
         plenaries.write()
 
         return

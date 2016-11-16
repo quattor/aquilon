@@ -312,7 +312,7 @@ class QIPRefresh(object):
         self.logger.client_info("Adding network {0!s}".format(dbnetwork))
         for ip in qipinfo.routers:
             self.add_router(dbnetwork, ip)
-        self.plenaries.append(Plenary.get_plenary(dbnetwork))
+        self.plenaries.add(dbnetwork)
         self.session.flush()
         return dbnetwork
 

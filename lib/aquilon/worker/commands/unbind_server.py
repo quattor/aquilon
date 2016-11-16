@@ -65,9 +65,9 @@ class CommandUnbindServer(BrokerCommand):
                     raise ArgumentError("Invalid server position.")
                 dbsrv = dbinstance.servers[position]
                 if dbsrv.host:
-                    plenaries.append(Plenary.get_plenary(dbsrv.host))
+                    plenaries.add(dbsrv.host)
                 if dbsrv.cluster:
-                    plenaries.append(Plenary.get_plenary(dbsrv.cluster))
+                    plenaries.add(dbsrv.cluster)
             else:
                 dbsrv = find_server(dbinstance, params)
                 if not dbsrv:
@@ -75,7 +75,7 @@ class CommandUnbindServer(BrokerCommand):
                         raise NotFoundException("No such server binding.")
                     continue
 
-            plenaries.append(Plenary.get_plenary(dbinstance))
+            plenaries.add(dbinstance)
 
             if dbsrv.host:
                 session.expire(dbsrv.host, ['services_provided'])

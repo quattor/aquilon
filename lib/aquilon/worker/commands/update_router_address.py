@@ -54,7 +54,7 @@ class CommandUpdateRouterAddress(BrokerCommand):
 
         # Refresh the plenaries even if nothing in the DB has changed
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbnetwork)
         plenaries.write()
 
         session.flush()

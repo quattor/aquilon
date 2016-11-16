@@ -36,7 +36,7 @@ class CommandAddService(BrokerCommand):
         session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbservice))
+        plenaries.add(dbservice)
 
         session.flush()
         plenaries.write()

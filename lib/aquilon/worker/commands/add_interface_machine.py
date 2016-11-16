@@ -60,9 +60,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.host:
-            plenaries.append(Plenary.get_plenary(dbmachine.host))
+            plenaries.add(dbmachine.host)
 
         # Even though there may be removals going on the write key
         # should be sufficient here.

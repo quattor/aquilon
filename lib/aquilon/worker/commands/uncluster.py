@@ -53,16 +53,16 @@ class CommandUncluster(BrokerCommand):
                                 dbhost.personality.name)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhost))
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbhost)
+        plenaries.add(dbcluster)
 
         # Clean up plenaries bound to the membership link
         q = session.query(PriorityList)
         q = q.join(MemberPriority, HostClusterMember)
         q = q.filter_by(host=dbhost)
         for dbresource in q:
-            plenaries.append(Plenary.get_plenary(dbresource))
-            plenaries.append(Plenary.get_plenary(dbresource.holder.holder_object))
+            plenaries.add(dbresource)
+            plenaries.add(dbresource.holder.holder_object)
             session.expire(dbresource, ['entries'])
 
         dbcluster.hosts.remove(dbhost)

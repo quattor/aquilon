@@ -68,7 +68,7 @@ class CommandMergeNetwork(BrokerCommand):
 
         if dbnets[0].ip == supernet.ip:
             dbsuper = dbnets.pop(0)
-            plenaries.append(Plenary.get_plenary(dbsuper))
+            plenaries.add(dbsuper)
             dbsuper.cidr = prefixlen
         else:
             # Create a new network, copying the parameters from the one
@@ -79,10 +79,10 @@ class CommandMergeNetwork(BrokerCommand):
                               side=dbnetwork.side,
                               comments=dbnetwork.comments)
             session.add(dbsuper)
-            plenaries.append(Plenary.get_plenary(dbsuper))
+            plenaries.add(dbsuper)
 
         for oldnet in dbnets:
-            plenaries.append(Plenary.get_plenary(oldnet))
+            plenaries.add(oldnet)
 
             # Delete routers of the old subnets
             for dbrouter in oldnet.routers:

@@ -35,5 +35,5 @@ class CommandUpdateVirtualSwitch(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbvswitch))
+        plenaries.add(dbvswitch)
         plenaries.write()

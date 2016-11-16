@@ -48,8 +48,8 @@ class CommandDelResource(BrokerCommand):
                                                     holder=holder, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbresource))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbresource)
 
         if hasattr(dbresource, 'resholder') and dbresource.resholder:
             for res in dbresource.resholder.resources:

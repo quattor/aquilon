@@ -177,10 +177,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhw_ent))
+        plenaries.add(dbhw_ent)
         # Interface renaming affects the host and service addresses
         if dbhw_ent.host:
-            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+            plenaries.add(dbhw_ent.host)
         plenaries.extend(map(Plenary.get_plenary,
                              dbinterface.service_addresses))
 

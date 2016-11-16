@@ -31,12 +31,12 @@ class CommandDelMachine(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
 
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
             holder = dbmachine.vm_container.holder.holder_object
-            plenaries.append(Plenary.get_plenary(holder))
+            plenaries.add(holder)
 
         if dbmachine.host:
             raise ArgumentError("{0} is still using the machine, so the "

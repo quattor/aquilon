@@ -95,8 +95,8 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbhost))
+        plenaries.add(dbnetdev)
+        plenaries.add(dbhost)
 
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)

@@ -82,12 +82,12 @@ class CommandAddCluster(BrokerCommand):
             dbmetacluster.members.append(dbcluster)
             dbmetacluster.validate()
 
-            plenaries.append(Plenary.get_plenary(dbmetacluster))
+            plenaries.add(dbmetacluster)
 
         session.add(dbcluster)
         session.flush()
 
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
         plenaries.write()
 
         return

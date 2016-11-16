@@ -111,10 +111,10 @@ class CommandAddMachine(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if vmholder:
-            plenaries.append(Plenary.get_plenary(vmholder.holder_object))
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(vmholder.holder_object)
+            plenaries.add(dbmachine.vm_container)
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

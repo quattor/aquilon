@@ -42,7 +42,7 @@ class CommandUpdateCluster(BrokerCommand):
                               personality, personality_stage, max_members,
                               fix_location, clear_location_preference,
                               virtual_switch, comments, **arguments):
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
 
         update_cluster_location(session, dbcluster, fix_location,
                                 clear_location_preference, plenaries,
@@ -80,7 +80,7 @@ class CommandUpdateCluster(BrokerCommand):
                                         "that first.".format(dbcluster))
                 dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                                      compel=True)
-                plenaries.append(Plenary.get_plenary(dbvswitch))
+                plenaries.add(dbvswitch)
             else:
                 dbvswitch = None
 
@@ -131,13 +131,13 @@ class CommandUpdateCluster(BrokerCommand):
             if metacluster:
                 dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                        compel=True)
-                plenaries.append(Plenary.get_plenary(dbmetacluster))
+                plenaries.add(dbmetacluster)
             else:
                 dbmetacluster = None
 
             old_metacluster = dbcluster.metacluster
             if old_metacluster:
-                plenaries.append(Plenary.get_plenary(old_metacluster))
+                plenaries.add(old_metacluster)
 
             if old_metacluster != dbmetacluster:
                 if dbcluster.virtual_machines:
@@ -148,7 +148,7 @@ class CommandUpdateCluster(BrokerCommand):
                 # Don't refresh the cluster plenaries twice
                 if dbobj is dbcluster:
                     continue
-                plenaries.append(Plenary.get_plenary(dbobj))
+                plenaries.add(dbobj)
 
             dbcluster.metacluster = dbmetacluster
 
@@ -233,10 +233,10 @@ def update_cluster_location(session, dbcluster, fix_location,
             for dbmachine in dbcluster.virtual_machines:
                 # The plenary objects should be created before changing the
                 # location, so they can track the change
-                plenaries.append(Plenary.get_plenary(dbmachine))
+                plenaries.add(dbmachine)
                 # Update the path to the machine plenary in the container
                 # resource
-                plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+                plenaries.add(dbmachine.vm_container)
                 dbmachine.location = dblocation
 
             dbcluster.location_constraint = dblocation

@@ -60,7 +60,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         if dbstage.created_implicitly:
-            plenaries.append(Plenary.get_plenary(dbstage))
+            plenaries.add(dbstage)
 
         self._update_dbobj(logger, dbstage, dbservice, dbenv)
         session.flush()

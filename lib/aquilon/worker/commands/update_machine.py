@@ -156,8 +156,8 @@ def move_vm(session, logger, dbmachine, resholder, remap_disk,
                                 "--allow_metacluster_change option to "
                                 "override.")
 
-        plenaries.append(Plenary.get_plenary(old_holder))
-        plenaries.append(Plenary.get_plenary(new_holder))
+        plenaries.add(old_holder)
+        plenaries.add(new_holder)
 
         dbmachine.vm_container.holder = resholder
 
@@ -187,9 +187,9 @@ class CommandUpdateMachine(BrokerCommand):
         old_location = dbmachine.location
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
         if dbmachine.host:
             # Using PlenaryHostData directly, to avoid warnings if the host has
             # not been configured yet
@@ -325,7 +325,7 @@ class CommandUpdateMachine(BrokerCommand):
 
         if dbmachine.location != old_location and dbmachine.host:
             for vm in dbmachine.host.virtual_machines:
-                plenaries.append(Plenary.get_plenary(vm))
+                plenaries.add(vm)
                 vm.location = dbmachine.location
 
         session.flush()

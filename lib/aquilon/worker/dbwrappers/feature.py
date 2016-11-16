@@ -83,7 +83,7 @@ def get_affected_plenaries(session, dbfeature, plenaries,
                            interface_name=None):
     if isinstance(dbfeature, HostFeature):
         if personality_stage:
-            plenaries.append(Plenary.get_plenary(personality_stage))
+            plenaries.add(personality_stage)
         else:
             q = session.query(PersonalityStage)
             q = q.join(Personality)
@@ -97,7 +97,7 @@ def get_affected_plenaries(session, dbfeature, plenaries,
         q = session.query(Host)
         if personality_stage:
             if personality_stage.created_implicitly:
-                plenaries.append(Plenary.get_plenary(personality_stage))
+                plenaries.add(personality_stage)
             q = q.filter_by(personality_stage=personality_stage)
         else:
             q = q.join(PersonalityStage, Personality)

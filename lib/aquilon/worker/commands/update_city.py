@@ -36,7 +36,7 @@ class CommandUpdateCity(BrokerCommand):
         dbcity = City.get_unique(session, city, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcity))
+        plenaries.add(dbcity)
 
         if timezone is not None:
             dbcity.timezone = timezone

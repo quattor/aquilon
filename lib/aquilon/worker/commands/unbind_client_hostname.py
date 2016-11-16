@@ -52,7 +52,7 @@ class CommandUnbindClientHostname(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbobj))
+        plenaries.add(dbobj)
         plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
         plenaries.write()
 

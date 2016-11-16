@@ -36,7 +36,7 @@ class CommandUpdateDisk(BrokerCommand):
                                  compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
 
         if rename_to:
             Disk.get_unique(session, device_name=rename_to, machine=dbmachine,

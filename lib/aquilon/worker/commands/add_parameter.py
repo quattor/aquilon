@@ -56,7 +56,7 @@ class CommandAddParameter(BrokerCommand):
         path = ParamDefinition.normalize_path(path, strict=False)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.add(dbstage)
 
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,

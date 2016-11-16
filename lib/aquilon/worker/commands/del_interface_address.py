@@ -107,10 +107,10 @@ class CommandDelInterfaceAddress(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhw_ent))
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbhw_ent)
+        plenaries.add(dbnetwork)
         if dbhw_ent.host:
-            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+            plenaries.add(dbhw_ent.host)
 
         dsdb_runner = DSDBRunner(logger=logger)
 

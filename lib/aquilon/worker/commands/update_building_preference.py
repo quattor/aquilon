@@ -40,7 +40,7 @@ class CommandUpdateBuildingPreference(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         for db_clus in get_clusters_by_locations(session, (db_pref.a, db_pref.b),
                                                  db_pref.archetype):
-            plenaries.append(Plenary.get_plenary(db_clus))
+            plenaries.add(db_clus)
 
         if prefer:
             dbbuilding = Building.get_unique(session, prefer, compel=True)

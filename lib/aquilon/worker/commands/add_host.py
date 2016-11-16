@@ -138,11 +138,11 @@ class CommandAddHost(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
         if dbsrv_addr:
-            plenaries.append(Plenary.get_plenary(dbsrv_addr))
+            plenaries.add(dbsrv_addr)
 
         with plenaries.transaction():
             if oldinfo:

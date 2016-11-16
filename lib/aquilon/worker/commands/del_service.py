@@ -44,7 +44,7 @@ class CommandDelService(BrokerCommand):
                                 "cannot be deleted." % dbservice.name)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbservice))
+        plenaries.add(dbservice)
 
         session.delete(dbservice)
         session.flush()

@@ -41,7 +41,7 @@ class CommandUpdateServiceInstance(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbsi))
+        plenaries.add(dbsi)
         plenaries.write()
 
         return

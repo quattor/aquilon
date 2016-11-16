@@ -63,7 +63,7 @@ class CommandCluster(BrokerCommand):
         dbcluster.validate_membership(dbhost)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
 
         if dbhost.cluster and dbhost.cluster != dbcluster:
             logger.client_info("Removing {0:l} from {1:l}.".format(dbhost,
@@ -72,7 +72,7 @@ class CommandCluster(BrokerCommand):
             old_cluster.hosts.remove(dbhost)
             old_cluster.validate()
             session.expire(dbhost, ['_cluster'])
-            plenaries.append(Plenary.get_plenary(old_cluster))
+            plenaries.add(old_cluster)
 
         if dbhost.cluster:
             if personality_change:
@@ -103,12 +103,12 @@ class CommandCluster(BrokerCommand):
             if dbcluster.status.name != 'ready':
                 dbalmost = HostAlmostready.get_instance(session)
                 dbhost.status.transition(dbhost, dbalmost)
-                plenaries.append(Plenary.get_plenary(dbhost))
+                plenaries.add(dbhost)
         elif dbhost.status.name == 'almostready':
             if dbcluster.status.name == 'ready':
                 dbready = HostReady.get_instance(session)
                 dbhost.status.transition(dbhost, dbready)
-                plenaries.append(Plenary.get_plenary(dbhost))
+                plenaries.add(dbhost)
 
         # Enforce that service instances are set correctly for the
         # new cluster association.

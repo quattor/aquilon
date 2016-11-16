@@ -49,8 +49,8 @@ class CommandDelServiceAddress(BrokerCommand):
         dsdb_runner = DSDBRunner(logger=logger)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbsrv))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbsrv)
 
         holder.resources.remove(dbsrv)
         if not dbdns_rec.service_addresses and not keep_dns:
