@@ -18,21 +18,19 @@
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_cluster import CommandUpdateCluster
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateMetaCluster(CommandUpdateCluster):
+    requires_plenaries = True
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, personality,
+    def render(self, session, logger, plenaries, metacluster, personality,
                personality_stage, max_members,
                fix_location, clear_location_preference,
                virtual_switch, comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-        plenaries = PlenaryCollection(logger=logger)
-
         self.update_cluster_common(session, dbmetacluster, plenaries,
                                    personality, personality_stage, max_members,
                                    fix_location, clear_location_preference,

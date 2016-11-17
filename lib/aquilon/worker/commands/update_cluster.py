@@ -20,11 +20,11 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
                                 NetworkDevice, VirtualSwitch, ClusterGroup)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandUpdateCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
 
@@ -89,14 +89,13 @@ class CommandUpdateCluster(BrokerCommand):
         if comments is not None:
             dbcluster.comments = comments
 
-    def render(self, session, logger, cluster, personality, personality_stage,
+    def render(self, session, logger, plenaries, cluster, personality, personality_stage,
                max_members, fix_location, clear_location_preference,
                down_hosts_threshold, maint_threshold, comments, switch,
                virtual_switch, metacluster, group_with, clear_group,
                **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
-        plenaries = PlenaryCollection(logger=logger)
 
         self.update_cluster_common(session, dbcluster, plenaries,
                                    personality, personality_stage, max_members,
