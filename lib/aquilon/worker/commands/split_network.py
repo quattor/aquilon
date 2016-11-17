@@ -30,7 +30,7 @@ class CommandSplitNetwork(BrokerCommand):
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, logger, plenaries, dbuser,
+    def render(self, session, plenaries, dbuser,
                ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one

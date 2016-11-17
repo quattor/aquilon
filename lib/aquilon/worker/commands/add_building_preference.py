@@ -28,7 +28,7 @@ class CommandAddBuildingPreference(BrokerCommand):
 
     required_parameters = ["building_pair", "prefer", "archetype"]
 
-    def render(self, session, logger, plenaries, building_pair, prefer, archetype,
+    def render(self, session, plenaries, building_pair, prefer, archetype,
                justification, reason, user, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         validate_prod_archetype(dbarchetype, user, justification, reason)

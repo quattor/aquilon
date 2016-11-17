@@ -40,7 +40,7 @@ class CommandAddParameter(BrokerCommand):
 
         set_parameter(session, parameter, db_paramdef, path, value)
 
-    def render(self, session, logger, plenaries, archetype, personality, personality_stage,
+    def render(self, session, plenaries, archetype, personality, personality_stage,
                feature, type, path, user, value=None, justification=None,
                reason=None, **_):
         dbpersonality = Personality.get_unique(session, name=personality,

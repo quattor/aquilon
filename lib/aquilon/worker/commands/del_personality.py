@@ -29,7 +29,7 @@ class CommandDelPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, plenaries, personality, archetype, **_):
+    def render(self, session, plenaries, personality, archetype, **_):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 

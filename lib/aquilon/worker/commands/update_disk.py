@@ -28,7 +28,7 @@ class CommandUpdateDisk(BrokerCommand):
 
     required_parameters = ["machine", "disk"]
 
-    def render(self, session, logger, plenaries, machine, disk, controller, share,
+    def render(self, session, plenaries, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
                snapshot, rename_to, wwn, bus_address, iops_limit, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)

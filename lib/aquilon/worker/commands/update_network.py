@@ -25,7 +25,7 @@ from aquilon.worker.dbwrappers.location import get_location
 class CommandUpdateNetwork(BrokerCommand):
     requires_plenaries = True
 
-    def render(self, session, logger, plenaries, dbuser, network, ip, network_environment,
+    def render(self, session, plenaries, dbuser, network, ip, network_environment,
                type, side, network_compartment, comments, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,

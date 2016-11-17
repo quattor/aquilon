@@ -22,8 +22,7 @@ from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
-from aquilon.worker.templates import (PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 
 
 def del_cluster(session, logger, plenaries, dbcluster, config):

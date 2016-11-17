@@ -31,7 +31,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "template", "path", "value_type"]
 
-    def render(self, session, logger, plenaries, archetype, template, path, value_type,
+    def render(self, session, plenaries, archetype, template, path, value_type,
                schema, required, activation, default, description, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)

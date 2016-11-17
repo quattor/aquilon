@@ -29,7 +29,7 @@ class CommandAddRouterAddress(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, plenaries, dbuser,
+    def render(self, session, plenaries, dbuser,
                fqdn, building, ip, network_environment, comments, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)

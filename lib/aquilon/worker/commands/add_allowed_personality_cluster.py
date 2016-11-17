@@ -26,7 +26,7 @@ class CommandAddAllowedPersonalityCluster(BrokerCommand):
 
     required_parameters = ["archetype", "personality", "cluster"]
 
-    def render(self, session, logger, plenaries, archetype, personality, cluster,
+    def render(self, session, plenaries, archetype, personality, cluster,
                metacluster, **_):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)

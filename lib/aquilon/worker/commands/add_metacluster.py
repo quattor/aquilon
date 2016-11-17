@@ -28,7 +28,7 @@ class CommandAddMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, plenaries, metacluster, archetype, personality,
+    def render(self, session, plenaries, metacluster, archetype, personality,
                personality_stage, domain, sandbox, max_members, buildstatus,
                comments, **arguments):
         validate_nlist_key("metacluster", metacluster)

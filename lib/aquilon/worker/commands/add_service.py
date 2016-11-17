@@ -25,7 +25,7 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, plenaries, dbuser, service, need_client_list,
+    def render(self, session, plenaries, dbuser, service, need_client_list,
                allow_alias_bindings, comments, **_):
         Service.get_unique(session, service, preclude=True)
 

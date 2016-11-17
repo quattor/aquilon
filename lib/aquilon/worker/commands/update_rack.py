@@ -27,7 +27,7 @@ class CommandUpdateRack(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, plenaries, rack, row, column, room, building, bunker,
+    def render(self, session, plenaries, rack, row, column, room, building, bunker,
                fullname, default_dns_domain, comments, **_):
         dbrack = Rack.get_unique(session, rack, compel=True)
 

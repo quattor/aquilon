@@ -28,7 +28,7 @@ class CommandDelRouterAddress(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, plenaries, dbuser,
+    def render(self, session, plenaries, dbuser,
                ip, fqdn, network_environment, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)

@@ -89,7 +89,7 @@ class CommandUpdateCluster(BrokerCommand):
         if comments is not None:
             dbcluster.comments = comments
 
-    def render(self, session, logger, plenaries, cluster, personality, personality_stage,
+    def render(self, session, plenaries, cluster, personality, personality_stage,
                max_members, fix_location, clear_location_preference,
                down_hosts_threshold, maint_threshold, comments, switch,
                virtual_switch, metacluster, group_with, clear_group,

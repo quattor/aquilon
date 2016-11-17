@@ -33,7 +33,7 @@ class CommandGrantRootAccess(BrokerCommand):
         if dbnetgroup and dbnetgroup not in obj.root_netgroups:
             obj.root_netgroups.append(dbnetgroup)
 
-    def render(self, session, logger, plenaries, username, netgroup, personality,
+    def render(self, session, plenaries, username, netgroup, personality,
                archetype, justification, user, reason, **_):
         validate_justification(user, justification, reason)
         dbobj = Personality.get_unique(session, name=personality,

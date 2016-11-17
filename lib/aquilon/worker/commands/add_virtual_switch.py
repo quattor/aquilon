@@ -26,7 +26,7 @@ class CommandAddVirtualSwitch(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, logger, plenaries, virtual_switch, comments, **_):
+    def render(self, session, plenaries, virtual_switch, comments, **_):
         validate_template_name("--virtual_switch", virtual_switch)
 
         VirtualSwitch.get_unique(session, virtual_switch, preclude=True)

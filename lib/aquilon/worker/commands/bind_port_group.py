@@ -27,7 +27,7 @@ class CommandBindPortGroup(BrokerCommand):
 
     required_parameters = ["virtual_switch", "networkip"]
 
-    def render(self, session, logger, plenaries, virtual_switch, networkip, tag, type,
+    def render(self, session, plenaries, virtual_switch, networkip, tag, type,
                **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)

@@ -39,7 +39,7 @@ class CommandUpdateModel(BrokerCommand):
                        'disksize': 'disk_capacity',
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
-    def render(self, session, logger, plenaries, model, vendor, newmodel, newvendor,
+    def render(self, session, plenaries, model, vendor, newmodel, newvendor,
                comments, update_existing_machines, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows

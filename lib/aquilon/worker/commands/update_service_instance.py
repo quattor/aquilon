@@ -25,7 +25,7 @@ class CommandUpdateServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, plenaries, service, instance, max_clients, default,
+    def render(self, session, plenaries, service, instance, max_clients, default,
                comments, **_):
         dbservice = Service.get_unique(session, name=service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,

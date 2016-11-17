@@ -25,7 +25,7 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, plenaries, metacluster, personality,
+    def render(self, session, plenaries, metacluster, personality,
                personality_stage, max_members,
                fix_location, clear_location_preference,
                virtual_switch, comments, **arguments):

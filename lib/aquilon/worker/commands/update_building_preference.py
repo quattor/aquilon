@@ -27,7 +27,7 @@ class CommandUpdateBuildingPreference(BrokerCommand):
 
     required_parameters = ["building_pair", "archetype"]
 
-    def render(self, session, logger, plenaries, building_pair, archetype, prefer,
+    def render(self, session, plenaries, building_pair, archetype, prefer,
                justification, reason, user, **_):
         db_pref = BuildingPreference.get_unique(session,
                                                 building_pair=building_pair,

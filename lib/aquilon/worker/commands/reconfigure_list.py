@@ -29,8 +29,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             preload_machine_data,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates import (PlenaryCollection, TemplateDomain,
-                                      PlenaryHost)
+from aquilon.worker.templates import TemplateDomain, PlenaryHost
 from aquilon.worker.services import Chooser, ChooserCache
 
 

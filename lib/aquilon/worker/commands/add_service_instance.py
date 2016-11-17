@@ -25,7 +25,7 @@ class CommandAddServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, plenaries, service, instance, comments, **_):
+    def render(self, session, plenaries, service, instance, comments, **_):
         dbservice = Service.get_unique(session, service, compel=True)
         ServiceInstance.get_unique(session, service=dbservice, name=instance,
                                    preclude=True)

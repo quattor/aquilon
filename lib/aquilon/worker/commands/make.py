@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (Archetype, HostLifecycle,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import TemplateDomain, PlenaryCollection
+from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser
 
 

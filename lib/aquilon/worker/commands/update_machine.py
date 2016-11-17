@@ -28,7 +28,7 @@ from aquilon.worker.dbwrappers.interface import set_port_group, generate_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
-from aquilon.worker.templates import (PlenaryCollection, PlenaryHostData,
+from aquilon.worker.templates import (PlenaryHostData,
                                       PlenaryServiceInstanceToplevel)
 from aquilon.worker.processes import DSDBRunner
 

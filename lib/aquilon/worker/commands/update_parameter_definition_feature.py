@@ -28,7 +28,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
     required_parameters = ["feature", "type", "path"]
 
-    def render(self, session, logger, plenaries, feature, type, path, schema, clear_schema,
+    def render(self, session, plenaries, feature, type, path, schema, clear_schema,
                required, default, clear_default, description, user,
                justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
