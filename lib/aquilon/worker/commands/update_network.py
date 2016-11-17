@@ -25,7 +25,7 @@ from aquilon.worker.templates import PlenaryCollection
 
 class CommandUpdateNetwork(BrokerCommand):
 
-    def render(self, session, dbuser, logger, network, ip, network_environment,
+    def render(self, session, logger, dbuser, network, ip, network_environment,
                type, side, network_compartment, comments, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,

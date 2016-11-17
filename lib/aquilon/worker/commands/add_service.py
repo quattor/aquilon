@@ -25,7 +25,8 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, dbuser, logger, service, need_client_list, comments, allow_alias_bindings, **_):
+    def render(self, session, logger, dbuser, service, need_client_list,
+               allow_alias_bindings, comments, **_):
         Service.get_unique(session, service, preclude=True)
 
         if dbuser.role.name != 'aqd_admin' and allow_alias_bindings is not None:

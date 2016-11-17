@@ -18,6 +18,7 @@
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.del_cluster import del_cluster
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelMetaCluster(BrokerCommand):
@@ -27,4 +28,5 @@ class CommandDelMetaCluster(BrokerCommand):
     def render(self, session, logger, metacluster, **_):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-        del_cluster(session, logger, dbmetacluster, self.config)
+        plenaries = PlenaryCollection(logger=logger)
+        del_cluster(session, logger, plenaries, dbmetacluster, self.config)

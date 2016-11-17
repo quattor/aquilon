@@ -31,7 +31,7 @@ class CommandMergeNetwork(BrokerCommand):
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, dbuser, logger,
+    def render(self, session, logger, dbuser,
                ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one

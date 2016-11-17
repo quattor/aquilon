@@ -30,8 +30,8 @@ class CommandAddNetwork(BrokerCommand):
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, dbuser,
-               network, ip, network_environment, type, side, comments, logger,
+    def render(self, session, logger, dbuser,
+               network, ip, network_environment, type, side, comments,
                netmask, prefixlen, mask, network_compartment, **arguments):
 
         # Handle the different ways of specifying the netmask

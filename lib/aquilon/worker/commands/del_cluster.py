@@ -26,7 +26,7 @@ from aquilon.worker.templates import (PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
 
-def del_cluster(session, logger, dbcluster, config):
+def del_cluster(session, logger, plenaries, dbcluster, config):
     check_no_provided_service(dbcluster)
 
     if dbcluster.virtual_machines:
@@ -50,7 +50,6 @@ def del_cluster(session, logger, dbcluster, config):
             raise ArgumentError("{0} still has {1:l} assigned, please delete "
                                 "it first.".format(dbcluster, res))
 
-    plenaries = PlenaryCollection(logger=logger)
     plenaries.add(dbcluster)
 
     if dbcluster.metacluster:
@@ -85,4 +84,5 @@ class CommandDelCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        del_cluster(session, logger, dbcluster, self.config)
+        plenaries = PlenaryCollection(logger=logger)
+        del_cluster(session, logger, plenaries, dbcluster, self.config)
