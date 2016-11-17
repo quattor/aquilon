@@ -28,14 +28,15 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.network import get_network_byip
-from aquilon.worker.templates import PlenaryCollection, PlenaryHost
+from aquilon.worker.templates import PlenaryHost
 
 
 class CommandAddStaticRoute(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["ip"]
 
-    def render(self, session, logger, gateway, networkip, ip, netmask,
+    def render(self, session, logger, plenaries, gateway, networkip, ip, netmask,
                prefixlen, network_environment, comments, personality,
                personality_stage, archetype, justification, reason, user, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -75,7 +76,6 @@ class CommandAddStaticRoute(BrokerCommand):
             raise ArgumentError("%s is not a network address; "
                                 "did you mean %s." % (ip, dest.network))
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,

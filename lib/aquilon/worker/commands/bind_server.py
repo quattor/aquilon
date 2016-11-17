@@ -23,7 +23,6 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates import PlenaryCollection
 
 
 def lookup_target(session, logger, plenaries, hostname, ip, cluster,
@@ -108,10 +107,11 @@ def find_server(dbinstance, params):
 
 
 class CommandBindServer(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, position, hostname,
+    def render(self, session, logger, plenaries, service, instance, position, hostname,
                cluster, ip, resourcegroup, service_address, alias,
                justification, reason, user, **_):
         # Check for invalid combinations. We allow binding as a server:
@@ -132,7 +132,6 @@ class CommandBindServer(BrokerCommand):
 
         validate_prod_service_instance(dbinstance, user, justification, reason)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbinstance)
 
         if alias and not dbinstance.service.allow_alias_bindings:

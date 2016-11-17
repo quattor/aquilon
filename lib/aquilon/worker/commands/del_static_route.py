@@ -28,14 +28,15 @@ from aquilon.aqdb.model import (NetworkEnvironment, StaticRoute, Personality,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
-from aquilon.worker.templates import PlenaryCollection, PlenaryHost
+from aquilon.worker.templates import PlenaryHost
 
 
 class CommandDelStaticRoute(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["gateway", "ip"]
 
-    def render(self, session, logger, gateway, ip, netmask, prefixlen,
+    def render(self, session, logger, plenaries, gateway, ip, netmask, prefixlen,
                network_environment, archetype, personality, personality_stage,
                justification, reason, user, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -47,7 +48,6 @@ class CommandDelStaticRoute(BrokerCommand):
         else:
             dest = IPv4Network("%s/%s" % (ip, prefixlen))
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,

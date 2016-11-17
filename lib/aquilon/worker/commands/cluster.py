@@ -24,15 +24,15 @@ from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
                                               Almostready as HostAlmostready)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.services import Chooser
 
 
 class CommandCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster, personality,
+    def render(self, session, logger, plenaries, hostname, cluster, personality,
                personality_stage, **_):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -62,7 +62,6 @@ class CommandCluster(BrokerCommand):
         # if this is a valid membership change
         dbcluster.validate_membership(dbhost)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbcluster)
 
         if dbhost.cluster and dbhost.cluster != dbcluster:

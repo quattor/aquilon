@@ -173,10 +173,11 @@ def move_vm(session, logger, dbmachine, resholder, remap_disk,
 
 
 class CommandUpdateMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, model, vendor, serial, uuid,
+    def render(self, session, logger, plenaries, machine, model, vendor, serial, uuid,
                clear_uuid, chassis, slot, clearchassis, multislot, vmhost,
                cluster, metacluster, allow_metacluster_change, cpuname,
                cpuvendor, cpucount, memory, ip, autoip, uri, remap_disk,
@@ -185,7 +186,6 @@ class CommandUpdateMachine(BrokerCommand):
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbmachine)
         if dbmachine.vm_container:
             plenaries.add(dbmachine.vm_container)

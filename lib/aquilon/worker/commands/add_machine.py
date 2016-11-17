@@ -24,14 +24,14 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine", "model"]
 
-    def render(self, session, logger, machine, model, vendor, serial, uuid,
+    def render(self, session, logger, plenaries, machine, model, vendor, serial, uuid,
                chassis, slot, cpuname, cpuvendor, cpucount, memory, recipe,
                cluster, metacluster, vmhost, uri, comments, **arguments):
         dblocation = get_location(session,
@@ -110,7 +110,6 @@ class CommandAddMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbmachine)
         if vmholder:
             plenaries.add(vmholder.holder_object)

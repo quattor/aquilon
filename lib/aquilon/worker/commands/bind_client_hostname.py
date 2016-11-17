@@ -20,18 +20,17 @@ from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.services import Chooser
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClientHostname(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, logger, hostname, service, instance, force=False,
+    def render(self, session, logger, plenaries, hostname, service, instance, force=False,
                **_):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
-        plenaries = PlenaryCollection(logger=logger)
         chooser = Chooser(dbhost, plenaries, logger=logger, required_only=False)
         if instance:
             dbinstance = ServiceInstance.get_unique(session, service=dbservice,

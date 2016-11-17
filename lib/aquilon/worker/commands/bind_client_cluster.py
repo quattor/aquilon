@@ -20,14 +20,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser, ChooserCache
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClientCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster", "service"]
 
-    def render(self, session, logger, cluster, service, instance, force=False,
+    def render(self, session, logger, plenaries, cluster, service, instance, force=False,
                **_):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -38,7 +38,6 @@ class CommandBindClientCluster(BrokerCommand):
         else:
             dbinstance = None
 
-        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
         choosers = []
         failed = []

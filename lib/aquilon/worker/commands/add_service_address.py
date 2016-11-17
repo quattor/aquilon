@@ -27,14 +27,14 @@ from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.search import search_next
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddServiceAddress(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["name"]
 
-    def render(self, session, logger, service_address, shortname, prefix,
+    def render(self, session, logger, plenaries, service_address, shortname, prefix,
                dns_domain, ip, name, interfaces, hostname, cluster, metacluster,
                resourcegroup, network_environment, map_to_primary, shared,
                comments, **kwargs):
@@ -118,7 +118,6 @@ class CommandAddServiceAddress(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
 
         plenaries.add(holder.holder_object)
         plenaries.add(dbsrv)

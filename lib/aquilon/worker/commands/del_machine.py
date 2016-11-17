@@ -19,18 +19,17 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 
 
 class CommandDelMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, **_):
+    def render(self, session, logger, plenaries, machine, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbmachine)
 
         if dbmachine.vm_container:

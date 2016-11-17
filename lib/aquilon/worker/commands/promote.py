@@ -21,14 +21,14 @@ from sqlalchemy.orm import contains_eager
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, PersonalityStage, Host, Cluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandPromote(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, **_):
+    def render(self, session, logger, plenaries, personality, archetype, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if "next" not in dbpersonality.stages:
@@ -49,7 +49,6 @@ class CommandPromote(BrokerCommand):
 
             del dbpersonality.stages["previous"]
 
-        plenaries = PlenaryCollection(logger=logger)
 
         current = dbpersonality.stages.get("current", None)
         next = dbpersonality.stages["next"]

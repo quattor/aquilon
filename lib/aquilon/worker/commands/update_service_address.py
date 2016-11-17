@@ -23,14 +23,14 @@ from aquilon.worker.dbwrappers.dns import update_address
 from aquilon.worker.dbwrappers.interface import get_interfaces
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateServiceAddress(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["name"]
 
-    def render(self, session, logger, ip, name, interfaces, hostname, cluster,
+    def render(self, session, logger, plenaries, ip, name, interfaces, hostname, cluster,
                metacluster, resourcegroup, network_environment, map_to_primary,
                comments, **_):
         holder = get_resource_holder(session, logger, hostname, cluster,
@@ -38,7 +38,6 @@ class CommandUpdateServiceAddress(BrokerCommand):
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,
                                           compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(holder.holder_object)
         plenaries.add(dbsrv)
 

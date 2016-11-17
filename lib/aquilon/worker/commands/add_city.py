@@ -20,14 +20,14 @@ from aquilon.aqdb.model import City, Country, Campus
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddCity(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["city", "timezone"]
 
-    def render(self, session, logger, city, country, fullname, comments,
+    def render(self, session, logger, plenaries, city, country, fullname, comments,
                timezone, campus, **_):
         if country:
             dbparent = Country.get_unique(session, country, compel=True)
@@ -39,7 +39,6 @@ class CommandAddCity(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbcity)
 
         with plenaries.transaction():

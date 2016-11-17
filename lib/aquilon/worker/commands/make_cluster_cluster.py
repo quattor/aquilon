@@ -19,15 +19,16 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster, MetaCluster
-from aquilon.worker.templates import PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser, ChooserCache
 
 
 class CommandMakeClusterCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, metacluster, keepbindings, **_):
+    def render(self, session, logger, plenaries, cluster, metacluster, keepbindings, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -45,7 +46,6 @@ class CommandMakeClusterCluster(BrokerCommand):
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
-        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
         choosers = []
         failed = []

@@ -21,14 +21,14 @@ from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelRouterAddress(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = []
 
-    def render(self, session, logger, dbuser,
+    def render(self, session, logger, plenaries, dbuser,
                ip, fqdn, network_environment, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -62,7 +62,6 @@ class CommandDelRouterAddress(BrokerCommand):
         session.flush()
 
         # TODO: update the templates of Zebra hosts on the network
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbnetwork)
         plenaries.write()
 

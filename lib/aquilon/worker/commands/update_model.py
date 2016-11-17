@@ -23,10 +23,10 @@ from aquilon.aqdb.types import CpuType, NicType
 from aquilon.aqdb.model import (Vendor, Model, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateModel(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["model", "vendor"]
 
@@ -39,7 +39,7 @@ class CommandUpdateModel(BrokerCommand):
                        'disksize': 'disk_capacity',
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
-    def render(self, session, logger, model, vendor, newmodel, newvendor,
+    def render(self, session, logger, plenaries, model, vendor, newmodel, newvendor,
                comments, update_existing_machines, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows
@@ -169,7 +169,6 @@ class CommandUpdateModel(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbmachines)
         plenaries.write()
 

@@ -19,14 +19,14 @@
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Personality, Host, Cluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelPersonalityPersonalityStage(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["personality", "archetype", "personality_stage"]
 
-    def render(self, session, logger, personality, archetype,
+    def render(self, session, logger, plenaries, personality, archetype,
                personality_stage, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
@@ -44,7 +44,6 @@ class CommandDelPersonalityPersonalityStage(BrokerCommand):
             raise ArgumentError("{0} is still in use and cannot be deleted."
                                 .format(dbstage))
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbstage)
 
         del dbpersonality.stages[personality_stage]

@@ -31,7 +31,6 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
 from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import GitRepo
-from aquilon.worker.templates import PlenaryCollection
 
 
 def validate_branch_commits(dbsource, dbsource_author,
@@ -99,6 +98,7 @@ def validate_branch_commits(dbsource, dbsource_author,
 
 
 class CommandManageList(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["list"]
 
@@ -123,7 +123,7 @@ class CommandManageList(BrokerCommand):
 
         return (dbsource, dbsource_author, dbhosts)
 
-    def render(self, session, logger, domain, sandbox, force, **arguments):
+    def render(self, session, logger, plenaries, domain, sandbox, force, **arguments):
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
         if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
@@ -159,7 +159,6 @@ class CommandManageList(BrokerCommand):
                         check_feature_template(self.config, dbarch, dbfeature,
                                                dbbranch)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         for dbobj in objects:
             if dbsource != dbbranch:

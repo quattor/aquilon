@@ -22,15 +22,16 @@ from aquilon.aqdb.model import Host, Cluster, Personality, PersonalityStage
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
-from aquilon.worker.templates import PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 
 
 class CommandCompilePersonality(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["personality"]
     requires_readonly = True
 
-    def render(self, session, logger, domain, sandbox, archetype, personality,
+    def render(self, session, logger, plenaries, domain, sandbox, archetype, personality,
                personality_stage, pancinclude, pancexclude, pancdebug,
                cleandeps, **_):
         dbdomain = None
@@ -81,7 +82,6 @@ class CommandCompilePersonality(BrokerCommand):
         # If the domain was not specified, set it to the domain of first host
         dbdomain, dbauthor = validate_branch_author(objects)
 
-        plenaries = PlenaryCollection(logger=logger)
         for dbobj in objects:
             plenaries.add(dbobj.all_objects())
 

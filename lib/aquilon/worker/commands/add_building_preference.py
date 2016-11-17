@@ -21,14 +21,14 @@ from aquilon.aqdb.model import BuildingPreference, Building, Archetype
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
 from aquilon.worker.dbwrappers.cluster import get_clusters_by_locations
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddBuildingPreference(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["building_pair", "prefer", "archetype"]
 
-    def render(self, session, logger, building_pair, prefer, archetype,
+    def render(self, session, logger, plenaries, building_pair, prefer, archetype,
                justification, reason, user, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         validate_prod_archetype(dbarchetype, user, justification, reason)
@@ -47,7 +47,6 @@ class CommandAddBuildingPreference(BrokerCommand):
         session.add(db_pref)
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         for db_clus in get_clusters_by_locations(session, pair, dbarchetype):
             plenaries.add(db_clus)
 

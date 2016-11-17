@@ -22,14 +22,14 @@ from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddRouterAddress(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, dbuser,
+    def render(self, session, logger, plenaries, dbuser,
                fqdn, building, ip, network_environment, comments, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -72,7 +72,6 @@ class CommandAddRouterAddress(BrokerCommand):
         session.flush()
 
         # TODO: update the templates of Zebra hosts on the network
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbnetwork)
         plenaries.write()
 

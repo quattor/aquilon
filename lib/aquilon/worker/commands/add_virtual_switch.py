@@ -19,14 +19,14 @@
 from aquilon.aqdb.model import VirtualSwitch
 from aquilon.utils import validate_template_name
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddVirtualSwitch(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, logger, virtual_switch, comments, **_):
+    def render(self, session, logger, plenaries, virtual_switch, comments, **_):
         validate_template_name("--virtual_switch", virtual_switch)
 
         VirtualSwitch.get_unique(session, virtual_switch, preclude=True)
@@ -35,6 +35,5 @@ class CommandAddVirtualSwitch(BrokerCommand):
         session.add(dbvswitch)
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbvswitch)
         plenaries.write()

@@ -79,10 +79,10 @@ def del_cluster(session, logger, plenaries, dbcluster, config):
 
 
 class CommandDelCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, **_):
+    def render(self, session, logger, plenaries, cluster, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        plenaries = PlenaryCollection(logger=logger)
         del_cluster(session, logger, plenaries, dbcluster, self.config)

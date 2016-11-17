@@ -18,14 +18,14 @@
 
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddService(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, dbuser, service, need_client_list,
+    def render(self, session, logger, plenaries, dbuser, service, need_client_list,
                allow_alias_bindings, comments, **_):
         Service.get_unique(session, service, preclude=True)
 
@@ -36,7 +36,6 @@ class CommandAddService(BrokerCommand):
                             need_client_list=need_client_list, allow_alias_bindings=allow_alias_bindings)
         session.add(dbservice)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbservice)
 
         session.flush()

@@ -21,14 +21,14 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_feature
 from aquilon.worker.dbwrappers.parameter import (add_feature_paramdef_plenaries,
                                                  lookup_paramdef,
                                                  update_paramdef_schema)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdParameterDefintionFeature(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["feature", "type", "path"]
 
-    def render(self, session, logger, feature, type, path, schema, clear_schema,
+    def render(self, session, logger, plenaries, feature, type, path, schema, clear_schema,
                required, default, clear_default, description, user,
                justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
@@ -36,7 +36,6 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         path = ParamDefinition.normalize_path(path)
         db_paramdef, _ = lookup_paramdef(dbfeature, path)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed

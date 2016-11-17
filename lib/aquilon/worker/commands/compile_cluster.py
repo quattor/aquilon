@@ -18,16 +18,16 @@
 
 from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.templates.domain import TemplateDomain
 
 
 class CommandCompileCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
     requires_readonly = True
 
-    def render(self, session, logger, cluster, metacluster,
+    def render(self, session, logger, plenaries, cluster, metacluster,
                pancinclude, pancexclude, pancdebug, cleandeps, **_):
         if cluster:
             # TODO: disallow metaclusters here
@@ -45,7 +45,6 @@ class CommandCompileCluster(BrokerCommand):
         dom = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                              logger=logger)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbcluster.all_objects())
 
         with plenaries.get_key():

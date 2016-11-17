@@ -20,21 +20,20 @@ from aquilon.aqdb.model import City
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelCity(CommandDelLocation):
+    requires_plenaries = True
 
     required_parameters = ["city"]
 
-    def render(self, session, logger, city, **arguments):
+    def render(self, session, logger, plenaries, city, **arguments):
         dbcity = City.get_unique(session, city, compel=True)
 
         name = dbcity.name
         country = dbcity.country.name
         fullname = dbcity.fullname
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbcity)
 
         CommandDelLocation.render(self, session=session, name=city,

@@ -19,14 +19,14 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelServiceInstance(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, **_):
+    def render(self, session, logger, plenaries, service, instance, **_):
         dbservice = Service.get_unique(session, service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=instance, compel=True)
@@ -40,7 +40,6 @@ class CommandDelServiceInstance(BrokerCommand):
                                 "provided by servers: %s." %
                                 (dbservice.name, dbsi.name, msg))
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbsi)
 
         # Depend on cascading to remove any mappings

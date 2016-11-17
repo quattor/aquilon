@@ -20,15 +20,15 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import VirtualSwitch, Interface
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.utils import first_of
 
 
 class CommandUnbindPortGroup(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, logger, virtual_switch, networkip, tag, **_):
+    def render(self, session, logger, plenaries, virtual_switch, networkip, tag, **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         if networkip:
@@ -66,6 +66,5 @@ class CommandUnbindPortGroup(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbvswitch)
         plenaries.write()

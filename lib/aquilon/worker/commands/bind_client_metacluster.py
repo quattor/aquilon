@@ -20,14 +20,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import MetaCluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser, ChooserCache
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClientMetacluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["metacluster", "service"]
 
-    def render(self, session, logger, metacluster, service, instance,
+    def render(self, session, logger, plenaries, metacluster, service, instance,
                force=False, **_):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
@@ -37,7 +37,6 @@ class CommandBindClientMetacluster(BrokerCommand):
         else:
             dbinstance = None
 
-        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
         choosers = []
         failed = []

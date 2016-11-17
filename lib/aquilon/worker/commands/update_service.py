@@ -18,15 +18,15 @@
 
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.exceptions_ import AuthorizationException
 
 
 class CommandUpdateService(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, dbuser, service, max_clients, default,
+    def render(self, session, logger, plenaries, dbuser, service, max_clients, default,
                need_client_list, allow_alias_bindings, comments, **_):
         dbservice = Service.get_unique(session, name=service, compel=True)
 
@@ -49,7 +49,6 @@ class CommandUpdateService(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbservice)
         plenaries.add(dbservice.instances)
         plenaries.write()

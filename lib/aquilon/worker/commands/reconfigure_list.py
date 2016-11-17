@@ -69,6 +69,7 @@ def select_os(session, cache, dbhost, osname, osversion, target_archetype):
 
 
 class CommandReconfigureList(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["list"]
 
@@ -84,7 +85,7 @@ class CommandReconfigureList(BrokerCommand):
         preload_machine_data(session, dbhosts)
         return dbhosts
 
-    def render(self, session, logger, archetype, personality, personality_stage, keepbindings,
+    def render(self, session, logger, plenaries, archetype, personality, personality_stage, keepbindings,
                buildstatus, osname, osversion, grn, eon_id, cleargrn, comments,
                **arguments):
         dbhosts = self.get_hostlist(session, **arguments)
@@ -176,7 +177,6 @@ class CommandReconfigureList(BrokerCommand):
         session.flush()
 
         logger.client_info("Verifying service bindings.")
-        plenaries = PlenaryCollection(logger=logger)
         chooser_cache = ChooserCache()
         choosers = []
         for dbhost in dbhosts:

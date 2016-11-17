@@ -27,16 +27,16 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandAddNetworkDevice(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["network_device", "model", "type",
                            "ip", "interface", "iftype"]
 
-    def render(self, session, logger, network_device, label, model, type, ip,
+    def render(self, session, logger, plenaries, network_device, label, model, type, ip,
                interface, iftype, mac, vendor, serial, comments,
                archetype, domain, sandbox, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
@@ -93,7 +93,6 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         # Add the legacy template separately
         plenaries.add(dbnetdev, cls=PlenarySwitchData)
         plenaries.add(dbnetdev)

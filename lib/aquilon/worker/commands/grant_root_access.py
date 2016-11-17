@@ -18,11 +18,11 @@
 
 from aquilon.aqdb.model import Personality, User, NetGroupWhiteList
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.dbwrappers.change_management import validate_justification
 
 
 class CommandGrantRootAccess(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ['personality', 'justification']
 
@@ -33,7 +33,7 @@ class CommandGrantRootAccess(BrokerCommand):
         if dbnetgroup and dbnetgroup not in obj.root_netgroups:
             obj.root_netgroups.append(dbnetgroup)
 
-    def render(self, session, logger, username, netgroup, personality,
+    def render(self, session, logger, plenaries, username, netgroup, personality,
                archetype, justification, user, reason, **_):
         validate_justification(user, justification, reason)
         dbobj = Personality.get_unique(session, name=personality,
@@ -50,7 +50,6 @@ class CommandGrantRootAccess(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbobj.stages.values())
         plenaries.write()
 

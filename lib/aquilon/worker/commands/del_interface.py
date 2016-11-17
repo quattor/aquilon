@@ -20,14 +20,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelInterface(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = []
 
-    def render(self, session, logger, interface, switch, mac, user,
+    def render(self, session, logger, plenaries, interface, switch, mac, user,
                **arguments):
         if switch:
             self.deprecated_option("switch", "Please use --network_device "
@@ -88,7 +88,6 @@ class CommandDelInterface(BrokerCommand):
         session.flush()
 
         if dbhw_ent.hardware_type != 'chassis':
-            plenaries = PlenaryCollection(logger=logger)
             plenaries.add(dbhw_ent)
             if dbhw_ent.host:
                 plenaries.add(dbhw_ent.host)

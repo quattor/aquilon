@@ -28,17 +28,16 @@ from aquilon.worker.dbwrappers.change_management import (validate_justification,
                                                          validate_prod_personality)
 from aquilon.worker.dbwrappers.feature import (add_link, check_feature_template,
                                                get_affected_plenaries)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindFeature(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ['feature']
 
-    def render(self, session, logger, feature, archetype, personality,
+    def render(self, session, logger, plenaries, feature, archetype, personality,
                personality_stage, model, vendor, interface, justification,
                reason, user, **_):
-        plenaries = PlenaryCollection(logger=logger)
 
         params = {}
 

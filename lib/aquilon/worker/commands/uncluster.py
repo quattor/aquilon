@@ -20,14 +20,14 @@ from aquilon.aqdb.model import (Cluster, Personality, PriorityList,
                                 MemberPriority, HostClusterMember)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUncluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster, personality,
+    def render(self, session, logger, plenaries, hostname, cluster, personality,
                personality_stage, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
@@ -52,7 +52,6 @@ class CommandUncluster(BrokerCommand):
                                 "when leaving the cluster." %
                                 dbhost.personality.name)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbhost)
         plenaries.add(dbcluster)
 

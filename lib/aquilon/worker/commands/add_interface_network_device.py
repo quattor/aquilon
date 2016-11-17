@@ -22,16 +22,16 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddInterfaceNetworkDevice(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["interface", "network_device", "iftype"]
     invalid_parameters = ["automac", "pg", "autopg", "model", "vendor",
                           "bus_address"]
 
-    def render(self, session, logger, interface, network_device,
+    def render(self, session, logger, plenaries, interface, network_device,
                mac, iftype, comments, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
@@ -49,7 +49,6 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbnetdev)
         plenaries.add(dbnetdev.host)
 

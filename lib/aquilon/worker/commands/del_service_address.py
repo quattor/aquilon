@@ -22,14 +22,14 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelServiceAddress(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["name"]
 
-    def render(self, session, logger, name, hostname, cluster, metacluster,
+    def render(self, session, logger, plenaries, name, hostname, cluster, metacluster,
                resourcegroup, keep_dns, **_):
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
@@ -48,7 +48,6 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dsdb_runner = DSDBRunner(logger=logger)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(holder.holder_object)
         plenaries.add(dbsrv)
 

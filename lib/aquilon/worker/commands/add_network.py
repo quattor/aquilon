@@ -23,14 +23,14 @@ from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddNetwork(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, logger, dbuser,
+    def render(self, session, logger, plenaries, dbuser,
                network, ip, network_environment, type, side, comments,
                netmask, prefixlen, mask, network_compartment, **arguments):
 
@@ -98,7 +98,6 @@ class CommandAddNetwork(BrokerCommand):
         session.add(net)
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(net)
         plenaries.write()
 

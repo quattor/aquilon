@@ -23,14 +23,14 @@ from aquilon.aqdb.model import (Network, NetworkEnvironment, AddressAssignment,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.network import fix_foreign_links
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandSplitNetwork(BrokerCommand):
+    requires_plenaries = True
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, logger, dbuser,
+    def render(self, session, logger, plenaries, dbuser,
                ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
@@ -46,7 +46,6 @@ class CommandSplitNetwork(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip,
                                        network_environment=dbnet_env)
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbnetwork)
 
         if prefixlen <= dbnetwork.cidr:

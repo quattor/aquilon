@@ -19,14 +19,15 @@
 from aquilon.aqdb.model import HostLifecycle
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 
 
 class CommandChangeStatus(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, buildstatus, **_):
+    def render(self, session, logger, plenaries, hostname, buildstatus, **_):
         dbhost = hostname_to_host(session, hostname)
         dbstatus = HostLifecycle.get_instance(session, buildstatus)
         changed = dbhost.status.transition(dbhost, dbstatus)
@@ -37,7 +38,6 @@ class CommandChangeStatus(BrokerCommand):
         session.flush()
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.add(dbhost, allow_incomplete=False)
 
         # Force a host lock as pan might overwrite the profile...
