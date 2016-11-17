@@ -19,14 +19,16 @@
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.user import UserSync
 from aquilon.worker.locks import SyncKey
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandRefreshUser(BrokerCommand):
 
     def render(self, session, logger, incremental, ignore_delete_limit, **_):
+        plenaries = PlenaryCollection(logger=logger)
         with SyncKey(data="user", logger=logger):
-            sync = UserSync(self.config, session, logger, incremental,
-                            ignore_delete_limit)
+            sync = UserSync(self.config, session, logger, plenaries,
+                            incremental, ignore_delete_limit)
             sync.refresh_user()
 
         return
