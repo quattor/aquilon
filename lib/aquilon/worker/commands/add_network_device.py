@@ -94,7 +94,8 @@ class CommandAddNetworkDevice(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
+        # Add the legacy template separately
+        plenaries.add(dbnetdev, cls=PlenarySwitchData)
         plenaries.add(dbnetdev)
         plenaries.add(dbhost)
 

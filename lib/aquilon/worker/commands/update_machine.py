@@ -192,7 +192,7 @@ class CommandUpdateMachine(BrokerCommand):
         if dbmachine.host:
             # Using PlenaryHostData directly, to avoid warnings if the host has
             # not been configured yet
-            plenaries.append(PlenaryHostData.get_plenary(dbmachine.host))
+            plenaries.add(dbmachine.host, cls=PlenaryHostData)
 
         if clearchassis:
             del dbmachine.chassis_slot[:]
@@ -319,7 +319,7 @@ class CommandUpdateMachine(BrokerCommand):
             if dbmachine.host:
                 for srv in dbmachine.host.services_provided:
                     si = srv.service_instance
-                    plenaries.append(PlenaryServiceInstanceToplevel.get_plenary(si))
+                    plenaries.add(si, cls=PlenaryServiceInstanceToplevel)
             update_primary_ip(session, logger, dbmachine, ip)
 
         if dbmachine.location != old_location and dbmachine.host:

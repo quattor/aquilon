@@ -134,7 +134,7 @@ def remove_host(logger, dbhw, plenaries):
     check_no_provided_service(dbhost)
 
     for si in dbhost.services_used:
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
+        plenaries.add(si, cls=PlenaryServiceInstanceServer)
         logger.info("Before deleting {0:l}, removing binding to {1:l}"
                     .format(dbhost, si))
 

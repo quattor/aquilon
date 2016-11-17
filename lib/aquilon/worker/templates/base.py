@@ -574,19 +574,17 @@ class PlenaryCollection(object):
         plenary.set_logger(self.logger)
         self.plenaries.append(plenary)
 
-    def extend(self, iterable):
-        for plenary in iterable:
-            plenary.set_logger(self.logger)
-            self.plenaries.append(plenary)
+    def add(self, dbobj_or_iterable, allow_incomplete=True, cls=None):
+        if not cls:
+            cls = Plenary
 
-    def add(self, dbobj_or_iterable, allow_incomplete=True):
         if isinstance(dbobj_or_iterable, Base):
-            self.append(Plenary.get_plenary(dbobj_or_iterable,
-                                            allow_incomplete=allow_incomplete))
+            self.append(cls.get_plenary(dbobj_or_iterable,
+                                        allow_incomplete=allow_incomplete))
         else:
             for dbobj in dbobj_or_iterable:
-                self.append(Plenary.get_plenary(dbobj,
-                                                allow_incomplete=allow_incomplete))
+                self.append(cls.get_plenary(dbobj,
+                                            allow_incomplete=allow_incomplete))
 
     def flatten(self):
         """

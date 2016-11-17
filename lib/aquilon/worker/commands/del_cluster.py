@@ -64,7 +64,7 @@ def del_cluster(session, logger, dbcluster, config):
 
     # Clean up service bindings
     for si in dbcluster.services_used:
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
+        plenaries.add(si, cls=PlenaryServiceInstanceServer)
 
     del dbcluster.services_used[:]
 

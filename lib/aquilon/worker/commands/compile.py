@@ -52,8 +52,7 @@ class CommandCompile(BrokerCommand):
 
             # Use PlenaryPersonalityBase to avoid having to load parameters and
             # other details
-            plenaries.extend(PlenaryPersonalityBase.get_plenary(dbstage)
-                             for dbstage in q)
+            plenaries.add(q, cls=PlenaryPersonalityBase)
 
         q = session.query(ServiceInstance)
         q = q.filter(ServiceInstance.clients.any(

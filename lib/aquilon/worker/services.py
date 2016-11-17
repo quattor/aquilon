@@ -23,7 +23,7 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceMap, MetaCluster
-from aquilon.worker.templates import Plenary, PlenaryServiceInstanceServer
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 
 
 class ChooserCache(object):
@@ -517,8 +517,7 @@ class Chooser(object):
                 if srv.cluster:
                     changed_servers.update(srv.cluster.all_objects())
 
-            plenary = PlenaryServiceInstanceServer.get_plenary(instance)
-            self.plenaries.append(plenary)
+            self.plenaries.add(instance, cls=PlenaryServiceInstanceServer)
 
         for dbobj in changed_servers:
             # Skip servers that do not have a profile

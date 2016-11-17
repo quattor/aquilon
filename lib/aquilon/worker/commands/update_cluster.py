@@ -112,7 +112,7 @@ class CommandUpdateCluster(BrokerCommand):
                                         "unbind that first.".format(dbcluster))
                 # FIXME: Verify that any hosts are on the same network
                 dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-                plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
+                plenaries.add(dbnetdev, cls=PlenarySwitchData)
             else:
                 dbnetdev = None
             dbcluster.network_device = dbnetdev
