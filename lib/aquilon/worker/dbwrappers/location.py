@@ -29,12 +29,7 @@ def get_location(session, query_options=None, compel=False, **kwargs):
     cls = None
     name = None
     for key, mapper in Location.__mapper__.polymorphic_map.items():
-        if key == "company":
-            # temporary until locations in DB restructured
-            value = kwargs.get("organization", None)
-        else:
-            value = kwargs.get(key, None)
-
+        value = kwargs.get(key, None)
         if value is None:
             continue
 

@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq add organization`."""
 
-from aquilon.aqdb.model import Company
+from aquilon.aqdb.model import Organization
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -25,11 +25,12 @@ class CommandAddOrganization(BrokerCommand):
     required_parameters = ["organization"]
 
     def render(self, session, organization, fullname, comments, **_):
-        Company.get_unique(session, organization, preclude=True)
+        Organization.get_unique(session, organization, preclude=True)
 
         if not fullname:
             fullname = organization
 
-        dborg = Company(name=organization, fullname=fullname, comments=comments)
+        dborg = Organization(name=organization, fullname=fullname,
+                             comments=comments)
         session.add(dborg)
         session.flush()

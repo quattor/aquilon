@@ -26,5 +26,5 @@ class CommandShowOrganizationAll(CommandShowLocationType):
 
     def render(self, session, **arguments):
         return CommandShowLocationType.render(self, session=session,
-                                              type='company', name=None,
+                                              type='organization', name=None,
                                               **arguments)

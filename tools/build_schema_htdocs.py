@@ -24,6 +24,7 @@
 
 ###############################################################################
 
+import argparse
 import os
 import sys
 
@@ -34,8 +35,6 @@ sys.path.insert(0, _LIBDIR)
 import aquilon.aqdb.depends
 
 ###############################################################################
-
-import argparse
 
 parser = argparse.ArgumentParser(description='generate schema graphs')
 parser.add_argument('--outputdir', '-o', dest='dir',
@@ -92,7 +91,7 @@ from sqlalchemy import orm
 model_group = {
     'locations': {
         'title': 'Location Information',
-        'classes': [Location, LocationLink, Company, Hub, Continent, Country,
+        'classes': [Location, LocationLink, Organization, Hub, Continent, Country,
                     City, Campus, Building, Room, Desk, Bunker, Rack],
     },
     'hardware': {

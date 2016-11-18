@@ -789,10 +789,10 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Building: ut
               Campus: ny
               City: ny
-              Organization: ms
               Continent: na
               Country: us
               Hub: ny
+              Organization: ms
               Rack: ut3
                 Row: a
                 Column: 3

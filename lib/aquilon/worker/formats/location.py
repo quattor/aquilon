@@ -47,7 +47,11 @@ class LocationFormatter(ObjectFormatter):
 
     def fill_proto(self, loc, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = loc.name
-        skeleton.location_type = loc.location_type
+        # Backwards compatibility
+        if loc.location_type == "organization":
+            skeleton.location_type = "company"
+        else:
+            skeleton.location_type = loc.location_type
         skeleton.fullname = loc.fullname
         if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
             skeleton.row = loc.rack_row
@@ -59,7 +63,11 @@ class LocationFormatter(ObjectFormatter):
             for p in loc.parents:
                 parent = skeleton.parents.add()
                 parent.name = p.name
-                parent.location_type = p.location_type
+                # Backwards compatibility
+                if p.location_type == "organization":
+                    parent.location_type = "company"
+                else:
+                    parent.location_type = p.location_type
 
     def csv_fields(self, location):
         details = [location.location_type, location.name]

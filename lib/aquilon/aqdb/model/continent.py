@@ -18,7 +18,7 @@
 
 from sqlalchemy import Column, ForeignKey
 
-from aquilon.aqdb.model import Location, Hub, Company
+from aquilon.aqdb.model import Location, Hub, Organization
 
 _TN = 'continent'
 
@@ -28,7 +28,7 @@ class Continent(Location):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    valid_parents = [Hub, Company]
+    valid_parents = [Hub, Organization]
 
     id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 

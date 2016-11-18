@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show organization --organization`."""
 
-from aquilon.aqdb.model import Company
+from aquilon.aqdb.model import Organization
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -25,4 +25,4 @@ class CommandShowOrganizationOrganization(BrokerCommand):
     required_parameters = ["organization"]
 
     def render(self, session, organization, **_):
-        return Company.get_unique(session, organization, compel=True)
+        return Organization.get_unique(session, organization, compel=True)

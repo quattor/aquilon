@@ -14,19 +14,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Company is a subclass of Location """
+""" Organization is a subclass of Location """
 
 from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Location
 
-_TN = 'company'
+_TN = 'organization'
 
 
-class Company(Location):
-    """ Company is a subtype of location """
+class Organization(Location):
+    """ Organization is a subtype of location """
     __tablename__ = _TN
-    _class_label = 'Organization'
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     valid_parents = []
