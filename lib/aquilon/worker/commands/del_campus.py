@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del campus`."""
 
-
+from aquilon.aqdb.model import Campus
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandDelCampus(CommandDelLocation):
@@ -28,7 +27,7 @@ class CommandDelCampus(CommandDelLocation):
     required_parameters = ["campus"]
 
     def render(self, session, logger, campus, **arguments):
-        dbcampus = get_location(session, campus=campus)
+        dbcampus = Campus.get_unique(session, campus, compel=True)
         name = dbcampus.name
 
         result = CommandDelLocation.render(self, session=session, name=name,

@@ -16,9 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq del city`."""
 
+from aquilon.aqdb.model import City
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.commands.del_location import CommandDelLocation
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -28,7 +28,7 @@ class CommandDelCity(CommandDelLocation):
     required_parameters = ["city"]
 
     def render(self, session, logger, city, **arguments):
-        dbcity = get_location(session, city=city)
+        dbcity = City.get_unique(session, city, compel=True)
 
         name = dbcity.name
         country = dbcity.country.name

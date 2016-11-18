@@ -17,7 +17,7 @@
 """Contains the logic for `aq update rack`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Rack, Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -29,7 +29,7 @@ class CommandUpdateRack(BrokerCommand):
 
     def render(self, session, logger, rack, row, column, room, building, bunker,
                fullname, default_dns_domain, comments, **_):
-        dbrack = get_location(session, rack=rack)
+        dbrack = Rack.get_unique(session, rack, compel=True)
 
         if row is not None:
             dbrack.rack_row = row

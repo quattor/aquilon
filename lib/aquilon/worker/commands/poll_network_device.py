@@ -27,9 +27,8 @@ from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
 from aquilon.utils import force_ipv4, validate_json
 from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import (NetworkDevice, ObservedMac, PortGroup, Network,
-                                NetworkEnvironment, VlanInfo)
+                                NetworkEnvironment, VlanInfo, Rack)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.network_device import (determine_helper_hostname,
@@ -42,7 +41,7 @@ class CommandPollNetworkDevice(BrokerCommand):
     required_parameters = ["rack"]
 
     def render(self, session, logger, rack, type, clear, vlan, **_):
-        dblocation = get_location(session, rack=rack)
+        dblocation = Rack.get_unique(session, rack, compel=True)
         NetworkDevice.check_type(type)
         q = session.query(NetworkDevice)
         q = q.filter_by(location=dblocation)

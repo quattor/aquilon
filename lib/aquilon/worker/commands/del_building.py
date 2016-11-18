@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del building`."""
 
-
+from aquilon.aqdb.model import Building
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandDelBuilding(CommandDelLocation):
@@ -28,8 +27,7 @@ class CommandDelBuilding(CommandDelLocation):
     required_parameters = ["building"]
 
     def render(self, session, logger, building, **arguments):
-
-        dbbuilding = get_location(session, building=building)
+        dbbuilding = Building.get_unique(session, building, compel=True)
 
         city = dbbuilding.city
         address = dbbuilding.address
