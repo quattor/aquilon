@@ -369,6 +369,10 @@
 			cluster members. The two may yield different results if e.g. the cluster spans multiple
 			racks.
 		    </para>
+		    <para>
+			The member location options also accept a comma-separated list of values. In that case, only
+			clusters which have members in all the listed locations will be returned.
+		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
