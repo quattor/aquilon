@@ -30,10 +30,13 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapafs(self):
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--justification", "tcm=12345678",
                         "--service", "afs", "--instance", "q.ny.ms.com"])
         self.noouttest(["unmap", "service", "--city", "ex",
+                        "--justification", "tcm=12345678",
                         "--service", "afs", "--instance", "q.ny.ms.com"])
         self.noouttest(["unmap", "service", "--building", "np",
+                        "--justification", "tcm=12345678",
                         "--service", "afs", "--instance", "q.ny.ms.com"])
 
     def testverifyunmapafs(self):
@@ -47,7 +50,8 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapafsbynet(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
         self.noouttest(["unmap", "service", "--networkip", ip,
-                        "--service", "afs", "--instance", "afs-by-net"])
+                        "--service", "afs", "--instance", "afs-by-net",
+                        "--justification", "tcm=12345678"])
 
     def testverifyunmapafsbynet(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
@@ -78,7 +82,8 @@ class TestUnmapService(TestBrokerCommand):
                         "--host_environment", "dev"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "scope_test", "--instance", "scope-building"])
+                        "--service", "scope_test", "--instance", "scope-building",
+                        "--justification", "tcm=12345678"])
 
     def testverifyunmapafsbynetpers(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
@@ -96,6 +101,7 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapdns(self):
         self.noouttest(["unmap", "service", "--hub", "ny",
+                        "--justification", "tcm=12345678",
                         "--service", "dns", "--instance", "unittest"])
 
     def testverifyunmapdns(self):
@@ -105,8 +111,10 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapaqd(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
+                        "--justification", "tcm=12345678",
                         "--service", "aqd", "--instance", "ny-prod"])
         self.noouttest(["unmap", "service", "--city", "ex",
+                        "--justification", "tcm=12345678",
                         "--service", "aqd", "--instance", "ny-prod"])
 
     def testverifyunmapaqd(self):
@@ -120,8 +128,10 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmaplemon(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
+                        "--justification", "tcm=12345678",
                         "--service", "lemon", "--instance", "ny-prod"])
         self.noouttest(["unmap", "service", "--city", "ex",
+                        "--justification", "tcm=12345678",
                         "--service", "lemon", "--instance", "ny-prod"])
 
     def testverifyunmaplemon(self):
@@ -135,10 +145,13 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapbootserver(self):
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--justification", "tcm=12345678",
                         "--service", "bootserver", "--instance", "one-nyp"])
         self.noouttest(["unmap", "service", "--building", "cards",
+                        "--justification", "tcm=12345678",
                         "--service", "bootserver", "--instance", "one-nyp"])
         self.noouttest(["unmap", "service", "--building", "np",
+                        "--justification", "tcm=12345678",
                         "--service", "bootserver", "--instance", "one-nyp"])
 
     def testverifyunmapbootserver(self):
@@ -155,6 +168,7 @@ class TestUnmapService(TestBrokerCommand):
     # the serviceinstance
     def testunmapntp(self):
         self.noouttest(["unmap", "service", "--city", "ex",
+                        "--justification", "tcm=12345678",
                         "--service", "ntp", "--instance", "pa.ny.na"])
 
     def testverifyunmapntp(self):
@@ -164,6 +178,7 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmapsyslogng(self):
         self.noouttest(["unmap", "service", "--campus", "ny",
+                        "--justification", "tcm=12345678",
                         "--service", "syslogng", "--instance", "ny-prod"])
 
     def testverifyunmapsyslogng(self):
@@ -173,10 +188,13 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmaputsi1(self):
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi1"])
         self.noouttest(["unmap", "service", "--building", "np",
+                        "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi1"])
         self.noouttest(["unmap", "service", "--building", "cards",
+                        "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi1"])
 
     def testverifyunmaputsi1(self):
@@ -189,8 +207,10 @@ class TestUnmapService(TestBrokerCommand):
 
     def testunmaputsi2(self):
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi2"])
         self.noouttest(["unmap", "service", "--building", "np",
+                        "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi2"])
 
     def testverifyunmaputsi2(self):
@@ -207,6 +227,7 @@ class TestUnmapService(TestBrokerCommand):
                     continue
                 instance = "ut.%s" % n
                 self.noouttest(["unmap", "service", "--building", "ut",
+                                "--justification", "tcm=12345678",
                                 "--service", service, "--instance", instance])
 
     def testunmapwithpersona(self):
@@ -274,6 +295,7 @@ class TestUnmapService(TestBrokerCommand):
     def testunmappollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--justification", "tcm=12345678",
                         "--service", service, "--instance", "unittest"])
 
 

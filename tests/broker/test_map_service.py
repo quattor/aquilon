@@ -97,6 +97,7 @@ class TestMapService(TestBrokerCommand):
                     for loc_name in loc_names:
                         self.noouttest(["map_service", "--service", service,
                                         "--instance", instance,
+                                        "--justification", "tcm=12345678",
                                         "--" + loc_type, loc_name])
 
     def test_105_verify_defaults(self):
@@ -152,15 +153,15 @@ class TestMapService(TestBrokerCommand):
         self.matchclean(out, "Building np", command)
 
     def test_110_map_utsi1(self):
-        self.noouttest(["map", "service", "--building", "ut",
+        self.noouttest(["map", "service", "--building", "ut", "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi1"])
-        self.noouttest(["map", "service", "--building", "cards",
+        self.noouttest(["map", "service", "--building", "cards", "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi1"])
-        self.noouttest(["map", "service", "--building", "np",
+        self.noouttest(["map", "service", "--building", "np", "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi1"])
 
     def test_111_map_utsi2(self):
-        self.noouttest(["map", "service", "--building", "ut",
+        self.noouttest(["map", "service", "--building", "ut", "--justification", "tcm=12345678",
                         "--service", "utsvc", "--instance", "utsi2"])
         # Do NOT bind utsi2 to "np" to keep test_compile results consistent
         # self.noouttest(["map", "service", "--building", "np",
@@ -194,7 +195,7 @@ class TestMapService(TestBrokerCommand):
                 if service == 'chooser3' and n == 'c':
                     continue
                 instance = "ut.%s" % n
-                self.noouttest(["map", "service", "--building", "ut",
+                self.noouttest(["map", "service", "--building", "ut", "--justification", "tcm=12345678",
                                 "--service", service, "--instance", instance])
 
     def test_130_personality_map(self):

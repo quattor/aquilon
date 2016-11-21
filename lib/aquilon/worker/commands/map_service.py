@@ -64,6 +64,8 @@ class CommandMapService(BrokerCommand):
             dbenv = HostEnvironment.get_instance(session, host_environment)
             if isinstance(dbenv, Production):
                 enforce_justification(user, justification, reason)
+        else:
+            enforce_justification(user, justification, reason)
 
         q = session.query(ServiceMap)
         q = q.filter_by(service_instance=dbinstance,

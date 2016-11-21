@@ -52,7 +52,8 @@ class TestPollNetworkDevice(TestBrokerCommand):
     def testmappollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["map", "service", "--service", service,
-                        "--instance", "unittest", "--building", "ut"])
+                        "--instance", "unittest", "--building", "ut",
+                        "--justification", "tcm=12345678"])
 
     def testpollnp06bals03(self):
         command = ["poll", "network_device", "--network_device", "np06bals03.ms.com"]
