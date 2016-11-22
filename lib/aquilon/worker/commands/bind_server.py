@@ -135,6 +135,10 @@ class CommandBindServer(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbinstance))
 
+        if alias and not dbinstance.service.allow_alias_bindings:
+            raise ArgumentError("Service %s is not configured to allow alias "
+                                "bindings." % dbinstance.service)
+
         params = lookup_target(session, logger, plenaries, hostname, ip,
                                cluster, resourcegroup, service_address, alias)
 

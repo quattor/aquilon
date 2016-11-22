@@ -25,9 +25,12 @@ class CommandUpdateService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, max_clients, default,
-               need_client_list, comments, **_):
+    def render(self, session, dbuser, logger, service, max_clients, default,
+               need_client_list, comments, allow_alias_bindings, **_):
         dbservice = Service.get_unique(session, name=service, compel=True)
+
+        if dbuser.role.name != 'aqd_admin' and allow_alias_bindings is not None:
+            raise AuthorizationException("Only AQD admin can set allowing alias bindings")
 
         if default:
             dbservice.max_clients = None
@@ -39,6 +42,9 @@ class CommandUpdateService(BrokerCommand):
 
         if comments is not None:
             dbservice.comments = comments
+
+        if allow_alias_bindings is not None:
+            dbservice.allow_alias_bindings = allow_alias_bindings
 
         session.flush()
 
