@@ -145,6 +145,7 @@ from .test_compile import TestCompile
 from .test_profile import TestProfile
 from .test_bind_server import TestBindServer
 from .test_add_filesystem import TestAddFilesystem
+from .test_update_filesystem import TestUpdateFilesystem
 from .test_del_filesystem import TestDelFilesystem
 from .test_add_application import TestAddApplication
 from .test_add_hostlink import TestAddHostlink
@@ -358,6 +359,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMapService, TestBindClient, TestPrebindServer,
                      TestFlush,
                      TestAddResourceGroup, TestAddShare, TestAddFilesystem,
+                     TestUpdateFilesystem,
                      TestMakeAquilon, TestMakeCluster, TestCluster,
                      TestAddAllowedPersonality,
                      TestDelAllowedPersonality,
