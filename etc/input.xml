@@ -1916,6 +1916,7 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="instance" type="string">Instance</option>
 	    <option name="need_client_list" type="boolean">Need client list in templates</option>
+	    <option name="allow_alias_bindings" type="boolean">Allow servers to be bound by alias</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -2007,6 +2008,7 @@
 	    <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
 	    <option name="default" type="flag" conflicts="max_clients">Restore default setting</option>
 	    <option name="need_client_list" type="boolean" conflicts="instance">Need client list in templates</option>
+	    <option name="allow_alias_bindings" type="boolean">Allow servers to be bound by alias</option>
 	    <option name="instance" type="string">Instance name</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>

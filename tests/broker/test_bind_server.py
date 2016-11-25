@@ -348,6 +348,13 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, "Provides Service: utsvc Instance: utsi2",
                          command)
 
+    def test_400_alias_not_allowed(self):
+        command = ['bind_server', '--service', 'utsvc2', '--instance', 'utsi1',
+                   '--alias', 'srv-alias.one-nyp.ms.com']
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Service utsvc2 is not configured to allow "
+                              "alias bindings.", command)
+
     def test_800_cleanup(self):
         self.statustest(["unbind_server",
                          "--hostname", "server1.aqd-unittest.ms.com",
