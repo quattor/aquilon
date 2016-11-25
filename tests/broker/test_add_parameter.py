@@ -275,8 +275,9 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
     def test_200_add_noncompileable(self):
         command = ["add", "parameter", "--path", "foo", "--value", "bar",
                    "--archetype", "windows", "--personality", "generic"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Archetype windows is not compileable.", command)
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "parameters are not supported.", command)
 
     def test_200_missing_stage(self):
         command = ["add_parameter", "--personality", "nostage",

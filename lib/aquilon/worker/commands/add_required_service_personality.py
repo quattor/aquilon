@@ -50,6 +50,8 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                user, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
+        dbpersonality.archetype.require_compileable("required services are not supported")
+
         dbstage = dbpersonality.active_stage(personality_stage)
         dbservice = Service.get_unique(session, service, compel=True)
         if environment_override:

@@ -17,8 +17,7 @@
 
 from sqlalchemy.sql import or_
 
-from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
-                                 UnimplementedError)
+from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import (HostFeature, HardwareFeature, InterfaceFeature,
                                 Archetype, Personality, PersonalityStage, Model,
                                 Domain, CompileableMixin)
@@ -62,9 +61,7 @@ class CommandBindFeature(BrokerCommand):
             raise ArgumentError("Please specify either an archetype or "
                                 "a personality when binding a feature.")
 
-        if not dbarchetype.is_compileable:
-            raise UnimplementedError("Binding features to non-compilable "
-                                     "archetypes is not implemented.")
+        dbarchetype.require_compileable("feature bindings are not supported")
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.
