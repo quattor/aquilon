@@ -26,7 +26,7 @@ class RebootInterventionFormatter(ResourceFormatter):
         details = []
         details.append(indent + "  Start: {0.start_date}".format(rs))
         details.append(indent + "  Expiry: {0.expiry_date}".format(rs))
-        details.append(indent + "  Justification: {0.justification}".format(rs))
+        details.append(indent + "  Reason: {0.reason}".format(rs))
         return details
 
     def fill_proto(self, rs, skeleton, embedded=True, indirect_attrs=True):

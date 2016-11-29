@@ -5488,10 +5488,10 @@
 		<option name="cluster" type="string">Cluster</option>
 	    </optgroup>
 	    <option name="expiry" type="string">when to expire this intervention</option>
-	    <option name="justification" type="string">the reason for the intervention</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<optgroup>
-	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
 	</optgroup>
@@ -5804,10 +5804,10 @@
 	    </optgroup>
 	    <option name="expiry" type="string">when to expire this intervention</option>
 	    <option name="intervention" type="string">the name of the intervention</option>
-	    <option name="justification" type="string">the reason for the intervention</option>
+	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
 	<optgroup>
-	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
+	    <option name="justification" type="string">the reason for the intervention</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="allowusers" type="string">Additional users allowed access</option>
 	    <option name="allowgroups" type="string">Additional groups allowed access</option>

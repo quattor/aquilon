@@ -141,7 +141,7 @@ class PlenaryResource(StructurePlenary):
                            StructureTemplate(res_path))
 
     def body_reboot_iv(self, lines):
-        pan_assign(lines, "justification", self.dbobj.justification)
+        pan_assign(lines, "justification", self.dbobj.reason)
         self.body_intervention(lines)
 
     def body_service_address(self, lines):

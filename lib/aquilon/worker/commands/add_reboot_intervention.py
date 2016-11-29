@@ -22,7 +22,7 @@ from aquilon.worker.commands.add_intervention import CommandAddIntervention
 
 class CommandAddRebootIntervention(CommandAddIntervention):
 
-    required_parameters = ["expiry", "justification"]
+    required_parameters = ["expiry", "reason"]
     resource_class = RebootIntervention
 
     def add_resource(self, **kwargs):

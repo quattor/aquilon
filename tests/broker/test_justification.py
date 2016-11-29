@@ -260,6 +260,18 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--justification", "tcm=12345678"]
         self.statustest(command)
 
+    def test_350_map_service(self):
+        command = ["map", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR, command)
+
+    def test_360_unmap_service(self):
+        command = ["unmap", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR, command)
+
     def test_400_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
 

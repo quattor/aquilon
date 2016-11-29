@@ -51,8 +51,10 @@ class TestMake(TestBrokerCommand):
         ip = self.net["netsvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
+                        "--justification", "tcm=12345678",
                         "--service", "afs", "--instance", "afs-by-net"])
         self.noouttest(["map", "service", "--networkip", ip,
+                        "--justification", "tcm=12345678",
                         "--service", "afs", "--instance", "afs-by-net2"])
 
     def test_112_scope_verify_maps(self):
@@ -99,6 +101,7 @@ class TestMake(TestBrokerCommand):
         """Maps a location based service map just to be overridden by a location
         based personality service map"""
         self.noouttest(["map", "service", "--building", "ut",
+                        "--justification", "tcm=12345678",
                         "--service", "scope_test", "--instance", "scope-building"])
 
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
@@ -118,10 +121,12 @@ class TestMake(TestBrokerCommand):
         location based personality service map"""
         self.noouttest(["map_service", "--building", "ut",
                         "--host_environment", "dev",
+                        "--justification", "tcm=12345678",
                         "--service", "scope_test",
                         "--instance", "target-dev"])
         self.noouttest(["map_service", "--building", "ut",
                         "--host_environment", "qa",
+                        "--justification", "tcm=12345678",
                         "--service", "scope_test",
                         "--instance", "target-qa"])
 

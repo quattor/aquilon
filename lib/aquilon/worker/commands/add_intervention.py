@@ -28,13 +28,13 @@ from aquilon.worker.commands.add_resource import CommandAddResource
 
 class CommandAddIntervention(CommandAddResource):
 
-    required_parameters = ["expiry", "intervention", "justification"]
+    required_parameters = ["expiry", "intervention", "reason"]
     resource_class = Intervention
     resource_name = "intervention"
 
     def add_resource(self, session, logger, intervention, expiry, start_time,
                      allowusers, allowgroups, disabled_actions, comments,
-                     justification, **_):
+                     reason, **_):
         try:
             expire_when = parse(expiry)
         except (ValueError, TypeError) as err:
@@ -61,5 +61,5 @@ class CommandAddIntervention(CommandAddResource):
                                    start_date=start_when, users=allowusers,
                                    groups=allowgroups,
                                    disabled=disabled_actions, comments=comments,
-                                   justification=justification)
+                                   reason=reason)
         return dbiv
