@@ -77,11 +77,6 @@ class TestDemolishClusters(MachineTestMixin, TestBrokerCommand):
     def test_141_del_building(self):
         """ Remove buildings that were added for the use case """
         for building in config["building"]:
-            for service in config["map"]:
-                self.noouttest(["unmap_service", "--service", service,
-                                "--instance", config["map"][service],
-                                "--building", building])
-
             self.dsdb_expect_del_campus_building("ny", building)
             self.dsdb_expect("delete_building_aq -building %s" % building)
             self.runcommand(["del_building", "--building", building])
