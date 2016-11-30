@@ -165,7 +165,8 @@ class TestBuildClusters(MachineTestMixin, TestBrokerCommand):
             for service in config["map"]:
                 self.noouttest(["map_service", "--service", service,
                                 "--instance", config["map"][service],
-                                "--building", building])
+                                "--building", building,
+                                "--justification", "tcm=12345678"])
 
     def test_110_add_rack(self):
         """ Add racks needed for the use case """
