@@ -279,6 +279,11 @@ from .test_usecase_database import TestUsecaseDatabase
 from .test_usecase_hacluster import TestUsecaseHACluster
 from .test_usecase_anycast import TestUsecaseAnycast
 from .test_usecase_networks import TestUsecaseNetworks
+from .test_build_clusters import TestBuildClusters
+from .test_demolish_clusters import TestDemolishClusters
+from .test_add_building_preference import TestAddBuildingPreference
+from .test_del_building_preference import TestDelBuildingPreference
+from .test_update_building_preference import TestUpdateBuildingPreference
 from .test_grns import TestGrns
 from .test_map_grn import TestMapGrn
 from .test_stop import TestBrokerStop
@@ -369,6 +374,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMapGrn,
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
+                     TestBuildClusters, TestAddBuildingPreference,
                      TestClusterConstraintsNoVMs,
                      TestAddVirtualHardware,
                      TestVulcanLocalDisk,
@@ -427,7 +433,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateParameterDefinition, TestUpdateParameter,
                      TestUpdateParameterFeature,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
-                     TestUpdateCluster,
+                     TestUpdateCluster, TestUpdateBuildingPreference,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
                      TestManageList,
                      TestRefreshUser, TestRootAccess,
@@ -437,6 +443,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestClientBypass,
                      TestConsistency,
                      TestUmaskConstraints,
+                     TestDelBuildingPreference, TestDemolishClusters,
                      TestUnbindServer, TestUnmapService,
                      TestDelParameterFeature,
                      TestUnbindFeature,

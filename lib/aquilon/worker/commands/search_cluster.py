@@ -27,10 +27,10 @@ from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterGroup, Archetype,
                                 NetworkDevice, HardwareEntity, ClusterLifecycle,
                                 Service, ServiceInstance, Share,
                                 ClusterResource, VirtualMachine, BundleResource,
-                                ResourceGroup, User)
+                                ResourceGroup, User, Location)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.location import get_location, get_location_list
 
 
 class CommandSearchCluster(BrokerCommand):
@@ -113,7 +113,7 @@ class CommandSearchCluster(BrokerCommand):
         # Go through the arguments and make special dicts for each
         # specific set of location arguments that are stripped of the
         # given prefix.
-        location_args = {'cluster_': {}, 'member_': {}}
+        location_args = {'cluster_': {}, 'member_': {}, 'preferred_': {}}
         for prefix, values in location_args.items():
             for k, v in arguments.items():
                 if k.startswith(prefix):
@@ -129,15 +129,27 @@ class CommandSearchCluster(BrokerCommand):
             else:
                 childids = dblocation.offspring_ids()
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
-        dblocation = get_location(session, **location_args['member_'])
-        if dblocation:
-            q = q.join(Cluster._hosts, Host, HardwareEntity, aliased=True)
+
+        dblocations = get_location_list(session, **location_args['member_'])
+        for dblocation in dblocations:
+            HWLoc = aliased(Location)
+            Parent = aliased(Location)
+
+            q1 = session.query(Cluster.id)
+            q1 = q1.join(Cluster._hosts, Host, HardwareEntity)
             if location_args['member_']['exact_location']:
-                q = q.filter_by(location=dblocation)
+                q1 = q1.filter_by(location=dblocation)
             else:
-                childids = dblocation.offspring_ids()
-                q = q.filter(HardwareEntity.location_id.in_(childids))
-            q = q.reset_joinpoint()
+                q1 = q1.join(HWLoc, HardwareEntity.location)
+                q1 = q1.join(Parent, HWLoc.parents)
+                q1 = q1.filter(or_(HWLoc.id == dblocation.id,
+                                   Parent.id == dblocation.id))
+
+            q = q.filter(Cluster.id.in_(q1.subquery()))
+
+        dblocation = get_location(session, **location_args['preferred_'])
+        if dblocation:
+            q = q.filter_by(preferred_location=dblocation)
 
         # esx stuff
         if cluster:

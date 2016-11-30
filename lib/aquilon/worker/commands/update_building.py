@@ -19,10 +19,10 @@
 from sqlalchemy.orm import with_polymorphic
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (HardwareEntity, Machine, NetworkDevice,
-                                ServiceMap, Cluster, Network)
+from aquilon.aqdb.model import (Building, City, HardwareEntity, Machine,
+                                NetworkDevice, ServiceMap, Cluster, Network)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.location import get_location, update_location
+from aquilon.worker.dbwrappers.location import update_location
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -33,7 +33,7 @@ class CommandUpdateBuilding(BrokerCommand):
 
     def render(self, session, logger, building, city, address,
                fullname, default_dns_domain, comments, **_):
-        dbbuilding = get_location(session, building=building)
+        dbbuilding = Building.get_unique(session, building, compel=True)
 
         old_city = dbbuilding.city
 
@@ -50,7 +50,7 @@ class CommandUpdateBuilding(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         if city:
-            dbcity = get_location(session, city=city)
+            dbcity = City.get_unique(session, city, compel=True)
 
             HWS = with_polymorphic(HardwareEntity, [Machine, NetworkDevice])
             q = session.query(HWS)

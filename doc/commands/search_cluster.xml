@@ -63,6 +63,7 @@
 		<arg><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
 		<arg><option>--share <replaceable>SHARE</replaceable></option></arg>
 		<arg><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
+		<arg><option>--preferred_building <replaceable>BUILDING</replaceable></option></arg>
 	    </group>
 	    <group>
 		<arg><option>--fullinfo</option></arg>
@@ -231,6 +232,16 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--preferred_building <replaceable>BUILDING</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Match clusters which have an override for the preferred side set to <replaceable>BUILDING</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	</variablelist>
 
 	<variablelist>
@@ -368,6 +379,10 @@
 			location constraint, while the options prefixed by "member_" match on the location of the
 			cluster members. The two may yield different results if e.g. the cluster spans multiple
 			racks.
+		    </para>
+		    <para>
+			The member location options also accept a comma-separated list of values. In that case, only
+			clusters which have members in all the listed locations will be returned.
 		    </para>
 		</listitem>
 	    </varlistentry>

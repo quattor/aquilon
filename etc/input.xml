@@ -381,6 +381,7 @@
 		<option name="member_desk" type="string">member Desk</option>
 	    </optgroup>
 	    <option name="member_exact_location" type="flag">match the member location exactly</option>
+	    <option name="preferred_building" type="string">look for clusters which have the preferred side override set to the given building</option>
 	</optgroup>
 	<optgroup>
 	    <option name="fullinfo" type="flag">show full information for the matching hosts</option>
@@ -4567,6 +4568,8 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
+	    <option name="preferred_building" type="string">Preferred hot building</option>
+	    <option name="clear_location_preference" type="flag" conflicts="preferred_building">Remove the hot side preference</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -4737,6 +4740,8 @@
 	    </optgroup>
 	    <option name="group_with" type="string">Group with the given cluster</option>
 	    <option name="clear_group" type="flag" conflicts="group_with">Remove the cluster from any cluster groups</option>
+	    <option name="preferred_building" type="string">Preferred hot building</option>
+	    <option name="clear_location_preference" type="flag" conflicts="preferred_building">Remove the hot side preference</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -6768,6 +6773,105 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s/command/promote"/>
+    </command>
+
+    <command name="add_building_preference">
+	Add a preference that will be used in determining the default hot-side of clusters
+	based on building code.  May also be used to configure a cluster-level override.
+	<optgroup mandatory="True" fields="all">
+	    <option name="building_pair" type="string">
+		Indicates that this is a building-level preference and provides a
+		comma-separated list of building codes identifying which buildings the cluster
+		nodes should reside in for the rule to apply, e.g. aa,bb
+	    </option>
+	    <option name="archetype" type="string">Cluster archetype the preference applies to</option>
+	</optgroup>
+	<optgroup mandatory="True" fields="one">
+	    <option name="prefer" type="string">
+		Building code that should be preferred
+	    </option>
+	</optgroup>
+	<optgroup>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="building_preference/%(building_pair)s"/>
+    </command>
+
+    <command name="update_building_preference">
+	Update a preference that will be used in determining the default hot-side of clusters
+	based on building code, or update a cluster-level override.
+	<optgroup mandatory="True" fields="all">
+	    <option name="building_pair" type="string">
+		Indicates that this is a building-level preference and provides a
+		comma-separated list of building codes identifying which rule to update,
+		e.g. aa,bb
+	    </option>
+	    <option name="archetype" type="string">Cluster archetype the preference applies to</option>
+	</optgroup>
+	<optgroup>
+	    <option name="prefer" type="string">Building code that should be preferred</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="building_preference/%(building_pair)s"/>
+    </command>
+
+    <command name="show_building_preference">
+	Show preferences that are used in determining the default hot-side of clusters
+	based on building code, and show cluster-level overrides.
+	<optgroup mandatory="True" fields="one">
+	    <optgroup fields="all">
+		<option name="building_pair" type="string">
+		    Display preferences that apply to a building combination provided as
+		    comma-separated building codes, e.g. aa,bb
+		</option>
+		<option name="archetype" type="string">Cluster archetype the preference applies to</option>
+	    </optgroup>
+	    <option name="all" type="flag">
+		Display all preferences
+	    </option>
+	</optgroup>
+	<transport method="get" path="building_preference/%(building_pair)s"/>
+	<transport trigger="all" method="get" path="building_preference"/>
+	<format name="proto">
+	    <message_class name="LocationPreferenceList" module="aqdsystems_pb2"/>
+	</format>
+    </command>
+
+    <command name="search_building_preference">
+	Searches for preferences that are used in determining the default hot-side of clusters
+	based on building code.
+	<optgroup mandatory="True">
+	    <option name="building_pair" type="string">Find preference rules for the given building pair</option>
+	    <option name="building" type="string">Find preference rules involving the given building</option>
+	    <option name="prefer" type="string">
+		Find preference rules for building pairs where the given building code is
+		preferred
+	    </option>
+	    <option name="archetype" type="string">Cluster archetype the preference applies to</option>
+	</optgroup>
+	<optgroup>
+	    <option name="fullinfo" type="flag">Show full information</option>
+	</optgroup>
+	<transport method="get" path="find/building_preference"/>
+    </command>
+
+    <command name="del_building_preference">
+	Delete preferences that are used in determining the default hot-side of clusters
+	based on building code, or delete cluster-level overrides.
+	<optgroup mandatory="True" fields="all">
+	    <option name="building_pair" type="string">
+		Removes a building-level preference, this is a comma-separated list of building
+		codes that match a single rule to remove, e.g. aa,bb
+	    </option>
+	    <option name="archetype" type="string">Cluster archetype the preference applies to</option>
+	</optgroup>
+	<optgroup>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="building_preference/%(building_pair)s"/>
     </command>
 
 </commandline>

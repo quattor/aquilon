@@ -32,7 +32,7 @@
 
 from sqlalchemy import Column, ForeignKey
 
-from aquilon.aqdb.model import Location, Company
+from aquilon.aqdb.model import Location, Organization
 
 _TN = 'hub'
 
@@ -42,7 +42,7 @@ class Hub(Location):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    valid_parents = [Company]
+    valid_parents = [Organization]
 
     id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 

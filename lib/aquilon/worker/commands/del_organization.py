@@ -27,5 +27,5 @@ class CommandDelOrganization(CommandDelLocation):
 
     def render(self, session, organization, **arguments):
         return CommandDelLocation.render(self, session=session,
-                                         name=organization, type='company',
+                                         name=organization, type='organization',
                                          **arguments)

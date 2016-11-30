@@ -56,7 +56,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
               Down Hosts Threshold: 0
               Build Status: build
               Cluster Personality: hapersonality Archetype: hacluster
-                Environment: dev
+                Environment: prod
                 Owned by GRN: grn:/ms/ei/aquilon/aqd
               Domain: unittest
             """ % default_max, command)

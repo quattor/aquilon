@@ -33,7 +33,7 @@ from aquilon.aqdb.model.dns_domain import DnsDomain
 
 # LOCATION
 from aquilon.aqdb.model.location import Location
-from aquilon.aqdb.model.company import Company
+from aquilon.aqdb.model.organization import Organization
 from aquilon.aqdb.model.hub import Hub
 from aquilon.aqdb.model.continent import Continent
 from aquilon.aqdb.model.country import Country
@@ -111,6 +111,7 @@ from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 
 # CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
+from aquilon.aqdb.model.building_preference import BuildingPreference
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,

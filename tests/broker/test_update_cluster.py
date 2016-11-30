@@ -123,6 +123,94 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         self.assertEqual(len(clstr.grouped_cluster), 1)
         self.assertEqual(clstr.grouped_cluster[0].name, "utecl1")
 
+    def test_160_set_preferred_side(self):
+        self.noouttest(["update_cluster", "--cluster", "utbvcs2a",
+                        "--preferred_building", "utb2"])
+
+    def test_161_show_utbvcs2a(self):
+        command = ["show_cluster", "--cluster", "utbvcs2a"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Preferred Building: utb2", command)
+
+    def test_161_cat_utbvcs2a(self):
+        command = ["cat", "--cluster", "utbvcs2a", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"system/cluster/preferred_location/building" = "utb2";',
+                         command)
+
+    def test_161_search_preferred(self):
+        command = ["search_cluster", "--preferred_building", "utb2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utbvcs2a", command)
+        self.matchclean(out, "utbvcs2b", command)
+        self.matchclean(out, "utbvcs5", command)
+
+    def test_161_show_all_preferences(self):
+        command = ["show_building_preference", "--all"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'^High Availability Cluster: utbvcs2a\s*'
+                          r'Preferred Building: utb2$',
+                          command)
+        self.matchclean(out, "utbvcs2b", command)
+        self.matchclean(out, "utbvcs5", command)
+
+    def test_162_uncluster_preferred(self):
+        command = ["uncluster", "--cluster", "utbvcs2a",
+                   "--hostname", "utbhost10.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "High Availability Cluster utbvcs2a has "
+                         "no members inside preferred building utb2.", command)
+
+    def test_163_flip_side(self):
+        self.noouttest(["update_cluster", "--cluster", "utbvcs2a",
+                        "--preferred_building", "utb1"])
+
+    def test_164_show_utbvcs2a(self):
+        command = ["show_cluster", "--cluster", "utbvcs2a"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Preferred Building: utb1", command)
+
+    def test_164_cat_utbvcs2a(self):
+        command = ["cat", "--cluster", "utbvcs2a", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"system/cluster/preferred_location/building" = "utb1";',
+                         command)
+
+    def test_166_clear_preferred_side(self):
+        self.noouttest(["update_cluster", "--cluster", "utbvcs2a",
+                        "--clear_location_preference"])
+
+    def test_167_show_utbvcs2a(self):
+        command = ["show_cluster", "--cluster", "utbvcs2a"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Preferred", command)
+
+    def test_167_cat_utbvcs2a(self):
+        command = ["cat", "--cluster", "utbvcs2a", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"system/cluster/preferred_location/building" = "utb2";',
+                         command)
+
+    # TODO: This error condition is currently unreachable due to validating the
+    # members' locations first
+    #def test_200_preferred_outside_constraint(self):
+    #    command = ["update_cluster", "--cluster", "utbvcs2a",
+    #               "--preferred_building", "cards"]
+    #    out = self.badrequesttest(command)
+    #    self.matchoutput(out, "The new preferred location is not inside the "
+    #                     "location constraint.", command)
+
+    def test_200_preferred_no_members(self):
+        command = ["update_cluster", "--cluster", "utbvcs2a",
+                   "--preferred_building", "utb3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "utbvcs2a has no members inside preferred "
+                         "building utb3.", command)
+
     def test_800_cleanup(self):
         self.drop_personality("gridcluster", "hadoop-test")
 

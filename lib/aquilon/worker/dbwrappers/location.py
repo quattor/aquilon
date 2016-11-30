@@ -16,53 +16,50 @@
 # limitations under the License.
 """Wrapper to make getting a location simpler."""
 
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Location, DnsDomain
 from aquilon.utils import validate_nlist_key
 
 
 def get_location(session, query_options=None, compel=False, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
-    cls = None
-    name = None
-    for key, mapper in Location.__mapper__.polymorphic_map.items():
-        if key == "company":
-            # temporary until locations in DB restructured
-            value = kwargs.get("organization", None)
-        else:
-            value = kwargs.get(key, None)
-
-        if value is None:
-            continue
-
-        if cls:  # pragma: no cover
-            raise ArgumentError("Please specify just a single location "
-                                "parameter.")
-        name = value
-        cls = mapper.class_
-
-    if not cls:
+    # Extract location-specific options from kwargs
+    location_args = {key: (mapper.class_, kwargs.get(key))
+                     for key, mapper in Location.__mapper__.polymorphic_map.items()
+                     if key in kwargs and kwargs[key] is not None}
+    if len(location_args) > 1:
+        raise ArgumentError("Please specify just a single location "
+                            "parameter.")
+    if not location_args:
         if compel:
             raise ArgumentError("Please specify a location parameter.")
-        else:
-            return None
+        return None
 
-    try:
-        q = session.query(cls)
-        q = q.filter_by(name=name)
-        if query_options:
-            q = q.options(query_options)
-        dblocation = q.one()
-    except NoResultFound:
-        raise NotFoundException("%s %s not found." %
-                                (cls._get_class_label(), name))
-    except MultipleResultsFound:  # pragma: no cover
-        raise ArgumentError("There are multiple matches for %s %s." %
-                            (cls._get_class_label(), name))
-    return dblocation
+    _, (cls, name) = location_args.popitem()
+    return cls.get_unique(session, name, query_options=query_options,
+                          compel=True)
+
+
+def get_location_list(session, compel=False, **kwargs):
+    """
+    A variant of get_location(), accepting multiple, comma-separated names
+    """
+    location_args = {key: (mapper.class_, kwargs.get(key))
+                     for key, mapper in Location.__mapper__.polymorphic_map.items()
+                     if key in kwargs and kwargs[key] is not None}
+    if len(location_args) > 1:
+        raise ArgumentError("Please specify just a single location "
+                            "parameter.")
+    if not location_args:
+        if compel:
+            raise ArgumentError("Please specify a location parameter.")
+        return []
+
+    _, (cls, names) = location_args.popitem()
+    return [cls.get_unique(session, name.strip(), compel=True)
+            for name in names.split(",")]
 
 
 def add_location(session, cls, name, parent, **kwargs):

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2016 Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Continent is a subclass of Location """
+""" Contains the logic for `aq show building preference`. """
 
-from sqlalchemy import Column, ForeignKey
-
-from aquilon.aqdb.model import Location, Hub, Organization
-
-_TN = 'continent'
+from aquilon.aqdb.model import BuildingPreference
+from aquilon.worker.broker import BrokerCommand
 
 
-class Continent(Location):
-    """ Continent is a subtype of location """
-    __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': _TN}
+class CommandShowBuildingPreference(BrokerCommand):
 
-    valid_parents = [Hub, Organization]
+    required_parameters = ["building_pair", "archetype"]
 
-    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
-
-    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    def render(self, session, building_pair, archetype, **_):
+        return BuildingPreference.get_unique(session,
+                                             building_pair=building_pair,
+                                             archetype=archetype, compel=True)

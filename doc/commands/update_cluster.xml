@@ -44,6 +44,10 @@
 		<arg choice="plain"><option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option></arg>
 		<arg choice="plain"><option>--clear_group</option></arg>
 	    </group>
+	    <group>
+		<arg choice="plain"><option>--preferred_building <replaceable>BUILDING</replaceable></option></arg>
+		<arg choice="plain"><option>--clear_location_preference</option></arg>
+	    </group>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/location_options.xml"/>
@@ -218,6 +222,27 @@
 		    <para>
 			Remove <replaceable>CLUSTER</replaceable> from the cluster group it is currently the member of. If only one cluster
 			is left in the group after this operation, then the cluster group is deleted.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--preferred_building <replaceable>BUILDING</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Set the preferred side of the cluster to <replaceable>BUILDING</replaceable>, overriding any
+			global preferences.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--clear_location_preference</option>
+		</term>
+		<listitem>
+		    <para>
+			Remove the preferred side override, if set, and make the cluster honour the global preferences, if any.
 		    </para>
 		</listitem>
 	    </varlistentry>

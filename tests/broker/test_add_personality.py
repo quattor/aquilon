@@ -211,8 +211,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_171_add_ha_personality(self):
         self.create_personality("hacluster", "hapersonality",
+                                environment="prod",
                                 grn="grn:/ms/ei/aquilon/aqd")
-        self.verifycatpersonality("hacluster", "hapersonality")
+        self.verifycatpersonality("hacluster", "hapersonality", host_env="prod")
 
     def test_172_add_generic(self):
         for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:
