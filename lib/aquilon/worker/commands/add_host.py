@@ -25,7 +25,7 @@ from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip, assign_address,
                                                  get_interfaces)
 from aquilon.worker.dbwrappers.host import create_host
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 

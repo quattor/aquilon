@@ -23,7 +23,7 @@ from aquilon.worker.dbwrappers.dns import update_address
 from aquilon.worker.dbwrappers.interface import get_interfaces
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateServiceAddress(BrokerCommand):

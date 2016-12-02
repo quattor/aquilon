@@ -20,7 +20,7 @@ from aquilon.aqdb.model import City, Country, Campus
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddCity(BrokerCommand):

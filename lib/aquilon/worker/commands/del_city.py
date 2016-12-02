@@ -20,7 +20,7 @@ from aquilon.aqdb.model import City
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelCity(CommandDelLocation):

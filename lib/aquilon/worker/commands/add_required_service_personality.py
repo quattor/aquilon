@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, HostEnvironment, Service,
                                 PersonalityServiceListItem)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):

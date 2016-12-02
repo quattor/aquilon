@@ -19,7 +19,7 @@
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.machine import add_disk
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddDisk(BrokerCommand):

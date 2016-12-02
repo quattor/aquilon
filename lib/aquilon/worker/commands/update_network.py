@@ -20,7 +20,7 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateNetwork(BrokerCommand):

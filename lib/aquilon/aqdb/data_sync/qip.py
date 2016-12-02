@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 NetworkCompartment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import update, and_, or_

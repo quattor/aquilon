@@ -20,7 +20,7 @@ from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (get_resource_holder,
                                                  check_resource_dependencies)
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelResource(BrokerCommand):

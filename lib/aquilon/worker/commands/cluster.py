@@ -24,7 +24,7 @@ from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
                                               Almostready as HostAlmostready)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.services import Chooser
 
 

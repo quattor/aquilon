@@ -21,7 +21,7 @@ from aquilon.aqdb.model import RouterAddress, Building, ARecord
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateRouterAddress(BrokerCommand):

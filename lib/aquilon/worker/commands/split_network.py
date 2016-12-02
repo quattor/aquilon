@@ -23,7 +23,7 @@ from aquilon.aqdb.model import (Network, NetworkEnvironment, AddressAssignment,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.network import fix_foreign_links
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandSplitNetwork(BrokerCommand):

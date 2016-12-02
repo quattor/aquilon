@@ -21,7 +21,7 @@ from aquilon.aqdb.model import Machine, Disk, VirtualDisk, Filesystem, Share
 from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateDisk(BrokerCommand):

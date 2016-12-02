@@ -24,7 +24,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddMachine(BrokerCommand):

@@ -23,7 +23,7 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_personalit
 from aquilon.worker.dbwrappers.feature import get_affected_plenaries
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  lookup_paramdef)
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddParameter(BrokerCommand):

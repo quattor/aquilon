@@ -21,7 +21,7 @@ from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddMetaCluster(BrokerCommand):

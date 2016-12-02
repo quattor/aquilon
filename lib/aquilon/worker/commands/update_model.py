@@ -23,7 +23,7 @@ from aquilon.aqdb.types import CpuType, NicType
 from aquilon.aqdb.model import (Vendor, Model, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateModel(BrokerCommand):

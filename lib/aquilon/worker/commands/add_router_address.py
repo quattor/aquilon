@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddRouterAddress(BrokerCommand):

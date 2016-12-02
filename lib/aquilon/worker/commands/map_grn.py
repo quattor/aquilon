@@ -24,7 +24,7 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_personalit
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandMapGrn(BrokerCommand):

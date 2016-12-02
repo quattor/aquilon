@@ -28,7 +28,7 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddInterfaceAddress(BrokerCommand):

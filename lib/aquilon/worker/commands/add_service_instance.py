@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddServiceInstance(BrokerCommand):

@@ -21,7 +21,7 @@ from aquilon.aqdb.model import Personality, Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUnMapGrnClearAll(BrokerCommand):

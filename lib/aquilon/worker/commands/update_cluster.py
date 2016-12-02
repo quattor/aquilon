@@ -20,7 +20,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
                                 NetworkDevice, VirtualSwitch, ClusterGroup)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 

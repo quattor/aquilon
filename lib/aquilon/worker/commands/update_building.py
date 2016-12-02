@@ -24,7 +24,7 @@ from aquilon.aqdb.model import (Building, City, HardwareEntity, Machine,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import update_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateBuilding(BrokerCommand):

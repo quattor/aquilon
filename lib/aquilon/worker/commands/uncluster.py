@@ -20,7 +20,7 @@ from aquilon.aqdb.model import (Cluster, Personality, PriorityList,
                                 MemberPriority, HostClusterMember)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUncluster(BrokerCommand):

@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.worker.commands.bind_server import lookup_target, find_server
 from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
 

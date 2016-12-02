@@ -31,7 +31,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
 from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import GitRepo
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 def validate_branch_commits(dbsource, dbsource_author,

@@ -19,7 +19,7 @@
 from aquilon.aqdb.model import VirtualSwitch
 from aquilon.utils import validate_template_name
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddVirtualSwitch(BrokerCommand):

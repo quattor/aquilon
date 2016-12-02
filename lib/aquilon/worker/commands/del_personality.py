@@ -22,7 +22,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityStage, CompileableMixin,
                                 Cluster)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelPersonality(BrokerCommand):

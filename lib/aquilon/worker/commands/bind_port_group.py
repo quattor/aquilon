@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import VirtualSwitch, PortGroup
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindPortGroup(BrokerCommand):

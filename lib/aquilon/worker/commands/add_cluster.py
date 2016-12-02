@@ -21,7 +21,7 @@ from aquilon.aqdb.model import Cluster, MetaCluster, NetworkDevice
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddCluster(BrokerCommand):
