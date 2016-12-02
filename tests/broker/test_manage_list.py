@@ -39,7 +39,7 @@ class TestManageList(TestBrokerCommand):
 
         scratchfile = self.writescratch("managelist", "\n".join(hosts))
         self.successtest(["manage", "--list", scratchfile,
-                        "--sandbox", "%s/managetest1" % self.user, "--force"])
+                          "--sandbox", "%s/managetest1" % self.user, "--force"])
         for h in hosts:
             self.verify_buildfiles("utsandbox", h, want_exist=False)
             plen = self.build_profile_name(h, domain="managetest1")
@@ -68,7 +68,7 @@ class TestManageList(TestBrokerCommand):
 
         scratchfile = self.writescratch("managelist", "\n".join(hosts))
         self.successtest(["manage", "--list", scratchfile,
-                        "--sandbox", "%s/managetest2" % self.user])
+                          "--sandbox", "%s/managetest2" % self.user])
         for h in hosts:
             self.verify_buildfiles("managetest1", h, want_exist=False)
             plen = self.build_profile_name(h, domain="managetest2")
@@ -153,7 +153,7 @@ class TestManageList(TestBrokerCommand):
         hosts = ["unittest17.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("managelist", "\n".join(hosts))
         self.successtest(["manage", "--list", scratchfile,
-                        "--sandbox", "%s/managetest1" % self.user, "--force"])
+                          "--sandbox", "%s/managetest1" % self.user, "--force"])
         self.verify_buildfiles("unittest", "unittest17.aqd-unittest.ms.com",
                                want_exist=False)
 

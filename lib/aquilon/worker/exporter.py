@@ -20,7 +20,7 @@ Export data to systems outside of the broker.
 
 import logging
 from collections import defaultdict
-from aquilon.exceptions_ import InternalError, RollbackException
+from aquilon.exceptions_ import InternalError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class Exporter(object):
     _handlers = defaultdict(list)
 
     @classmethod
-    def register(self, handler, *cls_names):
+    def register(cls, handler, *cls_names):
         """
         Resgister an ExportHandler for the given class types.  This method should
         be called durning initalisation to register the handler.
@@ -90,7 +90,7 @@ class Exporter(object):
         if not isinstance(handler, ExportHandler):
             raise InternalError('Handler must be of type ExportHandler')
         for cls_name in cls_names:
-            self._handlers[cls_name].append(handler)
+            cls._handlers[cls_name].append(handler)
 
     def __init__(self, **kwargs):
         """
@@ -193,7 +193,7 @@ def register_exporter(*class_names):
     This decorator takes a list of classes (as arguments) and calls
     Exporter.register.
     """
-    return (lambda exporter: Exporter.register(exporter(), *class_names))
+    return lambda exporter: Exporter.register(exporter(), *class_names)
 
 
 # Import all of the plugins

@@ -16,10 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq add personality`."""
 
-from sqlalchemy.orm import joinedload, subqueryload
-
 import re
+
 from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
+
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,

@@ -49,13 +49,13 @@ class TestUpdateFilesystem(TestBrokerCommand):
 
     def test_01_bad_fsckpass(self):
         command = ["update_filesystem", "--filesystem=fs1",
-                   "--hostname=server1.aqd-unittest.ms.com", "--fsckpass=banana" ]
+                   "--hostname=server1.aqd-unittest.ms.com", "--fsckpass=banana"]
         out = self.badoptiontest(command)
 
     def test_01_bad_hostname(self):
         command = ["update_filesystem", "--filesystem=fs1",
                    "--hostname=badhostname.aqd-unittest.ms.com",
-                   "--comments=Some more updated filesystem comments" ]
+                   "--comments=Some more updated filesystem comments"]
         out = self.notfoundtest(command)
 
 if __name__ == '__main__':

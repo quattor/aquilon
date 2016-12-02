@@ -25,7 +25,6 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 from eventstest import EventsTestMixin
-from eventstest import EventsTestMixin
 
 
 class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
