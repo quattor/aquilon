@@ -19,6 +19,7 @@
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.exceptions_ import AuthorizationException
 
 
 class CommandUpdateService(BrokerCommand):

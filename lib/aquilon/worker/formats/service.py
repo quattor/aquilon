@@ -33,6 +33,8 @@ class ServiceFormatter(ObjectFormatter):
                        max_clients)
         details.append(indent + "  Need Client List: %s" %
                        service.need_client_list)
+        details.append(indent + "  Allow Alias Bindings: %s" %
+                       service.allow_alias_bindings)
         for archetype in sorted(service.archetypes, key=attrgetter("name")):
             details.append(indent + "  Required for {0:c}: {0.name}"
                            .format(archetype))
