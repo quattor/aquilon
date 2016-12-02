@@ -29,7 +29,7 @@ from sqlalchemy.orm import object_session
 from aquilon.exceptions_ import (InternalError, IncompleteError,
                                  NotFoundException, ArgumentError)
 from aquilon.config import Config
-from aquilon.aqdb.model import Sandbox, CompileableMixin
+from aquilon.aqdb.model import Base, Sandbox, CompileableMixin
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
 from aquilon.utils import write_file, remove_file
@@ -578,6 +578,15 @@ class PlenaryCollection(object):
         for plenary in iterable:
             plenary.set_logger(self.logger)
             self.plenaries.append(plenary)
+
+    def add(self, dbobj_or_iterable, allow_incomplete=True):
+        if isinstance(dbobj_or_iterable, Base):
+            self.append(Plenary.get_plenary(dbobj_or_iterable,
+                                            allow_incomplete=allow_incomplete))
+        else:
+            for dbobj in dbobj_or_iterable:
+                self.append(Plenary.get_plenary(dbobj,
+                                                allow_incomplete=allow_incomplete))
 
     def flatten(self):
         """
