@@ -2851,8 +2851,8 @@
 	    <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
 	    <option name="hostlink" type="string" requires="hostname cluster metacluster">Name of a hostlink</option>
 	    <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
-	    <option name="reboot_intervention" type="string" requires="hostname cluster metacluster">Name of a reboot intervention</option>
-	    <option name="reboot_schedule" type="string" requires="hostname cluster metacluster">Name of a reboot schedule</option>
+	    <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
+	    <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
 	    <option name="virtual_machine" type="string" requires="hostname cluster metacluster">Name of a virtual machine</option>
 	    <option name="service_address" type="string" requires="hostname cluster metacluster">Name of a service address</option>
 	    <option name="share" type="string" requires="hostname cluster metacluster">Name of a resource group</option>

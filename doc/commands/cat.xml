@@ -48,8 +48,8 @@
 		<arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--share <replaceable>NAME</replaceable></option></arg>
-		<arg choice="plain"><option>--reboot_intervention <replaceable>NAME</replaceable></option></arg>
-		<arg choice="plain"><option>--reboot_schedule <replaceable>NAME</replaceable></option></arg>
+		<arg choice="plain"><option>--reboot_intervention</option></arg>
+		<arg choice="plain"><option>--reboot_schedule</option></arg>
 		<arg choice="plain"><option>--virtual_machine <replaceable>NAME</replaceable></option></arg>
 	    </group>
 	    <arg><option>--generate</option></arg>
@@ -222,8 +222,8 @@
 		    <option>--intervention <replaceable>NAME</replaceable></option>,
 		    <option>--service_address <replaceable>NAME</replaceable></option>,
 		    <option>--share <replaceable>NAME</replaceable></option>,
-		    <option>--reboot_intervention <replaceable>NAME</replaceable></option>,
-		    <option>--reboot_schedule <replaceable>NAME</replaceable></option>,
+		    <option>--reboot_intervention</option>,
+		    <option>--reboot_schedule</option>,
 		    <option>--virtual_machine <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>

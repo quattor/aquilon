@@ -49,14 +49,13 @@ class TestAddRebootIntervention(TestBrokerCommand):
         command = ["show_reboot_intervention",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "RebootIntervention: reboot_intervention",
-                         command)
+        self.searchoutput(out, "RebootIntervention$", command)
         self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Start: ", command)
         self.matchoutput(out, "Expiry: ", command)
 
-        command = ["cat", "--reboot_intervention=reboot_intervention",
+        command = ["cat", "--reboot_intervention",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -68,7 +67,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.matchoutput(out, "\"start\" =", command)
         self.matchoutput(out, "\"expiry\" =", command)
 
-        command = ["cat", "--reboot_intervention=reboot_intervention",
+        command = ["cat", "--reboot_intervention",
                    "--hostname=server1.aqd-unittest.ms.com",
                    "--generate"]
         newout = self.commandtest(command)
@@ -76,8 +75,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
 
         command = ["show_reboot_intervention", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "RebootIntervention: reboot_intervention",
-                         command)
+        self.searchoutput(out, "RebootIntervention$", command)
 
     def test_11_addexisting(self):
         EXPIRY = datetime.utcnow().replace(microsecond=0) + timedelta(days=2)
@@ -96,8 +94,8 @@ class TestAddRebootIntervention(TestBrokerCommand):
         self.matchoutput(out, "The start time or expiry time are in the past.", command)
 
     def test_15_notfoundri(self):
-        command = ["cat", "--reboot_intervention=ri-does-not-exist",
-                   "--hostname=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--reboot_intervention",
+                   "--hostname=server3.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_30_checkthehost(self):

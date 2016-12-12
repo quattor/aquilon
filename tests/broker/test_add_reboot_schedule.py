@@ -47,8 +47,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
         command = ["show_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "RebootSchedule: reboot_schedule",
-                         command)
+        self.searchoutput(out, "RebootSchedule$", command)
         self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Week: All", command)
@@ -56,7 +55,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "Time: 08:00", command)
 
     def test_120_cat_resource(self):
-        command = ["cat", "--reboot_schedule=reboot_schedule",
+        command = ["cat", "--reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -69,7 +68,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "\"week\" = \"All\"", command)
         self.matchoutput(out, "\"day\" = \"Sun\"", command)
 
-        command = ["cat", "--reboot_schedule=reboot_schedule",
+        command = ["cat", "--reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com",
                    "--generate"]
         newout = self.commandtest(command)
@@ -86,13 +85,12 @@ class TestAddRebootSchedule(TestBrokerCommand):
     def test_120_show_all(self):
         command = ["show_reboot_schedule", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "RebootSchedule: reboot_schedule", command)
+        self.searchoutput(out, "RebootSchedule$", command)
 
     def test_120_show_host(self):
         command = ["show_host", "--host=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         "RebootSchedule: reboot_schedule", command)
+        self.searchoutput(out, "RebootSchedule$", command)
 
     def test_120_show_host_proto(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
@@ -125,8 +123,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
         command = ["show_reboot_schedule",
                    "--hostname=server2.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "RebootSchedule: reboot_schedule",
-                         command)
+        self.searchoutput(out, "RebootSchedule$", command)
         self.matchoutput(out, "Bound to: Host server2.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Week: 1,3", command)
@@ -134,7 +131,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "Time: None", command)
 
     def test_135_cat_resource(self):
-        command = ["cat", "--reboot_schedule=reboot_schedule",
+        command = ["cat", "--reboot_schedule",
                    "--hostname=server2.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -173,8 +170,8 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "already exists", command)
 
     def test_200_cat_notfound(self):
-        command = ["cat", "--reboot_schedule=schedule-does-not-exist",
-                   "--hostname=server1.aqd-unittest.ms.com"]
+        command = ["cat", "--reboot_schedule",
+                   "--hostname=server3.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
     def test_210_add_schedule_fail(self):
