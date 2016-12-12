@@ -289,6 +289,12 @@ from .test_demolish_clusters import TestDemolishClusters
 from .test_add_building_preference import TestAddBuildingPreference
 from .test_del_building_preference import TestDelBuildingPreference
 from .test_update_building_preference import TestUpdateBuildingPreference
+from .test_add_cluster_autostartlist import TestAddClusterAutoStartList
+from .test_del_cluster_autostartlist import TestDelClusterAutoStartList
+from .test_update_cluster_autostartlist import TestUpdateClusterAutoStartList
+from .test_add_cluster_systemlist import TestAddClusterSystemList
+from .test_del_cluster_systemlist import TestDelClusterSystemList
+from .test_update_cluster_systemlist import TestUpdateClusterSystemList
 from .test_grns import TestGrns
 from .test_map_grn import TestMapGrn
 from .test_stop import TestBrokerStop
@@ -381,6 +387,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
                      TestBuildClusters, TestAddBuildingPreference,
+                     TestAddClusterAutoStartList, TestAddClusterSystemList,
                      TestClusterConstraintsNoVMs,
                      TestAddVirtualHardware,
                      TestVulcanLocalDisk,
@@ -427,6 +434,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateAddressAlias,
                      TestUpdateServiceAddress,
                      TestUpdateFilesystem,
+                     TestUpdateClusterAutoStartList,
+                     TestUpdateClusterSystemList,
                      TestUpdateNetworkCompartment,
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
@@ -448,6 +457,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestClientBypass,
                      TestConsistency,
                      TestUmaskConstraints,
+                     TestDelClusterAutoStartList, TestDelClusterSystemList,
                      TestDelBuildingPreference, TestDemolishClusters,
                      TestUnbindServer, TestUnmapService,
                      TestDelParameterFeature,

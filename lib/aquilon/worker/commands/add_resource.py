@@ -25,6 +25,7 @@ class CommandAddResource(BrokerCommand):
 
     resource_class = None
     resource_name = None
+    allow_existing = False
 
     def setup_resource(self, session, logger, dbresource, **kwargs):
         pass
@@ -47,13 +48,22 @@ class CommandAddResource(BrokerCommand):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=False)
 
-        self.resource_class.get_unique(session, name=name, holder=holder,
-                                       preclude=True)
-
         with session.no_autoflush:
-            dbresource = self.resource_class(name=name, comments=comments)  # pylint: disable=E1102
+            # For container-like resources, the resource object may already
+            # exist; otherwise, it must not exist
+            if self.allow_existing:
+                dbresource = self.resource_class.get_unique(session, name=name,
+                                                            holder=holder)
+            else:
+                self.resource_class.get_unique(session, name=name, holder=holder,
+                                               preclude=True)
+                dbresource = None
+
+            if not dbresource:
+                dbresource = self.resource_class(name=name, comments=comments)  # pylint: disable=E1102
+                holder.resources.append(dbresource)
+
             self.setup_resource(session, logger, dbresource, **kwargs)
-            holder.resources.append(dbresource)
 
         session.flush()
 

@@ -57,6 +57,7 @@ _table_abbrev = {
     'personality_rootnetgroup': 'pers_rootng',
     'personality_service_list_item': 'psli',
     'personality_stage': 'pers_st',
+    'priority_list': 'pl',
     'reboot_intervention': 'reboot_iv',
     'service': 'svc',
     'service_address': 'srv_addr',

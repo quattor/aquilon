@@ -56,6 +56,18 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
+	    <group choice="req">
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    </group>
+	    <arg><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	    <group>
+		<arg choice="plain"><option>--system_list</option></arg>
+		<arg choice="plain"><option>--auto_start_list</option></arg>
+	    </group>
+	    <arg><option>--generate</option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq cat</command>
 	    <arg choice="plain"><option>--city <replaceable>CITY</replaceable></option></arg>
 	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
@@ -225,6 +237,8 @@
 		    <option>--reboot_intervention</option>,
 		    <option>--reboot_schedule</option>,
 		    <option>--virtual_machine <replaceable>NAME</replaceable></option>
+		    <option>--auto_start_list</option>,
+		    <option>--system_list</option>,
 		</term>
 		<listitem>
 		    <para>
