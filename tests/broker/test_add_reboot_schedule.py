@@ -216,23 +216,6 @@ class TestAddRebootSchedule(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Key 'day' contains an invalid value. Valid values are (Sun|Mon|Tue|Wed|Thu|Fri|Sat).", command)
 
-    def test_300_del_reboot_schedule(self):
-        path = ["resource", "host", "server1.aqd-unittest.ms.com",
-                "reboot_schedule", "reboot_schedule", "config"]
-        self.check_plenary_exists(*path)
-
-        command = ["del_reboot_schedule",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        self.check_plenary_gone(*path, directory_gone=True)
-
-    def test_310_verify_del(self):
-        command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchclean(out, "reboot_schedule", command)
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRebootSchedule)
     unittest.TextTestRunner(verbosity=2).run(suite)

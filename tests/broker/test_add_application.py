@@ -78,11 +78,6 @@ class TestAddApplication(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, '"system/resources/application" = append(create("resource/host/server1.aqd-unittest.ms.com/application/app1/config"))', command)
 
-        command = ["del_application", "--application=app1",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddApplication)
     unittest.TextTestRunner(verbosity=2).run(suite)

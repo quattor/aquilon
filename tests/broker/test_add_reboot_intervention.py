@@ -33,10 +33,6 @@ EXPIRY = EXPIRY.isoformat().replace("T", " ")
 class TestAddRebootIntervention(TestBrokerCommand):
 
     def test_00_basic_reboot_intervention(self):
-        command = ["show_reboot_schedule",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-
         command = ["show_reboot_intervention",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
@@ -123,12 +119,6 @@ class TestAddRebootIntervention(TestBrokerCommand):
                resource.type == "reboot_iv":
                 found = True
         self.assertTrue(found, "No reboot_iv found in host protobuf.")
-
-    def test_del_reboot_intervention(self):
-        command = ["del_reboot_intervention",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
