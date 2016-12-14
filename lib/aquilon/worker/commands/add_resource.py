@@ -26,10 +26,11 @@ class CommandAddResource(BrokerCommand):
     resource_class = None
     resource_name = None
 
-    def add_resource(self, session, logger, **kwargs):
+    def setup_resource(self, session, logger, dbresource, **kwargs):
         pass
 
-    def render(self, session, logger, hostname, cluster, metacluster, **kwargs):
+    def render(self, session, logger, hostname, cluster, metacluster, comments,
+               **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -50,8 +51,8 @@ class CommandAddResource(BrokerCommand):
                                        preclude=True)
 
         with session.no_autoflush:
-            dbresource = self.add_resource(session=session, logger=logger,
-                                           **kwargs)
+            dbresource = self.resource_class(name=name, comments=comments)  # pylint: disable=E1102
+            self.setup_resource(session, logger, dbresource, **kwargs)
             holder.resources.append(dbresource)
 
         session.flush()
