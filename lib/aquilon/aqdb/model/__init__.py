@@ -112,7 +112,7 @@ from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 # CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.building_preference import BuildingPreference
-from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
+from aquilon.aqdb.model.cluster import (Cluster, HostClusterMember, EsxCluster,
                                         ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
                                                          PersonalityESXClusterInfo)
@@ -143,5 +143,7 @@ from aquilon.aqdb.model.virtual_machine import VirtualMachine
 from aquilon.aqdb.model.service_address import ServiceAddress
 from aquilon.aqdb.model.share import Share
 from aquilon.aqdb.model.virtual_disk import VirtualDisk
+from aquilon.aqdb.model.cluster_asl import (PriorityList, MemberPriority,
+                                            SystemList, AutoStartList)
 
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer

@@ -108,8 +108,6 @@ class CommandAddServiceAddress(BrokerCommand):
                                    "host-bound service addresses, and is "
                                    "ignored otherwise.")
 
-        # Disable autoflush, since the ServiceAddress object won't be complete
-        # until add_resource() is called
         dsdb_runner = DSDBRunner(logger=logger)
         with session.no_autoflush:
             dbsrv = ServiceAddress(name=name, dns_record=dbdns_rec,

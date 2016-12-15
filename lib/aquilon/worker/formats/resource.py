@@ -21,13 +21,21 @@ from aquilon.aqdb.model import Resource
 
 
 class ResourceFormatter(ObjectFormatter):
+
+    suppress_name = False
+
     def extra_details(self, share, indent=""):  # pylint: disable=W0613
         return []
 
     def format_raw(self, resource, indent="", embedded=True,
                    indirect_attrs=True):
         details = []
-        details.append(indent + "{0:c}: {0.name}".format(resource))
+
+        if self.suppress_name:
+            details.append(indent + format(resource, "c"))
+        else:
+            details.append(indent + "{0:c}: {0.name}".format(resource))
+
         if resource.comments:
             details.append(indent + "  Comments: %s" % resource.comments)
 

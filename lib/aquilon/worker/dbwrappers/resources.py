@@ -91,6 +91,10 @@ def get_resource(session, holder, **arguments_in):
     arguments = dict()
     mapper = inspect(Resource)
     for key, value in arguments_in.items():
+        # Shortcut for resources which do not really have a name
+        if value is True:
+            value = key
+
         if key in mapper.polymorphic_map and value is not None:
             arguments[mapper.polymorphic_map[key].class_] = value
         elif key == "reboot_intervention" and value is not None:

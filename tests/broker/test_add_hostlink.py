@@ -107,31 +107,6 @@ class TestAddHostlink(TestBrokerCommand):
                    "--hostname", "server1.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
-    def test_300_del_hostlink(self):
-        path = ["resource", "host", "server1.aqd-unittest.ms.com",
-                "hostlink", "app1", "config"]
-        self.check_plenary_exists(*path)
-
-        command = ["del_hostlink", "--hostlink=app1",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        self.check_plenary_gone(*path, directory_gone=True)
-
-    def test_305_del_camelcase(self):
-        path = ["resource", "host", "server1.aqd-unittest.ms.com",
-                "hostlink", "camelcase", "config"]
-        self.check_plenary_exists(*path)
-        self.successtest(["del_hostlink", "--hostlink", "CaMeLcAsE",
-                          "--hostname", "server1.aqd-unittest.ms.com"])
-        self.check_plenary_gone(*path)
-
-    def test_310_verify_del(self):
-        command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchclean(out, "Hostlink", command)
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHostlink)
     unittest.TextTestRunner(verbosity=2).run(suite)

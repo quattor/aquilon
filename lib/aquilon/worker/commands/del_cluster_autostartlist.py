@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2016 Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq add share`."""
+""" Contains the logic for `aq del cluster autostartlist --member`. """
 
-from aquilon.aqdb.model import Share
+from aquilon.aqdb.model import AutoStartList
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_resource import CommandAddResource
+from aquilon.worker.commands.del_cluster_member_priority import \
+    CommandDelClusterMemberPriority
 
 
-class CommandAddShare(CommandAddResource):
+class CommandDelClusterAutoStartList(CommandDelClusterMemberPriority):
 
-    required_parameters = ["share"]
-    resource_class = Share
-    resource_name = "share"
+    required_parameters = ["cluster", "member"]
+    resource_class = AutoStartList

@@ -2851,11 +2851,15 @@
 	    <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
 	    <option name="hostlink" type="string" requires="hostname cluster metacluster">Name of a hostlink</option>
 	    <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
-	    <option name="reboot_intervention" type="string" requires="hostname cluster metacluster">Name of a reboot intervention</option>
-	    <option name="reboot_schedule" type="string" requires="hostname cluster metacluster">Name of a reboot schedule</option>
+	    <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
+	    <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
 	    <option name="virtual_machine" type="string" requires="hostname cluster metacluster">Name of a virtual machine</option>
 	    <option name="service_address" type="string" requires="hostname cluster metacluster">Name of a service address</option>
 	    <option name="share" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
+	</optgroup>
+	<optgroup>
+	    <option name="system_list" type="flag" requires="cluster">System list entries</option>
+	    <option name="auto_start_list" type="flag" requires="cluster">Auto start list entries</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string" requires="networkip">Network environment (default: internal)</option>
@@ -6872,6 +6876,131 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<transport method="delete" path="building_preference/%(building_pair)s"/>
+    </command>
+
+    <command name="add_cluster_autostartlist">
+	Add a specific host to the list of those on which some or all service groups on
+	the cluster will be automatically started when the cluster is first formed.
+	This will override any building or cluster-level preferences set by 'aq add
+	building preference'.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	    <option name="order" type="int">
+Order that this host should appear in the list, which is used to determine
+the system on which to bring the service group online, where lower numbers
+appear earlier
+	    </option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Will be added only to the named resourcegroup, instead of the cluster default
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="cluster/%(cluster)s/autostartlist"/>
+    </command>
+
+    <command name="update_cluster_autostartlist">
+	Update the order of a host in the autostart list for a given cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of the cluster default
+	    </option>
+	    <option name="order" type="int">New order</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="cluster/%(cluster)s/autostartlist"/>
+    </command>
+
+    <command name="del_cluster_autostartlist">
+	Remove a host from the autostart list for a given cluster, or if no host is
+	given, all autostart list entries for the cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <optgroup fields="one">
+		<option name="member" type="string">Host name to remove</option>
+		<option name="all" type="flag">Remove all entries</option>
+	    </optgroup>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of the cluster default
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="cluster/%(cluster)s/autostartlist"/>
+	<transport method="delete" trigger="all" path="cluster/%(cluster)s/autostartlist/all"/>
+    </command>
+
+    <command name="add_cluster_systemlist">
+	Add a specific host to the list of those on which some or all service groups on
+	the cluster may run.  This will override any building or cluster-level
+	preferences set by 'aq add building preference'.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	    <option name="priority" type="int">
+		Priority for failover target where hosts with lower numbers are preferred over
+		those with higher numbers when assessing a failover target
+	    </option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Will be added only to the named resourcegroup, instead of all resourcegroups
+		in the cluster
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="cluster/%(cluster)s/systemlist"/>
+    </command>
+
+    <command name="update_cluster_systemlist">
+	Update the priority of a host in the system list for a given cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="priority" type="int">New priority</option>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of all resourcegroups in the
+		cluster
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="cluster/%(cluster)s/systemlist"/>
+    </command>
+
+    <command name="del_cluster_systemlist">
+	Remove a host from the system list for a given cluster, or if no host is given,
+	all system list entries for the cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <optgroup fields="one">
+		<option name="member" type="string">Host name to remove</option>
+		<option name="all" type="flag">Remove all entries</option>
+	    </optgroup>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of all resourcegroups in the
+		cluster
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="cluster/%(cluster)s/systemlist"/>
+	<transport method="delete" trigger="all" path="cluster/%(cluster)s/systemlist/all"/>
     </command>
 
 </commandline>

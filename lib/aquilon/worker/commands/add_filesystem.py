@@ -28,9 +28,9 @@ class CommandAddFilesystem(CommandAddResource):
     resource_class = Filesystem
     resource_name = "filesystem"
 
-    def add_resource(self, session, logger, filesystem, type, mountpoint,
-                     blockdevice, bootmount, dumpfreq, fsckpass, options,
-                     comments, **_):
+    def setup_resource(self, session, logger, dbfs, type, mountpoint,
+                       blockdevice, bootmount, dumpfreq, fsckpass, options,
+                       **_):
         if dumpfreq is None:
             dumpfreq = 0
         if fsckpass is None:
@@ -38,8 +38,10 @@ class CommandAddFilesystem(CommandAddResource):
             # we're being extra paranoid...
             fsckpass = 2  # pragma: no cover
 
-        dbfs = Filesystem(name=filesystem, mountpoint=mountpoint,
-                          mountoptions=options, mount=bool(bootmount),
-                          blockdev=blockdevice, fstype=type, passno=fsckpass,
-                          dumpfreq=dumpfreq, comments=comments)
-        return dbfs
+        dbfs.mountpoint = mountpoint
+        dbfs.mountoptions = options
+        dbfs.mount = bootmount
+        dbfs.blockdev = blockdevice
+        dbfs.fstype = type
+        dbfs.passno = fsckpass
+        dbfs.dumpfreq = dumpfreq

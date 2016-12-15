@@ -100,7 +100,7 @@ class CommandAddRebootSchedule(CommandAddResource):
 
         return arguments
 
-    def add_resource(self, session, logger, comments, **arguments):
+    def setup_resource(self, session, logger, dbrs, **arguments):
         arguments = self._validate_args(**arguments)
 
         time = arguments["time"]
@@ -113,10 +113,9 @@ class CommandAddRebootSchedule(CommandAddResource):
                 raise ArgumentError("The preferred time '%s' could not be "
                                     "interpreted: %s" % (time, e))
 
-        res = RebootSchedule(name="reboot_schedule", time=time, week=week,
-                             day=day, comments=comments)
-
-        return res
+        dbrs.time = time
+        dbrs.week = week
+        dbrs.day = day
 
     def render(self, **kwargs):
         return super(CommandAddRebootSchedule, self).render(metacluster=None,
