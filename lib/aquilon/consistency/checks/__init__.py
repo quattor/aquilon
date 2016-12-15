@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013,2014,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 import os
 from inspect import isclass
 
+# FIXME - this is a workaround for dependency issues between templates/ and
+# dbwrappers/
+from aquilon.worker.templates import TemplateDomain
 
 __all__ = []
 consistency_check_classes = []

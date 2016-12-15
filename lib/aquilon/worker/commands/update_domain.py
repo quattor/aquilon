@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq update domain`."""
 
-from aquilon.exceptions_ import ArgumentError, AuthorizationException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import (expand_compiler,
@@ -27,15 +27,10 @@ class CommandUpdateDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, dbuser, domain, comments, compiler_version,
+    def render(self, session, domain, comments, compiler_version,
                autosync, change_manager, allow_manage, profile_formats,
                archived, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
-
-        # FIXME: proper authorization
-        if dbdomain.owner != dbuser and dbuser.role.name != 'aqd_admin':
-            raise AuthorizationException("Only the owner or an AQD admin can "
-                                         "update a domain.")
 
         if comments is not None:
             dbdomain.comments = comments

@@ -1,0 +1,3 @@
+ALTER TABLE service ADD allow_alias_bindings BOOLEAN;
+UPDATE service SET allow_alias_bindings = 'F';
+ALTER TABLE service ALTER allow_alias_bindings SET NOT NULL;

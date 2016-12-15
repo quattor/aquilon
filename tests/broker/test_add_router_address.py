@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestAddRouterAddress(TestBrokerCommand):
 
     def test_100_add_router(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["add", "router", "address", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v109-hsrp.aqd-unittest.ms.com",
                    "--building", "ut",
@@ -37,7 +37,7 @@ class TestAddRouterAddress(TestBrokerCommand):
         self.noouttest(command)
 
     def test_105_show_router(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["show", "router", "address", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -49,13 +49,13 @@ class TestAddRouterAddress(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some router address comments", command)
 
     def test_105_show_network(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Routers: %s (Building ut)" % net.gateway, command)
 
     def test_105_show_network_proto(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
         netmsg = self.protobuftest(command)[0]
         self.assertEqual(len(netmsg.routers), 1)
@@ -119,7 +119,7 @@ class TestAddRouterAddress(TestBrokerCommand):
         self.noouttest(command)
 
     def test_200_add_router_again(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["add", "router", "address", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
                    "--building", "ut"]

@@ -761,12 +761,22 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Personality aquilon/clustered requires cluster "
                          "membership", command)
 
+    def test_2000_promote_mixed_personality(self):
+        hosts = ["unittest00.one-nyp.ms.com",
+                 "unittest12.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("promote_mixed_personality",
+                                        "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--personality_stage", "next"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Promoting hosts in multiple personalities is "
+                         "not supported.", command)
+
     def test_3000_missing_required_params(self):
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
-        #self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
         buildfile = self.build_profile_name("aquilon62.aqd-unittest.ms.com",
                                             domain="utsandbox")
         results = self.grepcommand(["-l", "badpersonality", buildfile])
@@ -779,7 +789,6 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon", "--personality", "badpersonality"]
         out = self.badrequesttest(command)
-        #self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
         self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="utsandbox")))

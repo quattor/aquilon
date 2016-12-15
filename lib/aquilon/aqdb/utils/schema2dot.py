@@ -14,14 +14,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ms.version
-import ms.modulecmd
 
-ms.modulecmd.load('fsf/libtool/1.5.18')
-ms.modulecmd.load('fsf/graphviz/2.26.3')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    import ms.modulecmd
 
-ms.version.addpkg('pyparsing', '1.5.5')  # pydot relies on pyparsing
-ms.version.addpkg('pydot', '1.0.28')
+    ms.modulecmd.load('fsf/libtool/1.5.18')
+    ms.modulecmd.load('fsf/graphviz/2.26.3')
+
+    ms.version.addpkg('pyparsing', '1.5.5')  # pydot relies on pyparsing
+    ms.version.addpkg('pydot', '1.0.28')
+
 import pydot
 
 from sqlalchemy.orm import RelationshipProperty

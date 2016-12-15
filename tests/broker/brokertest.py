@@ -174,7 +174,7 @@ class TestBrokerCommand(unittest.TestCase):
 
         if isinstance(clean, list):
             for item in clean:
-                self.matchoutput(contents, item, "read %s" % plenary)
+                self.matchclean(contents, item, "read %s" % plenary)
         elif clean:
             self.matchclean(contents, clean, "read %s" % plenary)
 

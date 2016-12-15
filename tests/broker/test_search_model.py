@@ -106,7 +106,7 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
         self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
-        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2640 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
@@ -124,7 +124,7 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
         self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
-        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2640 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
@@ -133,8 +133,8 @@ class TestSearchModel(TestBrokerCommand):
         command = ["search_model", "--cpunum", "2"]
         out = self.commandtest(command)
         self.matchoutput(out, "hs21-8853", command)
-        self.matchoutput(out, "bl260c", command)
-        self.matchclean(out, "poweredge_6650", command)
+        self.matchoutput(out, "bl460cg8", command)
+        self.matchoutput(out, "r730", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
         self.matchclean(out, "utchassis", command)
@@ -142,10 +142,9 @@ class TestSearchModel(TestBrokerCommand):
     def test_200_search_memory(self):
         command = ["search_model", "--memory", "16384"]
         out = self.commandtest(command)
-        self.matchoutput(out, "poweredge_6650", command)
         self.matchoutput(out, "utlarge", command)
         self.matchclean(out, "hs21-8853", command)
-        self.matchclean(out, "bl260c", command)
+        self.matchclean(out, "bl460cg8", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
         self.matchclean(out, "utchassis", command)
@@ -156,7 +155,7 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "utmedium", command)
         self.matchoutput(out, "utlarge", command)
         self.matchclean(out, "hs21-8853", command)
-        self.matchclean(out, "bl260c", command)
+        self.matchclean(out, "bl460cg8", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
         self.matchclean(out, "utchassis", command)
@@ -166,25 +165,24 @@ class TestSearchModel(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "utlarge", command)
         self.matchoutput(out, "utmedium", command)
+        self.matchoutput(out, "bl460cg8", command)
         self.matchclean(out, "utccissmodel", command)
         self.matchclean(out, "hs21-8853", command)
-        self.matchclean(out, "bl260c", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
         self.matchclean(out, "utchassis", command)
 
     def test_200_search_disk_size(self):
-        command = ["search_model", "--disksize", "36"]
+        command = ["search_model", "--disksize", "600"]
         out = self.commandtest(command)
-        self.matchoutput(out, "hp/bl260c", command)
-        self.matchoutput(out, "dell/poweredge_6650", command)
+        self.matchoutput(out, "hp/dl360g9", command)
+        self.matchoutput(out, "dell/r730", command)
         self.matchclean(out, "utlarge", command)
         self.matchclean(out, "utmedium", command)
         self.matchclean(out, "utccissmodel", command)
         self.matchclean(out, "hs21-8853", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "utchassis", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchModel)

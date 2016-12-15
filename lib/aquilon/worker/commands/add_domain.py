@@ -18,8 +18,7 @@
 
 import os.path
 
-from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
-                                 InternalError, ProcessException)
+from aquilon.exceptions_ import ArgumentError, InternalError, ProcessException
 from aquilon.aqdb.model import Domain, Branch
 from aquilon.utils import remove_dir
 from aquilon.worker.broker import BrokerCommand
@@ -31,12 +30,8 @@ class CommandAddDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, logger, dbuser, domain, track, start,
-               change_manager, comments, allow_manage, **_):
-        if not dbuser:
-            raise AuthorizationException("Cannot create a domain without "
-                                         "an authenticated connection.")
-
+    def render(self, session, logger, domain, track, start, change_manager,
+               comments, allow_manage, **_):
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
             if getattr(dbtracked, "tracked_branch", None):
@@ -52,7 +47,7 @@ class CommandAddDomain(BrokerCommand):
                 start = self.config.get("broker", "default_domain_start")
             dbstart = Branch.get_unique(session, start, compel=True)
 
-        dbdomain = add_branch(session, self.config, dbuser, Domain, domain,
+        dbdomain = add_branch(session, self.config, Domain, domain,
                               tracked_branch=dbtracked,
                               requires_change_manager=bool(change_manager),
                               comments=comments, allow_manage=allow_manage)

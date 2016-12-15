@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015  Contributor
+# Copyright (C) 2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
+from aquilon.worker.dbwrappers.cluster import get_cluster_location_preference
 from aquilon.worker.locks import CompileKey, PlenaryKey
 
 
@@ -64,6 +65,12 @@ class PlenaryMetaClusterData(StructurePlenary):
         dbloc = self.dbobj.location_constraint
         add_location_info(lines, dbloc, prefix="system/metacluster/")
         pan_assign(lines, "system/metacluster/sysloc/location", dbloc.sysloc())
+
+        preferred_location = get_cluster_location_preference(self.dbobj)
+        if preferred_location:
+            path = "system/metacluster/preferred_location"
+            path = path + "/" + preferred_location.location_type
+            pan_assign(lines, path, preferred_location.name)
 
         lines.append("")
 

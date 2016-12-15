@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq del city`."""
 
+from aquilon.aqdb.model import City
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.commands.del_location import CommandDelLocation
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -28,7 +28,7 @@ class CommandDelCity(CommandDelLocation):
     required_parameters = ["city"]
 
     def render(self, session, logger, city, **arguments):
-        dbcity = get_location(session, city=city)
+        dbcity = City.get_unique(session, city, compel=True)
 
         name = dbcity.name
         country = dbcity.country.name

@@ -383,7 +383,6 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
-        #self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
         self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="unittest")))
@@ -426,14 +425,19 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.assertEqual(host.ip, str(self.net["tor_net_0"].usable[3]))
         self.assertEqual(host.mac, self.net["tor_net_0"].usable[3].mac)
         self.assertEqual(host.machine.name, "ut8s02p3")
-        self.assertEqual(len(host.machine.interfaces), 2)
+        self.assertEqual(len(host.machine.interfaces), 3)
+        eth0_net = self.net["tor_net_0"]
+        mgmt_net = self.net["ut8_oob"]
         for i in host.machine.interfaces:
             if i.device == 'eth0':
-                self.assertEqual(i.ip, str(self.net["tor_net_0"].usable[3]))
-                self.assertEqual(i.mac, self.net["tor_net_0"].usable[3].mac)
+                self.assertEqual(i.ip, str(eth0_net.usable[3]))
+                self.assertEqual(i.mac, eth0_net.usable[3].mac)
             elif i.device == 'eth1':
                 # Skipping IP test to avoid merge conflict
                 self.assertEqual(i.mac, "")
+            elif i.device == 'mgmt0':
+                self.assertEqual(i.ip, str(mgmt_net.usable[3]))
+                self.assertEqual(i.mac, str(mgmt_net.usable[3].mac))
             else:
                 self.fail("Unrecognized interface '%s'" % i.device)
 

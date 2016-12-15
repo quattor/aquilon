@@ -23,15 +23,18 @@
 
 """
 
-import ms.version
-
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.5.0')
-ms.version.addpkg('zope.interface', '3.6.1')
-ms.version.addpkg('twisted', '12.0.0')
-ms.version.addpkg('coverage', '3.6')
-ms.version.addpkg('ipaddr', '2.1.9')
-ms.version.addpkg('mako', '0.7.2')
-ms.version.addpkg('cdb', '0.34')
-ms.version.addpkg('six', '1.7.3')
-ms.version.addpkg('jsonschema', '2.3.0')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('setuptools', '0.6c11')
+    ms.version.addpkg('protobuf', '2.5.0')
+    ms.version.addpkg('zope.interface', '3.6.1')
+    ms.version.addpkg('twisted', '12.0.0')
+    ms.version.addpkg('coverage', '3.6')
+    ms.version.addpkg('ipaddr', '2.1.9')
+    ms.version.addpkg('mako', '0.7.2')
+    ms.version.addpkg('cdb', '0.34')
+    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('jsonschema', '2.3.0')

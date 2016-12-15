@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 from sqlalchemy import Column, ForeignKey
 
-from aquilon.aqdb.model import Location, Hub, Company
+from aquilon.aqdb.model import Location, Hub, Organization
 
 _TN = 'continent'
 
@@ -28,7 +28,7 @@ class Continent(Location):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    valid_parents = [Hub, Company]
+    valid_parents = [Hub, Organization]
 
     id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 

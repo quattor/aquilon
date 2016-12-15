@@ -30,7 +30,7 @@ from sqlalchemy.sql.functions import coalesce
 from aquilon.exceptions_ import InternalError, AquilonError
 from aquilon.aqdb.model import (Base, Location, Desk, Rack, Room, Bunker,
                                 Building, City, Campus, Country, Continent, Hub,
-                                Company, ServiceInstance, Network, Personality,
+                                Organization, ServiceInstance, Network, Personality,
                                 PersonalityServiceListItem, HostEnvironment)
 
 _TN = 'service_map'
@@ -50,7 +50,7 @@ _LOCATION_PRIORITY = {
     Country: 1600,
     Continent: 1700,
     Hub: 1800,
-    Company: 1900,
+    Organization: 1900,
 }
 
 # NOTE: The actual value here is unimportant, what matters is the order wrt.

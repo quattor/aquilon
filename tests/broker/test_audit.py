@@ -95,7 +95,7 @@ class TestAudit(TestBrokerCommand):
         self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
-            self.searchoutput(m.group('args'), "--[a-z]+='ut'", line)
+            self.searchoutput(m.group('args'), "--[a-z_]+='ut'", line)
 
     def test_200_argument(self):
         command = ["search_audit", "--argument", "member_personality",

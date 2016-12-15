@@ -97,7 +97,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search_personality", "--host_environment", "dev",
                    "--personality_stage", "current",
                    "--eon_id", 2, "--format=proto"]
-        personalities = self.protobuftest(command, expect=15)
+        personalities = self.protobuftest(command, expect=14)
         pers_by_name_ver = defaultdict(dict)
         for p in personalities:
             pers_by_name_ver[p.name][p.stage] = p
@@ -173,9 +173,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'matching Options with different values:\s+Environment value=dev, othervalue=prod',
-                          command)
-        self.searchoutput(out,
-                          r'missing Options in Personality vmhost/vulcan-10g-server-prod:\s+ConfigOverride',
                           command)
 
     def test_200_no_match(self):

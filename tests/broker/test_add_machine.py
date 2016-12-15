@@ -35,7 +35,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                         "--chassis", "ut3c5", "--slot", 10,
                         "--model", "hs21-8853",
                         "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon_2660",
+                        "--cpuname", "e5-2660",
                         "--memory", "8192", "--serial", "99C5553",
                         "--comments", "Some machine comments"])
         self.events_verify()
@@ -55,10 +55,10 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Building: ut
               Campus: ny
               City: ny
-              Organization: ms
               Continent: na
               Country: us
               Hub: ny
+              Organization: ms
               Rack: ut3
                 Row: a
                 Column: 3
@@ -69,7 +69,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Comments: Some machine comments
               Chassis: ut3c5.aqd-unittest.ms.com
               Slot: 10
-              Cpu: xeon_2660 x 2
+              Cpu: e5-2660 x 2
               Memory: 8192 MB
               Disk: sda 68 GB scsi (local) [boot]
             """, command)
@@ -102,8 +102,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          r'create\("hardware/cpu/intel/e5-2660"\),\s*'
+                          r'create\("hardware/cpu/intel/e5-2660"\s*\)\s*\);',
                           command)
         self.matchoutput(out, '"chassis" = "ut3c5.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 10;', command)
@@ -192,7 +192,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
                         "--model", "hs21-8853", "--cpucount", "2",
-                        "--cpuvendor", "intel", "--cpuname", "xeon_2660",
+                        "--cpuvendor", "intel", "--cpuname", "e5-2660",
                         "--memory", "8192", "--serial", "KPDZ406",
                         "--uuid", "a4ceec7b-2b86-4c94-9dd5-cafbd612581a"])
         self.events_verify()
@@ -217,10 +217,10 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Building: ut
               Campus: ny
               City: ny
-              Organization: ms
               Continent: na
               Country: us
               Hub: ny
+              Organization: ms
               Rack: ut3
                 Row: a
                 Column: 3
@@ -230,7 +230,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Serial: KPDZ406
               Chassis: ut3c1.aqd-unittest.ms.com
               Slot: 3
-              Cpu: xeon_2660 x 2
+              Cpu: e5-2660 x 2
               Memory: 8192 MB
               Disk: sda 68 GB scsi (local) [boot]
               UUID: a4ceec7b-2b86-4c94-9dd5-cafbd612581a
@@ -247,7 +247,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(machine.location.col, "3")
         self.assertEqual(machine.model.vendor, "ibm")
         self.assertEqual(machine.model.name, "hs21-8853")
-        self.assertEqual(machine.cpu, "xeon_2660")
+        self.assertEqual(machine.cpu, "e5-2660")
         self.assertEqual(machine.memory, 8192)
         self.assertEqual(machine.cpu_count, 2)
         self.assertEqual(machine.serial_no, "KPDZ406")
@@ -280,8 +280,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          r'create\("hardware/cpu/intel/e5-2660"\),\s*'
+                          r'create\("hardware/cpu/intel/e5-2660"\s*\)\s*\);',
                           command)
         self.matchoutput(out,
                          '"uuid" = "a4ceec7b-2b86-4c94-9dd5-cafbd612581a";',
@@ -301,7 +301,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ407", command)
 
@@ -320,8 +320,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          r'create\("hardware/cpu/intel/e5-2660"\),\s*'
+                          r'create\("hardware/cpu/intel/e5-2660"\s*\)\s*\);',
                           command)
 
     def test_160_add_cciss_machine(self):
@@ -335,7 +335,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
-        self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2640 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local) [boot]", command)
 
@@ -364,7 +364,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_171_addut3s01p2(self):
         self.event_add_hardware('ut3s01p2')
         self.noouttest(["add", "machine", "--machine", "ut3s01p2",
-                        "--rack", "ut3", "--model", "poweredge_6650"])
+                        "--rack", "ut3", "--model", "r730"])
         self.events_verify()
 
     def test_175_show_ut3s01p2(self):
@@ -376,7 +376,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_180_add_ut3s01p1(self):
         self.event_add_hardware('ut3s01p1')
         self.noouttest(["add", "machine", "--machine", "ut3s01p1",
-                        "--rack", "ut3", "--model", "poweredge_6650"])
+                        "--rack", "ut3", "--model", "r730"])
         self.events_verify()
 
     def test_181_show_ut3s01p1(self):
@@ -386,20 +386,20 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: rackmount", command)
 
     # When doing an end-to-end test, these entries should be
-    # created as part of a sweep of a Verari rack
+    # created as part of a sweep of a rack
     # (ut01ga1s02.aqd-unittest.ms.com).
-    def test_190_add_verari_ut8(self):
+    def test_190_add_ut8(self):
         net = self.net["tor_net_0"]
         for port in range(1, 6):
             machine = "ut8s02p%d" % port
-            self.create_machine(machine, "vb1205xm", rack="ut8",
+            self.create_machine(machine, "dl360g9", rack="ut8",
                                 eth0_mac=net.usable[port].mac)
 
     def test_191_add_ut_no_rack(self):
         # A machine that's not in a rack
         self.event_add_hardware('utnorack')
         self.noouttest(["add", "machine", "--machine", "utnorack",
-                        "--desk", "utdesk1", "--model", "poweredge_6650"])
+                        "--desk", "utdesk1", "--model", "r730"])
         self.events_verify()
 
     def test_192_show_utnorack(self):
@@ -412,7 +412,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_192_show_utnorack_csv(self):
         command = ["show_machine", "--machine", "utnorack", "--format", "csv"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utnorack,,ut,dell,poweredge_6650,", command)
+        self.matchoutput(out, "utnorack,,ut,dell,r730,", command)
 
     def test_193_add_f5test(self):
         ip = DummyIP(self.net["f5test"].ip)
@@ -441,7 +441,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_230_reject_missing_memory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
                    "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
-                   "--cpuvendor", "intel", "--cpuname", "xeon_2500",
+                   "--cpuvendor", "intel", "--cpuname", "e5-2640",
                    "--serial", "AAAAAAA"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -481,7 +481,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                    "--chassis", "ut3c5", "--slot", 10,
                    "--model", "hs21-8853",
                    "--cpucount", "2", "--cpuvendor", "intel",
-                   "--cpuname", "xeon_2660",
+                   "--cpuname", "e5-2660",
                    "--memory", "8192"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

@@ -162,7 +162,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-            self.matchoutput(out, "Cpu: xeon_5150 x 1", command)
+            self.matchoutput(out, "Cpu: l5520 x 1", command)
             self.matchoutput(out, "Memory: 8192 MB", command)
             self.searchoutput(out,
                               r"Interface: eth0 00:50:56:01:20:%02x \[boot, default_route\]"
@@ -191,7 +191,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cpu" = list\(\s*'
-                              r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
+                              r'create\("hardware/cpu/intel/l5520"\)\s*\);',
                               command)
             self.searchoutput(out,
                               r'"cards/nic/eth0" = '
@@ -496,7 +496,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               command)
             self.searchoutput(out,
                               r'"cpu" = list\(\s*'
-                              r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
+                              r'create\("hardware/cpu/intel/l5520"\)\s*\);',
                               command)
             self.searchoutput(out,
                               r'"cards/nic/eth0" = '

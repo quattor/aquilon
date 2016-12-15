@@ -52,21 +52,19 @@ class TestAddDomain(TestBrokerCommand):
               Tracking: sandbox utsandbox
               Rollback commit: None
               Validated: True
-              Owner: %(principal)s
               Compiler: %(compiler)s
               Requires Change Manager: False
               May Contain Hosts/Clusters: False
               Archived: False
               Comments: aqd unit test tracking domain
-            """ % {"principal": self.principal,
-                   "compiler": self.config.get("panc", "pan_compiler")},
-            command)
+            """ % {"compiler": self.config.get("panc", "pan_compiler")},
+                           command)
 
     def test_115_verify_unittest_proto(self):
         command = ["show_domain", "--domain=unittest", "--format", "proto"]
         domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "unittest")
-        self.assertEqual(domain.owner, self.principal)
+        self.assertEqual(domain.owner, "")
         self.assertEqual(domain.tracked_branch, "utsandbox")
         self.assertEqual(domain.type, domain.DOMAIN)
         self.assertEqual(domain.allow_manage, False)
@@ -85,14 +83,12 @@ class TestAddDomain(TestBrokerCommand):
               Tracking: domain prod
               Rollback commit: None
               Validated: True
-              Owner: %(principal)s
               Compiler: %(compiler)s
               Requires Change Manager: False
               May Contain Hosts/Clusters: True
               Archived: False
-            """ % {"principal": self.principal,
-                   "compiler": self.config.get("panc", "pan_compiler")},
-            command)
+            """ % {"compiler": self.config.get("panc", "pan_compiler")},
+                           command)
 
     def test_120_add_deployable(self):
         command = ["add_domain", "--domain=deployable", "--start=prod"]
@@ -156,15 +152,6 @@ class TestAddDomain(TestBrokerCommand):
     def test_210_verifysearchchm(self):
         command = ["search", "domain", "--change_manager"]
         self.noouttest(command)
-
-    def test_210_verifysearchowner(self):
-        command = ["search", "domain", "--owner", self.principal]
-        out = self.commandtest(command)
-        self.matchoutput(out, "unittest", command)
-        self.matchoutput(out, "prod", command)
-        self.matchoutput(out, "ut-prod", command)
-        self.matchoutput(out, "deployable", command)
-        self.matchclean(out, "utsandbox", command)
 
     def test_300_invalidtrack(self):
         command = ["add_domain", "--domain=notvalid-prod", "--track=prod",

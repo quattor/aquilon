@@ -1,0 +1,8 @@
+ALTER TABLE sandbox ADD owner_id INTEGER;
+UPDATE sandbox SET owner_id = (SELECT owner_id FROM branch WHERE branch.id = sandbox.branch_id);
+ALTER TABLE sandbox MODIFY (owner_id CONSTRAINT sandbox_owner_id_nn NOT NULL);
+ALTER TABLE sandbox ADD CONSTRAINT sandbox_user_principal_fk FOREIGN KEY (owner_id) REFERENCES user_principal (id);
+ALTER TABLE branch DROP COLUMN owner_id;
+CREATE INDEX sandbox_owner_idx ON sandbox (owner_id);
+
+QUIT;

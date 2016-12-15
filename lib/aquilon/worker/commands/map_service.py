@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ class CommandMapService(BrokerCommand):
             dbenv = HostEnvironment.get_instance(session, host_environment)
             if isinstance(dbenv, Production):
                 enforce_justification(user, justification, reason)
+        else:
+            enforce_justification(user, justification, reason)
 
         q = session.query(ServiceMap)
         q = q.filter_by(service_instance=dbinstance,

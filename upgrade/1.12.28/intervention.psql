@@ -1,0 +1,1 @@
+ALTER TABLE INTERVENTION RENAME COLUMN justification TO reason;

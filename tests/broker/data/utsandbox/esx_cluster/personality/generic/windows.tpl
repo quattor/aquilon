@@ -1,3 +1,0 @@
-structure template personality/generic/windows;
-
-"windows" = list( nlist("day", "Fri", "start", "23:00", "duration", 48), );

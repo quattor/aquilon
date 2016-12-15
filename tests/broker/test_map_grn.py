@@ -68,12 +68,8 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(personality.name, "compileserver")
         self.assertEqual(personality.owner_eonid,
                          self.grns["grn:/ms/ei/aquilon/unittest"])
-        self.assertEqual(personality.eonid_maps[0].target, 'atarget')
-        self.assertEqual(personality.eonid_maps[0].eonid, 6)
-        self.assertEqual(personality.eonid_maps[1].target, 'esp')
-        self.assertEqual(personality.eonid_maps[1].eonid, 2)
-        self.assertEqual(personality.eonid_maps[2].target, 'esp')
-        self.assertEqual(personality.eonid_maps[2].eonid, 3)
+        grns = set((rec.target, rec.eonid) for rec in personality.eonid_maps)
+        self.assertEqual(grns, set([('atarget', 6), ('esp', 2), ('esp', 3)]))
 
     def test_115_verify_diff(self):
         command = ["show_diff", "--archetype", "aquilon",
@@ -114,6 +110,19 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["map", "grn", "--grn", "grn:/example/cards",
                    "--hostname", "unittest00.one-nyp.ms.com", "--target", "atarget"]
         self.noouttest(command)
+
+    def test_135_show_unitesst00_grns(self):
+        ip = self.net["unknown0"].usable[2]
+        command = ["show_host", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--grns"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Primary Name: unittest00.one-nyp.ms.com [%s]
+              Owned by GRN: grn:/ms/ei/aquilon/unittest [inherited]
+              Used by GRN: grn:/example/cards [target: atarget]
+              Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]
+              Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp, inherited]
+            """ % ip, command)
 
     def test_140_search(self):
         command = ["search", "host", "--grn", "grn:/ms/ei/aquilon/aqd"]
@@ -175,7 +184,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN is mapped to the personality only
-        self.check_grns(out, {"esp": self.grn_list}, command)
+        self.matchclean(out, "eon_id_maps", command)
 
     def test_220_verify_unittest12(self):
         command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
@@ -255,23 +264,21 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
-        self.check_grns(out, {"esp": [self.grn_list[1]]}, command)
+        self.matchclean(out, "eon_id_maps/esp", command)
 
     def test_410_verify_unittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the personality only
-        self.check_grns(out, {"esp": ["grn:/ms/ei/aquilon/unittest"]},
-                        command)
+        self.matchclean(out, "eon_id_maps", command)
 
     def test_420_verify_unittest12(self):
         command = ["cat", "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--data", "--generate"]
         out = self.commandtest(command)
         # The GRN was mapped to the host only
-        self.check_grns(out, {"esp": ["grn:/ms/ei/aquilon/unittest"]},
-                        command)
+        self.matchclean(out, "eon_id_maps", command)
 
     def test_500_fail_map_overlimitlist(self):
         hostlimit = self.config.getint("broker", "map_grn_max_list_size")
@@ -428,14 +435,14 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
             command = ["show_host", "--hostname", host, "--grns"]
             out = self.commandtest(command)
             self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
-            self.matchclean(out, "Used by GRN: grn:/ms/ei/aquilon/aqd", command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp, inherited]", command)
 
         command = ["unmap", "grn", "--clearall", "--membersof", cluster, "--target", "esp"]
         self.statustest(command)
         for host in hosts:
             command = ["show_host", "--hostname", host, "--grns"]
             out = self.commandtest(command)
-            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp] [inherited]", command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp, inherited]", command)
 
 
 if __name__ == '__main__':

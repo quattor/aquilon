@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelRouterAddress(TestBrokerCommand):
 
     def test_100_del_router_by_ip(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["del", "router", "address", "--ip", net.gateway]
         self.noouttest(command)
 
@@ -61,7 +61,7 @@ class TestDelRouterAddress(TestBrokerCommand):
         command = ["show", "router", "address", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, str(self.net["tor_net_12"].gateway), command)
-        self.matchclean(out, str(self.net["verari_eth1"].gateway), command)
+        self.matchclean(out, str(self.net["ut10_eth1"].gateway), command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRouterAddress)

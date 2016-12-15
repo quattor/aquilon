@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.aqdb.model import OperatingSystem, Archetype
+from aquilon.aqdb.model import (OperatingSystem, Archetype,
+                                AssetLifecycle)
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -23,7 +24,7 @@ class CommandUpdateOS(BrokerCommand):
 
     required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, osname, osversion, archetype, comments, **_):
+    def render(self, session, osname, osversion, archetype, lifecycle, comments, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,
@@ -31,6 +32,10 @@ class CommandUpdateOS(BrokerCommand):
 
         if comments is not None:
             dbos.comments = comments
+
+        if lifecycle:
+            dblifecycle = AssetLifecycle.get_instance(session, lifecycle)
+            dbos.lifecycle.transition(dbos, dblifecycle)
 
         session.flush()
 

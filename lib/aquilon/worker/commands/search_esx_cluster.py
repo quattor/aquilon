@@ -57,4 +57,5 @@ class CommandSearchESXCluster(CommandSearchCluster):
                                            sandbox_author=None,
                                            esx_metacluster=None,
                                            grouped_with=None,
+                                           preferred_building=None,
                                            **gen_arguments)

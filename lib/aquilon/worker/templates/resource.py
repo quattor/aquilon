@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ class PlenaryResource(StructurePlenary):
                            StructureTemplate(res_path))
 
     def body_reboot_iv(self, lines):
-        pan_assign(lines, "justification", self.dbobj.justification)
+        pan_assign(lines, "justification", self.dbobj.reason)
         self.body_intervention(lines)
 
     def body_service_address(self, lines):

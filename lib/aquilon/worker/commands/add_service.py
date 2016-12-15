@@ -25,10 +25,14 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, need_client_list, comments, **_):
+    def render(self, session, dbuser, logger, service, need_client_list, comments, allow_alias_bindings, **_):
         Service.get_unique(session, service, preclude=True)
+
+        if dbuser.role.name != 'aqd_admin' and allow_alias_bindings is not None:
+            raise AuthorizationException("Only AQD admin can set allowing alias bindings")
+
         dbservice = Service(name=service, comments=comments,
-                            need_client_list=need_client_list)
+                            need_client_list=need_client_list, allow_alias_bindings=allow_alias_bindings)
         session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)

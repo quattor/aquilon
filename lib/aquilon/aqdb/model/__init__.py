@@ -19,6 +19,7 @@ import aquilon.aqdb.depends
 
 from aquilon.aqdb.model.base import Base, SingleInstanceMixin
 from aquilon.aqdb.model.stateengine import StateEngine
+from aquilon.aqdb.model.lifecycleengine import LifecycleEngine
 
 # AUTHORIZATION
 from aquilon.aqdb.model.role import Role
@@ -32,7 +33,7 @@ from aquilon.aqdb.model.dns_domain import DnsDomain
 
 # LOCATION
 from aquilon.aqdb.model.location import Location
-from aquilon.aqdb.model.company import Company
+from aquilon.aqdb.model.organization import Organization
 from aquilon.aqdb.model.hub import Hub
 from aquilon.aqdb.model.continent import Continent
 from aquilon.aqdb.model.country import Country
@@ -70,6 +71,7 @@ from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.host_environment import HostEnvironment
 from aquilon.aqdb.model.personality import (Personality, PersonalityGrnMap,
                                             PersonalityStage)
+from aquilon.aqdb.model.asset_lifecycle import AssetLifecycle
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
 # HARDWARE
@@ -109,6 +111,7 @@ from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 
 # CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
+from aquilon.aqdb.model.building_preference import BuildingPreference
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,

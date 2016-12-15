@@ -136,6 +136,8 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'Following required parameters have not been specified:\s*'
                           r'Parameter Definition: windows \[required\]\s*'
                           r'Type: json\s*'
+                          r'Schema: {\s*'
+                          r'(^    .*\n)+\s*'
                           r'Template: windows\s*'
                           r'Activation: dispatch\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'

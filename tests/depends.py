@@ -16,13 +16,16 @@
 # limitations under the License.
 """ Load testing dependencies onto sys.path via ms.version """
 
-import ms.version
-
-ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('coverage', '3.6')
-ms.version.addpkg('nose', '1.3.0')
-ms.version.addpkg('lxml', '3.2.5')
-ms.version.addpkg('ipaddr', '2.1.9')
-ms.version.addpkg('dateutil', '1.5')
-ms.version.addpkg('six', '1.7.3')
-ms.version.addpkg('jsonschema', '2.3.0')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('setuptools', '0.6c11')
+    ms.version.addpkg('coverage', '3.6')
+    ms.version.addpkg('nose', '1.3.0')
+    ms.version.addpkg('lxml', '3.2.5')
+    ms.version.addpkg('ipaddr', '2.1.9')
+    ms.version.addpkg('dateutil', '1.5')
+    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('jsonschema', '2.3.0')

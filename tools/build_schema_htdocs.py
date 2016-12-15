@@ -24,6 +24,7 @@
 
 ###############################################################################
 
+import argparse
 import os
 import sys
 
@@ -34,8 +35,6 @@ sys.path.insert(0, _LIBDIR)
 import aquilon.aqdb.depends
 
 ###############################################################################
-
-import argparse
 
 parser = argparse.ArgumentParser(description='generate schema graphs')
 parser.add_argument('--outputdir', '-o', dest='dir',
@@ -56,8 +55,12 @@ config = Config(configfile=lookup_file_path('aqd.conf.mem'))
 
 ###############################################################################
 
-import ms.modulecmd
-ms.modulecmd.load("fsf/graphviz/2.6")
+try:
+    import ms.modulecmd
+except ImportError:
+    pass
+else:
+    ms.modulecmd.load("fsf/graphviz/2.6")
 
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
@@ -88,7 +91,7 @@ from sqlalchemy import orm
 model_group = {
     'locations': {
         'title': 'Location Information',
-        'classes': [Location, LocationLink, Company, Hub, Continent, Country,
+        'classes': [Location, LocationLink, Organization, Hub, Continent, Country,
                     City, Campus, Building, Room, Desk, Bunker, Rack],
     },
     'hardware': {
@@ -141,7 +144,8 @@ model_group = {
                     MetaCluster, __MetaClusterMember,
                     ClusterLifecycle, __ClusterAllowedPersonality,
                     VirtualSwitch, __VSwitchClusterAssignment,
-                    __VSwitchPGAssignment],
+                    __VSwitchPGAssignment,
+                    BuildingPreference],
     },
     'network': {
         'title': 'Network',

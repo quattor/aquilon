@@ -42,20 +42,20 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--comments", "Some personality comments"]
         self.noouttest(command)
         self.verifycatpersonality("aquilon", "utunused/dev", True, "dev",
-                                  grn=GRN)
+                                  grn=GRN, stage="next")
         for plenary in ("config", "espinfo"):
             self.check_plenary_exists("aquilon", "personality",
-                                      "utunused/dev", plenary)
+                                      "utunused/dev+next", plenary)
 
     def test_105_verify_utunused(self):
         command = ["show_personality", "--personality=utunused/dev",
-                   "--archetype=aquilon"]
+                   "--archetype=aquilon", "--personality_stage=next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
-        self.matchclean(out, "Stage:", command)
+        self.matchoutput(out, "Stage: next", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s [target: esp]" % GRN, command)
@@ -63,11 +63,12 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_105_verify_utunused_proto(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=utunused/dev", "--format=proto"]
+                   "--personality=utunused/dev", "--personality_stage=next",
+                   "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "utunused/dev")
-        self.assertEqual(personality.stage, "")
+        self.assertEqual(personality.stage, "next")
         self.assertEqual(personality.config_override, True)
         self.assertEqual(personality.cluster_required, False)
         self.assertEqual(personality.comments, "Some personality comments")
@@ -77,7 +78,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_120_add_netinfra(self):
         command = ["add_personality", "--personality=generic",
                    "--archetype=netinfra", "--eon_id=10",
-                   "--host_environment=dev"]
+                   "--host_environment=dev", "--unstaged"]
         self.noouttest(command)
 
     def test_125_add_utpers_dev(self):
@@ -106,7 +107,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_130_add_windows_desktop(self):
         command = ["add", "personality", "--personality", "desktop",
                    "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
-                   "--host_environment", "dev"]
+                   "--host_environment", "dev", "--unstaged"]
         self.noouttest(command)
         self.verifycatpersonality("windows", "desktop")
 
@@ -120,7 +121,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         # This personality is 'bad' because no required parameters will be set
         # up for it, so anything using it will fail to compile.
         command = ["add_personality", "--personality=badpersonality",
-                   "--host_environment=dev",
+                   "--host_environment=dev", "--unstaged",
                    "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
@@ -135,7 +136,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         # This personality is double 'bad'... there will be a required
         # service for the personality that has no instances.
         command = ["add_personality", "--personality=badpersonality2",
-                   "--host_environment=dev",
+                   "--host_environment=dev", "--unstaged",
                    "--archetype=aquilon", "--eon_id=2"]
         self.noouttest(command)
 
@@ -149,14 +150,14 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_150_add_selective_name_match_env(self):
         command = ["add_personality", "--personality", "ec-infra-auth",
-                   "--host_environment", "infra",
+                   "--host_environment", "infra", "--unstaged",
                    "--archetype", "vmhost", "--eon_id=2"]
         self.successtest(command)
 
     def test_155_add_camelcase(self):
         self.noouttest(["add_personality", "--personality", "CaMeLcAsE",
                         "--host_environment=dev", "--archetype", "aquilon",
-                        "--eon_id=2"])
+                        "--eon_id=2", "--unstaged"])
         self.check_plenary_exists("aquilon", "personality", "camelcase",
                                   "config")
         self.check_plenary_gone("aquilon", "personality", "CaMeLcAsE", "config",
@@ -164,7 +165,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_160_add_esx_server(self):
         command = ["add_personality", "--cluster_required", "--eon_id=2",
-                   "--host_environment=dev",
+                   "--host_environment=dev", "--unstaged",
                    "--personality=esx_server", "--archetype=vmhost"]
         self.noouttest(command)
         self.verifycatpersonality("vmhost", "esx_server",
@@ -175,7 +176,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, "Requires clustered hosts", command)
 
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
-                   "--personality=esx_server", "--archetype=esx_cluster"]
+                   "--personality=esx_server", "--archetype=esx_cluster",
+                   "--unstaged"]
         self.noouttest(command)
         self.verifycatpersonality("esx_cluster", "esx_server")
 
@@ -183,7 +185,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         # Can't use create_personality() here, because the --cluster_required
         # flag is intentionally missing.
         command = ["add_personality", "--personality=esx_standalone",
-                   "--host_environment=dev",
+                   "--host_environment=dev", "--unstaged",
                    "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
         self.verifycatpersonality("vmhost", "esx_standalone",
@@ -202,30 +204,32 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_170_add_grid_personality(self):
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
-                   "--personality=hadoop", "--archetype=gridcluster"]
+                   "--personality=hadoop", "--archetype=gridcluster",
+                   "--unstaged"]
         self.noouttest(command)
         self.verifycatpersonality("gridcluster", "hadoop")
 
     def test_171_add_ha_personality(self):
         self.create_personality("hacluster", "hapersonality",
+                                environment="prod",
                                 grn="grn:/ms/ei/aquilon/aqd")
-        self.verifycatpersonality("hacluster", "hapersonality")
+        self.verifycatpersonality("hacluster", "hapersonality", host_env="prod")
 
     def test_172_add_generic(self):
         for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:
             self.noouttest(["add", "personality", "--personality", "generic",
-                            "--archetype", archetype,
+                            "--archetype", archetype, "--unstaged",
                             "--host_environment", "prod",
                             "--grn", "grn:/ms/ei/aquilon/unittest"])
 
     def test_173_add_aquilon_personalities(self):
         personalities = {
-            'compileserver': {},
-            'inventory': {},
+            'compileserver': {'staged': False},
+            'inventory': {'staged': False},
             'unixeng-test': {'staged': True},
             'nostage': {'staged': True},
-            'clustered': {'cluster_required': True},
-            'utpers-prod': {'environment': 'prod'},
+            'clustered': {'cluster_required': True, 'staged': False},
+            'utpers-prod': {'environment': 'prod', 'staged': False},
         }
         for personality, kwargs in personalities.items():
             self.create_personality("aquilon", personality, **kwargs)

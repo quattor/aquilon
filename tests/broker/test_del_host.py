@@ -193,7 +193,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_300_del_unittest17(self):
         self.delete_host("unittest17.aqd-unittest.ms.com",
-                         self.net["tor_net_0"].usable[3], "ut8s02p3")
+                         self.net["tor_net_0"].usable[3], "ut8s02p3",
+                         manager_ip=self.net["ut8_oob"].usable[3])
 
     def test_300_del_unittest18(self):
         self.delete_host("unittest18.aqd-unittest.ms.com",
@@ -267,37 +268,48 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             self.delete_host(hostname, net.usable[port], machine,
                              manager_ip=mgmt_net.usable[port])
 
-    def test_300_del_verari_rack_hosts(self):
-        net = self.net["verari_eth0"]
+    def test_300_del_ut10_hosts(self):
+        net = self.net["ut10_eth0"]
+        mgmt_net = self.net["ut10_oob"]
         for i in range(101, 111):
             port = i - 100
             hostname = "evh%d.aqd-unittest.ms.com" % port
             machine = "ut10s04p%d" % port
-            self.delete_host(hostname, net.usable[port], machine)
+            self.delete_host(hostname, net.usable[port], machine,
+                             manager_ip=mgmt_net.usable[port])
 
     def test_300_del_10gig_rack_hosts(self):
         net = self.net["vmotion_net"]
         for i in range(1, 25):
             hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
             if i < 13:
+                port = i
                 machine = "ut11s01p%d" % i
+                mgmt_net = self.net["ut11_oob"]
             else:
+                port = i - 12
                 machine = "ut12s02p%d" % (i - 12)
-            self.delete_host(hostname, net.usable[i + 1], machine)
+                mgmt_net = self.net["ut12_oob"]
+            self.delete_host(hostname, net.usable[i + 1], machine,
+                             manager_ip=mgmt_net[port])
 
     def test_300_del_utmc8_hosts(self):
         self.delete_host("evh80.aqd-unittest.ms.com",
                          self.net["ut14_net"].usable[0], "ut14s1p0",
-                         eth1_ip=self.net["vm_storage_net"].usable[26])
+                         eth1_ip=self.net["vm_storage_net"].usable[26],
+                         manager_ip=self.net["ut14_oob"].usable[0])
         self.delete_host("evh81.aqd-unittest.ms.com",
                          self.net["ut14_net"].usable[1], "ut14s1p1",
-                         eth1_ip=self.net["vm_storage_net"].usable[27])
+                         eth1_ip=self.net["vm_storage_net"].usable[27],
+                         manager_ip=self.net["ut14_oob"].usable[1])
 
     def test_300_del_utmc9_hosts(self):
         self.delete_host("evh82.aqd-unittest.ms.com",
-                         self.net["ut14_net"].usable[2], "ut14s1p2")
+                         self.net["ut14_net"].usable[2], "ut14s1p2",
+                         manager_ip=self.net["ut14_oob"].usable[2])
         self.delete_host("evh83.aqd-unittest.ms.com",
-                         self.net["ut14_net"].usable[3], "ut14s1p3")
+                         self.net["ut14_net"].usable[3], "ut14s1p3",
+                         manager_ip=self.net["ut14_oob"].usable[3])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

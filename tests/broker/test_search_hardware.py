@@ -42,25 +42,25 @@ class TestSearchHardware(TestBrokerCommand):
                          command)
 
     def testmodelavailablefull(self):
-        command = "search hardware --model poweredge_6650 --fullinfo"
+        command = "search hardware --model r730 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3s01p1", command)
 
     def testmodelvendorconflict(self):
-        command = "search hardware --model vb1205xm --vendor dell"
+        command = "search hardware --model dl360g9 --vendor dell"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model vb1205xm, vendor dell not found.",
+        self.matchoutput(out, "Model dl360g9, vendor dell not found.",
                          command)
 
     def testmodelmachinetypeconflict(self):
-        command = ["search_hardware", "--model=vb1205xm",
+        command = ["search_hardware", "--model=dl360g9",
                    "--machine_type=virtual_machine"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Model vb1205xm, model_type "
+        self.matchoutput(out, "Model dl360g9, model_type "
                          "virtual_machine not found.", command)
 
     def testvendoravailable(self):
-        command = "search hardware --vendor verari"
+        command = "search hardware --vendor hp"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut8s02p1", command)
         self.matchoutput(out, "ut8s02p2", command)
@@ -75,7 +75,9 @@ class TestSearchHardware(TestBrokerCommand):
     def testmachinetypeavailable(self):
         command = "search hardware --machine_type blade"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "ut8s02p1", command)
+        self.matchoutput(out, "ut3c1n3", command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.matchoutput(out, "ut9s03p1", command)
 
     def testmachinetypeunavailable(self):
         command = "search hardware --machine_type machine_type-does-not-exist"

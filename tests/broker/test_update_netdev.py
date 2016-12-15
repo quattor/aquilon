@@ -30,7 +30,7 @@ from netdevtest import VerifyNetworkDeviceMixin
 class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     def test_100_update_ut3gd1r04(self):
-        newip = self.net["verari_eth1"].usable[1]
+        newip = self.net["ut10_eth1"].usable[1]
         self.dsdb_expect_update("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip,
                                 comments="Some new switch comments")
         command = ["update", "network_device", "--type", "bor",
@@ -47,8 +47,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
     def test_105_verify_ut3gd1r04(self):
         self.verifynetdev("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
-                          ip=self.net["verari_eth1"].usable[1],
-                          mac=self.net["verari_eth1"].usable[0].mac,
+                          ip=self.net["ut10_eth1"].usable[1],
+                          mac=self.net["ut10_eth1"].usable[0].mac,
                           interface="xge49",
                           comments="Some new switch comments")
 
