@@ -29,7 +29,7 @@ class CommandAddInterfaceSwitch(CommandAddInterfaceNetworkDevice):
         self.deprecated_option("switch", "Please use --network_device "
                                "instead.", **arguments)
         if type:
-            self.deprecated_option("type", "Please use --iftype"
+            self.deprecated_option("type", "Please use --iftype "
                                    "instead.", **arguments)
             iftype = type
 
