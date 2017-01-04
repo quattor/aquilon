@@ -82,10 +82,15 @@ class TestOrganization(TestBrokerCommand):
         self.matchoutput(out, "Organization example2 not found.", command)
 
     def test_230_del_notexist(self):
-        command = "del organization --organization org-does-not-exist"
+        command = "del organization --organization org-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Organization org-does-not-exist not found.",
+        self.matchoutput(out, "Organization org-not-exist not found.",
                          command)
+
+    def test_231_del_toolongnotexist(self):
+        command = "del organization --organization org-long-does-not-exist"
+        out = self.internalerrortest(command.split(" "))
+        self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def test_300_verify_example2(self):
         command = "show organization --organization example2"

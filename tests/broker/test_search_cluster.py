@@ -125,11 +125,17 @@ class TestSearchCluster(TestBrokerCommand):
         self.matchoutput(out, "utstorage2", command)
         self.matchclean(out, "utstorages2", command)  # bu
 
+    def testclusterlocationtoolong(self):
+        command = ["search_cluster",
+                   "--cluster_building=building-too-long-does-not-exist"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "is more than the maximum 16 allowed.", command)
+
     def testclusterlocationunavailable(self):
         command = ["search_cluster",
-                   "--cluster_building=building-does-not-exist"]
+                   "--cluster_building=bldg-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Building building-does-not-exist not found",
+        self.matchoutput(out, "Building bldg-not-exist not found",
                          command)
 
     def testallowedpersonalityavailable(self):
