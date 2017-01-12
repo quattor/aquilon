@@ -47,7 +47,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         if db_paramdef.default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         dbfeature.param_def_holder.param_definitions.remove(db_paramdef)

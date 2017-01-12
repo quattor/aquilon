@@ -82,7 +82,7 @@ class CommandDeploy(BrokerCommand):
             #    logger.warning("Warning: this deployment request was not "
             #                   "approved, this will be an error in the future.")
 
-            validate_justification(user, justification, reason)
+            validate_justification(user, justification, reason, logger)
 
         if dbtarget.archived:
             raise ArgumentError("{0} is archived and cannot be changed."

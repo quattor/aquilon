@@ -38,7 +38,7 @@ class CommandMapService(BrokerCommand):
                                host_environment=dbenv)
             session.add(dbmap)
 
-    def render(self, session, service, instance, archetype, personality,
+    def render(self, session, logger, service, instance, archetype, personality,
                host_environment, networkip, justification, reason, user,
                **kwargs):
         dbinstance = ServiceInstance.get_unique(session, service=service,
@@ -59,13 +59,13 @@ class CommandMapService(BrokerCommand):
                                                archetype=archetype, compel=True)
 
             for dbstage in dbpersona.stages.values():
-                validate_prod_personality(dbstage, user, justification, reason)
+                validate_prod_personality(dbstage, user, justification, reason, logger)
         elif host_environment:
             dbenv = HostEnvironment.get_instance(session, host_environment)
             if isinstance(dbenv, Production):
-                enforce_justification(user, justification, reason)
+                enforce_justification(user, justification, reason, logger)
         else:
-            enforce_justification(user, justification, reason)
+            enforce_justification(user, justification, reason, logger)
 
         q = session.query(ServiceMap)
         q = q.filter_by(service_instance=dbinstance,

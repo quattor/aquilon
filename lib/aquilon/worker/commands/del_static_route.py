@@ -54,7 +54,7 @@ class CommandDelStaticRoute(BrokerCommand):
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
-            validate_prod_personality(dbstage, user, justification, reason)
+            validate_prod_personality(dbstage, user, justification, reason, logger)
             if dbstage.created_implicitly:
                 plenaries.append(Plenary.get_plenary(dbstage))
         else:

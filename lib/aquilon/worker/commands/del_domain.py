@@ -42,7 +42,7 @@ class CommandDelDomain(BrokerCommand):
                 raise AuthorizationException("Deleting a domain may lose "
                                              "history, so --justification is "
                                              "required.")
-            validate_justification(user, justification, reason)
+            validate_justification(user, justification, reason, logger)
 
             if self.config.has_option("broker", "trash_branch"):
                 merge_msg = []

@@ -31,7 +31,7 @@ class CommandAddBuildingPreference(BrokerCommand):
     def render(self, session, logger, building_pair, prefer, archetype,
                justification, reason, user, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        validate_prod_archetype(dbarchetype, user, justification, reason)
+        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
         if not dbarchetype.cluster_type:
             raise ArgumentError("{0} is not a cluster archetype."
                                 .format(dbarchetype))

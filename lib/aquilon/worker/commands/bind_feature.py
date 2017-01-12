@@ -104,11 +104,11 @@ class CommandBindFeature(BrokerCommand):
                     raise AuthorizationException("Changing feature bindings for "
                                                  "a owner_only feature where owner grns "
                                                  "do not match requires --justification.")
-                validate_justification(user, justification, reason)
+                validate_justification(user, justification, reason, logger)
             else:
-                validate_prod_personality(dbstage, user, justification, reason)
+                validate_prod_personality(dbstage, user, justification, reason, logger)
         else:
-            validate_prod_archetype(dbarchetype, user, justification, reason)
+            validate_prod_archetype(dbarchetype, user, justification, reason, logger)
 
         # Step 4: do it
         get_affected_plenaries(session, dbfeature, plenaries, **params)

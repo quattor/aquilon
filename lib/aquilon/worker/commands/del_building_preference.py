@@ -34,7 +34,7 @@ class CommandDelBuildingPreference(BrokerCommand):
                                                 archetype=archetype,
                                                 compel=True)
 
-        validate_prod_archetype(db_pref.archetype, user, justification, reason)
+        validate_prod_archetype(db_pref.archetype, user, justification, reason, logger)
 
         plenaries = PlenaryCollection(logger=logger)
         for db_clus in get_clusters_by_locations(session, (db_pref.a, db_pref.b),

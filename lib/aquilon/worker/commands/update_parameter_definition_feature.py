@@ -41,7 +41,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed
         if default is not None or clear_default:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
             db_paramdef.default = default
 

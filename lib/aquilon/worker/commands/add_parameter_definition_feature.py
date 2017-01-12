@@ -44,7 +44,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         if default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         # Activation field has been skipped on purpose

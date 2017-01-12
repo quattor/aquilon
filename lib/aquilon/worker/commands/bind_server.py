@@ -130,7 +130,7 @@ class CommandBindServer(BrokerCommand):
         dbinstance = ServiceInstance.get_unique(session, service=service,
                                                 name=instance, compel=True)
 
-        validate_prod_service_instance(dbinstance, user, justification, reason)
+        validate_prod_service_instance(dbinstance, user, justification, reason, logger)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbinstance))
