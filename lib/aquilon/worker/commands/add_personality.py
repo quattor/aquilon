@@ -24,8 +24,7 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                PersonalityGrnMap, HostEnvironment, ServiceMap,
-                                PersonalityParameter)
+                                PersonalityGrnMap, HostEnvironment, ServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
@@ -141,13 +140,6 @@ class CommandAddPersonality(BrokerCommand):
             if self.config.has_option(section, "default_grn_target"):
                 target = self.config.get(section, "default_grn_target")
                 dbstage.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
-
-            # Create a parameter object for all parameter templates, because the
-            # default value calculation needs it
-            for defholder in dbarchetype.param_def_holders.values():
-                dbparam = PersonalityParameter(param_def_holder=defholder,
-                                               value={})
-                dbstage.parameters[defholder] = dbparam
 
         session.flush()
 

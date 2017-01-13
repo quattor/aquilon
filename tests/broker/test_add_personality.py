@@ -43,9 +43,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(command)
         self.verifycatpersonality("aquilon", "utunused/dev", True, "dev",
                                   grn=GRN, stage="next")
-        for plenary in ("config", "espinfo"):
-            self.check_plenary_exists("aquilon", "personality",
-                                      "utunused/dev+next", plenary)
+        self.check_plenary_exists("aquilon", "personality", "utunused/dev+next",
+                                  "config")
 
     def test_105_verify_utunused(self):
         command = ["show_personality", "--personality=utunused/dev",
@@ -86,9 +85,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype=aquilon", "--eon_id=2",
                    "--host_environment=dev", "--staged"]
         self.noouttest(command)
-        for plenary in ("config", "espinfo"):
-            self.check_plenary_exists("aquilon", "personality",
-                                      "utpers-dev+next", plenary)
+        self.check_plenary_exists("aquilon", "personality", "utpers-dev+next",
+                                  "config")
         self.verifycatpersonality("aquilon", "utpers-dev", stage="next")
 
     def test_126_verify_utpers_dev(self):
@@ -217,10 +215,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_172_add_generic(self):
         for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:
-            self.noouttest(["add", "personality", "--personality", "generic",
-                            "--archetype", archetype, "--unstaged",
-                            "--host_environment", "prod",
-                            "--grn", "grn:/ms/ei/aquilon/unittest"])
+            self.create_personality(archetype, "generic", staged=False,
+                                    grn="grn:/ms/ei/aquilon/unittest",
+                                    environment="prod", cluster_required=False)
 
     def test_173_add_aquilon_personalities(self):
         personalities = {

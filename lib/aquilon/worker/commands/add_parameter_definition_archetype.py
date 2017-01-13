@@ -15,23 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import contains_eager
-
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import (Archetype, ArchetypeParamDef, ParamDefinition,
-                                Personality, PersonalityStage,
-                                PersonalityParameter)
+from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
 from aquilon.utils import validate_template_name
 
 
 class CommandAddParameterDefintionArchetype(BrokerCommand):
-    requires_plenaries = True
-
     required_parameters = ["archetype", "template", "path", "value_type"]
 
-    def render(self, session, plenaries, archetype, template, path, value_type,
+    def render(self, session, archetype, template, path, value_type,
                schema, required, activation, default, description, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
@@ -41,25 +34,11 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             raise UnimplementedError("Archetype-wide parameter definitions "
                                      "cannot have default values.")
 
-
         try:
             holder = dbarchetype.param_def_holders[template]
         except KeyError:
             holder = ArchetypeParamDef(template=template)
             dbarchetype.param_def_holders[template] = holder
-
-            # Create the parameter object for all existing personalities
-            q = session.query(PersonalityStage)
-            q = q.join(Personality)
-            q = q.filter_by(archetype=dbarchetype)
-            q = q.options(contains_eager('personality'))
-            for dbstage in q:
-                dbparam = PersonalityParameter(param_def_holder=holder,
-                                               personality_stage=dbstage,
-                                               value={})
-                session.add(dbparam)
-
-            add_arch_paramdef_plenaries(session, holder, plenaries)
 
         if not activation:
             activation = 'dispatch'
@@ -91,7 +70,5 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         session.add(db_paramdef)
 
         session.flush()
-
-        plenaries.write(verbose=True)
 
         return

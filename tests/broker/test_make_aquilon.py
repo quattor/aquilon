@@ -383,6 +383,9 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "cannot locate template named 'personality/badpersonality/espinfo'",
+                         command)
         self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="unittest")))

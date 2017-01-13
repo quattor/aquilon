@@ -30,10 +30,6 @@ from .test_add_parameter_definition import default_param_defs
 
 class TestDelParameterDefinition(TestBrokerCommand):
 
-    def test_010_verify_precondition(self):
-        self.check_plenary_exists("aquilon", "personality", "utunused/dev",
-                                  "foo")
-
     def test_100_del_default(self):
         for path in default_param_defs:
             self.statustest(["del_parameter_definition", "--archetype", "aquilon",
@@ -47,9 +43,6 @@ class TestDelParameterDefinition(TestBrokerCommand):
         command = ["search_parameter_definition", "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchclean(out, "Template: foo", command)
-
-    def test_105_verify_plenary_gone(self):
-        self.check_plenary_gone("aquilon", "personality", "utunused/dev", "foo")
 
     def test_110_del_feature(self):
         for path, params in default_param_defs.items():

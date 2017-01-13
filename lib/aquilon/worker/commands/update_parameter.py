@@ -25,7 +25,8 @@ class CommandUpdateParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, db_paramdef, path, value):
+    def process_parameter(self, session, dbstage, db_paramdef, path, value,
+                          plenaries):
         try:
             parameter = dbstage.parameters[db_paramdef.holder]
         except KeyError:
