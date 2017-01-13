@@ -424,8 +424,8 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "windows",
                    "--justification", "tcm=12345678"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "Binding features to non-compilable archetypes "
-                         "is not implemented.", command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "feature bindings are not supported.", command)
 
     def test_200_bind_model_again(self):
         command = ["bind", "feature", "--feature", "bios_setup",

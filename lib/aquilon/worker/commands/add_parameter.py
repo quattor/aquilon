@@ -45,9 +45,7 @@ class CommandAddParameter(BrokerCommand):
                reason=None, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        if not dbpersonality.archetype.is_compileable:
-            raise ArgumentError("{0} is not compileable."
-                                .format(dbpersonality.archetype))
+        dbpersonality.archetype.require_compileable("parameters are not supported")
 
         dbstage = dbpersonality.active_stage(personality_stage)
 

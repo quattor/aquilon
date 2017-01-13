@@ -47,18 +47,15 @@ class CommandMakeClusterCluster(BrokerCommand):
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         for dbobj in dbcluster.all_objects():
-            if dbobj.archetype.is_compileable:
-                chooser = Chooser(dbobj, plenaries, logger=logger,
-                                  required_only=not keepbindings,
-                                  cache=chooser_cache)
-                choosers.append(chooser)
-                try:
-                    chooser.set_required()
-                except ArgumentError as err:
-                    failed.append(str(err))
+            chooser = Chooser(dbobj, plenaries, logger=logger,
+                              required_only=not keepbindings,
+                              cache=chooser_cache)
+            try:
+                chooser.set_required()
+            except ArgumentError as err:
+                failed.append(str(err))
 
         if failed:
             raise ArgumentError("The following objects failed service "

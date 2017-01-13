@@ -283,8 +283,9 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["add_parameter_definition", "--archetype", "windows",
                "--path=foo/testint", "--description=blaah",
                "--template=foo", "--value_type=int"]
-        out = self.badrequesttest(cmd)
-        self.matchoutput(out, "Archetype windows is not compileable.", cmd)
+        out = self.unimplementederrortest(cmd)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "parameters are not supported.", cmd)
 
     def test_300_add_archetype_default(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",

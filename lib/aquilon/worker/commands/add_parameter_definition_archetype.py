@@ -35,8 +35,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                schema, required, activation, default, description, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if not dbarchetype.is_compileable:
-            raise ArgumentError("{0} is not compileable.".format(dbarchetype))
+        dbarchetype.require_compileable("parameters are not supported")
 
         if default is not None:
             raise UnimplementedError("Archetype-wide parameter definitions "

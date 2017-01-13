@@ -182,7 +182,7 @@ class Plenary(object):
         if isinstance(self.dbobj, CompileableMixin) and \
            not self.ignore_compileable and \
            not self.dbobj.archetype.is_compileable:
-            return 0
+            return self._remove(remove_profile=True)
 
         self.stash()
 
@@ -515,7 +515,7 @@ class PlenaryCollection(object):
             if isinstance(plen, PlenaryCollection):
                 for obj in plen.object_templates:
                     yield obj
-            elif plen.template_type == 'object':
+            elif plen.template_type == 'object' and plen.dbobj.archetype.is_compileable:
                 yield plen.template_name(plen.dbobj)
 
     def _write(self, remove_profile=False):

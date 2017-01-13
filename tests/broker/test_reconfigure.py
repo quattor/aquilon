@@ -399,23 +399,51 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1070_reconfigure_windows_status(self):
         # Not a compileable archetype, so there should be no messages from the
         # compiler
-        self.noouttest(["reconfigure",
-                        "--hostname", "unittest01.one-nyp.ms.com",
-                        "--buildstatus", "ready"])
+        command = ["reconfigure",
+                   "--hostname", "unittest01.one-nyp.ms.com",
+                   "--buildstatus", "ready"]
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
+        self.assertFalse(os.path.exists(
+            self.build_profile_name("unittest01.one-nyp.ms.com",
+                                    domain="ut-prod")))
 
     def test_1071_reconfigure_windows_personality(self):
         # Not a compileable archetype, so there should be no messages from the
         # compiler
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--personality", "desktop"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
 
     def test_1072_reconfigure_windows_os(self):
         # Not a compileable archetype, so there should be no messages from the
         # compiler
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--osversion", "nt61e"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
+
+    def test_1073_make_compileable(self):
+        # We need a domain which is guaranteed to be compileable...
+        self.statustest(["manage", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--domain", "unittest", "--force"])
+        self.statustest(["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--archetype", "aurora", "--personality", "generic",
+                         "--osname", "linux", "--osversion", self.linux_version_prev])
+        self.assertTrue(os.path.exists(
+            self.build_profile_name("unittest01.one-nyp.ms.com",
+                                    domain="unittest")))
+
+    def test_1074_make_noncompileable(self):
+        self.statustest(["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--archetype", "windows", "--personality", "desktop",
+                         "--osname", "windows", "--osversion", "nt61e"])
+        self.assertFalse(os.path.exists(
+            self.build_profile_name("unittest01.one-nyp.ms.com",
+                                    domain="unittest")))
+        self.statustest(["manage", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--domain", "ut-prod", "--force"])
 
     def test_1075_show_unittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
@@ -427,6 +455,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: nt61e", command)
         self.matchoutput(out, "Advertise Status: True", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
 
     def test_1080_reconfigure_os(self):
         command = ["reconfigure",

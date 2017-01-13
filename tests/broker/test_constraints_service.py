@@ -30,10 +30,10 @@ class TestServiceConstraints(TestBrokerCommand):
 
     def test_100_del_required_service_personality_missing(self):
         command = ["del_required_service", "--service=ntp",
-                   "--archetype=windows", "--personality=desktop"]
+                   "--archetype=aquilon", "--personality=utpers-dev"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Service ntp is not required for personality "
-                         "windows/desktop.", command)
+                         "aquilon/utpers-dev@next.", command)
 
     def test_110_del_service_with_instances(self):
         command = "del service --service unmapped"

@@ -39,7 +39,6 @@ class CommandBindClientCluster(BrokerCommand):
             dbinstance = None
 
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         # FIXME: this logic should be in the chooser
         for dbobj in dbcluster.all_objects():
@@ -47,7 +46,6 @@ class CommandBindClientCluster(BrokerCommand):
             if dbobj == dbcluster or dbservice in dbobj.required_services:
                 chooser = Chooser(dbobj, plenaries, logger=logger,
                                   required_only=False, cache=chooser_cache)
-                choosers.append(chooser)
                 try:
                     chooser.set_single(dbservice, dbinstance, force=force)
                 except ArgumentError as err:
