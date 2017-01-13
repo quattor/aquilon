@@ -22,14 +22,14 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_feature
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
                                                  lookup_paramdef,
                                                  add_feature_paramdef_plenaries)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelParameterDefintionFeature(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["path", "feature", "type"]
 
-    def render(self, session, logger, feature, type, path, user, justification,
+    def render(self, session, plenaries, feature, type, path, user, justification,
                reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
@@ -44,7 +44,6 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                                 "cannot be deleted: {1!s}"
                                 .format(path, ", ".join(sorted(holders))))
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if db_paramdef.default is not None:
             validate_prod_feature(dbfeature, user, justification, reason)

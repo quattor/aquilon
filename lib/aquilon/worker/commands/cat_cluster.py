@@ -17,11 +17,12 @@
 """Contains the logic for `aq cat --cluster`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, MetaCluster
+from aquilon.aqdb.model import Cluster, MetaCluster, ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary, PlenaryClusterObject,
-                                      PlenaryClusterData, PlenaryClusterClient)
+                                      PlenaryClusterData, PlenaryClusterClient,
+                                      PlenaryResource)
 
 
 class CommandCatCluster(BrokerCommand):
@@ -38,7 +39,11 @@ class CommandCatCluster(BrokerCommand):
 
         dbresource = get_resource(session, dbcluster, **arguments)
         if dbresource:
-            plenary_info = Plenary.get_plenary(dbresource, logger=logger)
+            if isinstance(dbresource, ResourceGroup):
+                cls = PlenaryResource
+            else:
+                cls = Plenary
+            plenary_info = cls.get_plenary(dbresource, logger=logger)
         else:
             if data:
                 cls = PlenaryClusterData

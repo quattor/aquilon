@@ -21,15 +21,15 @@ from aquilon.aqdb.model import NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
 
 
 class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["interface", "network_device"]
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, interface, network_device, mac, comments,
+    def render(self, session, logger, plenaries, interface, network_device, mac, comments,
                rename_to, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
@@ -51,9 +51,8 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbnetdev.host))
+        plenaries.add(dbnetdev)
+        plenaries.add(dbnetdev.host)
 
         dsdb_runner = DSDBRunner(logger=logger)
 

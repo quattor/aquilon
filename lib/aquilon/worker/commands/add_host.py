@@ -25,7 +25,6 @@ from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip, assign_address,
                                                  get_interfaces)
 from aquilon.worker.dbwrappers.host import create_host
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -44,10 +43,11 @@ def get_boot_interface(dbmachine):
 
 
 class CommandAddHost(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "machine", "archetype"]
 
-    def render(self, session, logger, hostname, machine, archetype,
+    def render(self, session, logger, plenaries, hostname, machine, archetype,
                zebra_interfaces, skip_dsdb_check=False, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
@@ -137,12 +137,11 @@ class CommandAddHost(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
         if dbsrv_addr:
-            plenaries.append(Plenary.get_plenary(dbsrv_addr))
+            plenaries.add(dbsrv_addr)
 
         with plenaries.transaction():
             if oldinfo:

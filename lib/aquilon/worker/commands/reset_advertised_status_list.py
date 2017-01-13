@@ -21,15 +21,16 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 
 
 class CommandResetAdvertisedStatusList(BrokerCommand):
+    requires_plenaries = True
     """ reset advertised status for a list of hosts """
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, list, **_):
+    def render(self, session, logger, plenaries, list, **_):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
@@ -46,11 +47,9 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
 
-        plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
             dbhost.advertise_status = False
-            plenaries.append(Plenary.get_plenary(dbhost,
-                                                 allow_incomplete=False))
+            plenaries.add(dbhost, allow_incomplete=False)
 
         session.flush()
 

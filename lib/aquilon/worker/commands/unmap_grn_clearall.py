@@ -21,14 +21,14 @@ from aquilon.aqdb.model import Personality, Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUnMapGrnClearAll(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["target"]
 
-    def render(self, session, logger, target, hostname, list, membersof,
+    def render(self, session, plenaries, target, hostname, list, membersof,
                personality, personality_stage, archetype, **_):
 
         target_type = "personality" if personality else "host"
@@ -47,7 +47,6 @@ class CommandUnMapGrnClearAll(BrokerCommand):
                                                    compel=True)
             objs = [dbpersonality.active_stage(personality_stage)]
 
-        plenaries = PlenaryCollection(logger=logger)
         for obj in objs:
             # INFO: Fails for archetypes other than 'aquilon', 'vmhost'
             valid_targets = self.config.get("archetype_" + obj.archetype.name,
@@ -62,7 +61,7 @@ class CommandUnMapGrnClearAll(BrokerCommand):
             for grn_rec in obj.grns[:]:
                 if target == grn_rec.target:
                     obj.grns.remove(grn_rec)
-            plenaries.append(Plenary.get_plenary(obj))
+            plenaries.add(obj)
 
         session.flush()
 

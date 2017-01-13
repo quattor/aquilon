@@ -21,10 +21,10 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, HostEnvironment, Service,
                                 PersonalityServiceListItem)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service", "archetype", "personality"]
 
@@ -45,7 +45,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                                           host_environment=dbenv)
         dbstage.required_services[dbservice] = psli
 
-    def render(self, session, logger, service, archetype, personality,
+    def render(self, session, logger, plenaries, service, archetype, personality,
                personality_stage, environment_override, justification, reason,
                user, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
@@ -58,9 +58,8 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
             dbenv = None
         validate_prod_personality(dbstage, user, justification, reason)
 
-        plenaries = PlenaryCollection(logger=logger)
         if dbstage.created_implicitly:
-            plenaries.append(Plenary.get_plenary(dbstage))
+            plenaries.add(dbstage)
 
         self._update_dbobj(logger, dbstage, dbservice, dbenv)
         session.flush()

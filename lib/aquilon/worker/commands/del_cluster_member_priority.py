@@ -19,14 +19,14 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelClusterMemberPriority(BrokerCommand):
+    requires_plenaries = True
 
     resource_class = None
 
-    def render(self, session, logger, cluster, resourcegroup, member,
+    def render(self, session, logger, plenaries, cluster, resourcegroup, member,
                **kwargs):  # pylint: disable=W0613
         holder = get_resource_holder(session, logger, None, cluster,
                                      None, resourcegroup, compel=False)
@@ -36,9 +36,8 @@ class CommandDelClusterMemberPriority(BrokerCommand):
         dbresource = self.resource_class.get_unique(session, name=name,
                                                     holder=holder, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbresource))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbresource)
 
         try:
             del dbresource.entries[dbhost]

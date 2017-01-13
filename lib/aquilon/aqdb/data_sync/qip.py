@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 NetworkCompartment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import update, and_, or_
@@ -312,7 +312,7 @@ class QIPRefresh(object):
         self.logger.client_info("Adding network {0!s}".format(dbnetwork))
         for ip in qipinfo.routers:
             self.add_router(dbnetwork, ip)
-        self.plenaries.append(Plenary.get_plenary(dbnetwork))
+        self.plenaries.add(dbnetwork)
         self.session.flush()
         return dbnetwork
 
@@ -412,8 +412,7 @@ class QIPRefresh(object):
         qipinfo = heap_pop(qipnets)
         while aqnet or qipinfo:
             if aqnet and aqnet != prev_aqnet:
-                plenary = Plenary.get_plenary(aqnet)
-                self.plenaries.append(plenary)
+                self.plenaries.add(aqnet)
                 prev_aqnet = aqnet
 
             # We have 3 cases regarding aqnet/qipinfo:

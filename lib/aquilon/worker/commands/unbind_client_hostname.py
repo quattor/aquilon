@@ -20,19 +20,19 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 from aquilon.utils import first_of
 
 
 class CommandUnbindClientHostname(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "service"]
 
     def get_dbobj(self, session, hostname=None, **_):
         return hostname_to_host(session, hostname)
 
-    def render(self, session, logger, service, **arguments):
+    def render(self, session, plenaries, service, **arguments):
         dbobj = self.get_dbobj(session, **arguments)
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = first_of(dbobj.services_used,
@@ -51,9 +51,8 @@ class CommandUnbindClientHostname(BrokerCommand):
         dbobj.services_used.remove(dbinstance)
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbobj))
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
+        plenaries.add(dbobj)
+        plenaries.add(dbinstance, cls=PlenaryServiceInstanceServer)
         plenaries.write()
 
         return

@@ -27,10 +27,11 @@ from aquilon.worker.services import Chooser
 
 
 class CommandMake(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, osname, osversion, archetype,
+    def render(self, session, logger, plenaries, hostname, osname, osversion, archetype,
                personality, personality_stage, buildstatus, keepbindings, grn,
                eon_id, cleargrn, comments, **_):
         dbhost = hostname_to_host(session, hostname)
@@ -94,20 +95,15 @@ class CommandMake(BrokerCommand):
         session.flush()
 
         if dbhost.archetype.is_compileable:
-            self.compile(session, dbhost, logger, keepbindings)
+            chooser = Chooser(dbhost, plenaries, logger=logger,
+                              required_only=not keepbindings)
+            chooser.set_required()
 
-        return
+            session.flush()
 
-    def compile(self, session, dbhost, logger, keepbindings):
-        chooser = Chooser(dbhost, logger=logger,
-                          required_only=not keepbindings)
-        chooser.set_required()
+            td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
-        session.flush()
-
-        td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
-
-        with chooser.plenaries.transaction():
-            td.compile(session, only=chooser.plenaries.object_templates)
+            with plenaries.transaction():
+                td.compile(session, only=plenaries.object_templates)
 
         return

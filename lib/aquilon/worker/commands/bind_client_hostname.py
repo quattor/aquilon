@@ -23,14 +23,15 @@ from aquilon.worker.services import Chooser
 
 
 class CommandBindClientHostname(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, logger, hostname, service, instance, force=False,
+    def render(self, session, logger, plenaries, hostname, service, instance, force=False,
                **_):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
-        chooser = Chooser(dbhost, logger=logger, required_only=False)
+        chooser = Chooser(dbhost, plenaries, logger=logger, required_only=False)
         if instance:
             dbinstance = ServiceInstance.get_unique(session, service=dbservice,
                                                     name=instance, compel=True)
@@ -40,6 +41,6 @@ class CommandBindClientHostname(BrokerCommand):
 
         session.flush()
 
-        chooser.write_plenary_templates()
+        plenaries.write()
 
         return

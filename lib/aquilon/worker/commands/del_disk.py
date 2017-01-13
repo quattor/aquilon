@@ -18,21 +18,20 @@
 
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelDisk(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, disk, all, **_):
+    def render(self, session, plenaries, machine, disk, all, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         dbcontainer = dbmachine.vm_container
         if dbcontainer:
-            plenaries.append(Plenary.get_plenary(dbcontainer, logger=logger))
+            plenaries.add(dbcontainer)
 
         if disk:
             dbdisk = Disk.get_unique(session, machine=dbmachine,

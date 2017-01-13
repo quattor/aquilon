@@ -23,15 +23,15 @@ from aquilon.aqdb.model import (Archetype, ArchetypeParamDef, ParamDefinition,
                                 PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
-from aquilon.worker.templates import PlenaryCollection
 from aquilon.utils import validate_template_name
 
 
 class CommandAddParameterDefintionArchetype(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["archetype", "template", "path", "value_type"]
 
-    def render(self, session, logger, archetype, template, path, value_type,
+    def render(self, session, plenaries, archetype, template, path, value_type,
                schema, required, activation, default, description, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
@@ -42,7 +42,6 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             raise UnimplementedError("Archetype-wide parameter definitions "
                                      "cannot have default values.")
 
-        plenaries = PlenaryCollection(logger=logger)
 
         try:
             holder = dbarchetype.param_def_holders[template]

@@ -24,15 +24,15 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddAuxiliary(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["auxiliary"]
 
-    def render(self, session, logger, hostname, machine, auxiliary, interface,
+    def render(self, session, logger, plenaries, hostname, machine, auxiliary, interface,
                mac, comments, **arguments):
         self.deprecated_command("Command add_auxiliary is deprecated.  Please "
                                 "use add_interface_address instead.", logger,
@@ -78,8 +78,7 @@ class CommandAddAuxiliary(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbmachine, oldinfo)

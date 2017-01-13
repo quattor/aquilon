@@ -23,8 +23,7 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceMap, MetaCluster
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 
 
 class ChooserCache(object):
@@ -79,7 +78,7 @@ class Chooser(object):
 
         return chooser
 
-    def __init__(self, dbobj, logger, required_only=False, cache=None):
+    def __init__(self, dbobj, plenaries, logger, required_only=False, cache=None):
         """Initialize the chooser.
 
         To clear out bindings that are not required, pass in
@@ -138,7 +137,7 @@ class Chooser(object):
         self.chosen_services = {}
 
         # Keep stashed plenaries for rollback purposes
-        self.plenaries = PlenaryCollection(logger=logger)
+        self.plenaries = plenaries
 
         # Cache the original service bindings
         self.original_service_instances = {}
@@ -518,8 +517,7 @@ class Chooser(object):
                 if srv.cluster:
                     changed_servers.update(srv.cluster.all_objects())
 
-            plenary = PlenaryServiceInstanceServer.get_plenary(instance)
-            self.plenaries.append(plenary)
+            self.plenaries.add(instance, cls=PlenaryServiceInstanceServer)
 
         for dbobj in changed_servers:
             # Skip servers that do not have a profile
@@ -534,31 +532,23 @@ class Chooser(object):
             # Ignore IncompleteError for servers of service instances. It is
             # debatable if this is the right thing to do, but it preserves the
             # status quo, and can be revisited later.
-            self.plenaries.append(Plenary.get_plenary(dbobj))
+            self.plenaries.add(dbobj)
 
     def get_key(self):
         return self.plenaries.get_key()
 
-    def write_plenary_templates(self, locked=False):
-        self.plenaries.stash()
-        self.plenaries.write(locked=locked)
-
     def prestash_primary(self, allow_incomplete=False):
         for dbobj in self.dbobj.all_objects():
-            self.plenaries.append(Plenary.get_plenary(dbobj,
-                                                      allow_incomplete=allow_incomplete))
+            self.plenaries.add(dbobj, allow_incomplete=allow_incomplete)
 
             # This may be too much action at a distance... however, if
             # we are potentially re-writing a host plenary, it seems like
             # a good idea to also verify and refresh known dependencies.
             if dbobj.resholder:
                 for dbres in dbobj.resholder.resources:
-                    self.plenaries.append(Plenary.get_plenary(dbres))
+                    self.plenaries.add(dbres)
             if hasattr(dbobj, 'hardware_entity'):
-                self.plenaries.append(Plenary.get_plenary(dbobj.hardware_entity))
-
-    def restore_stash(self):
-        self.plenaries.restore_stash()
+                self.plenaries.add(dbobj.hardware_entity)
 
 
 class HostChooser(Chooser):

@@ -23,10 +23,10 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_personalit
 from aquilon.worker.dbwrappers.feature import get_affected_plenaries
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  lookup_paramdef)
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddParameter(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ['personality', 'path']
 
@@ -40,7 +40,7 @@ class CommandAddParameter(BrokerCommand):
 
         set_parameter(session, parameter, db_paramdef, path, value)
 
-    def render(self, session, logger, archetype, personality, personality_stage,
+    def render(self, session, plenaries, archetype, personality, personality_stage,
                feature, type, path, user, value=None, justification=None,
                reason=None, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
@@ -55,8 +55,7 @@ class CommandAddParameter(BrokerCommand):
 
         path = ParamDefinition.normalize_path(path, strict=False)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.add(dbstage)
 
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,

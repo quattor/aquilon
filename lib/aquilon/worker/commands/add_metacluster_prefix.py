@@ -37,7 +37,7 @@ class CommandAddMetaClusterPrefix(CommandAddMetaCluster):
                              pack=None, locked=True)
         metacluster = '%s%d' % (prefix, result)
         args['metacluster'] = metacluster
-        CommandAddMetaCluster.render(self, session, logger, **args)
+        CommandAddMetaCluster.render(self, session, logger=logger, **args)
 
         logger.info("Selected metacluster name %s." % metacluster)
         self.audit_result(session, 'metacluster', metacluster, **args)

@@ -19,20 +19,19 @@
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.machine import add_interface
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, logger, interface, machine, mac, automac, model,
+    def render(self, session, logger, plenaries, interface, machine, mac, automac, model,
                vendor, pg, autopg, iftype, type, bus_address, comments,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
-        plenaries = PlenaryCollection(logger=logger)
         audit_results = []
 
         if type:
@@ -60,9 +59,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.host:
-            plenaries.append(Plenary.get_plenary(dbmachine.host))
+            plenaries.add(dbmachine.host)
 
         # Even though there may be removals going on the write key
         # should be sufficient here.

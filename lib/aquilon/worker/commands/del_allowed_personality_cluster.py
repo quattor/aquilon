@@ -19,14 +19,14 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelAllowedPersonalityCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["archetype", "personality", "cluster"]
 
-    def render(self, session, logger, archetype, personality, cluster,
+    def render(self, session, plenaries, archetype, personality, cluster,
                metacluster, **_):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)
@@ -37,8 +37,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
         else:
             dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbclus))
+        plenaries.add(dbclus)
 
         if len(dbclus.allowed_personalities) > 1:
             members = dbclus.hosts[:]

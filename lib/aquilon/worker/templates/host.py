@@ -94,7 +94,6 @@ class PlenaryHost(PlenaryCollection):
         if not isinstance(dbhost, Host):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
-        self.dbobj = dbhost
         self.append(PlenaryHostObject.get_plenary(dbhost,
                                                   allow_incomplete=allow_incomplete))
         self.append(PlenaryHostData.get_plenary(dbhost,

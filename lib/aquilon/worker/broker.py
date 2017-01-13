@@ -97,6 +97,10 @@ class BrokerCommand(object):
 
     """
 
+    requires_plenaries = False
+    """ Causes the plenary management machinery to be initialized.
+    """
+
     requires_format = None
     """ Run command results through the formatter.
 
@@ -262,8 +266,15 @@ class BrokerCommand(object):
                     self._set_readonly(session)
                 # begin() is only required if session transactional=False
                 # session.begin()
+
+            if self.requires_plenaries:
+                plenaries = PlenaryCollection(logger=logger)
+            else:
+                plenaries = None
+
             retval = self.render(user=user, dbuser=dbuser, request=request,
                                  requestid=requestid, logger=logger,
+                                 plenaries=plenaries,
                                  session=session, **kwargs)
             if self.requires_format:
                 style = kwargs.get("style", None)
@@ -367,7 +378,9 @@ class BrokerCommand(object):
     # they all use Plenary classes but do not require a lock.
     @classmethod
     def is_class_lock_free(cls):
-        # log.msg("Checking %s" % cls.__module__)
+        if cls.requires_plenaries:
+            return False
+
         for item in sys.modules[cls.__module__].__dict__.values():
             # log.msg("  Checking %s" % item)
             if item in [sync_domain, TemplateDomain]:

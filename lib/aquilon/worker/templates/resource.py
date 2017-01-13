@@ -205,22 +205,12 @@ class PlenaryResourceGroup(PlenaryCollection):
         super(PlenaryResourceGroup, self).__init__(logger=logger,
                                                    allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbresource
-        self.real_plenary = PlenaryResource.get_plenary(dbresource,
-                                                        allow_incomplete=allow_incomplete)
+        self.append(PlenaryResource.get_plenary(dbresource,
+                                                allow_incomplete=allow_incomplete))
 
-        self.append(self.real_plenary)
         if dbresource.resholder:
             for res in dbresource.resholder.resources:
                 self.append(PlenaryResource.get_plenary(res,
                                                         allow_incomplete=allow_incomplete))
-
-    def read(self):
-        # This is used by the cat command
-        return self.real_plenary.read()
-
-    def _generate_content(self):
-        return self.real_plenary._generate_content()
-
 
 Plenary.handlers[ResourceGroup] = PlenaryResourceGroup

@@ -21,14 +21,14 @@ from aquilon.aqdb.model import Cluster, MetaCluster, NetworkDevice
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandAddCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster", "down_hosts_threshold"]
 
-    def render(self, session, logger, cluster, archetype, personality,
+    def render(self, session, logger, plenaries, cluster, archetype, personality,
                personality_stage, domain, sandbox, max_members,
                down_hosts_threshold, maint_threshold, buildstatus, comments,
                vm_to_host_ratio, switch, metacluster, **arguments):
@@ -74,7 +74,6 @@ class CommandAddCluster(BrokerCommand):
                               down_maint_percent=dmt_pct,
                               comments=comments, **kw)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if metacluster:
             dbmetacluster = MetaCluster.get_unique(session, metacluster,
@@ -82,12 +81,12 @@ class CommandAddCluster(BrokerCommand):
             dbmetacluster.members.append(dbcluster)
             dbmetacluster.validate()
 
-            plenaries.append(Plenary.get_plenary(dbmetacluster))
+            plenaries.add(dbmetacluster)
 
         session.add(dbcluster)
         session.flush()
 
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
         plenaries.write()
 
         return

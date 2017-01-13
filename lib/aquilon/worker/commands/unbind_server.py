@@ -19,16 +19,16 @@
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.commands.bind_server import lookup_target, find_server
 from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
 
 
 class CommandUnbindServer(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, instance, position, hostname,
+    def render(self, session, logger, plenaries, service, instance, position, hostname,
                cluster, ip, resourcegroup, service_address, alias,
                justification, reason, user, **_):
         dbservice = Service.get_unique(session, service, compel=True)
@@ -48,7 +48,6 @@ class CommandUnbindServer(BrokerCommand):
             q = q.filter_by(service=dbservice)
             dbinstances = q.all()
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if position is not None:
             params = None
@@ -65,9 +64,9 @@ class CommandUnbindServer(BrokerCommand):
                     raise ArgumentError("Invalid server position.")
                 dbsrv = dbinstance.servers[position]
                 if dbsrv.host:
-                    plenaries.append(Plenary.get_plenary(dbsrv.host))
+                    plenaries.add(dbsrv.host)
                 if dbsrv.cluster:
-                    plenaries.append(Plenary.get_plenary(dbsrv.cluster))
+                    plenaries.add(dbsrv.cluster)
             else:
                 dbsrv = find_server(dbinstance, params)
                 if not dbsrv:
@@ -75,7 +74,7 @@ class CommandUnbindServer(BrokerCommand):
                         raise NotFoundException("No such server binding.")
                     continue
 
-            plenaries.append(Plenary.get_plenary(dbinstance))
+            plenaries.add(dbinstance)
 
             if dbsrv.host:
                 session.expire(dbsrv.host, ['services_provided'])

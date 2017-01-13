@@ -37,7 +37,6 @@ class PlenaryService(PlenaryCollection):
         super(PlenaryService, self).__init__(logger=logger,
                                              allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbservice
         self.append(PlenaryServiceToplevel.get_plenary(dbservice,
                                                        allow_incomplete=allow_incomplete))
         self.append(PlenaryServiceClientDefault.get_plenary(dbservice,

@@ -29,8 +29,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             preload_machine_data,
                                             check_hostlist_size,
                                             validate_branch_author)
-from aquilon.worker.templates import (PlenaryCollection, TemplateDomain,
-                                      PlenaryHost)
+from aquilon.worker.templates import TemplateDomain, PlenaryHost
 from aquilon.worker.services import Chooser, ChooserCache
 
 
@@ -69,6 +68,7 @@ def select_os(session, cache, dbhost, osname, osversion, target_archetype):
 
 
 class CommandReconfigureList(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["list"]
 
@@ -84,7 +84,7 @@ class CommandReconfigureList(BrokerCommand):
         preload_machine_data(session, dbhosts)
         return dbhosts
 
-    def render(self, session, logger, archetype, personality, personality_stage, keepbindings,
+    def render(self, session, logger, plenaries, archetype, personality, personality_stage, keepbindings,
                buildstatus, osname, osversion, grn, eon_id, cleargrn, comments,
                **arguments):
         dbhosts = self.get_hostlist(session, **arguments)
@@ -180,7 +180,7 @@ class CommandReconfigureList(BrokerCommand):
         choosers = []
         for dbhost in dbhosts:
             if dbhost.archetype.is_compileable:
-                chooser = Chooser(dbhost, logger=logger,
+                chooser = Chooser(dbhost, plenaries, logger=logger,
                                   required_only=not keepbindings,
                                   cache=chooser_cache)
                 choosers.append(chooser)
@@ -194,8 +194,6 @@ class CommandReconfigureList(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)

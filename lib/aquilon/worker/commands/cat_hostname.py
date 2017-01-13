@@ -16,11 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq cat --hostname`."""
 
+from aquilon.aqdb.model import ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary, PlenaryHostObject,
-                                      PlenaryHostData)
+                                      PlenaryHostData, PlenaryResource)
 
 
 class CommandCatHostname(BrokerCommand):
@@ -34,7 +35,11 @@ class CommandCatHostname(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbresource = get_resource(session, dbhost, **arguments)
         if dbresource:
-            plenary_info = Plenary.get_plenary(dbresource, logger=logger)
+            if isinstance(dbresource, ResourceGroup):
+                cls = PlenaryResource
+            else:
+                cls = Plenary
+            plenary_info = cls.get_plenary(dbresource, logger=logger)
         else:
             if data:
                 cls = PlenaryHostData

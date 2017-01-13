@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (Personality, PersonalityStage, Cluster, Host,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.templates import Plenary, PlenaryCollection, PlenaryHost
+from aquilon.worker.templates import PlenaryHost
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -51,17 +51,17 @@ def _check_stage_unused(session, dbstage):
 
 
 class CommandUpdatePersonality(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, personality_stage, archetype,
+    def render(self, session, logger, plenaries, personality, personality_stage, archetype,
                vmhost_capacity_function, cluster_required, config_override,
                host_environment, grn, eon_id, leave_existing, staged,
                justification, reason, comments, user, **_):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if staged is not None:
             if staged is False:
@@ -77,7 +77,7 @@ class CommandUpdatePersonality(BrokerCommand):
                         continue
 
                     _check_stage_unused(session, dbstage)
-                    plenaries.append(Plenary.get_plenary(dbstage))
+                    plenaries.add(dbstage)
                     del dbpersona.stages[stage]
 
             dbpersona.staged = staged
@@ -132,7 +132,7 @@ class CommandUpdatePersonality(BrokerCommand):
             q = q.join(PersonalityStage)
             q = q.filter_by(personality=dbpersona)
             q = q.options(PlenaryHost.query_options())
-            plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+            plenaries.add(q)
 
             if not leave_existing:
                 # If this is a public personality, then there may be hosts with
@@ -145,7 +145,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = q.options(PlenaryHost.query_options())
                 for dbhost in q:
                     dbhost.owner_grn = dbgrn
-                    plenaries.append(Plenary.get_plenary(dbhost))
+                    plenaries.add(dbhost)
 
         if config_override is not None and \
            dbpersona.config_override != config_override:
@@ -184,7 +184,7 @@ class CommandUpdatePersonality(BrokerCommand):
         elif vmhost_capacity_function == "":
             dbstage.cluster_infos["esx"].vmhost_capacity_function = None
 
-        plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
+        plenaries.add(dbpersona.stages.values())
 
         session.flush()
 

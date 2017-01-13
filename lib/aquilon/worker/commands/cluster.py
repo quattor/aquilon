@@ -24,15 +24,15 @@ from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
                                               Almostready as HostAlmostready)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.services import Chooser
 
 
 class CommandCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster, personality,
+    def render(self, session, logger, plenaries, hostname, cluster, personality,
                personality_stage, **_):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -62,8 +62,7 @@ class CommandCluster(BrokerCommand):
         # if this is a valid membership change
         dbcluster.validate_membership(dbhost)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
 
         if dbhost.cluster and dbhost.cluster != dbcluster:
             logger.client_info("Removing {0:l} from {1:l}.".format(dbhost,
@@ -72,7 +71,7 @@ class CommandCluster(BrokerCommand):
             old_cluster.hosts.remove(dbhost)
             old_cluster.validate()
             session.expire(dbhost, ['_cluster'])
-            plenaries.append(Plenary.get_plenary(old_cluster))
+            plenaries.add(old_cluster)
 
         if dbhost.cluster:
             if personality_change:
@@ -103,20 +102,19 @@ class CommandCluster(BrokerCommand):
             if dbcluster.status.name != 'ready':
                 dbalmost = HostAlmostready.get_instance(session)
                 dbhost.status.transition(dbhost, dbalmost)
-                plenaries.append(Plenary.get_plenary(dbhost))
+                plenaries.add(dbhost)
         elif dbhost.status.name == 'almostready':
             if dbcluster.status.name == 'ready':
                 dbready = HostReady.get_instance(session)
                 dbhost.status.transition(dbhost, dbready)
-                plenaries.append(Plenary.get_plenary(dbhost))
+                plenaries.add(dbhost)
 
         # Enforce that service instances are set correctly for the
         # new cluster association.
-        chooser = Chooser(dbhost, logger=logger)
+        chooser = Chooser(dbhost, plenaries, logger=logger)
         chooser.set_required()
 
         # the chooser will include the host plenary
-        plenaries.extend(chooser.plenaries)
         plenaries.flatten()
 
         session.flush()

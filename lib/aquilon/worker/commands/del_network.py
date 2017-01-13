@@ -19,14 +19,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsDomain, Network, NetworkEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelNetwork(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["ip"]
 
-    def render(self, session, logger, dbuser, ip, network_environment, **_):
+    def render(self, session, plenaries, dbuser, ip, network_environment, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -34,8 +34,7 @@ class CommandDelNetwork(BrokerCommand):
         dbnetwork = Network.get_unique(session, network_environment=dbnet_env,
                                        ip=ip, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbnetwork)
 
         # Lock order: DNS domain(s), network
         DnsDomain.lock_rows(set(rec.fqdn.dns_domain

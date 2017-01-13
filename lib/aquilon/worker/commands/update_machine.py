@@ -28,8 +28,7 @@ from aquilon.worker.dbwrappers.interface import set_port_group, generate_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryHostData,
+from aquilon.worker.templates import (PlenaryHostData,
                                       PlenaryServiceInstanceToplevel)
 from aquilon.worker.processes import DSDBRunner
 
@@ -156,8 +155,8 @@ def move_vm(session, logger, dbmachine, resholder, remap_disk,
                                 "--allow_metacluster_change option to "
                                 "override.")
 
-        plenaries.append(Plenary.get_plenary(old_holder))
-        plenaries.append(Plenary.get_plenary(new_holder))
+        plenaries.add(old_holder)
+        plenaries.add(new_holder)
 
         dbmachine.vm_container.holder = resholder
 
@@ -174,10 +173,11 @@ def move_vm(session, logger, dbmachine, resholder, remap_disk,
 
 
 class CommandUpdateMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, model, vendor, serial, uuid,
+    def render(self, session, logger, plenaries, machine, model, vendor, serial, uuid,
                clear_uuid, chassis, slot, clearchassis, multislot, vmhost,
                cluster, metacluster, allow_metacluster_change, cpuname,
                cpuvendor, cpucount, memory, ip, autoip, uri, remap_disk,
@@ -186,14 +186,13 @@ class CommandUpdateMachine(BrokerCommand):
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
         if dbmachine.host:
             # Using PlenaryHostData directly, to avoid warnings if the host has
             # not been configured yet
-            plenaries.append(PlenaryHostData.get_plenary(dbmachine.host))
+            plenaries.add(dbmachine.host, cls=PlenaryHostData)
 
         if clearchassis:
             del dbmachine.chassis_slot[:]
@@ -320,12 +319,12 @@ class CommandUpdateMachine(BrokerCommand):
             if dbmachine.host:
                 for srv in dbmachine.host.services_provided:
                     si = srv.service_instance
-                    plenaries.append(PlenaryServiceInstanceToplevel.get_plenary(si))
+                    plenaries.add(si, cls=PlenaryServiceInstanceToplevel)
             update_primary_ip(session, logger, dbmachine, ip)
 
         if dbmachine.location != old_location and dbmachine.host:
             for vm in dbmachine.host.virtual_machines:
-                plenaries.append(Plenary.get_plenary(vm))
+                plenaries.add(vm)
                 vm.location = dbmachine.location
 
         session.flush()
