@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import (aliased, contains_eager, joinedload, subqueryload,
                             undefer)
-from sqlalchemy.sql import and_, or_
+from sqlalchemy.sql import and_, or_, null
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
@@ -170,7 +170,7 @@ class CommandSearchHost(BrokerCommand):
         if orphaned:
             q = q.join(Branch)
             q = q.filter(Branch.branch_type == "sandbox")
-            q = q.filter(Host.sandbox_author_id == None)
+            q = q.filter(Host.sandbox_author_id == null())
         elif dbauthor:
             q = q.filter_by(sandbox_author=dbauthor)
 

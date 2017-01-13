@@ -31,6 +31,7 @@ _approval_status = {
     False: 'Denied',
 }
 
+
 class ReviewFormatter(ObjectFormatter):
     def format_raw(self, review, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "Review request"]

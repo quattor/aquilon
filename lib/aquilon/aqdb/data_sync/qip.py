@@ -56,10 +56,10 @@ class QIPInfo(object):
         self.routers = routers
         self.compartment = compartment
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         # The refresh algorithm depends on QIPInfo objects being ordered by the
         # network IP address
-        return cmp(self.address.ip, other.address.ip)
+        return self.address.ip < other.address.ip
 
 
 class QIPRefresh(object):
@@ -407,13 +407,11 @@ class QIPRefresh(object):
         qipnets = qipnetworks.values()
         heapq.heapify(qipnets)
 
-        prev_aqnet = None
         aqnet = heap_pop(aqnets)
         qipinfo = heap_pop(qipnets)
         while aqnet or qipinfo:
-            if aqnet and aqnet != prev_aqnet:
+            if aqnet:
                 self.plenaries.add(aqnet)
-                prev_aqnet = aqnet
 
             # We have 3 cases regarding aqnet/qipinfo:
             # - One contains the other: this is a split or a merge
@@ -506,6 +504,7 @@ class QIPRefresh(object):
 
             self.commit_if_needed()
         self.session.flush()
+        self.plenaries.flatten()
         self.plenaries.write()
 
         if self.errors:

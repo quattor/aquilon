@@ -210,7 +210,7 @@ def create_sandbox(pageData, noexec=False):
               "update it or remove the directory and run `aq get`." %
               sandbox_dir, file=sys.stderr)
         return 1
-    os.umask(0022)
+    os.umask(0o022)
     cmd = ("git", "clone", "--branch", sandbox_name,
            template_king_url, sandbox_name)
     if noexec:

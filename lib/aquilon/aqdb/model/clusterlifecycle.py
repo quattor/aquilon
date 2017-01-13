@@ -92,9 +92,8 @@ class Decommissioned(ClusterLifecycle):
 
     # can't set the status to "decommissioned" if the cluster has VMs.
     def onEnter(self, dbcluster):
-        dbdecommissioned = HostLifecycle.get_unique(object_session(dbcluster),
-                                                    "decommissioned",
-                                                    compel=True)
+        dbdecommissioned = HostLifecycle.get_instance(object_session(dbcluster),
+                                                      "decommissioned")
 
         config = Config()
         archetype = dbcluster.archetype

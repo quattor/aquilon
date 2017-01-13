@@ -31,8 +31,8 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 class CommandDelAddress(BrokerCommand):
     def render(self, session, logger, fqdn, ip, dns_environment,
                network_environment, **_):
-        dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
-                                               dns_environment)
+        _, dbdns_env = get_net_dns_env(session, network_environment,
+                                       dns_environment)
 
         # We can't use get_unique() here, since we always want to filter by
         # DNS environment, even if no FQDN was given

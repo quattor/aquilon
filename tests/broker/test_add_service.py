@@ -61,7 +61,7 @@ default_services = {
 
     "utnotify": ["localhost"],
     "utsvc": ["utsi1", "utsi2"],
-    "utsvc2": [ "utsi1" ],
+    "utsvc2": ["utsi1"],
     "vcenter": ["ut"],
     "vmseasoning": ["salt", "pepper"],
 }

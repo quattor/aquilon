@@ -16,9 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Used by the test runner to display what test is currently running """
-import unittest
-from aquilon.config import Config
+
 from subprocess import call
+import unittest
+
+from aquilon.config import Config
 
 
 class VerboseTextTestResult(unittest._TextTestResult):

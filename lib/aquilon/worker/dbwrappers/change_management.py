@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import AuthorizationException, ArgumentError
+from aquilon.exceptions_ import AuthorizationException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityStage)
 from aquilon.aqdb.model.host_environment import Production

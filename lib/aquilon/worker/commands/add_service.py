@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq add service`."""
 
+from aquilon.exceptions_ import AuthorizationException
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
 

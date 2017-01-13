@@ -18,9 +18,8 @@
 from datetime import datetime
 
 from sqlalchemy import Column, Enum, Integer, DateTime, Sequence, event
-from sqlalchemy.orm import object_session, deferred
+from sqlalchemy.orm import deferred
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import LifecycleEngine, Base
 from aquilon.aqdb.column_types import Enum
 
@@ -37,8 +36,7 @@ class AssetLifecycle(LifecycleEngine, Base):
                    'pre_decommission': ['inactive'],
                    'inactive': ['decommissioned'],
                    'withdrawn': [],
-                   'decommissioned': []
-                  }
+                   'decommissioned': []}
 
     __tablename__ = _TN
     _class_label = 'Asset Lifecycle'

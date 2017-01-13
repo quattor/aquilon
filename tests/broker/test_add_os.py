@@ -217,9 +217,9 @@ class TestAddOS(TestBrokerCommand):
                    "--archetype", "aquilon"]
         self.noouttest(command)
 
-        stages = [ 'pre_prod', 'early_prod',
-                   'production', 'pre_decommission',
-                   'inactive','decommissioned']
+        stages = ['pre_prod', 'early_prod',
+                  'production', 'pre_decommission',
+                  'inactive', 'decommissioned']
 
         for lifecycle in stages:
             command = ["update_os", "--osname", "lctestos",

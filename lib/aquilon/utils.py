@@ -210,11 +210,12 @@ def force_uuid(label, value):
     return value
 
 
-def force_justification(label, value):
+def force_justification(label, value):  # pylint: disable=W0613
     """Utility method to validate justitification field"""
 
     justif = Justification(value)
     return justif
+
 
 def first_of(iterable, function):
     """
@@ -384,7 +385,7 @@ def validate_json(config, data, schema_name, msg):
         raise ArgumentError("Failed to validate %s: %s" % (msg, err))
 
 
-class Justification:
+class Justification(object):
 
     def __init__(self, justification):
 
@@ -405,7 +406,7 @@ class Justification:
         self.data = justification
         if not (self.tcm or self.sn or self.emergency):
             raise ArgumentError("Failed to parse the justification: expected "
-                            "tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.")
+                                "tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.")
 
     def check_reason(self, reason):
         if self.emergency and not reason:
@@ -413,7 +414,6 @@ class Justification:
                                          "--reason to be specified.")
 
     def __str__(self):
-
         ret = []
         if self.tcm:
             ret.append("tcm=%s" % self.tcm)
@@ -422,4 +422,4 @@ class Justification:
         if self.emergency:
             ret.append("emergency")
 
-        return  ",".join(ret)
+        return ",".join(ret)

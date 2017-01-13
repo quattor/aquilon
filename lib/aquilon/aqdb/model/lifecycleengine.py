@@ -14,9 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy.orm.session import Session, object_session
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
+from sqlalchemy.orm.session import object_session
+
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import SingleInstanceMixin
 
 
@@ -50,7 +51,7 @@ class LifecycleEngine(SingleInstanceMixin):
         if target_stage.name not in targets:
             raise ArgumentError("Cannot change lifecycle stage to %s from %s. "
                                 "Legal states are: %s" %
-                                ( target_stage.name, self.name,
+                                (target_stage.name, self.name,
                                  ", ".join(targets)))
 
         obj.lifecycle = target_stage
