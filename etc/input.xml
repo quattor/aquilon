@@ -5380,8 +5380,8 @@
 	Defaults:
 	<p/>
 	The default is only to search for commands that create, update or
-	delete data.  There are some special values for the command option to
-	provide customization to this behavior:
+	delete data within the last year.  There are some special values for
+	the command option to provide customization to this behavior:
 	<p/>"rw": includes read only commands except 'cat' and "show_active_*"
 	<p/>"all": includes ALL commands including the above
 	<p/>Date specifications: MM-DD-YY (midnight UTC),
@@ -5391,6 +5391,9 @@
 	the "parser" section of http://niemeyer.net/python-dateutil
 	<p/>The limit option defaults to 5000 and has a maximum of 20000
 	in order to enhance performance and stability.
+	<p/>Unless both 'before' and 'after' are specified, the default
+	date range is a year prior to 'before' or a year since 'after', or
+	a year prior to now if neither is specified.
 	<optgroup mandatory="True">
 	    <option name="keyword" type="string">The value of any argument supplied to a command</option>
 	    <option name="argument" type="string">Look at the value of the specified argument only</option>
