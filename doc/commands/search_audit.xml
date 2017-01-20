@@ -35,6 +35,7 @@
 	    <arg><option>--before <replaceable>DATE/TIME</replaceable></option></arg>
 	    <arg><option>--after <replaceable>DATE/TIME</replaceable></option></arg>
 	    <arg><option>--limit <replaceable>LIMIT</replaceable></option></arg>
+	    <arg><option>--forever</option></arg>
 	    <arg><option>--reverse_order</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -45,7 +46,9 @@
 	<para>
 	    The <command>aq search audit</command> command searches through the
 	    recorded history of all commands run on the broker.  The times
-	    reported by the command are in UTC.
+	    reported by the command are in UTC.  Unless both the <option>--before</option>
+	    and <option>--after</option> options are given the search is limited to a
+	    year of audit log.  To search within the entire audit history, use <option>--forever</option>.
 	</para>
     </refsect1>
 
@@ -183,6 +186,17 @@
 		</listitem>
 	    </varlistentry>
 
+	    <varlistentry>
+		<term>
+		<option>--forever</option>
+		</term>
+		<listitem>
+		    <para>
+			Search the entire audit history instead of the last
+			year by default.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	    <varlistentry>
 		<term>
 		    <option>--reverse_order</option>

@@ -275,6 +275,13 @@ class TestAudit(TestBrokerCommand):
                             (start, midpoint, line))
             self.assertTrue(start < end_time)
 
+    def test_330_before_and_after_backwards(self):
+        """ test audit search for 'before' after 'after' """
+        command = ["search_audit", "--before", midpoint, "--after", end_time]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, ("Time region from after '%s' to before " +
+                                "'%s' is invalid") % (end_time, midpoint), command)
+
     def test_400_missing_timezone(self):
         """Test behavior of a missing timezone."""
         # The datetime object will not have a timezone, even though we
