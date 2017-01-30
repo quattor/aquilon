@@ -26,9 +26,9 @@ from aquilon.worker.dbwrappers.parameter import (set_parameter,
 
 
 class CommandAddParameter(BrokerCommand):
-    requires_plenaries = True
 
-    required_parameters = ['personality', 'path']
+    requires_plenaries = True
+    required_parameters = ['personality', 'path', 'value']
 
     def process_parameter(self, session, dbstage, db_paramdef, path, value,
                           plenaries):
