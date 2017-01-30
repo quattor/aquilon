@@ -192,7 +192,7 @@ class TestAudit(TestBrokerCommand):
         self.assertTrue(tran_end_time <= end_time)
 
     def test_230_timezone_proto(self):
-        """ test start/end_times recorded are correctly """
+        """ test start/end_times are recorded correctly """
         cmd1 = ["search_audit", "--username", self.principal, "--command",
                 "search_audit", "--limit", "1"]
         my_start_time = int(time())
