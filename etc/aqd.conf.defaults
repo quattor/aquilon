@@ -199,6 +199,13 @@ auto_mac_end = 00:50:56:3f:ff:ff
 
 disk_controller_types = cciss, fibrechannel, flash, ide, nvme, sas, sata, scsi
 
+[change_management]
+# The contents of --justification will not be validated externally
+# (syntax checking will still be performed)
+enable = False
+# The result of justification_validation will not effect command execution, a warning will be generated if a failure is detected.
+enforce = False
+
 [tool_locations]
 dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
 ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
@@ -213,6 +220,7 @@ qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
 knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
 krb5_keytab = /ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
 klist = /ms/dist/aurora/bin/klist
+checkedm = /bin/true
 
 java_home = /ms/dist/msjava/PROJ/oraclejdk/1.8.0_92
 ant_home = /ms/dist/ossjava/PROJ/ant/1.9.4

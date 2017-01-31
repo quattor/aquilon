@@ -18,17 +18,57 @@
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import AuthorizationException, ArgumentError
+from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
+                                 ProcessException)
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityStage)
 from aquilon.aqdb.model.host_environment import Production
+from aquilon.worker.processes import run_command
+from aquilon.config import Config
 
 
 def validate_justification(user, justification, reason, logger):
+    config = Config()
+    check_enabled = False
+    if config.has_option("change_management", "enable"):
+        check_enabled = config.getboolean("change_management", "enable")
 
     justification.check_reason(reason)
-    # TODO: EDM validation
-    # edm_validate(result.group(0))
+
+    if check_enabled:
+        change_management_validate(user, justification, logger, config)
+
+
+def change_management_validate(user, justification, logger, config):
+    check_enforced = False
+    if config.has_option("change_management", "enforce"):
+        check_enforced = config.getboolean("change_management", "enforce")
+
+    cmd = ["checkedm",
+           "--resource-instance", "prod",
+           "--output-format", "json",
+           "--requestor", user]
+    if justification.tcm is not None:
+        cmd.extend(["--ticketing-system", "TCM2", "--ticket", justification.tcm])
+    elif justification.sn is not None:
+        cmd.extend(["--ticketing-system", "SN", "--ticket", justification.sn])
+    if justification.emergency:
+        cmd.append("--emergency")
+
+    exception_happened = False
+    try:
+        out = run_command(cmd)
+    except ProcessException as err:
+        exception_happened = True
+        out = err.out
+
+    logger.info("EDM validation done, request {}; output='{}'".format("denied" if exception_happened else "approved", out))
+
+    if exception_happened:
+        if check_enforced:
+            raise AuthorizationException("Authorization error")
+        else:
+            logger.client_info("Change management would reject the justification; reason={0:s}".format(out))
 
 
 def enforce_justification(user, justification, reason, logger):

@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# This is a minimalist and gappy implementation of a checkedm.
+# The only purpose of this is to test the broker. It not even
+# checks all the parameters.
+
+EMERGENCY=0
+TICKET="0"
+while [ -n "$1" ]; do
+	case "$1" in
+		--ticket)
+			TICKET="$2"
+			shift
+			;;
+		--emergency)
+		    EMERGENCY=1
+			;;
+		--ticketing-system)
+			SYSTEM="$2"
+			shift
+			;;
+		*)
+		    ;;
+	esac
+	shift
+done
+
+if [ $TICKET == "12345678" -a $SYSTEM == "TCM2" ]
+then
+    exit 0
+fi
+
+if [ $TICKET == "87654321" -a $SYSTEM == "TCM2" ]
+then
+    echo "Not approved ticket"
+    exit 1
+fi
+
+if [ $TICKET == "CHG123456" -a $SYSTEM == "SN" ]
+then
+    exit 0
+fi
+
+
+if [ $TICKET == "CHG654321" -a $SYSTEM == "SN" ]
+then
+    exit 1
+fi
+
+if [ $EMERGENCY -eq 1 ]
+then
+    exit 0
+fi
+
+echo "Unknown ticket number received $TICKET"
+exit 255
