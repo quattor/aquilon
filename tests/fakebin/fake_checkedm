@@ -19,11 +19,21 @@ while [ -n "$1" ]; do
 			SYSTEM="$2"
 			shift
 			;;
+		--extra-option)
+			EXTOPT="$2"
+			shift
+			;;
 		*)
 		    ;;
 	esac
 	shift
 done
+
+if [ "x$EXTOPT" != "xapple_tree" ]
+then
+    echo "Missing or bad extra option $EXTOPT"
+    exit 1
+fi
 
 if [ $TICKET == "12345678" -a $SYSTEM == "TCM2" ]
 then

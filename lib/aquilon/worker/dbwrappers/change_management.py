@@ -16,6 +16,8 @@
 # limitations under the License.
 """ Helper functions for change management """
 
+import shlex
+
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
@@ -44,6 +46,10 @@ def change_management_validate(user, justification, logger, config):
     if config.has_option("change_management", "enforce"):
         check_enforced = config.getboolean("change_management", "enforce")
 
+    extra_options = ""
+    if config.has_option("change_management", "extra_options"):
+        extra_options = config.get("change_management", "extra_options")
+
     cmd = ["checkedm",
            "--resource-instance", "prod",
            "--output-format", "json",
@@ -54,6 +60,8 @@ def change_management_validate(user, justification, logger, config):
         cmd.extend(["--ticketing-system", "SN", "--ticket", justification.sn])
     if justification.emergency:
         cmd.append("--emergency")
+
+    cmd.extend(shlex.split(extra_options))
 
     exception_happened = False
     try:
