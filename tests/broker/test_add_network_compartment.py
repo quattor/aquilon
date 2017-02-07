@@ -64,6 +64,12 @@ class TestAddNetworkCompartment(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Comments: Unit-test Permiter DMZ", command)
 
+    def test_202_show_utper_proto(self):
+        command = ["show", "network", "compartment",
+                   "--network_compartment", "perimeter.ut", "--format", "proto"]
+        compartment = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(compartment.name, "perimeter.ut")
+
     def test_209_show_nonexistant(self):
         command = ["show", "network", "compartment",
                    "--network_compartment", "nonexistant"]
@@ -77,7 +83,6 @@ class TestAddNetworkCompartment(TestBrokerCommand):
         self.matchoutput(out, "Network Compartment: perimeter.ut",
                          command)
         self.matchoutput(out, "Network Compartment: interior.ut", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkCompartment)
