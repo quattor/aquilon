@@ -145,7 +145,6 @@ logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
 plenarydir = %(cfgdir)s/plenary
-swrepdir = %(quattordir)s/swrep
 #git_author_name =
 #git_author_email =
 #git_committer_name =

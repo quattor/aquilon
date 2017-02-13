@@ -415,14 +415,12 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                                  "bin", "aq_compile.py")
         basedir = self.config.get("broker", "quattordir")
         templates = os.path.join(self.sandboxdir, "utsandbox")
-        swrep = self.config.get("broker", "swrepdir")
         # Make sure aq_compile uses the same panc.jar as the rest of the tests
         panc = self.config.get("panc", "pan_compiler")
         args = [aqcompile,
                 "--basedir", basedir,
                 "--domain", "utsandbox",
                 "--templates", templates,
-                "--swrep", swrep,
                 "--panc_jar", panc,
                 "--batch_size", "10"]
         if self.config.getboolean('panc', 'gzip_output'):

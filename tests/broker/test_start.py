@@ -152,16 +152,6 @@ class TestBrokerStart(unittest.TestCase):
         self.run_command([git, "symbolic-ref", "HEAD", "refs/heads/prod"],
                          env=env, cwd=dest)
 
-    def testcloneswrep(self):
-        source = self.config.get("unittest", "swrep_repository")
-        dest = os.path.join(self.config.get("broker", "swrepdir"), "repository")
-        rmtree(dest, ignore_errors=True)
-
-        env = {}
-        env["PATH"] = os.environ.get("PATH", "")
-        git = self.config.lookup_tool("git")
-        self.run_command([git, "clone", source, dest], env=env)
-
     def testdisabletemplatetests(self):
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")
