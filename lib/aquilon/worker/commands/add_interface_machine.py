@@ -35,7 +35,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         audit_results = []
 
         if type:
-            self.deprecated_option("type", "Please use --iftype"
+            self.deprecated_option("type", "Please use --iftype "
                                    "instead.", logger=logger, **arguments)
             if not iftype:
                 iftype = type
