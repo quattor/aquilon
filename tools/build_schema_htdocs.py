@@ -134,7 +134,7 @@ model_group = {
         'title': 'DNS',
         'classes': [DnsDomain, DnsRecord, ARecord, SrvRecord, NsRecord, Alias,
                     AddressAlias, ReservedName, Fqdn, DynamicStub,
-                    DnsEnvironment, DnsMap],
+                    DnsEnvironment],
     },
     'cluster': {
         'title': 'Clusters',

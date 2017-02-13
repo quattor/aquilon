@@ -35,10 +35,6 @@ class CommandDelDnsDomain(BrokerCommand):
             raise ArgumentError("DNS domain %s cannot be deleted while still "
                                 "in use." % dns_domain)
 
-        if dbdns_domain.dns_maps:
-            raise ArgumentError("{0} is still mapped to locations and cannot "
-                                "be deleted.".format(dbdns_domain))
-
         comments = dbdns_domain.comments
         session.delete(dbdns_domain)
         session.flush()

@@ -128,21 +128,6 @@ class TestAddDnsDomain(TestBrokerCommand):
         for domain in ['ms.com', 'aqd-unittest.ms.com', 'aqd-unittest-ut-env.ms.com']:
             self.assertIn(domain, dns_names)
 
-    def testaddtd1(self):
-        self.dsdb_expect("add_dns_domain -domain_name td1.aqd-unittest.ms.com "
-                         "-comments ")
-        command = ["add", "dns", "domain",
-                   "--dns_domain", "td1.aqd-unittest.ms.com"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def testaddtd2(self):
-        self.dsdb_expect("add_dns_domain -domain_name td2.aqd-unittest.ms.com "
-                         "-comments ")
-        command = ["add", "dns", "domain",
-                   "--dns_domain", "td2.aqd-unittest.ms.com"]
-        self.noouttest(command)
-
     def testaddcolodomains(self):
         self.dsdb_expect("add_dns_domain -domain_name excx.aqd-unittest.ms.com "
                          "-comments ")

@@ -167,20 +167,6 @@ class PlenaryMachineInfo(StructurePlenary):
             pan_assign(lines, "chassis", slot.chassis.fqdn)
             pan_assign(lines, "slot", slot.slot_number)
 
-        dns_search_domains = []
-        parents = self.dbobj.location.parents[:]
-        parents.append(self.dbobj.location)
-        parents.reverse()
-        for parent in parents:
-            # Filter out duplicates
-            extra_domains = [map.dns_domain.name
-                             for map in parent.dns_maps
-                             if map.dns_domain.name not in dns_search_domains]
-            dns_search_domains.extend(extra_domains)
-
-        if dns_search_domains:
-            pan_assign(lines, "sysloc/dns_search_domains", dns_search_domains)
-
         # Now describe the hardware
         lines.append("")
         if self.dbobj.serial_no:

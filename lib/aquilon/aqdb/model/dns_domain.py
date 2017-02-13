@@ -71,9 +71,6 @@ class DnsDomain(Base):
 
     servers = association_proxy('_ns_records', 'a_record')
 
-    # The relation is defined in dns_map.py
-    mapped_locations = association_proxy('dns_maps', 'location')
-
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
     @classmethod

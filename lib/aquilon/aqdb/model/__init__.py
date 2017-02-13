@@ -54,7 +54,6 @@ from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network_compartment import NetworkCompartment
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.static_route import StaticRoute
-from aquilon.aqdb.model.dns_map import DnsMap
 from aquilon.aqdb.model.fqdn import Fqdn
 from aquilon.aqdb.model.dns_record import DnsRecord
 from aquilon.aqdb.model.dns_record_target_mixin import DnsRecordTargetMixin
