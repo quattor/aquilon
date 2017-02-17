@@ -31,6 +31,7 @@ PPROD = "justify-prod"
 QPROD = "justify-qa"
 AUTHERR = "The operation has production impact, --justification is required."
 AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
+AUTHERR3 = "Unauthorized: Authorization error"
 
 
 class TestJustification(PersonalityTestMixin, TestBrokerCommand):
@@ -644,6 +645,29 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["del", "feature", "--feature", "nonpublicfeature",
                    "--type", "host"]
         self.noouttest(command)
+
+    def test_860_rejected_tcm(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "tcm=87654321"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR3, command)
+
+    def test_870_accepted_sn(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "sn=CHG123456"]
+        self.noouttest(command)
+
+    def test_880_rejected_sn(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "sn=CHG654321"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR3, command)
 
     def test_900_cleanup(self):
         h = "aquilon91.aqd-unittest.ms.com"

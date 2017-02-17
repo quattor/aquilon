@@ -23,18 +23,18 @@ from aquilon.worker.dbwrappers.cluster import get_clusters_by_locations
 
 
 class CommandDelBuildingPreference(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = ["building_pair", "archetype"]
 
-    def render(self, session, plenaries, building_pair, archetype,
+    def render(self, session, logger, plenaries, building_pair, archetype,
                justification, reason, user, **_):
         db_pref = BuildingPreference.get_unique(session,
                                                 building_pair=building_pair,
                                                 archetype=archetype,
                                                 compel=True)
 
-        validate_prod_archetype(db_pref.archetype, user, justification, reason)
+        validate_prod_archetype(db_pref.archetype, user, justification, reason, logger)
 
         for db_clus in get_clusters_by_locations(session, (db_pref.a, db_pref.b),
                                                  db_pref.archetype):

@@ -32,13 +32,13 @@ from aquilon.worker.templates import PlenaryHost
 
 
 class CommandDelStaticRoute(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = ["gateway", "ip"]
 
-    def render(self, session, plenaries, gateway, ip, netmask, prefixlen,
-               network_environment, archetype, personality, personality_stage,
-               justification, reason, user, **_):
+    def render(self, session, logger, plenaries, gateway, ip, netmask,
+               prefixlen, network_environment, archetype, personality,
+               personality_stage, justification, reason, user, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
@@ -54,7 +54,7 @@ class CommandDelStaticRoute(BrokerCommand):
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
-            validate_prod_personality(dbstage, user, justification, reason)
+            validate_prod_personality(dbstage, user, justification, reason, logger)
             if dbstage.created_implicitly:
                 plenaries.add(dbstage)
         else:

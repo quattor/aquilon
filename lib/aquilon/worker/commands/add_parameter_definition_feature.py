@@ -23,12 +23,13 @@ from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
 
 
 class CommandAddParameterDefintionFeature(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = ["feature", "type", "path", "value_type"]
 
-    def render(self, session, plenaries, feature, type, path, value_type, schema,
-               required, default, description, user, justification, reason, **_):
+    def render(self, session, logger, plenaries, feature, type, path,
+               value_type, schema, required, default, description, user,
+               justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -43,7 +44,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
 
 
         if default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         # Activation field has been skipped on purpose

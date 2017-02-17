@@ -69,7 +69,7 @@ class CommandMapGrn(BrokerCommand):
             objs = [dbpersonality.active_stage(personality_stage)]
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
-            validate_prod_personality(objs[0], user, justification, reason)
+            validate_prod_personality(objs[0], user, justification, reason, logger)
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 

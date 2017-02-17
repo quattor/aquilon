@@ -322,7 +322,7 @@ class TestBindFeature(TestBrokerCommand):
 
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0",
-                   "--justification", "tcm=123456789"]
+                   "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 2/1 templates.", command)
 

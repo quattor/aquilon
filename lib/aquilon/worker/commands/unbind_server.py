@@ -57,7 +57,7 @@ class CommandUnbindServer(BrokerCommand):
                                    alias)
 
         for dbinstance in dbinstances:
-            validate_prod_service_instance(dbinstance, user, justification, reason)
+            validate_prod_service_instance(dbinstance, user, justification, reason, logger)
 
             if position is not None:
                 if position < 0 or position >= len(dbinstance.servers):

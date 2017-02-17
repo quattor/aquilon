@@ -25,12 +25,12 @@ from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
 
 
 class CommandDelParameterDefintionFeature(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = ["path", "feature", "type"]
 
-    def render(self, session, plenaries, feature, type, path, user, justification,
-               reason, **_):
+    def render(self, session, logger, plenaries, feature, type, path, user,
+               justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         path = ParamDefinition.normalize_path(path, strict=False)
@@ -46,7 +46,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
 
 
         if db_paramdef.default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         dbfeature.param_def_holder.param_definitions.remove(db_paramdef)

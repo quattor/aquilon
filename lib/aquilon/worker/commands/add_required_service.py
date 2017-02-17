@@ -32,14 +32,14 @@ class CommandAddRequiredService(BrokerCommand):
                                 .format(dbservice, dbarchetype))
         dbarchetype.required_services.append(dbservice)
 
-    def render(self, session, service, archetype, justification, user,
+    def render(self, session, logger, service, archetype, justification, user,
                reason, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbarchetype.require_compileable("required services are not supported")
 
         dbservice = Service.get_unique(session, name=service, compel=True)
 
-        validate_prod_archetype(dbarchetype, user, justification, reason)
+        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
 
         self._update_dbobj(dbarchetype, dbservice)
 

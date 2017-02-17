@@ -24,14 +24,14 @@ from aquilon.worker.dbwrappers.cluster import get_clusters_by_locations
 
 
 class CommandAddBuildingPreference(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = ["building_pair", "prefer", "archetype"]
 
-    def render(self, session, plenaries, building_pair, prefer, archetype,
-               justification, reason, user, **_):
+    def render(self, session, logger, plenaries, building_pair, prefer,
+               archetype, justification, reason, user, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        validate_prod_archetype(dbarchetype, user, justification, reason)
+        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
         if not dbarchetype.cluster_type:
             raise ArgumentError("{0} is not a cluster archetype."
                                 .format(dbarchetype))

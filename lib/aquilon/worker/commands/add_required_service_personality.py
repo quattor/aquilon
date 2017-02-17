@@ -58,7 +58,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
             dbenv = HostEnvironment.get_instance(session, environment_override)
         else:
             dbenv = None
-        validate_prod_personality(dbstage, user, justification, reason)
+        validate_prod_personality(dbstage, user, justification, reason, logger)
 
         if dbstage.created_implicitly:
             plenaries.add(dbstage)

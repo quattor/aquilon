@@ -16,29 +16,76 @@
 # limitations under the License.
 """ Helper functions for change management """
 
+import shlex
+
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import AuthorizationException
+from aquilon.exceptions_ import AuthorizationException, ProcessException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityStage)
 from aquilon.aqdb.model.host_environment import Production
+from aquilon.worker.processes import run_command
+from aquilon.config import Config
 
 
-def validate_justification(user, justification, reason):
+def validate_justification(user, justification, reason, logger):
+    config = Config()
+    check_enabled = False
+    if config.has_option("change_management", "enable"):
+        check_enabled = config.getboolean("change_management", "enable")
 
     justification.check_reason(reason)
-    # TODO: EDM validation
-    # edm_validate(result.group(0))
+
+    if check_enabled:
+        change_management_validate(user, justification, logger, config)
 
 
-def enforce_justification(user, justification, reason):
+def change_management_validate(user, justification, logger, config):
+    check_enforced = False
+    if config.has_option("change_management", "enforce"):
+        check_enforced = config.getboolean("change_management", "enforce")
+
+    extra_options = ""
+    if config.has_option("change_management", "extra_options"):
+        extra_options = config.get("change_management", "extra_options")
+
+    cmd = ["checkedm",
+           "--resource-instance", "prod",
+           "--output-format", "json",
+           "--requestor", user]
+    if justification.tcm is not None:
+        cmd.extend(["--ticketing-system", "TCM2", "--ticket", justification.tcm])
+    elif justification.sn is not None:
+        cmd.extend(["--ticketing-system", "SN", "--ticket", justification.sn])
+    if justification.emergency:
+        cmd.append("--emergency")
+
+    cmd.extend(shlex.split(extra_options))
+
+    exception_happened = False
+    try:
+        out = run_command(cmd)
+    except ProcessException as err:
+        exception_happened = True
+        out = err.out
+
+    logger.info("EDM validation done, request {}; output='{}'".format("denied" if exception_happened else "approved", out))
+
+    if exception_happened:
+        if check_enforced:
+            raise AuthorizationException("Authorization error")
+        else:
+            logger.client_info("Change management would reject the justification; reason={0:s}".format(out))
+
+
+def enforce_justification(user, justification, reason, logger):
     if not justification:
         raise AuthorizationException("The operation has production impact, "
                                      "--justification is required.")
-    validate_justification(user, justification, reason)
+    validate_justification(user, justification, reason, logger)
 
 
-def validate_prod_personality(dbstage, user, justification, reason):
+def validate_prod_personality(dbstage, user, justification, reason, logger):
     session = object_session(dbstage)
     if dbstage.personality.is_cluster:
         q = session.query(Cluster.id)
@@ -46,10 +93,10 @@ def validate_prod_personality(dbstage, user, justification, reason):
         q = session.query(Host.hardware_entity_id)
     q = q.filter_by(personality_stage=dbstage)
     if isinstance(dbstage.host_environment, Production) and q.count() > 0:
-        enforce_justification(user, justification, reason)
+        enforce_justification(user, justification, reason, logger)
 
 
-def validate_prod_archetype(dbarchetype, user, justification, reason):
+def validate_prod_archetype(dbarchetype, user, justification, reason, logger):
     session = object_session(dbarchetype)
     prod = Production.get_instance(session)
     if dbarchetype.cluster_type:
@@ -59,10 +106,10 @@ def validate_prod_archetype(dbarchetype, user, justification, reason):
     q = q.join(PersonalityStage, Personality)
     q = q.filter_by(host_environment=prod, archetype=dbarchetype)
     if q.count() > 0:
-        enforce_justification(user, justification, reason)
+        enforce_justification(user, justification, reason, logger)
 
 
-def validate_prod_os(dbos, user, justification, reason):
+def validate_prod_os(dbos, user, justification, reason, logger):
     session = object_session(dbos)
     prod = Production.get_instance(session)
     q = session.query(Host.hardware_entity_id)
@@ -70,10 +117,10 @@ def validate_prod_os(dbos, user, justification, reason):
     q = q.join(PersonalityStage, Personality)
     q = q.filter_by(host_environment=prod)
     if q.count() > 0:
-        enforce_justification(user, justification, reason)
+        enforce_justification(user, justification, reason, logger)
 
 
-def validate_prod_service_instance(dbinstance, user, justification, reason):
+def validate_prod_service_instance(dbinstance, user, justification, reason, logger):
     session = object_session(dbinstance)
     prod = Production.get_instance(session)
 
@@ -88,10 +135,10 @@ def validate_prod_service_instance(dbinstance, user, justification, reason):
     q2 = q2.filter_by(host_environment=prod)
 
     if q1.count() > 0 or q2.count() > 0:
-        enforce_justification(user, justification, reason)
+        enforce_justification(user, justification, reason, logger)
 
 
-def validate_prod_feature(dbfeature, user, justification, reason):
+def validate_prod_feature(dbfeature, user, justification, reason, logger):
     session = object_session(dbfeature)
     prod = Production.get_instance(session)
 
@@ -99,7 +146,7 @@ def validate_prod_feature(dbfeature, user, justification, reason):
     q = q.join(Archetype.features)
     q = q.filter_by(feature=dbfeature)
     for dbarchetype in q:
-        validate_prod_archetype(dbarchetype, user, justification, reason)
+        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
 
     q1 = session.query(Cluster.id)
     q1 = q1.join(PersonalityStage, Personality)
@@ -117,4 +164,4 @@ def validate_prod_feature(dbfeature, user, justification, reason):
     q2 = q2.filter_by(feature=dbfeature)
 
     if q1.count() > 0 or q2.count() > 0:
-        enforce_justification(user, justification, reason)
+        enforce_justification(user, justification, reason, logger)

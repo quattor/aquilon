@@ -22,8 +22,8 @@ from aquilon.worker.dbwrappers.change_management import validate_justification
 
 
 class CommandGrantRootAccess(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = ['personality', 'justification']
 
     def _update_dbobj(self, obj, dbuser=None, dbnetgroup=None):
@@ -33,9 +33,9 @@ class CommandGrantRootAccess(BrokerCommand):
         if dbnetgroup and dbnetgroup not in obj.root_netgroups:
             obj.root_netgroups.append(dbnetgroup)
 
-    def render(self, session, plenaries, username, netgroup, personality,
-               archetype, justification, user, reason, **_):
-        validate_justification(user, justification, reason)
+    def render(self, session, logger, plenaries, username, netgroup,
+               personality, archetype, justification, user, reason, **_):
+        validate_justification(user, justification, reason, logger)
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)
 
