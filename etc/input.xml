@@ -1493,6 +1493,9 @@
 	</optgroup>
 	<transport method="get" path="network_compartment/%(network_compartment)s"/>
 	<transport trigger="all" method="get" path="network_compartment"/>
+	<format name="proto" >
+	    <message_class name="NetworkCompartmentList" module="aqdnetworks_pb2"/>
+	</format>
     </command>
 
     <command name="update_network_compartment">
