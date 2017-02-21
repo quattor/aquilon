@@ -87,8 +87,8 @@ class TestDeployDomain(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Failed to parse the justification", command)
 
-    def test_125_ask_review(self):
-        command = ["ask_for_review", "--source", "changetest1", "--target", "prod"]
+    def test_125_request_review(self):
+        command = ["request_review", "--source", "changetest1", "--target", "prod"]
         self.noouttest(command)
 
     def head_commit(self, sandbox):

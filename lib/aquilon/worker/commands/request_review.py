@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import GitRepo
 
 
-class CommandAskForReview(BrokerCommand):
+class CommandRequestReview(BrokerCommand):
 
     required_parameters = ["source", "target"]
 
