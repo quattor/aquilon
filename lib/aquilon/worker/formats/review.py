@@ -36,15 +36,18 @@ class ReviewFormatter(ObjectFormatter):
     def format_raw(self, review, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "Review request"]
         details.append(indent + "  Target {0:c}: {0.name}".format(review.target))
+        if review.target_commit_id:
+            details.append(indent + "    Tested Commit: %s" %
+                           review.target_commit_id)
         details.append(indent + "  Source {0:c}: {0.name}".format(review.source))
-        details.append(indent + "    Commit ID: %s" % review.commit_id)
-        details.append(indent + "  Testing status: %s" %
-                       _testing_status[review.tested])
-        if review.testing_url:
-            details.append(indent + "  Testing URL: %s" % review.testing_url)
+        details.append(indent + "    Published Commit: %s" % review.commit_id)
         if review.review_url:
             details.append(indent + "  Code Review URL: %s" % review.review_url)
-        details.append(indent + "  Approval status: %s" %
+        if review.testing_url:
+            details.append(indent + "  Testing URL: %s" % review.testing_url)
+        details.append(indent + "  Testing Status: %s" %
+                       _testing_status[review.tested])
+        details.append(indent + "  Approval Status: %s" %
                        _approval_status[review.approved])
 
         return "\n".join(details)
@@ -55,6 +58,7 @@ class ReviewFormatter(ObjectFormatter):
                review.commit_id,
                review.review_url or "",
                review.testing_url or "",
+               review.target_commit_id or "",
                review.tested if review.tested is not None else "",
                review.approved if review.approved is not None else "")
 

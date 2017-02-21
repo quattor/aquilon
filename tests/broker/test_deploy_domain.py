@@ -31,6 +31,13 @@ from brokertest import TestBrokerCommand
 
 class TestDeployDomain(TestBrokerCommand):
 
+    def head_commit(self, sandbox, ref="HEAD"):
+        sandboxdir = os.path.join(self.sandboxdir, sandbox)
+        head, _ = self.gitcommand(["rev-parse", "%s^{commit}" % ref],
+                                  cwd=sandboxdir)
+        head = head.strip()
+        return head
+
     def test_100_deploychangetest1domain(self):
         command = ["deploy", "--source", "changetest1",
                    "--target", "deployable", "--reason", "Test reason"]
@@ -87,17 +94,17 @@ class TestDeployDomain(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Failed to parse the justification", command)
 
-    def test_125_request_review(self):
+    def test_123_request_review(self):
         command = ["request_review", "--source", "changetest1", "--target", "prod"]
         self.noouttest(command)
 
-    def head_commit(self, sandbox):
-        sandboxdir = os.path.join(self.sandboxdir, sandbox)
-        head, _ = self.gitcommand(["rev-parse", "HEAD^{commit}"], cwd=sandboxdir)
-        head = head.strip()
-        return head
+    def test_123_request_review_tracking(self):
+        command = ["request_review", "--source", "changetest1", "--target", "ut-prod"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The target needs to be a non-tracking domain, "
+                         "maybe you meant prod?", command)
 
-    def test_126_show_review(self):
+    def test_124_show_review(self):
         changetest1_head = self.head_commit("changetest1")
         command = ["show_review", "--source", "changetest1", "--target", "prod"]
         out = self.commandtest(command)
@@ -105,38 +112,102 @@ class TestDeployDomain(TestBrokerCommand):
             Review request
               Target Domain: prod
               Source Sandbox: changetest1
-                Commit ID: %s
-              Testing status: Untested
-              Approval status: No decision
+                Published Commit: %s
+              Testing Status: Untested
+              Approval Status: No decision
             """ % changetest1_head,
                            command)
 
-    def test_126_show_review_all(self):
+    def test_124_show_review_all(self):
         changetest1_head = self.head_commit("changetest1")
         command = ["show_review", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, changetest1_head, command)
 
-    def test_127_update_review(self):
+    def test_125_update_review_cr(self):
+        command = ["update_review", "--source", "changetest1", "--target", "prod",
+                   "--review_url", "http://review.example.org/changes/1234"]
+        self.noouttest(command)
+
+    def test_126_update_review_testing(self):
+        changetest1_head = self.head_commit("changetest1")
+        prod_head = self.head_commit("changetest1", ref="origin/prod")
+        command = ["update_review", "--source", "changetest1", "--target", "prod",
+                   "--commit_id", changetest1_head,
+                   "--target_commit_tested", prod_head,
+                   "--testing_url", "http://ci.example.org/builds/5678",
+                   "--testing_succeeded"]
+        self.noouttest(command)
+
+    def test_126_update_review_approval(self):
         changetest1_head = self.head_commit("changetest1")
         command = ["update_review", "--source", "changetest1", "--target", "prod",
                    "--commit_id", changetest1_head,
-                   "--testing_succeeded", "--approved"]
+                   "--approved"]
         self.noouttest(command)
 
     def test_128_show_review(self):
         changetest1_head = self.head_commit("changetest1")
+        prod_head = self.head_commit("changetest1", ref="origin/prod")
         command = ["show_review", "--source", "changetest1", "--target", "prod"]
         out = self.commandtest(command)
         self.output_equals(out, """
             Review request
               Target Domain: prod
+                Tested Commit: %s
               Source Sandbox: changetest1
-                Commit ID: %s
-              Testing status: Success
-              Approval status: Approved
-            """ % changetest1_head,
+                Published Commit: %s
+              Code Review URL: http://review.example.org/changes/1234
+              Testing URL: http://ci.example.org/builds/5678
+              Testing Status: Success
+              Approval Status: Approved
+            """ % (prod_head, changetest1_head),
                            command)
+
+    def test_128_show_review_csv(self):
+        changetest1_head = self.head_commit("changetest1")
+        prod_head = self.head_commit("changetest1", ref="origin/prod")
+        command = ["show_review", "--source", "changetest1", "--target", "prod",
+                   "--format", "csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "prod,changetest1,%s,http://review.example.org/changes/1234,http://ci.example.org/builds/5678,%s,True,True"
+                         % (changetest1_head, prod_head),
+                         command)
+
+    def test_129_bad_target_commit_id(self):
+        changetest1_head = self.head_commit("changetest1")
+        commit_not_in_templates = "576afd9bd9f620293a9e0e249032be5157ba5d29"
+        command = ["update_review", "--source", "changetest1", "--target", "prod",
+                   "--commit_id", changetest1_head, "--testing_failed",
+                   "--target_commit_tested", commit_not_in_templates]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Domain prod does not contain commit %s." %
+                         commit_not_in_templates, command)
+
+    def test_129_stale_testing(self):
+        changetest1_head = self.head_commit("changetest1")
+        commit_not_in_templates = "576afd9bd9f620293a9e0e249032be5157ba5d29"
+        command = ["update_review", "--source", "changetest1", "--target", "prod",
+                   "--commit_id", commit_not_in_templates,
+                   "--testing_url", "http://ci.example.org/builds/5677",
+                   "--testing_failed"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Possible attempt to update an old review record - "
+                         "the commit being reviewed is %s, not %s." %
+                         (changetest1_head, commit_not_in_templates),
+                         command)
+
+    def test_129_short_commit(self):
+        abbrev_hash_not_in_templates = "576afd9bd9f620"
+        command = ["update_review", "--source", "changetest1", "--target", "prod",
+                   "--commit_id", abbrev_hash_not_in_templates,
+                   "--testing_url", "http://ci.example.org/builds/5677",
+                   "--testing_failed"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid commit ID (%s), make sure to pass the "
+                         "full hash." % abbrev_hash_not_in_templates, command)
 
     def test_130_deploynosync(self):
         command = ["deploy", "--source", "changetest1", "--target", "prod",
@@ -190,6 +261,14 @@ class TestDeployDomain(TestBrokerCommand):
                          "You're trying to deploy a sandbox to a domain that "
                          "does not contain the commit where the sandbox was "
                          "branched from.",
+                         command)
+
+    def test_310_review_leftbehild(self):
+        command = ["request_review", "--source", "advanced", "--target", "leftbehind"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Domain leftbehind does not contain the commit where "
+                         "sandbox advanced was branched from.",
                          command)
 
     def test_320_update_leftbehind(self):
