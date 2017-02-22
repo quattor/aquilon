@@ -155,7 +155,7 @@ class AQDMaker(object):
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
         resources = __import__("aquilon.worker.resources", globals(), locals(),
-                               ["RestServer"], -1)
+                               ["RestServer"], 0)
         RestServer = getattr(resources, "RestServer")
         restServer = RestServer(config)
 
