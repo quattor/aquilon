@@ -54,12 +54,14 @@ class TestDeployDomain(TestBrokerCommand):
 
     def test_110_verifydeploylog(self):
         kingdir = self.config.get("broker", "kingdir")
-        command = ["log", "--no-color", "-n", "1", "deployable"]
+        command = ["show", "--no-patch", "--pretty=full", "deployable"]
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "User:", command)
-        self.matchoutput(out, "Request ID:", command)
+        self.matchoutput(out, "Request-ID:", command)
         self.matchoutput(out, "Reason: Test reason", command)
         self.matchclean(out, "Justification:", command)
+        self.matchclean(out, "Code-Review-URL", command)
+        self.matchclean(out, "Testing-URL", command)
 
         author_email = self.config.get("broker", "git_author_email")
         self.matchoutput(out, "Author: %s <%s>" % (self.user, author_email),
@@ -218,6 +220,21 @@ class TestDeployDomain(TestBrokerCommand):
                          command)
         self.matchclean(out, "ut-prod", command)
         self.matchclean(out, "not approved", command)
+
+    def test_131_verifydeploylog(self):
+        kingdir = self.config.get("broker", "kingdir")
+        command = ["show", "--no-patch", "--format=%B", "prod"]
+        out, _ = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "User:", command)
+        self.matchoutput(out, "Request-ID:", command)
+        self.matchoutput(out, "Justification: tcm=12345678", command)
+        self.matchoutput(out, "Reason: Just because", command)
+        self.matchoutput(out,
+                         "Code-Review-URL: http://review.example.org/changes/1234",
+                         command)
+        self.matchoutput(out,
+                         "Testing-URL: http://ci.example.org/builds/5678",
+                         command)
 
     def test_200_verifynosync(self):
         # The change should be in prod...

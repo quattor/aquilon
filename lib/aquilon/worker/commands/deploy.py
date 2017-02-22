@@ -115,12 +115,22 @@ class CommandDeploy(BrokerCommand):
             merge_msg.append("Merge remote branch 'origin/%s' into %s" %
                              (dbsource.name, dbtarget.name))
             merge_msg.append("")
+
+            # TODO: The rest tries to look RFC2822-parseable, but e.g. a newline
+            # in --reason may cause surprises.
             merge_msg.append("User: %s" % user)
-            merge_msg.append("Request ID: %s" % requestid)
+            merge_msg.append("Request-ID: %s" % requestid)
             if justification:
                 merge_msg.append("Justification: %s" % justification)
             if reason:
                 merge_msg.append("Reason: %s" % reason)
+
+            if dbreview:
+                if dbreview.review_url:
+                    merge_msg.append("Code-Review-URL: %s" %
+                                     dbreview.review_url)
+                if dbreview.testing_url:
+                    merge_msg.append("Testing-URL: %s" % dbreview.testing_url)
 
             try:
                 cmd = ["merge", "--no-ff", "origin/%s" % dbsource.name,
