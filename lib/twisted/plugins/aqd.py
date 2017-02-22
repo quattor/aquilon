@@ -22,7 +22,7 @@ import sys
 # This is done by the wrapper script.
 # import aquilon.worker.depends
 
-from zope.interface import implements
+from zope.interface import implementer
 from twisted.python import usage, log
 from twisted.plugin import IPlugin
 from twisted.application import strports
@@ -79,8 +79,8 @@ def make_required_dirs(config):
             log.msg("Could not create directory '%s': %s" % (dir, e))
 
 
+@implementer(IServiceMaker, IPlugin)
 class AQDMaker(object):
-    implements(IServiceMaker, IPlugin)
     tapname = "aqd"
     description = "Aquilon Daemon"
     options = Options
