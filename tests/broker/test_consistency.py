@@ -130,8 +130,8 @@ class TestConsistency(TestBrokerCommand):
 
     def test_115_verify_delete_orphaned_branch(self):
         kingdir = self.config.get("broker", "kingdir")
-        command = ["log", "--no-color", "-n", "1", self.config.get("broker",
-                                                                   "trash_branch")]
+        command = ["show", "--no-patch", "--format=%B",
+                   self.config.get("broker", "trash_branch")]
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Delete orphaned branch branch-only", command)
 

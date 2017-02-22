@@ -257,13 +257,13 @@ class TestDeployDomain(TestBrokerCommand):
         # history checked to avoid being fooled by real commits
 
         # The change must be in prod...
-        command = ["log", "--no-color", "-n", "1", "prod"]
+        command = ["show", "--no-patch", "--format=%B", "prod"]
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Justification: tcm=12345678", command)
         self.matchoutput(out, "Reason: Just because", command)
 
         # ... but not in ut-prod
-        command = ["log", "--no-color", "-n", "1", "ut-prod"]
+        command = ["show", "--no-patch", "--format=%B", "ut-prod"]
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchclean(out, "tcm=12345678", command)
 
