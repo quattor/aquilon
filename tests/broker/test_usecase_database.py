@@ -33,7 +33,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_100_standalone_single_dbserver(self):
         command = ["add_filesystem", "--filesystem=gnr.0", "--type=ext3",
                    "--mountpoint=/d/d1/utdb1",
-                   "--blockdevice=/dev/vx/dsk/dg.0/gnr.0",
+                   "--blockdevice=/dev/vx/dsk/dg.1/gnr.0",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--hostname=server1.aqd-unittest.ms.com"]
@@ -58,15 +58,6 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.matchoutput(out, '"system/resources/filesystem" = append(create("resource/host/server1.aqd-unittest.ms.com/filesystem/gnr.0/config"))', command)
         self.matchoutput(out, '"system/resources/application" = append(create("resource/host/server1.aqd-unittest.ms.com/application/nydb1/config"))', command)
 
-    def test_120_standalone_two_dbserver(self):
-        command = ["add_filesystem", "--filesystem=gnr.1", "--type=ext3",
-                   "--mountpoint=/d/d1/utdb2",
-                   "--blockdevice=/dev/vx/dsk/dg.0/gnr.1",
-                   "--bootmount",
-                   "--dumpfreq=1", "--fsckpass=3", "--options=rw",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.noouttest(command)
-
     def test_111_add_app(self):
         command = ["add_application", "--application=utdb2", "--eon_id=2",
                    "--hostname=server1.aqd-unittest.ms.com"]
@@ -75,6 +66,15 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_115_compile(self):
         command = ["compile", "--hostname=server1.aqd-unittest.ms.com"]
         self.statustest(command)
+
+    def test_120_standalone_two_dbserver(self):
+        command = ["add_filesystem", "--filesystem=gnr.1", "--type=ext3",
+                   "--mountpoint=/d/d1/utdb2",
+                   "--blockdevice=/dev/vx/dsk/dg.0/gnr.1",
+                   "--bootmount",
+                   "--dumpfreq=1", "--fsckpass=3", "--options=rw",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
     def test_130_verify_show(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
