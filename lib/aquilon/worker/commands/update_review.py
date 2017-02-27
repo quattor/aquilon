@@ -42,24 +42,30 @@ class CommandUpdateReview(BrokerCommand):
 
         # Automated tools are expected to pass --commit_id, in case the review
         # was updated in the mean time
-        if commit_id and dbreview.commit_id != commit_id:
-            raise ArgumentError("Possible attempt to update a stale review - "
-                                "commit ID being reviewed is %s, not %s."
-                                % (dbreview.commit_id, commit_id))
+        if commit_id:
+            if not _commit_re.search(commit_id):
+                raise ArgumentError("Invalid commit ID (%s), make sure to pass "
+                                    "the full hash." % commit_id)
+
+            if dbreview.commit_id.lower() != commit_id.lower():
+                raise ArgumentError("Possible attempt to update an old review "
+                                    "record - the commit being reviewed is %s, "
+                                    "not %s."
+                                    % (dbreview.commit_id, commit_id))
 
         if testing_succeeded is not None:
             dbreview.tested = testing_succeeded
 
         if target_commit_tested:
             if not _commit_re.search(target_commit_tested):
-                raise ArgumentError("Invalid commit ID, make sure you pass "
-                                    "the full hash.")
+                raise ArgumentError("Invalid commit ID (%s), make sure to pass "
+                                    "the full hash." % target_commit_tested)
             repo = GitRepo.domain(dbtarget.name, logger)
-            if not repo.ref_contains_commit(dbtarget.name,
-                                            target_commit_tested):
+            if not repo.ref_contains_commit(target_commit_tested,
+                                            ref=dbtarget.name):
                 raise ArgumentError("{0} does not contain commit {1!s}."
                                     .format(dbtarget, target_commit_tested))
-            dbreview.target_commit_id = target_commit_tested
+            dbreview.target_commit_id = target_commit_tested.lower()
 
         if testing_url is not None:
             dbreview.testing_url = testing_url
