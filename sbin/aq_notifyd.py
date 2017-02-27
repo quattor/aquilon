@@ -193,13 +193,13 @@ def main():
         rootlog.setLevel(level)
 
     # Apply configured log settings
+    defaults = config.defaults()
     for logname, level in config.items("logging"):
+        if logname in defaults:
+            continue
         try:
-            # TODO: Drop the translation from str to int when moving the min.
-            # Python version to 2.7
-            levelno = logging._levelNames[level]
-            logging.getLogger(logname).setLevel(levelno)
-        except (ValueError, KeyError):
+            logging.getLogger(logname).setLevel(level)
+        except ValueError:
             pass
 
     logger = logging.getLogger("aq_notifyd")

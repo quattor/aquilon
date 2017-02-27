@@ -22,7 +22,7 @@ import sys
 # This is done by the wrapper script.
 # import aquilon.worker.depends
 
-from zope.interface import implements
+from zope.interface import implementer
 from twisted.python import usage, log
 from twisted.plugin import IPlugin
 from twisted.application import strports
@@ -79,8 +79,8 @@ def make_required_dirs(config):
             log.msg("Could not create directory '%s': %s" % (dir, e))
 
 
+@implementer(IServiceMaker, IPlugin)
 class AQDMaker(object):
-    implements(IServiceMaker, IPlugin)
     tapname = "aqd"
     description = "Aquilon Daemon"
     options = Options
@@ -155,7 +155,7 @@ class AQDMaker(object):
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
         resources = __import__("aquilon.worker.resources", globals(), locals(),
-                               ["RestServer"], -1)
+                               ["RestServer"], 0)
         RestServer = getattr(resources, "RestServer")
         restServer = RestServer(config)
 
