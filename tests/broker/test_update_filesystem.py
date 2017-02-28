@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 class TestUpdateFilesystem(TestBrokerCommand):
     def test_00_update_basic_filesystem(self):
         command = ["update_filesystem", "--filesystem=fs1", "--type=ext3",
-                   "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
+                   "--mountpoint=/mnt1", "--blockdevice=/dev/vx/dsk/dg.0/gnr.0",
                    "--dumpfreq=1", "--fsckpass=2", "--options=rw",
                    "--comments=Some updated filesystem comments",
                    "--hostname=server1.aqd-unittest.ms.com"]
@@ -39,10 +39,10 @@ class TestUpdateFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Filesystem: fs1", command)
         self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "Block Device: /dev/foo/bar", command)
+        self.matchoutput(out, "Block Device: /dev/vx/dsk/dg.0/gnr.0", command)
         self.matchoutput(out, "Mount at boot: True", command)
         self.matchoutput(out, "Mountopts: rw", command)
-        self.matchoutput(out, "Mountpoint: /mnt", command)
+        self.matchoutput(out, "Mountpoint: /mnt1", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 2", command)
         self.matchoutput(out, "Comments: Some updated filesystem comments", command)
