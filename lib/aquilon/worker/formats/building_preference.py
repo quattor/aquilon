@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016  Contributor
+# Copyright (C) 2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@
 """ Formatter for building and cluster preference tables. """
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import BuildingPreference
+from aquilon.aqdb.model import BuildingPreference, Building
 
 
-class ClusterBuildingPreference(object):
-    __slots__ = ['cluster']
+class BuildingClusterPreference(object):
+    __slots__ = ['buildings', 'prefer', 'clusters', 'archetype']
 
-    def __init__(self, cluster):
-        self.cluster = cluster
+    def __init__(self, buildings, archetype, clusters, prefer=None):
+        self.buildings = buildings
+        self.archetype = archetype
+        self.clusters = clusters
+        self.prefer = prefer
 
 
 class BuildingPreferenceFormatter(ObjectFormatter):
@@ -32,10 +35,9 @@ class BuildingPreferenceFormatter(ObjectFormatter):
     def format_raw(self, db_pref, indent="", embedded=True,
                    indirect_attrs=True):
         details = []
-        details.append(indent + "Building Pair: {0.sorted_name} {1:c}: {1.name}"
-                       .format(db_pref, db_pref.archetype))
-        details.append(indent + "  Preferred {0:c}: {0.name}"
-                       .format(db_pref.prefer))
+        details.append(indent + "Building Pair: {0.sorted_name}  {1:c}: "
+                       "{1.name}  Prefer: {2.name}".format(db_pref,
+                       db_pref.archetype, db_pref.prefer))
         return "\n".join(details)
 
     def fill_proto(self, db_pref, skeleton, embedded=True, indirect_attrs=True):
@@ -50,20 +52,26 @@ class BuildingPreferenceFormatter(ObjectFormatter):
 
 ObjectFormatter.handlers[BuildingPreference] = BuildingPreferenceFormatter()
 
+class BuildingClusterPreferenceFormatter(ObjectFormatter):
 
-class ClusterBuildingPreferenceFormatter(ObjectFormatter):
-
-    def format_raw(self, db_pref, indent="", embedded=True,
-                   indirect_attrs=True):
+    def format_raw(self, bcpref, indent="", embedded=True, indirect_attrs=True):
         details = []
-        details.append(indent + "{0:c}: {0.name}".format(db_pref.cluster))
-        details.append(indent + "  Preferred {0:c}: {0.name}"
-                       .format(db_pref.cluster.preferred_location))
+        if bcpref.prefer:
+            details.append(indent + "Building Pair: {0}  {1:c}: {1.name}  "
+                           "Prefer: {2.name}".format(bcpref.buildings,
+                                                     bcpref.archetype,
+                                                     bcpref.prefer))
+        else:
+            details.append(indent + "Building Pair: {0}  {1:c}: {1.name}"
+                           .format(bcpref.buildings, bcpref.archetype))
+        for dbcluster in bcpref.clusters:
+            if dbcluster.preferred_location:
+                details.append(indent + "  Cluster: {0.name}  Prefer: {1.name}"
+                               .format(dbcluster, dbcluster.preferred_location))
+            else:
+                details.append(indent + "  Cluster: {0.name}".format(dbcluster))
+
         return "\n".join(details)
 
-    def fill_proto(self, db_pref, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.cluster = db_pref.cluster.name
-        self.redirect_proto(db_pref.cluster.preferred_location, skeleton.prefer,
-                            indirect_attrs=False)
+ObjectFormatter.handlers[BuildingClusterPreference] = BuildingClusterPreferenceFormatter()
 
-ObjectFormatter.handlers[ClusterBuildingPreference] = ClusterBuildingPreferenceFormatter()

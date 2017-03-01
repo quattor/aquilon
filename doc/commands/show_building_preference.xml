@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_show_building_preference"
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+	<refentrytitle>aq_show_building_preference</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+	<refname>aq show building preference</refname>
+	<refpurpose>
+	    Show building preferences
+	</refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq show building preference</command>
+	    <arg choice="plain"><option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option></arg>
+	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq show building preference</command>
+	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq show building preference</command>
+	    <arg choice="plain"><option>--all</option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+	<title>Description</title>
+	<para>
+	    The <command>aq show building preference</command> command shows
+	    building preferences for clusters.  Either by building codes and
+	    the cluster archetype; a specific cluster; or all building
+	    preferences (including clusters where a cluster-specific preferred
+	    building is set).
+	</para>
+    </refsect1>
+
+    <refsect1>
+	<title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Show building preferences for the given building pair.
+			Must be used together with
+			<option>--archetype</option>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Show building preferences for the given archetype.
+			Must be used together with
+			<option>--building_pair</option>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Show building preferences for the given cluster.  This is only
+			relevant if the cluster has a preferred building, or the cluster's
+			members are in a pair of buildings that have a building preference.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--all</option>
+		</term>
+		<listitem>
+		    <para>
+			Show all building preferences, including clusters that have
+			a specific preferred building.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>Examples</title>
+	<example>
+	    <title>Show building preferences for specific building pair</title>
+            <para>
+		The following shows the building preference for a specific
+		building pair and archetype:
+            </para>
+	    <programlisting>
+aq show building preference --building_pair aa,bb --archetype hacluster
+	    </programlisting>
+	</example>
+
+	<example>
+	    <title>Show building preferences for all buildings</title>
+	    <para>
+		The following shows all building preferences, including clusters
+		where the cluster has a preferred location.
+	    </para>
+	    <programlisting>
+aq show building preference --all
+	    </programlisting>
+	</example>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_update_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_search_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

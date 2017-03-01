@@ -47,6 +47,10 @@ class CommandUpdateBuildingPreference(BrokerCommand):
 
         session.flush()
 
+        # FIXME: for large numbers of affected clusters, this may take a little
+        # while -- refactor some feedback into the plenaries.write() where
+        # verbose=True.
+
         plenaries.write(verbose=True)
 
         return

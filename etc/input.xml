@@ -6704,7 +6704,7 @@
 
     <command name="add_building_preference">
 	Add a preference that will be used in determining the default hot-side of clusters
-	based on building code.  May also be used to configure a cluster-level override.
+	based on building code.
 	<optgroup mandatory="True" fields="all">
 	    <option name="building_pair" type="string">
 		Indicates that this is a building-level preference and provides a
@@ -6727,7 +6727,9 @@
 
     <command name="update_building_preference">
 	Update a preference that will be used in determining the default hot-side of clusters
-	based on building code, or update a cluster-level override.
+	based on building code.  If --prefer is not specified, this will rewrite plenary templates for
+	clusters that span the specified buildings, with the existing preference (that may be overridden by
+	a cluster-specific preference).
 	<optgroup mandatory="True" fields="all">
 	    <option name="building_pair" type="string">
 		Indicates that this is a building-level preference and provides a
@@ -6758,9 +6760,13 @@
 	    <option name="all" type="flag">
 		Display all preferences
 	    </option>
+	    <option name="cluster" type="string">
+		Display building preference for a specific cluster
+	    </option>
 	</optgroup>
 	<transport method="get" path="building_preference/%(building_pair)s"/>
 	<transport trigger="all" method="get" path="building_preference"/>
+	<transport trigger="cluster" method="get" path="building_preference_cluster"/>
 	<format name="proto">
 	    <message_class name="LocationPreferenceList" module="aqdsystems_pb2"/>
 	</format>
@@ -6768,7 +6774,7 @@
 
     <command name="search_building_preference">
 	Searches for preferences that are used in determining the default hot-side of clusters
-	based on building code.
+	based on building codes.
 	<optgroup mandatory="True">
 	    <option name="building_pair" type="string">Find preference rules for the given building pair</option>
 	    <option name="building" type="string">Find preference rules involving the given building</option>
@@ -6778,15 +6784,12 @@
 	    </option>
 	    <option name="archetype" type="string">Cluster archetype the preference applies to</option>
 	</optgroup>
-	<optgroup>
-	    <option name="fullinfo" type="flag">Show full information</option>
-	</optgroup>
 	<transport method="get" path="find/building_preference"/>
     </command>
 
     <command name="del_building_preference">
 	Delete preferences that are used in determining the default hot-side of clusters
-	based on building code, or delete cluster-level overrides.
+	based on building code.
 	<optgroup mandatory="True" fields="all">
 	    <option name="building_pair" type="string">
 		Removes a building-level preference, this is a comma-separated list of building

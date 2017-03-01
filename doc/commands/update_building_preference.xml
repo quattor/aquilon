@@ -47,6 +47,12 @@
             the same arguments as
 	    <citerefentry><refentrytitle>aq_add_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 	</para>
+	<para>
+	    If the <option>--prefer</option> option is not used, this command
+	    will rewrite plenary templates for affected clusters using the
+	    existing preference (that may be overridden by cluster-specific
+	    preferences).
+	</para>
     </refsect1>
 
     <refsect1>
