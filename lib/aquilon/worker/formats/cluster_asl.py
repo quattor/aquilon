@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016  Contributor
+# Copyright (C) 2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import AutoStartList, SystemList, BundleResource
+from aquilon.aqdb.model import (AutoStartList, SystemList, BundleResource,
+                                Building)
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.resource import ResourceFormatter
 
@@ -77,3 +78,43 @@ class AutoStartListFormatter(PriorityListFormatter):
         return details
 
 ObjectFormatter.handlers[AutoStartList] = AutoStartListFormatter()
+
+
+class ClusterPriorityList(object):
+    __slots__ = ['type', 'cluster', 'cl_pl', 'rg_pls']
+
+    def __init__(self, type, cluster, cl_pl, rg_pls):
+        self.type = type
+        self.cluster = cluster
+        self.cl_pl = cl_pl
+        self.rg_pls = rg_pls
+
+
+class ClusterPriorityListFormatter(ObjectFormatter):
+
+    def format_raw(self, cpl, indent="", embedded=True, indirect_attrs=True):
+        details = []
+        details.append(indent + "{0:c}: {0.name}".format(cpl.cluster))
+
+        buildings = cpl.cluster.member_locations(location_class=Building)
+        if len(buildings) == 2:
+            if cpl.cluster.preferred_location:
+                cbpref = "  Prefer: {0.name}".format(cpl.cluster.preferred_location)
+            else:
+                cbpref = ""
+
+            details.append(indent + "  Building Pair: " +
+                           ",".join(sorted(b.name for b in buildings)) +
+                           cbpref)
+
+        if cpl.cl_pl is not None:
+            details.append(self.redirect_raw(cpl.cl_pl, indent + "  "))
+        for (rgname,rgpl) in cpl.rg_pls:
+            details.append(indent + "  Resource Group: {0}".format(rgname))
+            details.append(self.redirect_raw(rgpl, indent + "    "))
+
+        return "\n".join(details)
+
+ObjectFormatter.handlers[ClusterPriorityList] = ClusterPriorityListFormatter()
+
+

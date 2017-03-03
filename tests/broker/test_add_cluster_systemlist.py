@@ -28,7 +28,20 @@ from brokertest import TestBrokerCommand
 
 class TestAddClusterSystemList(TestBrokerCommand):
 
-    def test_100_add_rg_single_host(self):
+    def test_100_show_cluster_systemlist_cluster(self):
+        command = ["show_cluster_systemlist", "--cluster", "utbvcs1b"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "High Availability Cluster utbvcs1b has no "
+                         "system list resource(s)",
+                         command)
+
+    def test_100_show_cluster_systemlist_all(self):
+        command = ["show_cluster_systemlist", "--all"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "No cluster system lists found",
+                         command)
+
+    def test_102_add_rg_single_host(self):
         self.noouttest(["add_cluster_systemlist", "--cluster", "utbvcs1b",
                         "--resourcegroup", "utbvcs1bas01",
                         "--member", "utbhost04.aqd-unittest.ms.com",
@@ -37,6 +50,29 @@ class TestAddClusterSystemList(TestBrokerCommand):
                         "--resourcegroup", "utbvcs1bas02",
                         "--member", "utbhost03.aqd-unittest.ms.com",
                         "--priority", 1])
+
+    def test_103_show_cluster_systemlist_cluster(self):
+        command = ["show_cluster_systemlist", "--cluster", "utbvcs1b"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1b\s*'
+                          r'Resource Group: utbvcs1bas01\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost04.aqd-unittest.ms.com Priority: 1$',
+                          command)
+
+    def test_103_show_cluster_systemlist_all(self):
+        command = ["show_cluster_systemlist", "--all"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1b\s*'
+                          r'Resource Group: utbvcs1bas01\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost04.aqd-unittest.ms.com Priority: 1\s*'
+                          r'Resource Group: utbvcs1bas02\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost03.aqd-unittest.ms.com Priority: 1$',
+                          command)
 
     def test_105_cat_utbvcs1b(self):
         command = ["cat", "--cluster", "utbvcs1b", "--resourcegroup", "utbvcs1bas01"]
@@ -204,6 +240,36 @@ class TestAddClusterSystemList(TestBrokerCommand):
         command = ["cat", "--cluster", "utbvcs1d", "--resourcegroup",
                    "utbvcs1das02", "--system_list"]
         self.notfoundtest(command)
+
+    def test_120_show_cluster_systemlist_cluster(self):
+        command = ["show_cluster_systemlist", "--cluster", "utbvcs1d"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1d\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost07.aqd-unittest.ms.com Priority: 5\s*'
+                          r'Member: utbhost08.aqd-unittest.ms.com Priority: 10\s*',
+                          command)
+
+    def test_120_show_cluster_systemlist_all(self):
+        command = ["show_cluster_systemlist", "--all"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1d\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost07.aqd-unittest.ms.com Priority: 5\s*'
+                          r'Member: utbhost08.aqd-unittest.ms.com Priority: 10\s*',
+                          command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1d\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost07.aqd-unittest.ms.com Priority: 5\s*'
+                          r'Member: utbhost08.aqd-unittest.ms.com Priority: 10\s*'
+                          r'Resource Group: utbvcs1das01\s*'
+                          r'SystemList\s*'
+                          r'Member: utbhost08.aqd-unittest.ms.com Priority: 15\s*'
+                          r'Member: utbhost07.aqd-unittest.ms.com Priority: 20\s*',
+                          command)
 
     def test_200_no_member(self):
         command = ["add_cluster_systemlist", "--cluster", "utbvcs1b",
