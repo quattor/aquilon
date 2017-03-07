@@ -32,10 +32,14 @@ class CommandUpdateClusterSystemList(CommandUpdateResource):
         if member is not None:
             dbcluster = dbresource.holder.toplevel_holder_object
             dbhost = hostname_to_host(session, member)
+
+            if not dbhost or dbhost.cluster != dbcluster:
+                raise ArgumentError("{0} is not a member of {1:l}."
+                                    .format(dbhost, dbcluster))
             try:
                 entry = dbresource.entries[dbhost]
             except KeyError:
-                raise NotFoundException("{0} does not have a SystemList entry."
+                raise NotFoundException("{0} does not have a system list entry."
                                         .format(dbhost))
             if priority is not None:
                 check_cluster_priority_order(dbcluster, self.config,

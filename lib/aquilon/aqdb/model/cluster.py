@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -221,6 +221,10 @@ class Cluster(CompileableMixin, Base):
             if self.preferred_location not in member_locs:
                 raise ArgumentError("{0} has no members inside preferred {1:l}."
                                     .format(self, self.preferred_location))
+
+            if len(member_locs) == 1:
+                raise ArgumentError("{0} does not span two {1}s."
+                                    .format(self, self.preferred_location.location_type))
 
         if self.max_hosts is not None and len(self.hosts) > self.max_hosts:
             raise ArgumentError("{0} has {1} hosts bound, which exceeds the "

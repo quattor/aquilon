@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016  Contributor
+# Copyright (C) 2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import backref, deferred, relation
 from sqlalchemy.orm.collections import attribute_mapped_collection
 
-from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.model import Resource, Base
+from aquilon.exceptions_ import InternalError, NotFoundException
+from aquilon.aqdb.model import Resource, Base, ClusterResource
 from aquilon.aqdb.model.cluster import HostClusterMember
 
 _TNPL = 'priority_list'
@@ -52,6 +52,23 @@ class PriorityList(Resource):
 
     hosts = association_proxy("entries", "host",
                               creator=_member_priority_creator)
+
+    @classmethod
+    def get_unique(cls, session, **kwargs):
+        try:
+            return super(PriorityList, cls).get_unique (session, **kwargs)
+        except (NotFoundException):
+            # This (likely) means that the cluster has no such resource,
+            # send back a more helpful error message.
+            if (not 'holder' in kwargs) or (not 'name' in kwargs):
+                raise
+
+            holder = kwargs.get('holder')
+            if not isinstance (holder, ClusterResource):
+                raise
+
+            raise NotFoundException("{0:c} {0.name} has no {1} resource."
+                                    .format(holder.holder_object, cls.__description__))
 
 
 class MemberPriority(Base):

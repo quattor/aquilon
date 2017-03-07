@@ -128,10 +128,10 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
         command = ["update_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
                    "--hostname", "server1.aqd-unittest.ms.com", "--order", 1]
-        out = self.notfoundtest(command)
+        out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Host server1.aqd-unittest.ms.com does not have "
-                         "an AutoStartList entry.",
+                         "Host server1.aqd-unittest.ms.com is not a member "
+                         "of high availability cluster utbvcs1b.",
                          command)
 
     def test_200_no_asl(self):
@@ -141,7 +141,7 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host utbhost03.aqd-unittest.ms.com does not have "
-                         "an AutoStartList entry.",
+                         "an autostart list entry.",
                          command)
 
 if __name__ == '__main__':

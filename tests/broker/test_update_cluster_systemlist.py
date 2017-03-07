@@ -130,10 +130,10 @@ class TestUpdateClusterSystemList(TestBrokerCommand):
         command = ["update_cluster_systemlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
                    "--hostname", "server1.aqd-unittest.ms.com", "--priority", 1]
-        out = self.notfoundtest(command)
+        out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Host server1.aqd-unittest.ms.com does not have "
-                         "a SystemList entry.",
+                         "Host server1.aqd-unittest.ms.com is not a member of "
+                         "high availability cluster utbvcs1b.",
                          command)
 
     def test_200_no_asl(self):
@@ -143,7 +143,7 @@ class TestUpdateClusterSystemList(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host utbhost03.aqd-unittest.ms.com does not have "
-                         "a SystemList entry.",
+                         "a system list entry.",
                          command)
 
 if __name__ == '__main__':
