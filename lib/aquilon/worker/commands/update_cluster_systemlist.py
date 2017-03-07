@@ -25,7 +25,7 @@ from aquilon.worker.dbwrappers.cluster import check_cluster_priority_order
 
 class CommandUpdateClusterSystemList(CommandUpdateResource):
 
-    required_parameters = ["cluster"]
+    required_parameters = ["cluster", "hostname"]
     resource_class = SystemList
 
     def update_resource(self, dbresource, session, logger, member, priority, **_):
@@ -42,8 +42,9 @@ class CommandUpdateClusterSystemList(CommandUpdateResource):
                                              'priority', priority)
                 entry.priority = priority
 
-    def render(self, **kwargs):
+    def render(self, hostname, **kwargs):
         super(CommandUpdateClusterSystemList, self).render(hostname=None,
                                                            metacluster=None,
                                                            comments=None,
+                                                           member=hostname,
                                                            **kwargs)

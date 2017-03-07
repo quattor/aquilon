@@ -6808,7 +6808,7 @@
 	building preference'.
 	<optgroup mandatory="True" fields="all">
 	    <option name="cluster" type="string">Cluster</option>
-	    <option name="member" type="string">Host name</option>
+	    <option name="hostname" type="string">Host name</option>
 	    <option name="order" type="int">
 Order that this host should appear in the list, which is used to determine
 the system on which to bring the service group online, where lower numbers
@@ -6829,7 +6829,7 @@ appear earlier
 	Update the order of a host in the autostart list for a given cluster.
 	<optgroup mandatory="True" fields="all">
 	    <option name="cluster" type="string">Cluster</option>
-	    <option name="member" type="string">Host name</option>
+	    <option name="hostname" type="string">Host name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="resourcegroup" type="string">
@@ -6848,7 +6848,7 @@ appear earlier
 	<optgroup mandatory="True" fields="all">
 	    <option name="cluster" type="string">Cluster</option>
 	    <optgroup fields="one">
-		<option name="member" type="string">Host name to remove</option>
+		<option name="hostname" type="string">Host name to remove</option>
 		<option name="all" type="flag">Remove all entries</option>
 	    </optgroup>
 	</optgroup>
@@ -6869,7 +6869,7 @@ appear earlier
 	preferences set by 'aq add building preference'.
 	<optgroup mandatory="True" fields="all">
 	    <option name="cluster" type="string">Cluster</option>
-	    <option name="member" type="string">Host name</option>
+	    <option name="hostname" type="string">Host name</option>
 	    <option name="priority" type="int">
 		Priority for failover target where hosts with lower numbers are preferred over
 		those with higher numbers when assessing a failover target
@@ -6890,7 +6890,7 @@ appear earlier
 	Update the priority of a host in the system list for a given cluster.
 	<optgroup mandatory="True" fields="all">
 	    <option name="cluster" type="string">Cluster</option>
-	    <option name="member" type="string">Host name</option>
+	    <option name="hostname" type="string">Host name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="priority" type="int">New priority</option>
@@ -6910,7 +6910,7 @@ appear earlier
 	<optgroup mandatory="True" fields="all">
 	    <option name="cluster" type="string">Cluster</option>
 	    <optgroup fields="one">
-		<option name="member" type="string">Host name to remove</option>
+		<option name="hostname" type="string">Host name to remove</option>
 		<option name="all" type="flag">Remove all entries</option>
 	    </optgroup>
 	</optgroup>

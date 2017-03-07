@@ -31,7 +31,7 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
     def test_100_add_rg_single_host_range_lo(self):
         command = ["add_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--hostname", "utbhost04.aqd-unittest.ms.com",
                    "--order", -99]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Value for order (-99) is outside of the configured range 1..99",
@@ -40,7 +40,7 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
     def test_100_add_rg_single_host_range_hi(self):
         command = ["add_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--hostname", "utbhost04.aqd-unittest.ms.com",
                    "--order", 255]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Value for order (255) is outside of the configured range 1..99",
@@ -49,11 +49,11 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
     def test_102_add_rg_single_host(self):
         self.noouttest(["add_cluster_autostartlist", "--cluster", "utbvcs1b",
                         "--resourcegroup", "utbvcs1bas01",
-                        "--member", "utbhost04.aqd-unittest.ms.com",
+                        "--hostname", "utbhost04.aqd-unittest.ms.com",
                         "--order", 1])
         self.noouttest(["add_cluster_autostartlist", "--cluster", "utbvcs1b",
                         "--resourcegroup", "utbvcs1bas02",
-                        "--member", "utbhost03.aqd-unittest.ms.com",
+                        "--hostname", "utbhost03.aqd-unittest.ms.com",
                         "--order", 1])
 
     def test_105_cat_utbvcs1b(self):
@@ -121,22 +121,22 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
 
     def test_110_cluster_default(self):
         self.noouttest(["add_cluster_autostartlist", "--cluster", "utbvcs1d",
-                        "--member", "utbhost07.aqd-unittest.ms.com",
+                        "--hostname", "utbhost07.aqd-unittest.ms.com",
                         "--order", 5])
         self.noouttest(["add_cluster_autostartlist", "--cluster", "utbvcs1d",
-                        "--member", "utbhost08.aqd-unittest.ms.com",
+                        "--hostname", "utbhost08.aqd-unittest.ms.com",
                         "--order", 10])
 
     def test_111_rg_override(self):
         # CamelCase
         self.noouttest(["add_cluster_autostartlist", "--cluster", "utbvcs1d",
                         "--resourcegroup", "UTBvcs1das01",
-                        "--member", "UTBhost07.aqd-unittest.ms.com",
+                        "--hostname", "UTBhost07.aqd-unittest.ms.com",
                         "--order", 20])
         # CamelCase
         self.noouttest(["add_cluster_autostartlist", "--cluster", "utbvcs1d",
                         "--resourcegroup", "UTBvcs1das01",
-                        "--member", "UTBhost08.aqd-unittest.ms.com",
+                        "--hostname", "UTBhost08.aqd-unittest.ms.com",
                         "--order", 15])
         self.check_plenary_exists("resource", "cluster", "utbvcs1d",
                                   "resourcegroup", "utbvcs1das01",
@@ -223,7 +223,7 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
 
     def test_200_no_member(self):
         command = ["add_cluster_autostartlist", "--cluster", "utbvcs1b",
-                   "--member", "server1.aqd-unittest.ms.com", "--order", 1]
+                   "--hostname", "server1.aqd-unittest.ms.com", "--order", 1]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Host server1.aqd-unittest.ms.com is not a member of "
@@ -233,7 +233,7 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
     def test_200_add_again(self):
         command = ["add_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--hostname", "utbhost04.aqd-unittest.ms.com",
                    "--order", 10]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Host utbhost04.aqd-unittest.ms.com already has "

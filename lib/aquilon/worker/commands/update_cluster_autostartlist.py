@@ -26,10 +26,10 @@ from aquilon.worker.dbwrappers.cluster import check_cluster_priority_order
 
 class CommandUpdateClusterAutoStartList(CommandUpdateResource):
 
-    required_parameters = ["cluster"]
+    required_parameters = ["cluster", "hostname"]
     resource_class = AutoStartList
 
-    def update_resource(self, dbresource, session, logger, member, order, **_):
+    def update_resource(self, dbresource, session, logger, member, order, **kwargs):
         if member is not None:
             dbcluster = dbresource.holder.toplevel_holder_object
             dbhost = hostname_to_host(session, member)
@@ -43,8 +43,9 @@ class CommandUpdateClusterAutoStartList(CommandUpdateResource):
                                              order)
                 entry.priority = order
 
-    def render(self, **kwargs):
+    def render(self, hostname, **kwargs):
         super(CommandUpdateClusterAutoStartList, self).render(hostname=None,
                                                               metacluster=None,
                                                               comments=None,
+                                                              member=hostname,
                                                               **kwargs)
