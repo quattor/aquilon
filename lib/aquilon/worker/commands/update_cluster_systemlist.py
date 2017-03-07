@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016  Contributor
+# Copyright (C) 2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 # limitations under the License.
 """ Contains the logic for `aq update cluster systemlist`. """
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import SystemList
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_resource import CommandUpdateResource
 from aquilon.worker.dbwrappers.host import hostname_to_host
-
+from aquilon.worker.dbwrappers.cluster import check_cluster_priority_order
 
 class CommandUpdateClusterSystemList(CommandUpdateResource):
 
@@ -30,6 +30,7 @@ class CommandUpdateClusterSystemList(CommandUpdateResource):
 
     def update_resource(self, dbresource, session, logger, member, priority, **_):
         if member is not None:
+            dbcluster = dbresource.holder.toplevel_holder_object
             dbhost = hostname_to_host(session, member)
             try:
                 entry = dbresource.entries[dbhost]
@@ -37,6 +38,8 @@ class CommandUpdateClusterSystemList(CommandUpdateResource):
                 raise NotFoundException("{0} does not have a SystemList entry."
                                         .format(dbhost))
             if priority is not None:
+                check_cluster_priority_order(dbcluster, self.config,
+                                             'priority', priority)
                 entry.priority = priority
 
     def render(self, **kwargs):

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016  Contributor
+# Copyright (C) 2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -125,3 +125,23 @@ def get_cluster_location_preference(dbcluster):
         return db_pref.prefer
     else:
         return None
+
+
+def check_cluster_priority_order(dbcluster, config, priority_parameter, priord):
+    section = "archetype_" + dbcluster.archetype.name
+    try:
+        cpri_min = int(config.get(section, "min_priority_order"))
+        cpri_max = int(config.get(section, "max_priority_order"))
+        cpri_src = "configured"
+    except (NoSectionError, NoOptionError):
+        cpri_min = 1
+        cpri_max = 99
+        cpri_src = "built-in"
+
+    if (int(priord) < cpri_min) or (int(priord) > cpri_max):
+        raise ArgumentError("Value for {0} ({1}) is outside of the {2} range "
+                            "{3}..{4}".format (priority_parameter, priord,
+                                               cpri_src, cpri_min, cpri_max))
+
+    return (cpri_min, cpri_max, cpri_src)
+
