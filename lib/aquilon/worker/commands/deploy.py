@@ -100,12 +100,12 @@ class CommandDeploy(BrokerCommand):
         if merge_strategy:
             if merge_strategy not in _git_strategies:
                 raise ArgumentError("Unknown or unsupported merge strategy.")
-            merge_args.extend("-s", merge_strategy)
+            merge_args.extend(["-s", merge_strategy])
             if strategy_options:
                 if not _git_strategies[merge_strategy] or \
                    not _git_strategies[merge_strategy].search(strategy_options):
                     raise ArgumentError("Unknown or unsupported strategy options.")
-                merge_args.extend("-X", strategy_options)
+                merge_args.extend(["-X", strategy_options])
 
         kingrepo = GitRepo(self.config.get("broker", "kingdir"), logger)
         with kingrepo.temp_clone(dbtarget.name) as temprepo:
