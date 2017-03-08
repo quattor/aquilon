@@ -128,17 +128,17 @@
 	were selected. For example "flushed 10/10 templates" would indicate
 	that 10 templates matched and they were all written out successfully.
 	<optgroup mandatory="True">
-	    <option name="hosts" type="flag">flush the host templates</option>
-	    <option name="machines" type="flag">flush the machine templates</option>
-	    <option name="personalities" type="flag">flush the personality templates</option>
-	    <option name="clusters" type="flag">flush the cluster templates</option>
-	    <option name="services" type="flag">flush the service templates</option>
-	    <option name="resources" type="flag">flush the resource templates</option>
-	    <option name="locations" type="flag">flush templates related to locations. This is only cities for now</option>
-	    <option name="networks" type="flag">flush templates related to networks</option>
-	    <option name="network_devices" type="flag">flush templates related to network devices</option>
-	    <option name="virtual_switches" type="flag">flush templates of virtual switches</option>
-	    <option name="all" type="flag">flush all templates</option>
+	    <option name="hosts" type="flag">Flush the host templates</option>
+	    <option name="machines" type="flag">Flush the machine templates</option>
+	    <option name="personalities" type="flag">Flush the personality templates</option>
+	    <option name="clusters" type="flag">Flush the cluster templates</option>
+	    <option name="services" type="flag">Flush the service templates</option>
+	    <option name="resources" type="flag">Flush the resource templates</option>
+	    <option name="locations" type="flag">Flush templates related to locations. This is only cities for now</option>
+	    <option name="networks" type="flag">Flush templates related to networks</option>
+	    <option name="network_devices" type="flag">Flush templates related to network devices</option>
+	    <option name="virtual_switches" type="flag">Flush templates of virtual switches</option>
+	    <option name="all" type="flag">Flush all templates</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -175,8 +175,8 @@
 	a top of rack switch, a chassis, or any other system tracked by
 	AQDB.
 	<optgroup mandatory="True" fields="one">
-	    <option name="fqdn" type="string">full qualified domain name</option>
-	    <option name="all" type="flag">select all systems</option>
+	    <option name="fqdn" type="string">Fully qualified domain name</option>
+	    <option name="all" type="flag">Select all systems</option>
 	</optgroup>
 	<optgroup>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
@@ -194,19 +194,19 @@
 	building will include all racks, rooms, etc. inside the building.  The
 	--exact_location option can be used to override this behavior.
 	<optgroup mandatory="True">
-	    <option name="model" type="string">model name</option>
-	    <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
-	    <option name="vendor" type="string">vendor name</option>
+	    <option name="model" type="string">Model name</option>
+	    <option name="machine_type" type="enum" enum="MachineType">Machine type for the model (blade, virtual_machine, etc.)</option>
+	    <option name="vendor" type="string">Vendor name</option>
 	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
 	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">MAC address of an attached interface</option>
-	    <option name="pg" type="string">port group of an attached interface</option>
+	    <option name="pg" type="string">Port group of an attached interface</option>
 	    <option name="interface_name" type="string">Having an interface of the given name</option>
 	    <option name="interface_model" type="string">Having an interface of the given model</option>
 	    <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
 	    <option name="interface_bus_address" type="string">Interface at the given bus address</option>
-	    <option name="serial" type="string">serial number</option>
+	    <option name="serial" type="string">Serial number</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -220,11 +220,11 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <option name="exact_location" type="flag">match the location exactly</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="exact_location" type="flag">Match the location exactly</option>
+	    <option name="all" type="flag">Show all hardware</option>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching hardware</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching hardware</option>
 	</optgroup>
 	<transport method="get" path="find/hardware"/>
     </command>
@@ -238,20 +238,20 @@
 	building will include all racks, rooms, etc. inside the building.  The
 	--exact_location option can be used to override this behavior.
 	<optgroup mandatory="True">
-	    <option name="hostname" type="string">host name</option>
-	    <option name="machine" type="string">machine name (exact)</option>
-	    <option name="cpuname" type="string">cpu name</option>
-	    <option name="cpuvendor" type="string">cpu vendor</option>
-	    <option name="cpucount" type="int">cpu count</option>
-	    <option name="memory" type="int">memory in MB</option>
+	    <option name="hostname" type="string">Host name</option>
+	    <option name="machine" type="string">Machine name (exact)</option>
+	    <option name="cpuname" type="string">CPU name</option>
+	    <option name="cpuvendor" type="string">CPU vendor</option>
+	    <option name="cpucount" type="int">CPU count</option>
+	    <option name="memory" type="int">Memory in MB</option>
 	    <optgroup fields="one">
 		<option name="cluster" type="string">Cluster name hosting the VM</option>
 		<option name="metacluster" type="string">Metacluster name hosting the VM</option>
 		<option name="vmhost" type="string">Hypervisor host name</option>
 	    </optgroup>
-	    <option name="model" type="string">model name</option>
-	    <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
-	    <option name="vendor" type="string">vendor name</option>
+	    <option name="model" type="string">Model name</option>
+	    <option name="machine_type" type="enum" enum="MachineType">Machine type for the model (blade, virtual_machine, etc.)</option>
+	    <option name="vendor" type="string">Vendor name</option>
 	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
 	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
@@ -260,8 +260,8 @@
 	    <option name="interface_model" type="string">Having an interface of the given model</option>
 	    <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
 	    <option name="interface_bus_address" type="string">Interface at the given bus address</option>
-	    <option name="pg" type="string">port group of an attached interface</option>
-	    <option name="serial" type="string">serial number</option>
+	    <option name="pg" type="string">Port group of an attached interface</option>
+	    <option name="serial" type="string">Serial number</option>
 	    <option name="uuid" type="uuid">Machine UUID</option>
 	    <option name="disk_name" type="string">Disk name</option>
 	    <option name="disk_size" type="int">Disk size</option>
@@ -285,7 +285,7 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <option name="exact_location" type="flag">match the location exactly</option>
+	    <option name="exact_location" type="flag">Match the location exactly</option>
 	    <option name="chassis" type="string">Chassis name</option>
 	    <option name="slot" type="int">Chassis slot number</option>
 	    <option name="used" type="boolean" reverse="unused">Machine is used by a host</option>
@@ -294,7 +294,7 @@
 	    <message_class name="MachineList" module="aqdsystems_pb2"/>
 	</format>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the machine</option>
+	    <option name="fullinfo" type="flag">Show full information for the machine</option>
 	</optgroup>
 	<transport method="get" path="find/machine"/>
     </command>
@@ -304,16 +304,16 @@
 	could be hosts, top of rack switches, chassis, or any other system
 	tracked by AQDB.
 	<optgroup mandatory="True">
-	    <option name="fqdn" type="string">fully qualified domain name</option>
+	    <option name="fqdn" type="string">Fully qualified domain name</option>
 	    <option name="dns_domain" type="string">DNS domain</option>
 	    <option name="shortname" type="string">First segment of the fqdn</option>
 	    <option name="type" type="enum" enum="HardwareEntityType">System type (host, chassis, switch, manager, auxiliary)</option>
 	    <option name="ip" type="ipv4">IP address</option>
 	    <option name="networkip" type="ipv4">Network IP address</option>
-	    <option name="mac" type="mac">primary MAC address</option>
+	    <option name="mac" type="mac">Primary MAC address</option>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching systems</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching systems</option>
 	</optgroup>
 	<transport method="get" path="find/system"/>
     </command>
@@ -322,34 +322,34 @@
 	Shows any information available for the matching clusters.
 	<p/>
 	<optgroup mandatory="True">
-	    <option name="archetype" type="string">archetype</option>
-	    <option name="buildstatus" type="string">buildstatus</option>
-	    <option name="cluster_type" type="string">cluster type of archetype (compute)</option>
-	    <option name="personality" type="string">personality</option>
+	    <option name="archetype" type="string">Archetype</option>
+	    <option name="buildstatus" type="string">Build status</option>
+	    <option name="cluster_type" type="string">Cluster type of archetype (compute)</option>
+	    <option name="personality" type="string">Personality</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
-	    <option name="allowed_archetype" type="string">allowed_archetype</option>
-	    <option name="allowed_personality" type="string">allowed_personality</option>
-	    <option name="down_hosts_threshold" type="string">down_hosts_threshold</option>
-	    <option name="down_maint_threshold" type="string">down_maint_threshold</option>
-	    <option name="max_members" type="int">max_members</option>
+	    <option name="allowed_archetype" type="string">Allowed archetype</option>
+	    <option name="allowed_personality" type="string">Allowed personality</option>
+	    <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
+	    <option name="down_maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
+	    <option name="max_members" type="int">Max members</option>
 	    <option name="grouped_with" type="string">Clusters grouped with the given cluster</option>
-	    <option name="member_archetype" type="string">member_archetype</option>
-	    <option name="member_hostname" type="string">member_hostname</option>
-	    <option name="member_personality" type="string">member_personality</option>
+	    <option name="member_archetype" type="string">Member archetype</option>
+	    <option name="member_hostname" type="string">Member hostname</option>
+	    <option name="member_personality" type="string">Member personality</option>
 	    <optgroup fields="one">
-		<option name="domain" type="string">template domain</option>
+		<option name="domain" type="string">Template domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
-		<option name="branch" type="string">template branch (either a domain or a sandbox)</option>
+		<option name="branch" type="string">Template branch (either a domain or a sandbox)</option>
 		<option name="sandbox_author" type="string">Author of the sandbox the cluster is in</option>
 	    </optgroup>
 	    <optgroup>
-		<option name="cluster" type="string">cluster name</option>
-		<option name="metacluster" type="string">metacluster name</option>
+		<option name="cluster" type="string">Cluster name</option>
+		<option name="metacluster" type="string">Metacluster name</option>
 		<option name="esx_metacluster" type="string">[Deprecated] metacluster name</option>
-		<option name="esx_virtual_machine" type="string">virtual machine label (evm1)</option>
-		<option name="esx_guest" type="string">fully qualified host name of a virtual machine</option>
-		<option name="service" type="string">client of service (single service only)</option>
-		<option name="instance" type="string">client of service instance (single instance only)</option>
+		<option name="esx_virtual_machine" type="string">Virtual machine label (evm1)</option>
+		<option name="esx_guest" type="string">Fully qualified host name of a virtual machine</option>
+		<option name="service" type="string">Client of service (single service only)</option>
+		<option name="instance" type="string">Client of service instance (single instance only)</option>
 		<option name="share" type="string">Share used by the cluster</option>
 		<option name="esx_switch" type="string">Select clusters bound to the given switch</option>
 	    </optgroup>
@@ -366,25 +366,25 @@
 		<option name="cluster_rack" type="string">Cluster Rack</option>
 		<option name="cluster_desk" type="string">Cluster Desk</option>
 	    </optgroup>
-	    <option name="cluster_exact_location" type="flag">match the cluster location exactly</option>
+	    <option name="cluster_exact_location" type="flag">Match the cluster location exactly</option>
 	    <optgroup fields="one">
-		<option name="member_organization" type="string">member Organization</option>
-		<option name="member_hub" type="string">member Hub</option>
-		<option name="member_continent" type="string">member Continent</option>
-		<option name="member_country" type="string">member Country</option>
-		<option name="member_campus" type="string">member Campus</option>
-		<option name="member_city" type="string">member City</option>
-		<option name="member_building" type="string">member Building</option>
-		<option name="member_room" type="string">member Room</option>
-		<option name="member_bunker" type="string">Bunker</option>
-		<option name="member_rack" type="string">member Rack</option>
-		<option name="member_desk" type="string">member Desk</option>
+		<option name="member_organization" type="string">Member organization</option>
+		<option name="member_hub" type="string">Member hub</option>
+		<option name="member_continent" type="string">Member continent</option>
+		<option name="member_country" type="string">Member country</option>
+		<option name="member_campus" type="string">Member campus</option>
+		<option name="member_city" type="string">Member city</option>
+		<option name="member_building" type="string">Member building</option>
+		<option name="member_room" type="string">Member room</option>
+		<option name="member_bunker" type="string">Member bunker</option>
+		<option name="member_rack" type="string">Member rack</option>
+		<option name="member_desk" type="string">Member desk</option>
 	    </optgroup>
-	    <option name="member_exact_location" type="flag">match the member location exactly</option>
-	    <option name="preferred_building" type="string">look for clusters which have the preferred side override set to the given building</option>
+	    <option name="member_exact_location" type="flag">Match the member location exactly</option>
+	    <option name="preferred_building" type="string">Look for clusters which have the preferred side override set to the given building</option>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching hosts</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching hosts</option>
 	</optgroup>
 	<transport method="get" path="find/cluster"/>
 	<format name="proto">
@@ -396,26 +396,26 @@
 	Shows any information available for the matching metaclusters.
 	<p/>
 	<optgroup mandatory="True">
-	    <option name="archetype" type="string">archetype</option>
-	    <option name="personality" type="string">personality</option>
+	    <option name="archetype" type="string">Archetype</option>
+	    <option name="personality" type="string">Personality</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
-	    <option name="buildstatus" type="string">buildstatus</option>
-	    <option name="allowed_archetype" type="string">allowed_archetype</option>
-	    <option name="allowed_personality" type="string">allowed_personality</option>
-	    <option name="max_members" type="int">max_members</option>
-	    <option name="member_archetype" type="string">member_archetype</option>
-	    <option name="member_cluster" type="string">member_cluster</option>
-	    <option name="member_personality" type="string">member_personality</option>
+	    <option name="buildstatus" type="string">Build status</option>
+	    <option name="allowed_archetype" type="string">Allowed archetype</option>
+	    <option name="allowed_personality" type="string">Allowed personality</option>
+	    <option name="max_members" type="int">Maximum members</option>
+	    <option name="member_archetype" type="string">Member archetype</option>
+	    <option name="member_cluster" type="string">Member cluster</option>
+	    <option name="member_personality" type="string">Member personality</option>
 	    <optgroup fields="one">
-		<option name="domain" type="string">template domain</option>
+		<option name="domain" type="string">Template domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
-		<option name="branch" type="string">template branch (either a domain or a sandbox)</option>
+		<option name="branch" type="string">Template branch (either a domain or a sandbox)</option>
 		<option name="sandbox_author" type="string">Author of the sandbox the cluster is in</option>
 	    </optgroup>
 	    <optgroup>
-		<option name="metacluster" type="string">metacluster name</option>
-		<option name="service" type="string">client of service (single service only)</option>
-		<option name="instance" type="string">client of service instance (single instance only)</option>
+		<option name="metacluster" type="string">Metacluster name</option>
+		<option name="service" type="string">Client of service (single service only)</option>
+		<option name="instance" type="string">Client of service instance (single instance only)</option>
 		<option name="share" type="string">Share used by the metacluster</option>
 	    </optgroup>
 	    <optgroup fields="one">
@@ -431,24 +431,24 @@
 		<option name="metacluster_rack" type="string">Cluster Rack</option>
 		<option name="metacluster_desk" type="string">Cluster Desk</option>
 	    </optgroup>
-	    <option name="metacluster_exact_location" type="flag">match the cluster location exactly</option>
+	    <option name="metacluster_exact_location" type="flag">Match the cluster location exactly</option>
 	    <optgroup fields="one">
-		<option name="member_organization" type="string">member Organization</option>
-		<option name="member_hub" type="string">member Hub</option>
-		<option name="member_continent" type="string">member Continent</option>
-		<option name="member_country" type="string">member Country</option>
-		<option name="member_campus" type="string">member Campus</option>
-		<option name="member_city" type="string">member City</option>
-		<option name="member_building" type="string">member Building</option>
-		<option name="member_room" type="string">member Room</option>
-		<option name="member_bunker" type="string">Bunker</option>
-		<option name="member_rack" type="string">member Rack</option>
-		<option name="member_desk" type="string">member Desk</option>
+		<option name="member_organization" type="string">Member organization</option>
+		<option name="member_hub" type="string">Member hub</option>
+		<option name="member_continent" type="string">Member continent</option>
+		<option name="member_country" type="string">Member country</option>
+		<option name="member_campus" type="string">Member campus</option>
+		<option name="member_city" type="string">Member city</option>
+		<option name="member_building" type="string">Member building</option>
+		<option name="member_room" type="string">Member room</option>
+		<option name="member_bunker" type="string">Member bunker</option>
+		<option name="member_rack" type="string">Member rack</option>
+		<option name="member_desk" type="string">Member desk</option>
 	    </optgroup>
-	    <option name="member_exact_location" type="flag">match the member location exactly</option>
+	    <option name="member_exact_location" type="flag">Match the member location exactly</option>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching hosts</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching hosts</option>
 	</optgroup>
 	<transport method="get" path="find/metacluster"/>
 	<format name="proto">
@@ -518,7 +518,7 @@
 	    <option name="eon_id" type="int">Match by EON ID</option>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching hosts</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching hosts</option>
 	</optgroup>
 	<transport method="get" path="find/host"/>
 	<format name="proto" >
@@ -541,23 +541,23 @@
 	--cluster_exact_location and --vmhost_exact_location options can be used
 	to override this behavior.
 	<optgroup mandatory="True">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="metacluster" type="string">metacluster name</option>
-	    <option name="esx_hostname" type="string">fully qualified domain name of a vmhost</option>
-	    <option name="virtual_machine" type="string">virtual machine label (evm1)</option>
-	    <option name="guest" type="string">fully qualified host name of a virtual machine</option>
-	    <option name="archetype" type="string">archetype (vmhost)</option>
-	    <option name="personality" type="string">personality</option>
+	    <option name="cluster" type="string">Cluster name</option>
+	    <option name="metacluster" type="string">Metacluster name</option>
+	    <option name="esx_hostname" type="string">Fully qualified domain name of a vmhost</option>
+	    <option name="virtual_machine" type="string">Virtual machine label (evm1)</option>
+	    <option name="guest" type="string">Fully qualified host name of a virtual machine</option>
+	    <option name="archetype" type="string">Archetype (vmhost)</option>
+	    <option name="personality" type="string">Personality</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
-	    <option name="service" type="string">client of service (single service only)</option>
-	    <option name="instance" type="string">client of service instance (single instance only)</option>
-	    <option name="share" type="string">share in use by an virtual machine on the cluster</option>
+	    <option name="service" type="string">Client of service (single service only)</option>
+	    <option name="instance" type="string">Client of service instance (single instance only)</option>
+	    <option name="share" type="string">Share in use by an virtual machine on the cluster</option>
 	    <option name="switch" type="string">Select clusters bound to the given switch</option>
-	    <option name="buildstatus" type="string">status</option>
+	    <option name="buildstatus" type="string">Build status</option>
 	    <optgroup fields="one">
-		<option name="domain" type="string">template domain</option>
+		<option name="domain" type="string">Template domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
-		<option name="branch" type="string">template branch (either a domain or a sandbox)</option>
+		<option name="branch" type="string">Template branch (either a domain or a sandbox)</option>
 	    </optgroup>
 	    <optgroup fields="one">
 		<option name="cluster_organization" type="string">Cluster Organization</option>
@@ -572,24 +572,24 @@
 		<option name="cluster_rack" type="string">Cluster Rack</option>
 		<option name="cluster_desk" type="string">Cluster Desk</option>
 	    </optgroup>
-	    <option name="cluster_exact_location" type="flag">match the cluster location exactly</option>
+	    <option name="cluster_exact_location" type="flag">Match the cluster location exactly</option>
 	    <optgroup fields="one">
-		<option name="vmhost_organization" type="string">vmhost Organization</option>
-		<option name="vmhost_hub" type="string">vmhost Hub</option>
-		<option name="vmhost_continent" type="string">vmhost Continent</option>
-		<option name="vmhost_country" type="string">vmhost Country</option>
-		<option name="vmhost_campus" type="string">vmhost Campus</option>
-		<option name="vmhost_city" type="string">vmhost City</option>
-		<option name="vmhost_building" type="string">vmhost Building</option>
-		<option name="vmhost_room" type="string">vmhost Room</option>
-		<option name="vmhost_bunker" type="string">vmhost Bunker</option>
-		<option name="vmhost_rack" type="string">vmhost Rack</option>
-		<option name="vmhost_desk" type="string">vmhost Desk</option>
+		<option name="vmhost_organization" type="string">VM host organization</option>
+		<option name="vmhost_hub" type="string">VM host hub</option>
+		<option name="vmhost_continent" type="string">VM host continent</option>
+		<option name="vmhost_country" type="string">VM host country</option>
+		<option name="vmhost_campus" type="string">VM host campus</option>
+		<option name="vmhost_city" type="string">VM host city</option>
+		<option name="vmhost_building" type="string">VM host building</option>
+		<option name="vmhost_room" type="string">VM host room</option>
+		<option name="vmhost_bunker" type="string">VM host bunker</option>
+		<option name="vmhost_rack" type="string">VM host rack</option>
+		<option name="vmhost_desk" type="string">VM host desk</option>
 	    </optgroup>
-	    <option name="vmhost_exact_location" type="flag">match the vmhost location exactly</option>
+	    <option name="vmhost_exact_location" type="flag">Match the VM host location exactly</option>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching clusters</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching clusters</option>
 	</optgroup>
 	<transport method="get" path="find/cluster_esx"/>
 	<format name="proto" >
@@ -645,7 +645,7 @@
 	    <option name="metacluster" type="string">Metacluster prefix to check</option>
 	</optgroup>
 	<optgroup>
-	    <option name="number" type="flag">show only the next number</option>
+	    <option name="number" type="flag">Show only the next number</option>
 	    <option name="pack" type="flag">Return first free value</option>
 	    <option name="start" type="string">Start counting at a different number than one</option>
 	</optgroup>
@@ -665,10 +665,10 @@
 	    <option name="hostname" type="string" conflicts="domain sandbox cluster metacluster personality">FQDN</option>
 	    <option name="cluster" type="string" conflicts="domain sandbox hostname metacluster personality">Name of cluster</option>
 	    <option name="metacluster" type="string" conflicts="domain sandbox hostname cluster personality">Name of metacluster</option>
-	    <option name="personality" type="string" conflicts="hostname cluster metacluster">personality name</option>
+	    <option name="personality" type="string" conflicts="hostname cluster metacluster">Personality name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="archetype" type="string" requires="personality">archetype name</option>
+	    <option name="archetype" type="string" requires="personality">Archetype name</option>
 	    <option name="personality_stage" type="string" requires="personality">Personality stage</option>
 	    <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
 	    <option name="pancexclude" type="string" conflicts="pancdebug">Regex for templates to exclude in debug output (only useful if pancinclude has been given)</option>
@@ -782,7 +782,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="exact_location" type="flag">match the location exactly</option>
+	    <option name="exact_location" type="flag">Match the location exactly</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="hosts" type="flag">Hosts</option>
 	</optgroup>
@@ -816,7 +816,7 @@
 	    <option name="virtual_switch" type="string">Networks used by the virtual switch</option>
 	    <option name="pg" type="string">Networks assigned to the given portgroup</option>
 	    <option name="has_dynamic_ranges" type="flag">Matches networks containing dynamic DHCP ranges</option>
-	    <option name="exact_location" type="flag">match the location exactly</option>
+	    <option name="exact_location" type="flag">Match the location exactly</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -832,7 +832,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="fullinfo" type="flag">show full information for the matching networks</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching networks</option>
 	</optgroup>
 	<transport method="get" path="find/network"/>
 	<format name="proto" >
@@ -867,7 +867,7 @@
 	Add a new CPU type to the database.
 	<optgroup mandatory="True" fields="all">
 	    <option name="cpu" type="string">CPU type name</option>
-	    <option name="vendor" type="string">name of the vendor</option>
+	    <option name="vendor" type="string">Name of the vendor</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
@@ -884,7 +884,7 @@
 	    <option name="cpu" type="string">CPU type name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="vendor" requires="cpu" type="string">name of the vendor</option>
+	    <option name="vendor" requires="cpu" type="string">Name of the vendor</option>
 	</optgroup>
 	<transport method="get" path="find/cpu"/>
     </command>
@@ -924,10 +924,10 @@
 	If more than one disk matches, they will not be deleted.  Use the
 	--all flag to override this and delete all matching disks.
 	<optgroup mandatory="True" fields="all">
-	    <option name="machine" type="string">machine ID</option>
+	    <option name="machine" type="string">Machine ID</option>
 	    <optgroup fields="one">
-		<option name="disk" type="string">device name of the disk (like sda)</option>
-		<option name="all" type="flag">remove any matching disks</option>
+		<option name="disk" type="string">Device name of the disk (like sda)</option>
+		<option name="all" type="flag">Remove any matching disks</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
@@ -995,9 +995,9 @@
 	    </optgroup>
 	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
-		<option name="autoip" type="flag">choose IP address based on mac/switch</option>
+		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
+		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
@@ -1053,9 +1053,9 @@
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-	    <option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
-	    <option name="autoip" type="flag">choose IP address based on mac/switch</option>
+	    <option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+	    <option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
+	    <option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="grn" type="string">GRN as string</option>
@@ -1116,9 +1116,9 @@
 	    <option name="auxiliary" type="string">Fully qualified name for the auxiliary interface</option>
 	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
-		<option name="autoip" type="flag">choose IP address based on mac/switch</option>
+		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
+		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
@@ -1181,9 +1181,9 @@
 	    <option name="hostname" type="string">Fully qualified Host name</option>
 	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
-		<option name="autoip" type="flag">choose IP address based on mac/switch</option>
+		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
+		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
@@ -1244,10 +1244,10 @@
 	<optgroup fields="all">
 	    <option name="cpuname" type="string">CPU model name</option>
 	    <option name="cpunum" type="int">CPU count</option>
-	    <option name="memory" type="int">amount of installed memory (MB)</option>
-	    <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
-	    <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
-	    <option name="disksize" type="int">installed disk capacity (GB)</option>
+	    <option name="memory" type="int">Amount of installed memory (MB)</option>
+	    <option name="disktype" type="string">Installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
+	    <option name="diskcontroller" type="string">Controller type (sata, scsi, etc.)</option>
+	    <option name="disksize" type="int">Installed disk capacity (GB)</option>
 	</optgroup>
 	<optgroup>
 	    <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
@@ -1319,10 +1319,10 @@
 	    <option name="cpuname" type="string">CPU name</option>
 	    <option name="cpuvendor" type="string">CPU vendor</option>
 	    <option name="cpunum" type="int">CPU count</option>
-	    <option name="memory" type="int">amount of installed memory (MB)</option>
-	    <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
-	    <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
-	    <option name="disksize" type="int">installed disk capacity (GB)</option>
+	    <option name="memory" type="int">Amount of installed memory (MB)</option>
+	    <option name="disktype" type="string">Installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
+	    <option name="diskcontroller" type="string">Controller type (sata, scsi, etc.)</option>
+	    <option name="disksize" type="int">Installed disk capacity (GB)</option>
 	    <option name="nicmodel" type="string">NIC model name</option>
 	    <option name="nicvendor" type="string">NIC vendor</option>
 	    <option name="comments" type="string">Comments</option>
@@ -1385,8 +1385,8 @@
 	    <option name="automac" type="flag">Automatically generate MAC for virtual hardware</option>
 	</optgroup>
 	<optgroup fields="one">
-	    <option name="pg" type="string">portgroup</option>
-	    <option name="autopg" type="flag">choose portgroup based on switch</option>
+	    <option name="pg" type="string">Port group</option>
+	    <option name="autopg" type="flag">Choose portgroup based on switch</option>
 	</optgroup>
 	<optgroup>
 	    <option name="iftype" type="string">Interface type: public, management, oa, vlan</option>
@@ -1786,8 +1786,8 @@
 	    <option name="interface" type="string">Interface name</option>
 	</optgroup>
 	<optgroup fields="one">
-	    <option name="pg" type="string">portgroup, or an empty string to clear</option>
-	    <option name="autopg" type="flag">choose portgroup based on switch</option>
+	    <option name="pg" type="string">Port group, or an empty string to clear</option>
+	    <option name="autopg" type="flag">Choose portgroup based on switch</option>
 	</optgroup>
 	<optgroup>
 	    <option name="mac" type="mac">MAC address</option>
@@ -1868,9 +1868,9 @@
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-	    <option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
-	    <option name="autoip" type="flag">choose IP address based on MAC/switch</option>
+	    <option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+	    <option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
+	    <option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	</optgroup>
 	<transport method="put" trigger="network_device" path="network_device/%(network_device)s/interface/%(interface)s/address"/>
 	<transport method="put" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
@@ -1914,7 +1914,7 @@
 	provides the service receive a full list of clients as part of its
 	profile. The default is false.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
@@ -2006,7 +2006,7 @@
 	the value set for the service.  The maximum client count for a
 	service defaults to unlimited.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
@@ -2026,10 +2026,10 @@
 	Delete a service. The command will fail if any servers or clients are marked
 	as being bound to any of the instances of the service.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="instance" type="string">instance name</option>
+	    <option name="instance" type="string">Instance name</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -2161,12 +2161,12 @@
 	any required services have appropriate service mappings to
 	declare which instances to use by default.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
-	    <option name="archetype" type="string" mandatory="True">archetype name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
+	    <option name="archetype" type="string" mandatory="True">Archetype name</option>
 	</optgroup>
 	<optgroup>
 	    <optgroup fields="one">
-		<option name="personality" type="string">personality name</option>
+		<option name="personality" type="string">Personality name</option>
 		<optgroup fields="all">
 		    <option name="osname" type="string">OS name</option>
 		    <option name="osversion" type="string">OS version</option>
@@ -2185,7 +2185,7 @@
     <command name="show_archetype">
 	Show information about an archetype, including required services.
 	<optgroup mandatory="True" fields="one">
-	    <option name="archetype" type="string">archetype name</option>
+	    <option name="archetype" type="string">Archetype name</option>
 	    <option name="all" type="flag">Select all services</option>
 	</optgroup>
 	<transport trigger="archetype" method="get" path="archetype/%(archetype)s"/>
@@ -2201,12 +2201,12 @@
 	service because it used to be required will be unmodified. If
 	you wish to unbind those clients, you must do so manually.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
-	    <option name="archetype" type="string" mandatory="True">archetype name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
+	    <option name="archetype" type="string" mandatory="True">Archetype name</option>
 	</optgroup>
 	<optgroup>
 	    <optgroup fields="one">
-		<option name="personality" type="string">personality name</option>
+		<option name="personality" type="string">Personality name</option>
 		<optgroup fields="all">
 		    <option name="osname" type="string">OS name</option>
 		    <option name="osversion" type="string">OS version</option>
@@ -2227,8 +2227,8 @@
 	automatic selection during any bind_server (or rebuilds that invoke bind_server)
 	commands.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
-	    <option name="instance" type="string" mandatory="True">instance name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
+	    <option name="instance" type="string" mandatory="True">Instance name</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -2261,11 +2261,11 @@
     <command name="show_map">
 	Show any relevant mappings for the given service, instance, or location.
 	<optgroup mandatory="True">
-	    <option name="service" type="string">service name</option>
-	    <option name="instance" type="string">instance name</option>
-	    <option name="archetype" type="string">archetype name</option>
-	    <option name="personality" type="string">personality name</option>
-	    <option name="host_environment" type="string">host environment</option>
+	    <option name="service" type="string">Service name</option>
+	    <option name="instance" type="string">Instance name</option>
+	    <option name="archetype" type="string">Archetype name</option>
+	    <option name="personality" type="string">Personality name</option>
+	    <option name="host_environment" type="string">Host environment</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -2280,7 +2280,7 @@
 		<option name="desk" type="string">Desk</option>
 		<option name="networkip" type="ipv4">Network IP address</option>
 	    </optgroup>
-	    <option name="all" type="flag">show all maps</option>
+	    <option name="all" type="flag">Show all maps</option>
 	</optgroup>
 	<optgroup>
 	    <option name="include_parents" type="flag">Include mappings of parent locations</option>
@@ -2296,8 +2296,8 @@
 	Remove the map from a service instance to a location. Existing bindings of
 	clients will remain unmodified.
 	<optgroup mandatory="True" fields="all">
-	    <option name="service" type="string" mandatory="True">service name</option>
-	    <option name="instance" type="string" mandatory="True">instance name</option>
+	    <option name="service" type="string" mandatory="True">Service name</option>
+	    <option name="instance" type="string" mandatory="True">Instance name</option>
 	    <optgroup mandatory="True" fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -2368,15 +2368,15 @@
 	All hosts will be set to the same status.
 	<optgroup mandatory="True" fields="one">
 	    <option name="hostname" type="string">Host name</option>
-	    <option name="list" type="list">file containing hostnames</option>
+	    <option name="list" type="list">File containing hostnames</option>
 	</optgroup>
 	<optgroup fields="one">
-	    <option name="status" type="flag">display the current status of how the host will boot</option>
-	    <option name="localboot" type="flag">set the host to boot from local disk</option>
-	    <option name="install" type="flag">set the host to install from the network at next reboot</option>
-	    <option name="firmware" type="flag">set the host to boot its firmware image</option>
-	    <option name="blindbuild" type="flag">set the host to boot a blindbuild livecd image</option>
-	    <option name="rescue" type="flag">set the host to boot a rescue image</option>
+	    <option name="status" type="flag">Display the current status of how the host will boot</option>
+	    <option name="localboot" type="flag">Set the host to boot from local disk</option>
+	    <option name="install" type="flag">Set the host to install from the network at next reboot</option>
+	    <option name="firmware" type="flag">Set the host to boot its firmware image</option>
+	    <option name="blindbuild" type="flag">Set the host to boot a blindbuild livecd image</option>
+	    <option name="rescue" type="flag">Set the host to boot a rescue image</option>
 	</optgroup>
 	<optgroup>
 	    <option name="configure" type="boolean" default="True">(re)initialize the pxeswitch configuration (the default)</option>
@@ -2407,8 +2407,8 @@
 	    <option name="membersof" type="string">Hosts which are members of the specified cluster</option>
 	</optgroup>
 	<optgroup>
-	    <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
-	    <option name="osversion" type="string">version of the OS</option>
+	    <option name="osname" type="string">Name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+	    <option name="osversion" type="string">Version of the OS</option>
 	    <option name="archetype" type="string">Archetype of the personality</option>
 	    <option name="personality" type="string">Personality of the host</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
@@ -2802,7 +2802,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="force" type="flag">bypasses git status and branch integrity checks (potentially dangerous)</option>
+	    <option name="force" type="flag">Bypasses git status and branch integrity checks (potentially dangerous)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -2841,7 +2841,7 @@
 	<optgroup>
 	    <option name="archetype" requires="personality" type="string">Archetype</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
-	    <option name="param_tmpl" requires="personality" type="string">param templates</option>
+	    <option name="param_tmpl" requires="personality" type="string">Param templates</option>
 	</optgroup>
 	<optgroup>
 	    <option name="instance" type="string" requires="service">Name of the service instance</option>
@@ -2910,7 +2910,7 @@
 	    <option name="mac" type="mac">MAC address of the interface</option>
 	    <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	    <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
-	    <option name="serial" type="string">serial number</option>
+	    <option name="serial" type="string">Serial number</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -3020,8 +3020,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="rack" type="string">rack name</option>
-	    <option name="all" type="flag">all</option>
+	    <option name="rack" type="string">Rack name</option>
+	    <option name="all" type="flag">Show all racks</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/rack"/>
 	<transport trigger="rack" method="get" path="location/rack/%(rack)s"/>
@@ -3033,7 +3033,7 @@
     <command name="del_rack">
 	Delete a rack.
 	<optgroup mandatory="True" fields="all">
-	    <option name="rack" type="string">rack name</option>
+	    <option name="rack" type="string">Rack name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3125,7 +3125,7 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="building" type="string">building name</option>
+	    <option name="building" type="string">Building name</option>
 	    <option name="all" type="flag">Select all</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/building"/>
@@ -3138,7 +3138,7 @@
     <command name="del_building">
 	Delete a building.
 	<optgroup mandatory="True" fields="all">
-	    <option name="building" type="string">building name</option>
+	    <option name="building" type="string">Building name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3165,7 +3165,7 @@
     <command name="del_campus">
 	Delete a campus.
 	<optgroup mandatory="True" fields="all">
-	    <option name="campus" type="string">campus name</option>
+	    <option name="campus" type="string">Campus name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3210,8 +3210,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="room" type="string">room name</option>
-	    <option name="all" type="flag">show all</option>
+	    <option name="room" type="string">Room name</option>
+	    <option name="all" type="flag">Show all rooms</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/room"/>
 	<transport trigger="room" method="get" path="location/room/%(room)s"/>
@@ -3223,7 +3223,7 @@
     <command name="del_room">
 	Delete a room.
 	<optgroup mandatory="True" fields="all">
-	    <option name="room" type="string">room name</option>
+	    <option name="room" type="string">Room name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3256,8 +3256,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="bunker" type="string">bunker name</option>
-	    <option name="all" type="flag">show all</option>
+	    <option name="bunker" type="string">Bunker name</option>
+	    <option name="all" type="flag">Show all bunkers</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/bunker"/>
 	<transport trigger="bunker" method="get" path="location/bunker/%(bunker)s"/>
@@ -3269,7 +3269,7 @@
     <command name="del_bunker">
 	Delete a bunker.
 	<optgroup mandatory="True" fields="all">
-	    <option name="bunker" type="string">bunker name</option>
+	    <option name="bunker" type="string">Bunker name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3284,8 +3284,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="campus" type="string">campus name</option>
-	    <option name="all" type="flag">show all campuses</option>
+	    <option name="campus" type="string">Campus name</option>
+	    <option name="all" type="flag">Show all campuses</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/campus"/>
 	<transport trigger="campus" method="get" path="location/campus/%(campus)s"/>
@@ -3338,8 +3338,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="city" type="string">city name</option>
-	    <option name="all" type="flag">show all cities</option>
+	    <option name="city" type="string">City name</option>
+	    <option name="all" type="flag">Show all cities</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/city"/>
 	<transport trigger="city" method="get" path="location/city/%(city)s"/>
@@ -3351,7 +3351,7 @@
     <command name="del_city">
 	Delete a city.
 	<optgroup mandatory="True" fields="all">
-	    <option name="city" type="string">city name</option>
+	    <option name="city" type="string">City name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3381,8 +3381,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="country" type="string">country name</option>
-	    <option name="all" type="flag">show all countries</option>
+	    <option name="country" type="string">Country name</option>
+	    <option name="all" type="flag">Show all countries</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/country"/>
 	<transport trigger="country" method="get" path="location/country/%(country)s"/>
@@ -3394,7 +3394,7 @@
     <command name="del_country">
 	Delete a country.
 	<optgroup mandatory="True" fields="all">
-	    <option name="country" type="string">country name</option>
+	    <option name="country" type="string">Country name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3424,8 +3424,8 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="continent" type="string">continent name</option>
-	    <option name="all" type="flag">show all continents</option>
+	    <option name="continent" type="string">Continent name</option>
+	    <option name="all" type="flag">Show all continents</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/continent"/>
 	<transport trigger="continent" method="get" path="location/continent/%(continent)s"/>
@@ -3437,7 +3437,7 @@
     <command name="del_continent">
 	Delete a continent.
 	<optgroup mandatory="True" fields="all">
-	    <option name="continent" type="string">continent name</option>
+	    <option name="continent" type="string">Continent name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3510,7 +3510,7 @@
 	Supported options for --format: raw, csv, proto.
 	<p/>
 	<optgroup mandatory="True" fields="one">
-	    <option name="hub" type="string">hub name</option>
+	    <option name="hub" type="string">Hub name</option>
 	    <option name="all" type="flag">Show all hubs</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="location/hub"/>
@@ -3523,7 +3523,7 @@
     <command name="del_hub">
 	Delete a hub.
 	<optgroup mandatory="True" fields="all">
-	    <option name="hub" type="string">hub name</option>
+	    <option name="hub" type="string">Hub name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3538,7 +3538,7 @@
 	    <option name="archetype" type="string">The name to create</option>
 	</optgroup>
 	<optgroup>
-	    <option name="compilable" type="boolean" default='False'>Does this archetype produce profiles?</option>
+	    <option name="compilable" type="boolean" default="False">Does this archetype produce profiles?</option>
 	    <option name="description" type="string">A human readable description of the archetype name</option>
 	    <option name="cluster_type" type="string">For cluster archetypes - what kind of cluster is this?</option>
 	    <option name="comments" type="string">Comments</option>
@@ -3722,7 +3722,7 @@
 	<optgroup>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
-	    <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
+	    <option name="cluster_required" type="boolean" default="False">Does this personality require hosts to be clustered?</option>
 	    <option name="config_override" type="boolean">Include external personality config override template</option>
 	    <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
 	    <option name="leave_existing" type="flag">Do not propagate GRN changes to hosts in the personality</option>
@@ -3745,9 +3745,9 @@
 	If the domain option is given that domain will be searched for
 	information about the personality's thresholds.
 	<optgroup mandatory="True">
-	    <option name="personality" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
-	    <option name="archetype" type="string" conflicts="all">which archetype to use</option>
-	    <option name="all" type="flag" conflicts="personality archetype">all</option>
+	    <option name="personality" type="string" conflicts="all">Personality name (same name may be in multiple archetypes)</option>
+	    <option name="archetype" type="string" conflicts="all">Which archetype to use</option>
+	    <option name="all" type="flag" conflicts="personality archetype">Show all</option>
 	</optgroup>
 	<optgroup>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
@@ -3763,17 +3763,17 @@
 	be shown using the --fullinfo option
 	<p/>
 	<optgroup mandatory="True">
-	    <option name="personality" type="string" >personality name (same name may be in multiple archetypes)</option>
+	    <option name="personality" type="string" >Personality name (same name may be in multiple archetypes)</option>
 	    <option name="personality_stage" type="string">Personality stage</option>
-	    <option name="archetype" type="string" >which archetype to use</option>
-	    <option name="grn" type="string" >match by GRN</option>
-	    <option name="eon_id" type="int" >match by EON ID</option>
+	    <option name="archetype" type="string" >Which archetype to use</option>
+	    <option name="grn" type="string" >Match by GRN</option>
+	    <option name="eon_id" type="int" >Match by EON ID</option>
 	    <option name="config_override" type="boolean" >Include external personality config override template</option>
 	    <option name="host_environment" type="string" >Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
 	    <option name="required_service" type="string">Show personalities requiring the given service</option>
 	    <option name="environment_override" type="string" requires="required_service">Show personalities which have an environment override for the specified service</option>
 	    <option name="used" type="boolean" reverse="unused">Look for used/unused personalities</option>
-	    <option name="fullinfo" type="flag">show full information for the matching personalities</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching personalities</option>
 	</optgroup>
 	<transport method="get" path="find/personality"/>
 	<format name="proto" >
@@ -3798,8 +3798,8 @@
 	    <option name="hostname" type="string">Host name to make</option>
 	</optgroup>
 	<optgroup>
-	    <option name="osname" type="string">name of the OS to assign to the host (linux, windows, esx, etc.)</option>
-	    <option name="osversion" type="string">version of the OS</option>
+	    <option name="osname" type="string">Name of the OS to assign to the host (linux, windows, esx, etc.)</option>
+	    <option name="osversion" type="string">Version of the OS</option>
 	    <option name="archetype" type="string">Archetype of the host (defaults to aquilon)</option>
 	    <option name="personality" type="string">Personality of the host</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
@@ -3880,10 +3880,10 @@
 	virtual is indicated by the machine type of the model.
 	<optgroup mandatory="True" fields="all">
 	    <optgroup fields="one">
-		<option name="machine" type="string">machine name</option>
-		<option name="prefix" type="string">machine prefix</option>
+		<option name="machine" type="string">Machine name</option>
+		<option name="prefix" type="string">Machine prefix</option>
 	    </optgroup>
-	    <option name="model" type="string">machine model</option>
+	    <option name="model" type="string">Machine model</option>
 	    <optgroup fields="one">
 		<optgroup fields="all">
 		    <option name="chassis" type="string">Chassis name</option>
@@ -3899,10 +3899,10 @@
 	<optgroup>
 	    <option name="vendor" type="string">Machine vendor. Needed if the model name is not unique</option>
 	    <option name="recipe" type="json">Hardware parameters to apply</option>
-	    <option name="cpuname" type="string">cpu name</option>
-	    <option name="cpuvendor" type="string">cpu vendor</option>
-	    <option name="cpucount" type="int">cpu count</option>
-	    <option name="memory" type="int">memory in MB</option>
+	    <option name="cpuname" type="string">CPU name</option>
+	    <option name="cpuvendor" type="string">CPU vendor</option>
+	    <option name="cpucount" type="int">CPU count</option>
+	    <option name="memory" type="int">Memory in MB</option>
 	    <option name="serial" type="string">Serial number</option>
 	    <option name="uuid" type="uuid">Machine UUID</option>
 	    <option name="comments" type="string">Comments</option>
@@ -3921,33 +3921,33 @@
 	the machine to the new model's default specifications.  To do so, give
 	the new information (cpu, count, memory) at the same time.
 	<optgroup mandatory="True" fields="one">
-	    <option name="machine" type="string">machine name</option>
-	    <option name="hostname" type="string">fully qualified host name</option>
+	    <option name="machine" type="string">Machine name</option>
+	    <option name="hostname" type="string">Fully qualified host name</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <optgroup>
-		<option name="chassis" type="string">chassis name</option>
-		<option name="slot" type="int">chassis slot</option>
+		<option name="chassis" type="string">Chassis name</option>
+		<option name="slot" type="int">Chassis slot</option>
 	    </optgroup>
-	    <option name="rack" type="string">rack name</option>
-	    <option name="desk" type="string">desk name</option>
+	    <option name="rack" type="string">Rack name</option>
+	    <option name="desk" type="string">Desk name</option>
 	    <option name="cluster" type="string">Cluster name hosting the VM</option>
 	    <option name="metacluster" type="string">Metacluster name hosting the VM</option>
 	    <option name="vmhost" type="string">Host name hosting the VM</option>
 	</optgroup>
 	<optgroup>
-	    <option name="model" type="string">machine model</option>
-	    <option name="vendor" type="string" requires="model">machine vendor</option>
-	    <option name="cpuname" type="string">cpu name</option>
-	    <option name="cpuvendor" type="string">cpu vendor</option>
-	    <option name="cpucount" type="int">cpu count</option>
-	    <option name="memory" type="int">memory in MB</option>
-	    <option name="serial" type="string">serial number</option>
+	    <option name="model" type="string">Machine model</option>
+	    <option name="vendor" type="string" requires="model">Machine vendor</option>
+	    <option name="cpuname" type="string">CPU name</option>
+	    <option name="cpuvendor" type="string">CPU vendor</option>
+	    <option name="cpucount" type="int">CPU count</option>
+	    <option name="memory" type="int">Memory in MB</option>
+	    <option name="serial" type="string">Serial number</option>
 	    <option name="uuid" type="uuid">Machine UUID</option>
 	    <option name="clear_uuid" type="flag">Clear the machine UUID</option>
-	    <option name="clearchassis" type="boolean">remove chassis and slot information</option>
-	    <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
-	    <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
+	    <option name="clearchassis" type="boolean">Remove chassis and slot information</option>
+	    <option name="multislot" type="boolean">Use to record machine as taking multiple slots in a chassis</option>
+	    <option name="allow_metacluster_change" type="boolean">When changing clusters, allow the cluster to be in a different metacluster</option>
 	    <optgroup fields="one">
 		<option name="autoip" type="flag" requires="cluster metacluster vmhost">Re-assign IP addresses</option>
 		<option name="ip" type="ipv4">New primary IP address</option>
@@ -3974,8 +3974,8 @@
 	If the machine has multiple interfaces, then there will be a separate
 	line for each.
 	<optgroup mandatory="True" fields="one">
-	    <option name="machine" type="string">machine name</option>
-	    <option name="all" type="flag">all</option>
+	    <option name="machine" type="string">Machine name</option>
+	    <option name="all" type="flag">Show all</option>
 	</optgroup>
 	<format name="proto">
 	    <message_class name="MachineList" module="aqdsystems_pb2"/>
@@ -3988,7 +3988,7 @@
 	Delete the specified machine. This command will fail if the machine
 	is being used: you must del_host before you can del_machine.
 	<optgroup mandatory="True" fields="all">
-	    <option name="machine" type="string">machine name</option>
+	    <option name="machine" type="string">Machine name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -4082,8 +4082,8 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="rename_to" type="string">New name of the network device</option>
 	    <!-- TODO should be some json type with schema + validation -->
-	    <option name="discovered_macs" type="json">mac/port mapping</option>
-	    <option name="clear" type="flag">clear current mac/port mapping</option>
+	    <option name="discovered_macs" type="json">MAC/port mapping</option>
+	    <option name="clear" type="flag">Clear current MAC/port mapping</option>
 	    <option name="discover" type="flag">Do automatic discovery</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -4104,7 +4104,7 @@
 	separate line for each.
 	<optgroup mandatory="True" fields="one">
 	    <option name="network_device" type="string">Network device fully qualified name</option>
-	    <option name="all" type="flag">show all</option>
+	    <option name="all" type="flag">Show all</option>
 	</optgroup>
 	<optgroup>
 	    <option name="discover" type="flag" conflicts="all">Show differences to discovery data</option>
@@ -4128,8 +4128,8 @@
 	If the switch has multiple interfaces assigned, then there will be a
 	separate line for each.
 	<optgroup mandatory="True" fields="one">
-	    <option name="switch" type="string">switch fully qualified name</option>
-	    <option name="all" type="flag">show all</option>
+	    <option name="switch" type="string">Switch fully qualified name</option>
+	    <option name="all" type="flag">Show all</option>
 	</optgroup>
 	<optgroup>
 	    <option name="discover" type="flag" conflicts="all">Show differences to discovery data</option>
@@ -4174,10 +4174,10 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <option name="serial" type="string">serial number</option>
-	    <option name="exact_location" type="flag">match the location exactly</option>
-	    <option name="fullinfo" type="flag">show full information for the matching network devices</option>
-	    <option name="all" type="flag">show all</option>
+	    <option name="serial" type="string">Serial number</option>
+	    <option name="exact_location" type="flag">Match the location exactly</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching network devices</option>
+	    <option name="all" type="flag">Show all</option>
 	</optgroup>
 	<transport method="get" path="find/network_device"/>
 	<format name="proto" >
@@ -4201,12 +4201,12 @@
 	If the switch has multiple interfaces assigned, then there will be a
 	separate line for each.
 	<optgroup mandatory="True">
-	    <option name="switch" type="string">switch fully qualified name</option>
+	    <option name="switch" type="string">Switch fully qualified name</option>
 	    <option name="ip" type="ipv4">IP address</option>
 	    <option name="vlan" type="int">Vlan ID</option>
 	    <option name="type" type="string">Type (tor, bor, agg)</option>
-	    <option name="model" type="string">switch model</option>
-	    <option name="vendor" type="string">switch vendor </option>
+	    <option name="model" type="string">Switch model</option>
+	    <option name="vendor" type="string">Switch vendor</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -4219,10 +4219,10 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <option name="serial" type="string">serial number</option>
-	    <option name="exact_location" type="flag">match the location exactly</option>
-	    <option name="fullinfo" type="flag">show full information for the matching switches</option>
-	    <option name="all" type="flag">show all</option>
+	    <option name="serial" type="string">Serial number</option>
+	    <option name="exact_location" type="flag">Match the location exactly</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching switches</option>
+	    <option name="all" type="flag">Show all</option>
 	</optgroup>
 	<transport method="get" path="find/switch"/>
     </command>
@@ -4242,7 +4242,7 @@
     <command name="del_switch">
 	DEPRECATED. Delete the specified switch.
 	<optgroup mandatory="True" fields="all">
-	    <option name="switch" type="string">switch name</option>
+	    <option name="switch" type="string">Switch name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -4271,7 +4271,7 @@
     <command name="poll_switch">
 	DEPRECATED. Poll switch for MAC information.
 	<optgroup mandatory="True" fields="one">
-	    <option name="switch" type="string">switch name</option>
+	    <option name="switch" type="string">Switch name</option>
 	    <option name="rack" type="string">Rack name</option>
 	</optgroup>
 	<optgroup>
@@ -4359,7 +4359,7 @@
 	Show the properties of a role, or list all roles.
 	<optgroup mandatory="True" fields="one">
 	    <option name="role" type="string">Role name</option>
-	    <option name="all" type="flag"></option>
+	    <option name="all" type="flag">Show all roles</option>
 	</optgroup>
 	<transport method="get" trigger="role" path="role/%(role)s"/>
 	<transport method="get" trigger="all" path="role"/>
@@ -4382,7 +4382,7 @@
     </command>
 
     <command name="add_dns_environment">
-	Add a new DNS Environment
+	Add a new DNS Environment.
 	<optgroup mandatory="True" fields="all">
 	    <option name="dns_environment" type="string">The DNS environment name</option>
 	</optgroup>
@@ -4395,7 +4395,7 @@
     </command>
 
     <command name="show_dns_environment">
-	Display a DNS Environment
+	Display a DNS environment.
 	<optgroup mandatory="True" fields="one">
 	    <option name="dns_environment" type="string">Name of the DNS environment</option>
 	    <option name="all" type="flag">Show all DNS environments</option>
@@ -4405,7 +4405,7 @@
     </command>
 
     <command name="del_dns_environment">
-	Delete a DNS Environment
+	Delete a DNS environment.
 	<optgroup mandatory="True" fields="all">
 	    <option name="dns_environment" type="string">The DNS environment name</option>
 	</optgroup>
@@ -4417,7 +4417,7 @@
     </command>
 
     <command name="update_dns_environment">
-	Update a DNS Environment
+	Update a DNS environment.
 	<optgroup mandatory="True" fields="all">
 	    <option name="dns_environment" type="string">The DNS environment name</option>
 	</optgroup>
@@ -4652,7 +4652,7 @@
 	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
 	    <option name="max_members" type="int">Comments</option>
 	    <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-	    <option name="switch" type="string">switch in use by the cluster</option>
+	    <option name="switch" type="string">Switch in use by the cluster</option>
 	    <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -4706,7 +4706,7 @@
 	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
 	    <option name="max_members" type="int">Max allowed host members</option>
 	    <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
-	    <option name="switch" type="string">switch in use by the cluster</option>
+	    <option name="switch" type="string">Switch in use by the cluster</option>
 	    <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -4915,8 +4915,8 @@
 	    <option name="fqdn" type="string">A fully qualified domain name</option>
 	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
+		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
@@ -5287,7 +5287,7 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <option name="all" type="flag">list all systems</option>
+	    <option name="all" type="flag">List all systems</option>
 	    <optgroup>
 		<option name="row" type="string">Rack Row</option>
 		<option name="column" type="string">Rack Column</option>
@@ -5337,9 +5337,9 @@
     <command name="show_reboot_schedule">
 	Show reboot_schedule based on filtering for host/cluster association
 	<optgroup mandatory="True" fields="one">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
-	    <option name="all" type="flag">list all schedules</option>
+	    <option name="cluster" type="string">Cluster name</option>
+	    <option name="hostname" type="string">Hostname</option>
+	    <option name="all" type="flag">List all schedules</option>
 	</optgroup>
 	<transport method="get" path="resource/reboot_schedule/reboot_schedule"/>
 	<format name="proto" >
@@ -5391,11 +5391,11 @@
     </command>
 
     <command name="show_reboot_intervention">
-	Show reboot_intervention based on filtering for host/cluster association
+	Show reboot_intervention based on filtering for host/cluster association.
 	<optgroup mandatory="True" fields="one">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
-	    <option name="all" type="flag">list all interventions</option>
+	    <option name="cluster" type="string">Cluster name</option>
+	    <option name="hostname" type="string">Hostname</option>
+	    <option name="all" type="flag">Show all interventions</option>
 	</optgroup>
 	<transport method="get" path="resource/reboot_intervention"/>
 	<format name="proto" >
@@ -5419,13 +5419,13 @@
 		<option name="hostname" type="string">Host</option>
 		<option name="cluster" type="string">Cluster</option>
 	    </optgroup>
-	    <option name="expiry" type="string">when to expire this intervention</option>
+	    <option name="expiry" type="string">When to expire this intervention</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
+	    <option name="start_time" type="string">When to start this intervention (default=now)</option>
 	</optgroup>
 	<transport method="put" path="resource/reboot_intervention"/>
     </command>
@@ -5455,16 +5455,16 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="filesystem" type="string">name</option>
-	    <option name="type" type="string">type</option>
-	    <option name="mountpoint" type="string">mountpoint</option>
-	    <option name="blockdevice" type="string">blockdevice</option>
-	    <option name="bootmount" type="boolean">immediately mount on boot</option>
+	    <option name="filesystem" type="string">Name</option>
+	    <option name="type" type="string">Type</option>
+	    <option name="mountpoint" type="string">Mount point</option>
+	    <option name="blockdevice" type="string">Block device</option>
+	    <option name="bootmount" type="boolean">Immediately mount on boot</option>
 	</optgroup>
 	<optgroup>
-	    <option name="dumpfreq" type="int" default="0">dump frequency</option>
+	    <option name="dumpfreq" type="int" default="0">Dump frequency</option>
 	    <option name="fsckpass" type="int" default="2">fsck passno</option>
-	    <option name="options" type="string">mountoptions</option>
+	    <option name="options" type="string">Mount options</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -5481,7 +5481,7 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="filesystem" type="string">name</option>
+	    <option name="filesystem" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -5499,16 +5499,16 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="filesystem" type="string">name</option>
+	    <option name="filesystem" type="string">Name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="type" type="string">type</option>
-	    <option name="mountpoint" type="string">mountpoint</option>
-	    <option name="blockdevice" type="string">blockdevice</option>
-	    <option name="bootmount" type="boolean">immediately mount on boot</option>
-	    <option name="dumpfreq" type="int" default="0">dump frequency</option>
+	    <option name="type" type="string">Type</option>
+	    <option name="mountpoint" type="string">Mount point</option>
+	    <option name="blockdevice" type="string">Block device</option>
+	    <option name="bootmount" type="boolean">Immediately mount on boot</option>
+	    <option name="dumpfreq" type="int" default="0">Dump frequency</option>
 	    <option name="fsckpass" type="int" default="2">fsck passno</option>
-	    <option name="options" type="string">mountoptions</option>
+	    <option name="options" type="string">Mount options</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -5525,8 +5525,8 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="filesystem" type="string">filesystem name</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup filesystem">list all filesystems</option>
+	    <option name="filesystem" type="string">Filesystem name</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup filesystem">List all filesystems</option>
 	</optgroup>
 	<transport method="get" trigger="filesystem" path="resource/filesystem/%(filesystem)s"/>
 	<transport method="get" path="find/resource/filesystem"/>
@@ -5544,7 +5544,7 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="share" type="string">name</option>
+	    <option name="share" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
@@ -5557,7 +5557,7 @@
     <command name="update_share">
 	Update a share resource.
 	<optgroup mandatory="True" fields="all">
-	    <option name="share" type="string">name</option>
+	    <option name="share" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
@@ -5577,7 +5577,7 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="share" type="string">name</option>
+	    <option name="share" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -5595,8 +5595,8 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="share" type="string">share name</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup share">list all shares</option>
+	    <option name="share" type="string">Share name</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup share">List all shares</option>
 	</optgroup>
 	<transport method="get" trigger="share" path="resource/share/%(share)s"/>
 	<transport method="get" path="find/resource/share"/>
@@ -5637,7 +5637,7 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="application" type="string">name</option>
+	    <option name="application" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -5656,9 +5656,9 @@
 		    <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 		</optgroup>
-		<option name="application" type="string">application name</option>
+		<option name="application" type="string">Application name</option>
 	    </optgroup>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application">list all applications</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application">List all applications</option>
 	</optgroup>
 	<transport method="get" trigger="application" path="resource/application/%(application)s"/>
 	<transport method="get" path="find/resource/application"/>
@@ -5698,7 +5698,7 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="hostlink" type="string">name</option>
+	    <option name="hostlink" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -5716,8 +5716,8 @@
 		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
-	    <option name="hostlink" type="string">hostlink name</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup hostlink">list all hostlinks</option>
+	    <option name="hostlink" type="string">Hostlink name</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup hostlink">List all hostlinks</option>
 	</optgroup>
 	<transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s"/>
 	<transport method="get" path="find/resource/hostlink"/>
@@ -5734,17 +5734,17 @@
 		<option name="cluster" type="string">Cluster</option>
 		<option name="metacluster" type="string">Metacluster to apply resource</option>
 	    </optgroup>
-	    <option name="expiry" type="string">when to expire this intervention</option>
-	    <option name="intervention" type="string">the name of the intervention</option>
+	    <option name="expiry" type="string">When to expire this intervention</option>
+	    <option name="intervention" type="string">The name of the intervention</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
 	<optgroup>
-	    <option name="justification" type="string">the reason for the intervention</option>
+	    <option name="justification" type="string">The reason for the intervention</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="allowusers" type="string">Additional users allowed access</option>
 	    <option name="allowgroups" type="string">Additional groups allowed access</option>
 	    <option name="disabled_actions" type="string">Disabled actions</option>
-	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
+	    <option name="start_time" type="string">When to start this intervention (default=now)</option>
 	</optgroup>
 	<transport method="put" path="resource/intervention/%(intervention)s"/>
     </command>
@@ -5753,12 +5753,12 @@
 	Display the attributes of an existing intervention resource.
 	<optgroup mandatory="True">
 	    <optgroup fields="one">
-		<option name="hostname" type="string">hostname</option>
-		<option name="cluster" type="string">cluster name</option>
-		<option name="metacluster" type="string">metacluster name</option>
+		<option name="hostname" type="string">Hostname</option>
+		<option name="cluster" type="string">Cluster name</option>
+		<option name="metacluster" type="string">Metacluster name</option>
 	    </optgroup>
-	    <option name="intervention" type="string">the name of the intervention</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup intervention">list all interventions</option>
+	    <option name="intervention" type="string">The name of the intervention</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup intervention">List all interventions</option>
 	</optgroup>
 	<transport method="get" trigger="intervention" path="resource/intervention/%(intervention)s"/>
 	<transport method="get" path="find/resource/intervention"/>
@@ -5775,7 +5775,7 @@
 		<option name="cluster" type="string">Cluster of resource</option>
 		<option name="metacluster" type="string">Metacluster to apply resource</option>
 	    </optgroup>
-	    <option name="intervention" type="string">name</option>
+	    <option name="intervention" type="string">Name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -5843,9 +5843,9 @@
 		    <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
 		    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 		</optgroup>
-		<option name="name" type="string">service address name</option>
+		<option name="name" type="string">Service address name</option>
 	    </optgroup>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup name">list all service addresses</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup name">List all service addresses</option>
 	</optgroup>
 	<transport method="get" trigger="name" path="resource/service_address/%(name)s"/>
 	<transport method="get" path="find/resource/service_address"/>
@@ -5942,7 +5942,7 @@
 	Map a given GRN to a host or a personality. The affected host(s) must be
 	recompiled for the changes to take effect.
 	<optgroup mandatory="True" fields="all">
-	    <option name="target" type="string">peer system using the GRN</option>
+	    <option name="target" type="string">Peer system using the GRN</option>
 	    <optgroup fields="one">
 		<option name="grn" type="string">GRN as string</option>
 		<option name="eon_id" type="int">Numeric EON ID</option>
@@ -5967,7 +5967,7 @@
 	Unmap a given GRN from a host or a personality. The affected host(s) must be
 	recompiled for the changes to take effect.
 	<optgroup mandatory="True" fields="all">
-	    <option name="target" type="string">peer system using the GRN</option>
+	    <option name="target" type="string">Peer system using the GRN</option>
 	    <optgroup fields="one">
 		<option name="grn" type="string">GRN as string</option>
 		<option name="eon_id" type="int">Numeric EON ID</option>
@@ -6001,7 +6001,7 @@
 	    <option name="resourcegroup" type="string">Name of the resource group</option>
 	</optgroup>
 	<optgroup>
-	    <option name="required_type" type="string">group members must have this type</option>
+	    <option name="required_type" type="string">Group members must have this type</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -6030,12 +6030,12 @@
 	Show resource groups based on filtering for host/cluster association.
 	<optgroup mandatory="True">
 	    <optgroup fields="one">
-		<option name="hostname" type="string">hostname</option>
-		<option name="cluster" type="string">cluster name</option>
-		<option name="metacluster" type="string">metacluster name</option>
+		<option name="hostname" type="string">Hostname</option>
+		<option name="cluster" type="string">Cluster name</option>
+		<option name="metacluster" type="string">Metacluster name</option>
 	    </optgroup>
-	    <option name="resourcegroup" type="string">resource group name</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup">list all resource groups</option>
+	    <option name="resourcegroup" type="string">Resource group name</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup">List all resource groups</option>
 	</optgroup>
 	<transport method="get" trigger="resourcegroup" path="resource/resourcegroup/%(resourcegroup)s"/>
 	<transport method="get" path="find/resource/resourcegroup"/>
@@ -6055,7 +6055,7 @@
 	    <option name="resourcegroup" type="string">Name of the resource group</option>
 	</optgroup>
 	<optgroup>
-	    <option name="required_type" type="string">group members must have this type</option>
+	    <option name="required_type" type="string">Group members must have this type</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -6079,7 +6079,7 @@
 	<optgroup>
 	    <option name="pre_personality" type="flag">Call the feature before the personality</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="visibility" type="string">scope of the feature
+	    <option name="visibility" type="string">Scope of the feature
         values are public, restricted (default), owner_only, owner_approved</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -6095,7 +6095,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="visibility" type="string">scope of the feature values are public, restricted, owner_only, owner_approved</option>
+	    <option name="visibility" type="string">Scope of the feature values are public, restricted, owner_only, owner_approved</option>
 	    <option name="activation" type="string">How the feature gets activated, valid values are rebuild, reboot, dispatch</option>
 	    <option name="deactivation" type="string">How the feature gets removed, valid values are rebuild, reboot, dispatch</option>
 	    <optgroup fields="one">
@@ -6455,7 +6455,7 @@
 	Show a specified vlan or all vlans
 	<optgroup mandatory="True" fields="one">
 	    <option name="vlan" type="int">VLAN</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="all" type="flag">List all hardware</option>
 	</optgroup>
 	<transport trigger="all" method="get" path="vlan"/>
 	<transport trigger="vlan" method="get" path="vlan/%(vlan)s"/>
@@ -6590,7 +6590,7 @@
 	Show the user for a given username.
 	<optgroup mandatory="True" fields="one">
 	    <option name="username" type="string">User to check</option>
-	    <option name="all" type="flag">list all users</option>
+	    <option name="all" type="flag">List all users</option>
 	</optgroup>
 	<transport trigger="username" method="get" path="user/%(username)s"/>
 	<transport trigger="all" method="get" path="user"/>
