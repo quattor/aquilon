@@ -42,10 +42,17 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         cls.linux_version_prev = cls.config.get("unittest",
                                                 "linux_version_prev")
 
-    def testmakeinfra(self):
-        command = ["make", "--hostname", "infra1.one-nyp.ms.com"]
+    def testmakeinfranp(self):
+        hosts = ["infra1.one-nyp.ms.com"]
+        scratchfile = self.writescratch("infrahosts", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile]
         self.statustest(command)
-        command = ["make", "--hostname", "infra1.aqd-unittest.ms.com"]
+
+    def testmakeinfraut(self):
+        hosts = ["infra1.aqd-unittest.ms.com",
+                 "infra2.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("infrahosts", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile]
         self.statustest(command)
 
     def testmakeunittest02(self):

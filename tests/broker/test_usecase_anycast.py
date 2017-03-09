@@ -37,22 +37,6 @@ anycast = {
 
 class TestUsecaseAnycast(MachineTestMixin, TestBrokerCommand):
 
-    def test_100_add_utinfra2(self):
-        eth0_ip = self.net["unknown0"].usable[38]
-        eth1_ip = self.net["unknown1"].usable[37]
-        ip = self.net["zebra_vip"].usable[7]
-        self.create_host("infra2.aqd-unittest.ms.com", ip, "ut3c5n14",
-                         model="utrackmount", chassis="ut3c5", slot=14,
-                         cpuname="utcpu", cpucount=2, memory=65536,
-                         sda_size=600, sda_controller="sas",
-                         eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
-                         eth0_fqdn="infra2-e0.aqd-unittest.ms.com",
-                         eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
-                         eth1_fqdn="infra2-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="utpers-prod")
-        command = ["make", "--hostname", "infra2.aqd-unittest.ms.com"]
-        self.statustest(command)
-
     def test_100_add_utinfra3(self):
         eth0_ip = self.net["unknown0"].usable[39]
         eth1_ip = self.net["unknown1"].usable[38]
@@ -142,13 +126,6 @@ class TestUsecaseAnycast(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["del_service", "--service", anycast['service'],
                         "--instance", anycast['instance']])
         self.noouttest(["del_service", "--service", anycast['service']])
-
-    def test_900_del_utinfra2(self):
-        eth0_ip = self.net["unknown0"].usable[38]
-        eth1_ip = self.net["unknown1"].usable[37]
-        ip = self.net["zebra_vip"].usable[7]
-        self.delete_host("infra2.aqd-unittest.ms.com", ip, "ut3c5n14",
-                         eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_900_del_utinfra3(self):
         eth0_ip = self.net["unknown0"].usable[39]

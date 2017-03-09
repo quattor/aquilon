@@ -30,8 +30,8 @@ instance_servers = {
         "ny-prod": ["nyaqd1.ms.com"],
     },
     "bootserver": {
-        "unittest": ["infra1.aqd-unittest.ms.com"],
-        "one-nyp": ["infra1.one-nyp.ms.com"],
+        "unittest": ["infra1.aqd-unittest.ms.com", "infra2.aqd-unittest.ms.com"],
+        "one-nyp": ["infra1.one-nyp.ms.com", "infra2.one-nyp.ms.com"],
     },
     "chooser1": {
         "ut.a": ["server1.aqd-unittest.ms.com"],

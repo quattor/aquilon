@@ -219,7 +219,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_300_del_unittest24(self):
         self.check_plenary_exists("machine", "americas", "np", "np3", "np3c5n5")
-        self.delete_host("unittest24.aqd-unittest.ms.com",
+        self.delete_host("unittest24.one-nyp.ms.com",
                          self.net["vpls"].usable[2], "np3c5n5")
         self.check_plenary_gone("machine", "americas", "np", "np3", "np3c5n5")
 
@@ -239,18 +239,32 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.delete_host("f5test.aqd-unittest.ms.com", self.net["f5test"].ip,
                          "f5test")
 
-    def test_300_del_utinfra(self):
+    def test_300_del_utinfra1(self):
         eth0_ip = self.net["unknown0"].usable[33]
         eth1_ip = self.net["unknown1"].usable[34]
         ip = self.net["zebra_vip"].usable[3]
         self.delete_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
-    def test_300_del_npinfra(self):
+    def test_300_del_utinfra2(self):
+        eth0_ip = self.net["unknown0"].usable[38]
+        eth1_ip = self.net["unknown1"].usable[37]
+        ip = self.net["zebra_vip"].usable[7]
+        self.delete_host("infra2.aqd-unittest.ms.com", ip, "ut3c5n14",
+                         eth0_ip=eth0_ip, eth1_ip=eth1_ip)
+
+    def test_300_del_npinfra1(self):
         eth0_ip = self.net["unknown0"].usable[35]
         eth1_ip = self.net["unknown1"].usable[36]
         ip = self.net["zebra_vip"].usable[4]
         self.delete_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
+                         eth0_ip=eth0_ip, eth1_ip=eth1_ip)
+
+    def test_300_del_npinfra2(self):
+        eth0_ip = self.net["unknown0"].usable[43]
+        eth1_ip = self.net["unknown1"].usable[39]
+        ip = self.net["zebra_vip"].usable[9]
+        self.delete_host("infra2.one-nyp.ms.com", ip, "np3c5n14",
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_hp_rack_hosts(self):
