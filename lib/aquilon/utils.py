@@ -32,10 +32,11 @@ from itertools import islice
 from tempfile import mkstemp
 from uuid import UUID
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 import jsonschema
 
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
+from six import text_type
 
 from aquilon.exceptions_ import (ArgumentError, AquilonError,
                                  AuthorizationException)
@@ -98,7 +99,7 @@ def force_ip(label, value):
     if isinstance(value, IPv4Address):
         return value
     try:
-        return IPv4Address(value)
+        return IPv4Address(text_type(value))
     except ValueError as e:
         raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
 

@@ -39,7 +39,7 @@ class TestSearchHost(TestBrokerCommand):
         self.statustest(command.split(" "))
         command = "reconfigure --hostname unittest02.one-nyp.ms.com"
         self.successtest(command.split(" "))
- 
+
     def testfqdnavailable(self):
         command = "search host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -166,7 +166,7 @@ class TestSearchHost(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
                          "Expected an IPv4 address for --ip: "
-                         "not-an-ip-address",
+                         "Expected 4 octets in u'not-an-ip-address'",
                          command)
 
     def testnetworkipavailable(self):

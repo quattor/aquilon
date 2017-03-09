@@ -91,7 +91,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(["del", "network", "--ip", "127.0.0.0"])
 
     def test_150_delexcx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "excx"]
         self.noouttest(command)
@@ -118,7 +118,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def test_260_verifyexcx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["search", "network", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)

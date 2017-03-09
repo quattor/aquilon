@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,

@@ -68,7 +68,7 @@ class TestUpdateRouterAddress(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
 
     def test_120_update_excx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["update_router_address", "--ip", net[-2],
                    "--network_environment", "excx",
                    "--comments", "New other router address comments"]
@@ -83,7 +83,7 @@ class TestUpdateRouterAddress(TestBrokerCommand):
 
     def test_200_update_wrong_env(self):
         # This address exists as a router in excx, but not in utcolo
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["update_router_address", "--ip", net[-2],
                    "--network_environment", "utcolo",
                    "--comments", "New other router address comments"]

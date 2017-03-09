@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show dynamic range`."""
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 
 from aquilon.aqdb.model import DynamicStub, DnsEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip

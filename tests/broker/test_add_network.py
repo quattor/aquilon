@@ -74,7 +74,7 @@ class TestAddNetwork(TestBrokerCommand):
     def test_140_addsubnet(self):
         # Add a subnet of an existing network
         net = self.net["unknown0"]
-        subnet = net.subnet()[1]
+        subnet = list(net.subnets())[1]
         command = ["add", "network", "--network", "subnet-test",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
                    "--building", "ut", "--type", net.nettype]
@@ -124,7 +124,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def test_300_addexcx(self):
         net = self.net["unknown0"]
-        subnet = net.subnet()[0]
+        subnet = list(net.subnets())[0]
         command = ["add", "network", "--network", "excx-net",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
                    "--building", "np", "--type", net.nettype,
@@ -133,7 +133,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def test_310_addnetsvcmap(self):
         net = self.net["netsvcmap"]
-        subnet = net.subnet()[0]
+        subnet = list(net.subnets())[0]
         command = ["add", "network", "--network", "netsvcmap",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
                    "--building", "ut", "--type", net.nettype]
@@ -141,7 +141,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def test_320_addnetperssvcmap(self):
         net = self.net["netperssvcmap"]
-        subnet = net.subnet()[0]
+        subnet = list(net.subnets())[0]
         command = ["add", "network", "--network", "netperssvcmap",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
                    "--building", "ut", "--type", net.nettype]
@@ -160,8 +160,8 @@ class TestAddNetwork(TestBrokerCommand):
                    "--network", "bad-address", "--netmask", "255.255.255.0",
                    "--building", "ut", "--side", "a", "--type", "unknown"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "IP address 10.0.0.1 is not a network address.  "
-                         "Maybe you meant 10.0.0.0?", command)
+        self.matchoutput(out, "Failed to parse the network address: "
+                         "10.0.0.1/24 has host bits set.", command)
 
     def test_350_shownetwork(self):
         for network in self.net:
@@ -249,7 +249,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def test_440_showexcxwithenv(self):
         net = self.net["unknown0"]
-        subnet = net.subnet()[0]
+        subnet = list(net.subnets())[0]
         command = "show network --network excx-net --network_environment excx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Network: excx-net", command)

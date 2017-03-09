@@ -253,7 +253,7 @@ class TestMapService(TestBrokerCommand):
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
     def test_200_scope_conflict(self):
-        ip = self.net["netsvcmap"].subnet()[0].ip
+        ip = list(self.net["netsvcmap"].subnets())[0].ip
 
         command = ["map", "service", "--networkip", ip,
                    "--service", "afs", "--instance", "afs-by-net",

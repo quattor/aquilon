@@ -20,7 +20,9 @@
 from datetime import datetime
 import logging
 
-from ipaddr import IPv4Address, IPv4Network
+from ipaddress import IPv4Address, IPv4Network, ip_address, ip_network
+
+from six import text_type
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, CheckConstraint, desc, event)
@@ -157,7 +159,7 @@ class Network(Base):
         self._props = self.network_type_map.get(self.network_type,
                                                 self.default_network_props)
 
-        super(Network, self).__init__(ip=network.network,
+        super(Network, self).__init__(ip=network.network_address,
                                       cidr=network.prefixlen,
                                       network_type=network_type, **kw)
 
@@ -174,7 +176,7 @@ class Network(Base):
         start = self._props.first_usable_offset
 
         # TODO: do we need this fallback for /31 and /32 networks?
-        if self.network.numhosts < start:
+        if self.network.num_addresses < start:
             start = 0
 
         return self.network[start]
@@ -198,7 +200,7 @@ class Network(Base):
             # IPv4Network(int(self.ip)).supernet(new_prefix=self.cidr) looks
             # promising at first, but unfortunately it uses the same string
             # conversion internally...
-            self._network = IPv4Network("%s/%s" % (self.ip, self.cidr))
+            self._network = ip_network(u"%s/%s" % (self.ip, self.cidr))
         return self._network
 
     @network.setter
@@ -223,11 +225,11 @@ class Network(Base):
 
     @property
     def broadcast_address(self):
-        return self.network.broadcast
+        return self.network.broadcast_address
 
     @property
     def network_address(self):
-        return self.network.ip
+        return self.network.network_address
 
     @property
     def available_ip_count(self):
@@ -288,7 +290,7 @@ class Network(Base):
             ip = args[0]
         else:
             try:
-                ip = IPv4Address(args[0])
+                ip = ip_address(text_type(args[0]))
             except ValueError:
                 pass
 
@@ -302,11 +304,12 @@ class Network(Base):
             net = args[0]
         else:
             try:
-                net = IPv4Network(args[0])
+                net = ip_network(text_type(args[0]))
             except ValueError:
                 pass
         if net:
-            return super(Network, cls).get_unique(session, ip=net.network,
+            return super(Network, cls).get_unique(session,
+                                                  ip=net.network_address,
                                                   cidr=net.prefixlen,
                                                   network_environment=netenv,
                                                   query_options=options,

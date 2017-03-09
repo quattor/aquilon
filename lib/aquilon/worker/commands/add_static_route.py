@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq add static route`."""
 
-from ipaddr import IPv4Network
+from ipaddress import ip_network
 
 from sqlalchemy.orm import contains_eager
 
@@ -68,13 +68,13 @@ class CommandAddStaticRoute(BrokerCommand):
         else:
             raise ArgumentError("Please either --gateway or --networkip")
 
-        if netmask:
-            dest = IPv4Network("%s/%s" % (ip, netmask))
-        else:
-            dest = IPv4Network("%s/%s" % (ip, prefixlen))
-        if dest.network != ip:
-            raise ArgumentError("%s is not a network address; "
-                                "did you mean %s." % (ip, dest.network))
+        try:
+            if netmask:
+                dest = ip_network(u"%s/%s" % (ip, netmask))
+            else:
+                dest = ip_network(u"%s/%s" % (ip, prefixlen))
+        except ValueError as err:
+            raise ArgumentError(err)
 
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
@@ -99,7 +99,7 @@ class CommandAddStaticRoute(BrokerCommand):
                                     .format(dbnetwork, route.destination,
                                             route.gateway_ip))
 
-        route = StaticRoute(network=dbnetwork, dest_ip=dest.ip,
+        route = StaticRoute(network=dbnetwork, dest_ip=dest.network_address,
                             dest_cidr=dest.prefixlen, gateway_ip=gateway,
                             personality_stage=dbstage, comments=comments)
         session.add(route)

@@ -16,12 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq del static route`."""
 
-from ipaddr import IPv4Network
+from ipaddress import ip_network
 
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound
 
-from aquilon.exceptions_ import NotFoundException
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (NetworkEnvironment, StaticRoute, Personality,
                                 PersonalityStage, Archetype, Host,
                                 HardwareEntity, Interface, AddressAssignment)
@@ -43,10 +43,13 @@ class CommandDelStaticRoute(BrokerCommand):
                                                              network_environment)
         dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
 
-        if netmask:
-            dest = IPv4Network("%s/%s" % (ip, netmask))
-        else:
-            dest = IPv4Network("%s/%s" % (ip, prefixlen))
+        try:
+            if netmask:
+                dest = ip_network(u"%s/%s" % (ip, netmask))
+            else:
+                dest = ip_network(u"%s/%s" % (ip, prefixlen))
+        except ValueError as err:
+            raise ArgumentError(err)
 
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
@@ -60,7 +63,8 @@ class CommandDelStaticRoute(BrokerCommand):
             dbstage = None
 
         q = session.query(StaticRoute)
-        q = q.filter_by(network=dbnetwork, gateway_ip=gateway, dest_ip=dest.ip,
+        q = q.filter_by(network=dbnetwork, gateway_ip=gateway,
+                        dest_ip=dest.network_address,
                         dest_cidr=dest.prefixlen, personality_stage=dbstage)
 
         try:

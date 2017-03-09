@@ -184,7 +184,7 @@ class TestAddServiceAddress(TestBrokerCommand):
 
     def test_520_failbadnetenv(self):
         net = self.net["unknown0"]
-        subnet = net.subnet()[0]
+        subnet = list(net.subnets())[0]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--name", "badenv",

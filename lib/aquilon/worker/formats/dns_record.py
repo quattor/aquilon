@@ -16,7 +16,6 @@
 # limitations under the License.
 """DnsRecord formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import (DnsRecord, DynamicStub, ARecord, Alias,
                                 AddressAlias, ReservedName, SrvRecord)

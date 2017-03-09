@@ -38,7 +38,9 @@ if LIBDIR not in sys.path:
 
 import aquilon.aqdb.depends  # pylint: disable=W0611
 
-from ipaddr import IPv4Address, IPv4Network  # pylint: disable=W0611
+# pylint: disable=W0611
+from ipaddress import (IPv4Address, IPv4Network, IPv6Address, IPv6Network,
+                       ip_address, ip_network)
 from IPython.config.loader import Config as IPyConfig
 from IPython import embed
 

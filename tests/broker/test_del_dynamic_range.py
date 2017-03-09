@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 
 from brokertest import TestBrokerCommand
 

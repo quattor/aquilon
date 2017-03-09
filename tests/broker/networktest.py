@@ -19,19 +19,21 @@
 from functools import total_ordering
 import os
 from csv import DictReader
+
 import six.moves.cPickle as pickle  # pylint: disable=F0401
-from six import itervalues
-from ipaddr import (IPv4Network, IPv4Address, IPv6Network, IPv6Address,
-                    IPNetwork, IPAddress)
+from six import itervalues, text_type
+
+from ipaddress import (IPv4Network, IPv4Address, IPv6Network, IPv6Address,
+                       ip_network, ip_address)
 
 # Ranges for dynamic network allocation. The idea is to allocate a /N network
 # inside 10.N.0.0/16.
 SUBNET_RANGE = {
-    24: IPv4Network('10.24.0.0/16'),
-    25: IPv4Network('10.25.0.0/16'),
-    26: IPv4Network('10.26.0.0/16'),
-    27: IPv4Network('10.27.0.0/16'),
-    28: IPv4Network('10.28.0.0/16')}
+    24: IPv4Network(u'10.24.0.0/16'),
+    25: IPv4Network(u'10.25.0.0/16'),
+    26: IPv4Network(u'10.26.0.0/16'),
+    27: IPv4Network(u'10.27.0.0/16'),
+    28: IPv4Network(u'10.28.0.0/16')}
 
 
 @total_ordering
@@ -44,7 +46,7 @@ class DummyIP(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._ip = IPAddress(*args, **kwargs)
+        self._ip = ip_address(*args, **kwargs)
 
         if isinstance(self._ip, IPv4Address):
             octets = [int(i) for i in str(self._ip).split('.')]
@@ -108,7 +110,7 @@ class IPGenerator(object):
                 raise IndexError("Index too small")
         else:
             ip = DummyIP(self.network[index + self.offset])
-            if ip >= self.network.broadcast:
+            if ip >= self.network.broadcast_address:
                 raise IndexError("Index too big")
         return ip
 
@@ -127,7 +129,7 @@ class NetworkInfo(object):
         if isinstance(cidr, (IPv4Network, IPv6Network)):
             self._network = cidr
         else:
-            self._network = IPNetwork(cidr)
+            self._network = ip_network(text_type(cidr))
 
         self.name = name
         self.nettype = nettype
@@ -205,12 +207,17 @@ class NetworkInfo(object):
 
     @property
     def ip(self):
-        return DummyIP(self._network.ip)
+        return DummyIP(self._network.network_address)
 
     def subnet(self, new_prefix=None):
-        return [NetworkInfo(str(net.ip), net, self.nettype, self.loc_type,
-                            self.loc_name, self.side)
-                for net in self._network.subnet(new_prefix=new_prefix)]
+        return [NetworkInfo(str(net.network_address), net, self.nettype,
+                            self.loc_type, self.loc_name, self.side)
+                for net in self._network.subnets(new_prefix=new_prefix)]
+
+    def subnets(self, new_prefix=None):
+        for net in self._network.subnets(new_prefix=new_prefix):
+            yield NetworkInfo(str(net.network_address), net, self.nettype,
+                              self.loc_type, self.loc_name, self.side)
 
     @property
     def is_ipv4(self):
@@ -289,8 +296,8 @@ class DummyNetworks(object):
 
         range = SUBNET_RANGE[prefixlength]
         result = None
-        for net in range.iter_subnets(new_prefix=prefixlength):
-            statefile = os.path.join(self.statedir, "%s" % net.ip)
+        for net in range.subnets(new_prefix=prefixlength):
+            statefile = os.path.join(self.statedir, "%s" % net.network_address)
             if os.path.exists(statefile):
                 continue
 
@@ -302,7 +309,8 @@ class DummyNetworks(object):
             raise ValueError("Could not allocate network of size /%d" %
                              prefixlength)
 
-        command = ["add_network", "--network", name, "--ip", result.ip,
+        command = ["add_network", "--network", name,
+                   "--ip", result.network_address,
                    "--netmask", result.netmask,
                    "--" + loc_type, loc_name, "--type", network_type]
         if comments:
@@ -322,9 +330,9 @@ class DummyNetworks(object):
 
         net = self.networks[name]
 
-        command = ["del_network", "--ip", net.ip]
+        command = ["del_network", "--ip", net.network_address]
         testsuite.noouttest(command)
 
-        statefile = os.path.join(self.statedir, "%s" % net.ip)
+        statefile = os.path.join(self.statedir, "%s" % net.network_address)
         os.unlink(statefile)
         del self.networks[name]

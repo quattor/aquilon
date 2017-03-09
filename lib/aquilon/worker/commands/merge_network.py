@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddr import IPv4Network
+from ipaddress import IPv4Network
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import ArgumentError
@@ -35,7 +35,7 @@ class CommandMergeNetwork(BrokerCommand):
                ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
-            net = IPv4Network("127.0.0.0/%s" % netmask)
+            net = IPv4Network(u"127.0.0.0/%s" % netmask)
             prefixlen = net.prefixlen
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -49,23 +49,16 @@ class CommandMergeNetwork(BrokerCommand):
             raise ArgumentError("The specified --prefixlen must be smaller "
                                 "than the current value.")
 
-        # IPv4Network has a supernet() object, but that does not normalize the
-        # IP address, i.e. IPv4Network('1.2.3.0/24').supernet() will return
-        # IPv4Network('1.2.3.0/23'). Do the normalization manually.
-        try:
-            supernet = dbnetwork.network.supernet(new_prefix=prefixlen)
-        except ValueError as err:
-            raise ArgumentError("Failed to calculate the supernet: %s" % err)
-        supernet = IPv4Network("%s/%d" % (supernet.network, supernet.prefixlen))
+        supernet = dbnetwork.network.supernet(new_prefix=prefixlen)
 
         q = session.query(Network)
         q = q.filter_by(network_environment=dbnet_env)
-        q = q.filter(and_(Network.ip >= supernet.ip,
-                          Network.ip < supernet.broadcast))
+        q = q.filter(and_(Network.ip >= supernet.network_address,
+                          Network.ip < supernet.broadcast_address))
         q = q.order_by(Network.ip)
         dbnets = q.all()
 
-        if dbnets[0].ip == supernet.ip:
+        if dbnets[0].ip == supernet.network_address:
             dbsuper = dbnets.pop(0)
             plenaries.add(dbsuper)
             dbsuper.cidr = prefixlen

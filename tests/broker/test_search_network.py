@@ -133,7 +133,7 @@ class TestSearchNetwork(TestBrokerCommand):
     def testwithenv(self):
         # Same IP defined differently in different environments
         net = self.net["unknown0"]
-        subnet = net.subnet()[0]
+        subnet = list(net.subnets())[0]
         command = ["search", "network", "--ip", net.ip,
                    "--network_environment", "excx", "--fullinfo"]
         out = self.commandtest(command)

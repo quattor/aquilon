@@ -101,8 +101,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
                    "--ip", "192.168.95.150", "--prefixlen", "24"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "192.168.95.150 is not a network address; "
-                         "did you mean 192.168.95.0.",
+                         "192.168.95.150/24 has host bits set",
                          command)
 
     def test_200_show_host(self):
@@ -157,7 +156,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (eth0_net.broadcast, eth0_net.gateway, eth0_ip,
+                          (eth0_net.broadcast_address, eth0_net.gateway, eth0_ip,
                            eth0_net.netmask, eth0_net.gateway),
                           command)
         self.searchoutput(out,
@@ -176,7 +175,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.254.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (eth1_net.broadcast, eth1_net.gateway, eth1_ip,
+                          (eth1_net.broadcast_address, eth1_net.gateway, eth1_ip,
                            eth1_net.netmask, eth1_gw),
                           command)
 
@@ -204,7 +203,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (eth0_net.broadcast, eth0_net.gateway, eth0_ip,
+                          (eth0_net.broadcast_address, eth0_net.gateway, eth0_ip,
                            eth0_net.netmask, eth0_net.gateway),
                           command)
         self.searchoutput(out,
@@ -228,7 +227,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.254.0"\s*'
                           r'\)\s*\)\s*\)' %
-                          (eth1_net.broadcast, eth1_net.gateway, eth1_ip,
+                          (eth1_net.broadcast_address, eth1_net.gateway, eth1_ip,
                            eth1_net.netmask, eth1_gw, eth1_gw),
                           command)
 
@@ -259,7 +258,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (net.broadcast, net.gateway,
+                          (net.broadcast_address, net.gateway,
                            eth0_ip, net.netmask, net.gateway),
                           command)
 

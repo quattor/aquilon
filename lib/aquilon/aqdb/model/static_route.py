@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from datetime import datetime
-from ipaddr import IPv4Network
+from ipaddress import ip_network
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         Index)
@@ -69,7 +69,7 @@ class StaticRoute(Base):
     @property
     def destination(self):
         # TODO: cache the IPv4Network object
-        return IPv4Network("%s/%s" % (self.dest_ip, self.dest_cidr))
+        return ip_network(u"%s/%s" % (self.dest_ip, self.dest_cidr))
 
     def __init__(self, network=None, gateway_ip=None, **kwargs):
         if not network or not gateway_ip:  # pragma: no cover

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddr import IPv4Network
+from ipaddress import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
@@ -36,13 +36,9 @@ class CommandAddNetwork(BrokerCommand):
             netmask = prefixlen
 
         try:
-            address = IPv4Network("%s/%s" % (ip, netmask))
+            address = IPv4Network(u"%s/%s" % (ip, netmask))
         except ValueError as e:
-            raise ArgumentError("Failed to parse the network address: %s" % e)
-
-        if ip != address.network:
-            raise ArgumentError("IP address %s is not a network address.  "
-                                "Maybe you meant %s?" % (ip, address.network))
+            raise ArgumentError("Failed to parse the network address: %s." % e)
 
         location = get_location(session, **arguments)
         if not type:
@@ -72,11 +68,11 @@ class CommandAddNetwork(BrokerCommand):
 
         # Check if the address is free
         try:
-            dbnetwork = get_net_id_from_ip(session, address.ip,
+            dbnetwork = get_net_id_from_ip(session, address.network_address,
                                            network_environment=dbnet_env)
             raise ArgumentError("IP address %s is part of existing network "
                                 "named %s with address %s." %
-                                (str(address.ip), dbnetwork.name,
+                                (str(address.network_address), dbnetwork.name,
                                  str(dbnetwork.network)))
         except NotFoundException:
             pass

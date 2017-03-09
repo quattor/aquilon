@@ -48,7 +48,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def test_111_scope_add_network_maps(self):
-        ip = self.net["netsvcmap"].subnet()[0].ip
+        ip = list(self.net["netsvcmap"].subnets())[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--justification", "tcm=12345678",
@@ -58,7 +58,7 @@ class TestMake(TestBrokerCommand):
                         "--service", "afs", "--instance", "afs-by-net2"])
 
     def test_112_scope_verify_maps(self):
-        ip = self.net["netsvcmap"].subnet()[0].ip
+        ip = list(self.net["netsvcmap"].subnets())[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip]
@@ -68,7 +68,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def test_112_scope_verify_maps_proto(self):
-        ip = self.net["netsvcmap"].subnet()[0].ip
+        ip = list(self.net["netsvcmap"].subnets())[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip, "--format=proto"]
@@ -220,7 +220,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def test_124_network_precedence(self):
-        ip = self.net["netperssvcmap"].subnet()[0].ip
+        ip = list(self.net["netperssvcmap"].subnets())[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "scope_test", "--instance", "scope-network",
@@ -228,7 +228,7 @@ class TestMake(TestBrokerCommand):
                         "--archetype", "aquilon"])
 
     def test_125_verify_network_map(self):
-        ip = self.net["netperssvcmap"].subnet()[0].ip
+        ip = list(self.net["netperssvcmap"].subnets())[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
                    "--networkip=%s" % ip, "--personality", "utpers-dev",
@@ -241,7 +241,7 @@ class TestMake(TestBrokerCommand):
                          command)
 
     def test_125_verify_network_map_proto(self):
-        ip = self.net["netperssvcmap"].subnet()[0].ip
+        ip = list(self.net["netperssvcmap"].subnets())[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
                    "--networkip=%s" % ip, "--personality", "utpers-dev",
@@ -319,12 +319,12 @@ class TestMake(TestBrokerCommand):
 
     def test_151_verify_unittest20(self):
         eth0_ip = self.net["zebra_eth0"].usable[0]
-        eth0_broadcast = self.net["zebra_eth0"].broadcast
+        eth0_broadcast = self.net["zebra_eth0"].broadcast_address
         eth0_netmask = self.net["zebra_eth0"].netmask
         eth0_gateway = self.net["zebra_eth0"].gateway
 
         eth1_ip = self.net["zebra_eth1"].usable[0]
-        eth1_broadcast = self.net["zebra_eth1"].broadcast
+        eth1_broadcast = self.net["zebra_eth1"].broadcast_address
         eth1_netmask = self.net["zebra_eth1"].netmask
         eth1_gateway = self.net["zebra_eth1"].gateway
         eth1_1_ip = self.net["zebra_eth1"].usable[3]
@@ -476,7 +476,7 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "vpls"\s*\);' %
-                          (net.broadcast, router, ip, net.netmask),
+                          (net.broadcast_address, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
                          router, command)
@@ -508,7 +508,7 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "vpls"\s*\);' %
-                          (net.broadcast, router, ip, net.netmask),
+                          (net.broadcast_address, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
                          router, command)
@@ -540,7 +540,7 @@ class TestMake(TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "utcolo",\s*'
                           r'"network_type", "unknown"\s*\);' %
-                          (net.broadcast, router, ip, net.netmask),
+                          (net.broadcast_address, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
                          self.net["unknown0"].gateway, command)

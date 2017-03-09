@@ -19,7 +19,9 @@
 from binascii import hexlify
 import struct
 
-from ipaddr import IPv4Address, IPv6Address, IPAddress
+from six import text_type
+
+from ipaddress import IPv4Address, IPv6Address, ip_address
 
 from sqlalchemy.types import TypeDecorator, TypeEngine, BINARY
 from sqlalchemy.dialects.postgresql import INET
@@ -69,7 +71,7 @@ class IP(TypeDecorator):
             return None
         if isinstance(value, (IPv4Address, IPv6Address)):
             if dialect.name == 'postgresql':
-                return str(value)  # pragma: no cover
+                return text_type(value)  # pragma: no cover
             else:
                 if isinstance(value, IPv6Address):
                     return value.packed
@@ -83,7 +85,7 @@ class IP(TypeDecorator):
             return None
 
         if dialect.name == 'postgresql':
-            return IPAddress(value)
+            return ip_address(value)
         else:
             # We could unpack the value unconditionally as IPv6 and use the
             # .ipv4_mapped property for IPv4, but that would add some extra

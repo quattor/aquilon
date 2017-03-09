@@ -39,7 +39,7 @@ class TestDelRouterAddress(TestBrokerCommand):
         self.noouttest(command)
 
     def test_120_del_excx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["del", "router", "address", "--ip", net[-2],
                    "--network_environment", "excx"]
         self.noouttest(command)

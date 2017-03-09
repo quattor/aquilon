@@ -18,7 +18,9 @@
 
 import heapq
 
-from ipaddr import IPv4Address, IPv4Network
+from ipaddress import IPv4Address, IPv4Network
+
+from six import text_type
 
 from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
@@ -58,7 +60,7 @@ class QIPInfo(object):
     def __lt__(self, other):
         # The refresh algorithm depends on QIPInfo objects being ordered by the
         # network IP address
-        return self.address.ip < other.address.ip
+        return self.address.network_address < other.address.network_address
 
 
 class QIPRefresh(object):
@@ -169,13 +171,13 @@ class QIPRefresh(object):
             name = qipinfo["SubnetAddress"]
 
         # Parse the network address/netmask
-        address = IPv4Network("%s/%s" % (qipinfo["SubnetAddress"],
-                                         qipinfo["SubnetMask"]))
+        address = IPv4Network(u"%s/%s" % (qipinfo["SubnetAddress"],
+                                          qipinfo["SubnetMask"]))
 
         # Parse the list of routers
         if "DefaultRouters" in qipinfo:
             for addr in qipinfo["DefaultRouters"].split(","):
-                routers.append(IPv4Address(addr))
+                routers.append(IPv4Address(text_type(addr)))
 
         # Extract MS-specific information from the UDF field
         if "UDF" in qipinfo:
@@ -369,7 +371,7 @@ class QIPRefresh(object):
                     continue
                 if self.building and qipinfo.location.building != self.building:
                     continue
-                qipnetworks[qipinfo.address.ip] = qipinfo
+                qipnetworks[qipinfo.address.network_address] = qipinfo
             except ValueError as err:
                 self.error("%s; skipping line %d: %s" % (err, linecnt, line))
 
@@ -406,20 +408,20 @@ class QIPRefresh(object):
 
             # We have 3 cases regarding aqnet/qipinfo:
             # - One contains the other: this is a split or a merge
-            # - aqnet.network_address < qipinfo.address.ip (or there is no
-            #   qipinfo): the network was deleted from QIP
-            # - qipinfo.address.ip < aqnet.network_address (or there is no
-            #   aqnet): a new network was added to QIP
+            # - aqnet.network_address < qipinfo.address.network_address (or
+            #   there is no qipinfo): the network was deleted from QIP
+            # - qipinfo.address.network_address < aqnet.network_address (or
+            #   there is no aqnet): a new network was added to QIP
             if aqnet and qipinfo and (aqnet.network_address in qipinfo.address or
-                                      qipinfo.address.ip in aqnet.network):
+                                      qipinfo.address.network_address in aqnet.network):
                 # This is a split or a merge. The trick here is to perform
                 # multiple network additions/deletions inside the same
                 # transaction even in incremental mode, to maintain relational
                 # integrity
 
-                startip = min(aqnet.network_address, qipinfo.address.ip)
+                startip = min(aqnet.network_address, qipinfo.address.network_address)
                 prefixlen = min(aqnet.cidr, qipinfo.address.prefixlen)
-                supernet = IPv4Network("%s/%s" % (startip, prefixlen))
+                supernet = IPv4Network(u"%s/%s" % (startip, prefixlen))
                 # We may modify aqnet.network below, so save the original value
                 orig_net = aqnet.network
 
@@ -428,7 +430,7 @@ class QIPRefresh(object):
                 # the IP address and the non-null foreign key constraints in
                 # other tables. So we need a flag to remember if we want to keep
                 # the original object or not
-                if aqnet.network_address == qipinfo.address.ip:
+                if aqnet.network_address == qipinfo.address.network_address:
                     self.logger.client_info("Setting network {0!s} prefix "
                                             "length to {1}"
                                             .format(aqnet,
@@ -454,7 +456,7 @@ class QIPRefresh(object):
                     else:
                         # The first subnet was deleted
                         pass
-                    while qipinfo and qipinfo.address.ip in orig_net:
+                    while qipinfo and qipinfo.address.network_address in orig_net:
                         newnet = self.add_network(qipinfo)
                         # Redirect addresses from the split network to the new
                         # subnet
@@ -484,7 +486,8 @@ class QIPRefresh(object):
                         self.del_network(aqnet)
                         aqnet = heap_pop(aqnets)
                     qipinfo = heap_pop(qipnets)
-            elif aqnet and (not qipinfo or aqnet.network_address < qipinfo.address.ip):
+            elif aqnet and (not qipinfo or aqnet.network_address <
+                            qipinfo.address.network_address):
                 # Network is deleted
                 self.del_network(aqnet)
                 aqnet = heap_pop(aqnets)
