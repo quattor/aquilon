@@ -32,6 +32,7 @@ from threading import Thread, Lock
 
 from six import iteritems
 
+from ipaddress import IPv4Address
 from mako.lookup import TemplateLookup
 from twisted.python import context
 from twisted.python.log import callWithContext, ILogContext
@@ -545,6 +546,9 @@ class DSDBRunner(object):
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                          comments=None, **_):
+        if not isinstance(ip, IPv4Address):
+            return
+
         command = ["add_host", "-host_name", fqdn,
                    "-ip_address", ip, "-status", "aq"]
         if iface:
@@ -569,7 +573,7 @@ class DSDBRunner(object):
 
         rollback = command[:]
 
-        if new_ip and new_ip != old_ip:
+        if new_ip and new_ip != old_ip and isinstance(new_ip, IPv4Address):
             command.extend(["-ip_address", new_ip])
             rollback.extend(["-ip_address", old_ip])
         if new_mac and new_mac != old_mac:
@@ -601,6 +605,8 @@ class DSDBRunner(object):
 
     def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                             comments=None, **_):
+        if not isinstance(ip, IPv4Address):
+            return
         command = ["delete_host", "-ip_address", ip]
         rollback = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
@@ -652,6 +658,8 @@ class DSDBRunner(object):
             if not addr.fqdns:
                 continue
             if addr.is_shared:
+                continue
+            if not isinstance(addr.ip, IPv4Address):
                 continue
 
             # In AQDB there may be multiple domain names associated with

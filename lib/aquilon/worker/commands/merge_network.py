@@ -16,6 +16,7 @@
 # limitations under the License.
 
 from ipaddress import IPv4Network
+
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import ArgumentError

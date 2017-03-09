@@ -19,6 +19,8 @@
 from collections import defaultdict
 from operator import attrgetter
 
+from ipaddress import IPv4Network
+
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm import object_session, subqueryload
 
@@ -93,12 +95,14 @@ def possible_mac_addresses(interface):
 class NetworkFormatter(ObjectFormatter):
     def format_raw(self, network, indent="", embedded=True,
                    indirect_attrs=True):
-        netmask = network.netmask
         sysloc = network.location.sysloc()
         details = [indent + "{0:c}: {0.name}".format(network)]
         details.append(indent + "  {0:c}: {0.name}".format(network.network_environment))
         details.append(indent + "  IP: %s" % network.network_address)
-        details.append(indent + "  Netmask: %s" % netmask)
+        if isinstance(network.network, IPv4Network):
+            details.append(indent + "  Netmask: %s" % network.netmask)
+        else:
+            details.append(indent + "  Prefix: %d" % network.cidr)
         details.append(indent + "  Sysloc: %s" % sysloc)
         details.append(self.redirect_raw(network.location, indent + "  "))
         details.append(indent + "  Side: %s" % network.side)
@@ -149,7 +153,8 @@ class NetworkFormatter(ObjectFormatter):
         skeleton.ip = str(net.network_address)
         skeleton.cidr = net.cidr
         skeleton.bcast = str(net.broadcast_address)
-        skeleton.netmask = str(net.netmask)
+        if isinstance(net.network, IPv4Network):
+            skeleton.netmask = str(net.netmask)
         if net.side:
             skeleton.side = net.side
 
@@ -334,7 +339,11 @@ class NetworkList(list):
 
 class NetworkListFormatter(ListFormatter):
     def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
-        return "\n".join(indent + "%s/%s" % (network.network_address, network.cidr)
-                         for network in sorted(objects, key=attrgetter("ip")))
+        def sortkey(network):
+            return (1 if isinstance(network.network, IPv4Network) else 2,
+                    int(network.network_address))
+
+        return "\n".join(indent + str(network.network)
+                         for network in sorted(objects, key=sortkey))
 
 ObjectFormatter.handlers[NetworkList] = NetworkListFormatter()

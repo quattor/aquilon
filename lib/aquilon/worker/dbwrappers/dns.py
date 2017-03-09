@@ -354,6 +354,9 @@ def update_address(session, dbdns_rec, ip, dbnetwork):
                             "changed: {1!s}."
                             .format(dbdns_rec, ifaces))
 
+    if type(dbdns_rec.ip) is not type(ip):
+        raise ArgumentError("Changing the IP address type is not allowed.")
+
     q = session.query(ARecord)
     q = q.filter_by(network=dbnetwork, ip=ip)
     q = q.join(ARecord.fqdn)
@@ -393,7 +396,7 @@ def create_target_if_needed(session, logger, target, dbdns_env):
                         dns_environment=dbdns_env)
 
         try:
-            socket.gethostbyname(dbtarget.fqdn)
+            socket.getaddrinfo(dbtarget.fqdn, None)
         except socket.gaierror as e:
             logger.warning("WARNING: Will create a reference to {0.fqdn!s}, "
                            "but trying to resolve it resulted in an error: "

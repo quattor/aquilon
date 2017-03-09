@@ -38,6 +38,15 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_address", "--fqdn=arecord13.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def testbasicipv6(self):
+        command = ["del_address", "--ip=%s" % self.net["ipv6_test"].usable[1]]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
+    def testverifybasicipv6(self):
+        command = ["show_address", "--fqdn=ipv6test.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
     def testdefaultenv(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[14])
         default = self.config.get("site", "default_dns_environment")

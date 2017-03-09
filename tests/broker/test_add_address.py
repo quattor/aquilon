@@ -23,6 +23,8 @@ if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
+from ipaddress import IPv6Address
+
 from broker.brokertest import TestBrokerCommand
 
 
@@ -36,7 +38,7 @@ class TestAddAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def test_150_verifybasic(self):
+    def test_105_verifybasic(self):
         net = self.net["unknown0"]
         command = ["show_address", "--fqdn=arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -47,6 +49,19 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchclean(out, "Reverse", command)
         self.matchclean(out, "TTL", command)
+
+    def test_110_basic_ipv6(self):
+        command = ["add_address", "--ip", self.net["ipv6_test"].usable[1],
+                   "--fqdn", "ipv6test.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
+    def test_115_verify_basic_ipv6(self):
+        net = self.net["ipv6_test"]
+        command = ["show_address", "--fqdn=ipv6test.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "IP: %s" % net.usable[1], command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
@@ -161,13 +176,37 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "IP address %s is the address of network " % ip,
                          command)
 
-    def test_430_failbroadcast(self):
+    def test_420_failnetaddressv6(self):
+        ip = self.net["ipv6_test"].network_address
+        command = ["add_address", "--fqdn", "netaddress6.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is the address of network " % ip,
+                         command)
+
+    def test_425_failbroadcast(self):
         ip = self.net["unknown0"].broadcast_address
         command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
                    "--ip", ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is the broadcast address of "
                          "network " % ip, command)
+
+    def test_425_failbroadcastv6(self):
+        ip = self.net["ipv6_test"].broadcast_address
+        command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
+                   "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IP address %s is the broadcast address of "
+                         "network " % ip, command)
+
+    def test_426_failv6mapped(self):
+        ipv4 = self.net["unknown0"].ip
+        ipv6 = IPv6Address(u"::ffff:%s" % ipv4)
+        command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
+                   "--ip", ipv6]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IPv6-mapped IPv4 addresses are not supported.", command)
 
     def test_440_failbadenv(self):
         ip = self.net["unknown0"].usable[16]

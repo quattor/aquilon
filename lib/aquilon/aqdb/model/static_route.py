@@ -68,7 +68,7 @@ class StaticRoute(Base):
 
     @property
     def destination(self):
-        # TODO: cache the IPv4Network object
+        # TODO: cache the network object
         return ip_network(u"%s/%s" % (self.dest_ip, self.dest_cidr))
 
     def __init__(self, network=None, gateway_ip=None, **kwargs):

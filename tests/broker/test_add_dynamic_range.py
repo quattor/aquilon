@@ -281,6 +281,13 @@ class TestAddDynamicRange(TestBrokerCommand):
                          "building cards.  Please specify --dns_domain.",
                          command)
 
+    def test_200_fail_ipv6(self):
+        command = ["add_dynamic_range", "--fillnetwork",
+                   self.net["ipv6_test"].network_address]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "Registering dynamic DHCP ranges is not "
+                         "supported on IPv6 networks.", command)
+
     def test_800_cleanup(self):
         self.net.dispose_network(self, 'dyndhcp4')
 

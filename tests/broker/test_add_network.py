@@ -173,7 +173,10 @@ class TestAddNetwork(TestBrokerCommand):
             self.matchoutput(out, "Network: %s" % network.name, command)
             self.matchoutput(out, "Network Environment: internal", command)
             self.matchoutput(out, "IP: %s" % network.ip, command)
-            self.matchoutput(out, "Netmask: %s" % network.netmask, command)
+            if network.is_ipv4:
+                self.matchoutput(out, "Netmask: %s" % network.netmask, command)
+            else:
+                self.matchoutput(out, "Prefix: %s" % network.prefixlen, command)
             self.matchoutput(out,
                              "%s: %s" % (network.loc_type.title(),
                                          network.loc_name),

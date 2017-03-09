@@ -16,6 +16,10 @@
 # limitations under the License.
 """DnsRecord formatter."""
 
+import struct
+
+from ipaddress import IPv4Address
+
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import (DnsRecord, DynamicStub, ARecord, Alias,
                                 AddressAlias, ReservedName, SrvRecord)
@@ -32,8 +36,13 @@ class ARecordFormatter(ObjectFormatter):
     template_raw = "a_record.mako"
 
     def csv_fields(self, dns_record):
+        if isinstance(dns_record.ip, IPv4Address):
+            rrtype = "A"
+        else:
+            rrtype = "AAAA"
+
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
-               'A', dns_record.ip)
+               rrtype, dns_record.ip, dns_record.reverse_ptr)
 
 
 class AliasFormatter(ObjectFormatter):
@@ -57,8 +66,13 @@ class AddressAliasFormatter(ObjectFormatter):
     template_raw = "address_alias.mako"
 
     def csv_fields(self, dns_record):
+        if isinstance(dns_record.target_ip, IPv4Address):
+            rrtype = "A"
+        else:
+            rrtype = "AAAA"
+
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
-               'A', dns_record.target_ip)
+               rrtype, dns_record.target_ip)
 
 # The DnsRecord entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()
@@ -79,6 +93,15 @@ def inaddr_ptr(ip):
     return "%s.in-addr.arpa" % '.'.join(octets)
 
 
+def in6addr_ptr(ip):
+    octets = list(struct.unpack("B" * 16, ip.packed))
+    octets.reverse()
+    # This may not look intuitive, but this was the fastest variant I could come
+    # up with - improvements are welcome :-)
+    return "".join(format((octet & 0xf) << 4 | (octet >> 4), "02x")
+                   for octet in octets).replace("", ".")[1:-1] + ".ip6.arpa"
+
+
 def octal16(value):
     return "\\%03o\\%03o" % (value >> 8, value & 0xff)
 
@@ -89,6 +112,11 @@ def str8(text):
 
 def nstr(text):
     return "".join(str8(p) for p in (text + ".").split('.'))
+
+
+def ip6(ip):
+    octets = struct.unpack("B" * 16, ip.packed)
+    return "\\" + "\\".join(format(octet, "03o") for octet in octets)
 
 
 class DnsDump(list):
@@ -115,16 +143,19 @@ class DnsDumpFormatter(ObjectFormatter):
                 ttl = ''
 
             if isinstance(record, ARecord):
-                if record.reverse_ptr:
-                    reverse = record.reverse_ptr
-                else:
-                    reverse = record.fqdn
+                reverse = record.reverse_ptr or record.fqdn
 
                 # Mind the dot!
-                result.append("%s.%s\tIN\tA\t%s" % (record.fqdn, ttl, record.ip))
-                result.append("%s.%s\tIN\tPTR\t%s." % (inaddr_ptr(record.ip),
-                                                       ttl,
-                                                       reverse))
+                if isinstance(record.ip, IPv4Address):
+                    result.append("%s.%s\tIN\tA\t%s" %
+                                  (record.fqdn, ttl, record.ip))
+                    result.append("%s.%s\tIN\tPTR\t%s." %
+                                  (inaddr_ptr(record.ip), ttl, reverse))
+                else:
+                    result.append("%s.%s\tIN\tAAAA\t%s" %
+                                  (record.fqdn, ttl, record.ip))
+                    result.append("%s.%s\tIN\tPTR\t%s." %
+                                  (in6addr_ptr(record.ip), ttl, reverse))
             elif isinstance(record, ReservedName):
                 pass
             elif isinstance(record, Alias):
@@ -139,8 +170,12 @@ class DnsDumpFormatter(ObjectFormatter):
                                                                 record.port,
                                                                 record.target.fqdn))
             elif isinstance(record, AddressAlias):
-                result.append("%s.%s\tIN\tA\t%s" % (record.fqdn, ttl,
-                                                    record.target_ip))
+                if isinstance(record.target_ip, IPv4Address):
+                    result.append("%s.%s\tIN\tA\t%s" % (record.fqdn, ttl,
+                                                        record.target_ip))
+                else:
+                    result.append("%s.%s\tIN\tAAAA\t%s" % (record.fqdn, ttl,
+                                                           record.target_ip))
 
         return "\n".join(result)
 
@@ -153,18 +188,27 @@ class DnsDumpFormatter(ObjectFormatter):
                 ttl = ''
 
             if isinstance(record, ARecord):
-                if record.reverse_ptr:
-                    result.append("+%s:%s%s" % (record.fqdn, record.ip, ttl))
-                    result.append("^%s:%s%s" % (inaddr_ptr(record.ip),
-                                                record.reverse_ptr, ttl))
+                if isinstance(record.ip, IPv4Address):
+                    if record.reverse_ptr:
+                        result.append("+%s:%s%s" % (record.fqdn, record.ip, ttl))
+                        result.append("^%s:%s%s" % (inaddr_ptr(record.ip),
+                                                    record.reverse_ptr, ttl))
+                    else:
+                        result.append("=%s:%s%s" % (record.fqdn, record.ip, ttl))
                 else:
-                    result.append("=%s:%s%s" % (record.fqdn, record.ip, ttl))
+                    result.append(":%s:28:%s%s" % (record.fqdn, ip6(record.ip), ttl))
+                    ptr = record.reverse_ptr or record.fqdn
+                    result.append("^%s:%s%s" % (in6addr_ptr(record.ip), ptr, ttl))
             elif isinstance(record, ReservedName):
                 pass
             elif isinstance(record, Alias):
                 result.append("C%s:%s%s" % (record.fqdn, record.target.fqdn, ttl))
             elif isinstance(record, AddressAlias):
-                result.append("+%s:%s%s" % (record.fqdn, record.target_ip, ttl))
+                if isinstance(record.target_ip, IPv4Address):
+                    result.append("+%s:%s%s" % (record.fqdn, record.target_ip, ttl))
+                else:
+                    result.append(":%s:28:%s%s" % (record.fqdn,
+                                                   ip6(record.target_ip), ttl))
             elif isinstance(record, SrvRecord):
                 # djbdns does not have native support for SRV records
                 result.append(":%s:33:%s%s%s%s%s" % (record.fqdn,
