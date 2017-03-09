@@ -81,7 +81,8 @@ class CommandUpdateServiceAddress(BrokerCommand):
             plenaries.stash()
             try:
                 plenaries.write(locked=True)
-                if dbsrv.ip != old_ip or dbsrv.comments != old_comments:
+                if ((dbsrv.ip != old_ip or dbsrv.comments != old_comments) and
+                        dbsrv.dns_record.network.is_internal):
                     dsdb_runner.update_host_details(dbsrv.dns_record.fqdn,
                                                     new_ip=dbsrv.ip,
                                                     old_ip=old_ip,

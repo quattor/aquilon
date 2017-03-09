@@ -640,7 +640,7 @@ class DSDBRunner(object):
         # create an entry in DSDB.  The following loop makes a snapshot of
         # expected state of the information in DSDB.
         for addr in dbhw_ent.all_addresses():
-            # Do not propergate to DSDB if the network is not internal,
+            # Do not propagate to DSDB if the network is not internal,
             # there are no FQDN's associated with this address, or
             # the address is shared with other devices.
             if not addr.network.is_internal:
@@ -652,7 +652,7 @@ class DSDBRunner(object):
 
             # In AQDB there may be multiple domain names associated with
             # an address, in DSDB there can only be one.  Thus we pick
-            # the first address to propergate.
+            # the first address to propagate.
             dns_record = addr.dns_records[0]
 
             # By default we take the comments from the hardware_entity,

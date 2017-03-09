@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 
 class TestDelInterfaceAddress(TestBrokerCommand):
 
-    def testdelkeepdns(self):
+    def test_100_delkeepdns(self):
         ip = self.net["zebra_eth1"].usable[0]
         self.dsdb_expect_delete(ip)
         self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", ip)
@@ -37,7 +37,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testrejectunknownip(self):
+    def test_110_rejectunknownip(self):
         ip = self.net["unknown0"].usable[10]
         command = ["del", "interface", "address", "--machine", "ut3c1n3",
                    "--interface", "eth1", "--ip", ip]
@@ -47,7 +47,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          "does not have IP address %s assigned to it." % ip,
                          command)
 
-    def testrejectprimaryip(self):
+    def test_120_rejectprimaryip(self):
         ip = self.net["unknown0"].usable[2]
         command = ["del", "interface", "address", "--machine", "ut3c1n3",
                    "--interface", "eth0", "--ip", ip]
@@ -57,19 +57,19 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          "cannot be removed.",
                          command)
 
-    def testbadmachine(self):
+    def test_130_badmachine(self):
         command = ["del", "interface", "address", "--machine", "no-such-machine",
                    "--interface", "eth0", "--ip", "192.168.0.1"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Machine no-such-machine not found.", command)
 
-    def testverifykeepdns(self):
+    def test_140_verifykeepdns(self):
         command = ["search", "dns",
                    "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
 
-    def testdelbylabel(self):
+    def test_150_delbylabel(self):
         ip = self.net["zebra_eth1"].usable[3]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
@@ -77,7 +77,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelbylabelagain(self):
+    def test_160_delbylabelagain(self):
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1"]
         out = self.badrequesttest(command)
@@ -86,7 +86,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                          "does not have an address with label e1.",
                          command)
 
-    def testdelunittest20e0(self):
+    def test_170_delunittest20e0(self):
         ip = self.net["zebra_eth0"].usable[0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
@@ -94,7 +94,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyunittest20(self):
+    def test_180_verifyunittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
@@ -105,7 +105,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.matchclean(out, "zebra2", command)
         self.matchclean(out, "zebra3", command)
 
-    def testdelut3c5n16eth0(self):
+    def test_190_delut3c5n16eth0(self):
         ip = self.net["zebra_eth0"].usable[16]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n16",
@@ -113,7 +113,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelut3c5n16eth1(self):
+    def test_200_delut3c5n16eth1(self):
         ip = self.net["zebra_eth1"].usable[16]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n16",
@@ -121,7 +121,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelunittest25utcolo(self):
+    def test_210_delunittest25utcolo(self):
         net = self.net["unknown1"]
         ip = net[4]
         command = ["del", "interface", "address",
@@ -141,7 +141,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         # External addresses should not affect DSDB
         self.dsdb_verify(empty=True)
 
-    def testdelunittest26(self):
+    def test_220_delunittest26(self):
         ip = self.net["routing1"].usable[0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
@@ -150,7 +150,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelut3gd1r04vlan220(self):
+    def test_230_delut3gd1r04vlan220(self):
         ip = self.net["tor_net_12"].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
@@ -161,7 +161,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     clean=str(ip))
 
-    def testdelut3gd1r04vlan220hsrp(self):
+    def test_240_delut3gd1r04vlan220hsrp(self):
         ip = self.net["tor_net_12"].usable[2]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
@@ -172,7 +172,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     clean=str(ip))
 
-    def testdelut3gd1r04loop0(self):
+    def test_250_delut3gd1r04loop0(self):
         ip = self.net["autopg1"][0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
@@ -183,13 +183,21 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     clean=str(ip))
 
-    def testdelauroraextraip(self):
+    def test_260_delauroraextraip(self):
         ip = self.net["tor_net_0"].usable[6]
         command = ["del_interface_address", "--interface", "eth0", "--ip", ip,
                    "--machine", "test-aurora-default-os.ms.com"]
         out = self.statustest(command)
         self.matchoutput(out, "WARNING: removing IP %s from AQDB and *not* "
                          "changing DSDB." % ip, command)
+        self.dsdb_verify(empty=True)
+
+    def test_270_delunittest20eth2(self):
+        command = ["del_interface_address", "--machine", "ut3c5n2",
+                   "--interface", "eth2", "--network_environment", "excx",
+                   "--ip", "192.168.5.24"]
+        self.statustest(command)
+        # External IP addresses should not be removed from DSDB
         self.dsdb_verify(empty=True)
 
 if __name__ == '__main__':

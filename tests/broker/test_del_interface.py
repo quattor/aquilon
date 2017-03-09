@@ -32,48 +32,48 @@ class TestDelInterface(EventsTestMixin, TestBrokerCommand):
     # Not testing del interface for ut3c5n10... testing that those
     # interfaces are removed automatically when the machine is removed.
 
-    def testdelut3c1n3eth0(self):
+    def test_100_delut3c1n3eth0(self):
         self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3"])
         self.events_verify()
 
-    def testdelut3c1n3eth1(self):
+    def test_110_delut3c1n3eth1(self):
         self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "interface",
                         "--mac", self.net["unknown0"].usable[3].mac.upper()])
         self.events_verify()
 
-    def testnotamachine(self):
+    def test_120_notamachine(self):
         command = ["del", "interface", "--interface", "xge49",
                    "--machine", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a machine", command)
 
-    def testnotaswitch(self):
+    def test_130_notaswitch(self):
         command = ["del", "interface", "--interface", "oa",
                    "--network_device", "ut3c5"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a switch", command)
 
-    def testnotachassis(self):
+    def test_140_notachassis(self):
         command = ["del", "interface", "--interface", "eth0",
                    "--chassis", "ut3c5n10"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a chassis", command)
 
-    def testverifydelut3c1n3interfaces(self):
+    def test_150_verifydelut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Interface: eth", command)
 
-    def testverifycatut3c1n3interfaces(self):
+    def test_160_verifycatut3c1n3interfaces(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "eth0", command)
         self.matchclean(out, "eth1", command)
 
-    def testdelut3gd1r04vlan220(self):
+    def test_170_delut3gd1r04vlan220(self):
         command = ["del", "interface", "--interface", "vlan220",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
@@ -82,11 +82,10 @@ class TestDelInterface(EventsTestMixin, TestBrokerCommand):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     clean='vlan220')
 
-    def testverifydelut3gd1r04vlan220(self):
+    def test_180_verifydelut3gd1r04vlan220(self):
         command = ["show", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "vlan220", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelInterface)

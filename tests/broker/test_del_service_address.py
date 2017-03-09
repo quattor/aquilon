@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 
 class TestDelServiceAddress(TestBrokerCommand):
 
-    def testdelzebra2(self):
+    def test_100_delzebra2(self):
         ip = self.net["zebra_vip"].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "service", "address", "--name", "zebra2",
@@ -36,7 +36,7 @@ class TestDelServiceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testdelzebra2again(self):
+    def test_110_delzebra2again(self):
         command = ["del", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
@@ -46,20 +46,20 @@ class TestDelServiceAddress(TestBrokerCommand):
                          command)
         self.dsdb_verify(empty=True)
 
-    def testverifyzebra2(self):
+    def test_120_verifyzebra2(self):
         command = ["show", "address", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "DNS Record zebra2.aqd-unittest.ms.com not "
                          "found.", command)
 
-    def testdelzebra3(self):
+    def test_130_delzebra3(self):
         command = ["del", "service", "address", "--keep_dns",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--name", "zebra3"]
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
-    def testverifyzebra3(self):
+    def test_140_verifyzebra3(self):
         ip = self.net["zebra_vip"].usable[0]
         command = ["show", "address", "--fqdn", "zebra3.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -69,7 +69,7 @@ class TestDelServiceAddress(TestBrokerCommand):
         self.matchclean(out, "ut3c5n2", command)
         self.matchclean(out, "eth0", command)
 
-    def testdelzebra3again(self):
+    def test_150_delzebra3again(self):
         command = ["del", "service", "address", "--name", "zebra3",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
@@ -79,12 +79,19 @@ class TestDelServiceAddress(TestBrokerCommand):
                          command)
         self.dsdb_verify(empty=True)
 
-    def testfailhostname(self):
+    def test_160_failhostname(self):
         command = ["del", "service", "address", "--name", "hostname",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The primary address of the host cannot be "
                          "deleted.", command)
+
+    def test_170_del_extserviceaddress(self):
+        # check that removing an external service address does not invoke DSDB
+        command = ["del_service_address", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--name", "et-unittest20"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
 
 
 if __name__ == '__main__':

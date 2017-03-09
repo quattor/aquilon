@@ -149,10 +149,10 @@ class TestUpdateServiceAddress(TestBrokerCommand):
     def test_200_bad_interface(self):
         command = ["update_service_address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
-                   "--name", "hostname", "--interfaces", "eth2"]
+                   "--name", "hostname", "--interfaces", "eth3"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine unittest20.aqd-unittest.ms.com does not "
-                         "have an interface named eth2.", command)
+                         "have an interface named eth3.", command)
 
     def test_200_no_interface(self):
         command = ["update_service_address",
@@ -160,6 +160,17 @@ class TestUpdateServiceAddress(TestBrokerCommand):
                    "--name", "hostname", "--interfaces", " ,"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The interface list cannot be empty.", command)
+
+
+    def test_300_update_ext_service_address(self):
+        # check that updating external service addresses do not invoke DSDB
+        command = ["update_service_address", "--ip", "192.168.5.26",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--interfaces", "eth2", "--name", "et-unittest20",
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateServiceAddress)
