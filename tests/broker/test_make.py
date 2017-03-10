@@ -486,13 +486,13 @@ class TestMake(TestBrokerCommand):
                           command)
 
     def test_156_make_unittest24(self):
-        command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
+        command = ["make", "--hostname", "unittest24.one-nyp.ms.com"]
         err = self.statustest(command)
         self.matchoutput(err, "2/2 compiled", command)
 
     def test_157_verify_unittest24(self):
         # Verify that the host chooses the closest router
-        command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com",
+        command = ["cat", "--hostname", "unittest24.one-nyp.ms.com",
                    "--data"]
         out = self.commandtest(command)
         net = self.net["vpls"]
@@ -502,7 +502,7 @@ class TestMake(TestBrokerCommand):
                           r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
-                          r'"fqdn", "unittest24.aqd-unittest.ms.com",\s*'
+                          r'"fqdn", "unittest24.one-nyp.ms.com",\s*'
                           r'"gateway", "%s",\s*'
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'

@@ -676,7 +676,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          personality="utpers-dev", personality_stage="next",
                          comments="For net/pers based service mappings")
 
-    def test_430_add_utinfra(self):
+    def test_430_add_utinfra1(self):
         eth0_ip = self.net["unknown0"].usable[33]
         eth1_ip = self.net["unknown1"].usable[34]
         ip = self.net["zebra_vip"].usable[3]
@@ -690,7 +690,22 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
                          zebra=True, personality="utpers-prod")
 
-    def test_435_add_npinfra(self):
+    def test_431_add_utinfra2(self):
+        eth0_ip = self.net["unknown0"].usable[38]
+        eth1_ip = self.net["unknown1"].usable[37]
+        ip = self.net["zebra_vip"].usable[7]
+        self.create_host("infra2.aqd-unittest.ms.com", ip, "ut3c5n14",
+                         model="utrackmount", chassis="ut3c5", slot=14,
+                         cpuname="utcpu", cpucount=2, memory=65536,
+                         sda_size=600, sda_controller="sas",
+                         eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
+                         eth0_fqdn="infra2-e0.aqd-unittest.ms.com",
+                         eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
+                         eth1_fqdn="infra2-e1.aqd-unittest.ms.com",
+                         zebra=True, personality="utpers-prod")
+
+    def test_435_add_npinfra1(self):
+        # FIXME: use networks from np
         eth0_ip = self.net["unknown0"].usable[35]
         eth1_ip = self.net["unknown1"].usable[36]
         ip = self.net["zebra_vip"].usable[4]
@@ -702,6 +717,21 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.one-nyp.ms.com",
+                         zebra=True, personality="utpers-prod")
+
+    def test_436_add_npinfra2(self):
+        # FIXME: use networks from np
+        eth0_ip = self.net["unknown0"].usable[43]
+        eth1_ip = self.net["unknown1"].usable[39]
+        ip = self.net["zebra_vip"].usable[9]
+        self.create_host("infra2.one-nyp.ms.com", ip, "np3c5n14",
+                         model="utrackmount", chassis="np3c5", slot=14,
+                         cpuname="utcpu", cpucount=2, memory=65536,
+                         sda_size=600, sda_controller="sas",
+                         eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
+                         eth0_fqdn="infra2-e0.one-nyp.ms.com",
+                         eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
+                         eth1_fqdn="infra2-e1.one-nyp.ms.com",
                          zebra=True, personality="utpers-prod")
 
     def test_440_add_jack_host(self):
@@ -816,6 +846,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Slot #11: ut3c5n11 (afs-by-net.aqd-unittest.ms.com)
               Slot #12: ut3c5n12 (netmap-pers.aqd-unittest.ms.com)
               Slot #13: ut3c5n13 (infra1.aqd-unittest.ms.com)
+              Slot #14: ut3c5n14 (infra2.aqd-unittest.ms.com)
               Slot #16: ut3c5n16 (no hostname)
             """ % (ip, ip.mac, ip, hostname),
             command)

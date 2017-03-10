@@ -301,10 +301,10 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def test_161_add_unittest24(self):
         ip = self.net["vpls"].usable[2]
-        self.dsdb_expect_add("unittest24.aqd-unittest.ms.com", ip, "eth0",
+        self.dsdb_expect_add("unittest24.one-nyp.ms.com", ip, "eth0",
                              ip.mac)
         self.noouttest(["add", "host", "--archetype", "aquilon",
-                        "--hostname", "unittest24.aqd-unittest.ms.com",
+                        "--hostname", "unittest24.one-nyp.ms.com",
                         "--ip", ip, "--machine", "np3c5n5",
                         "--domain", "unittest",
                         "--personality", "compileserver"])
