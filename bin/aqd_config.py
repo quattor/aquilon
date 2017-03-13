@@ -30,7 +30,7 @@ try:
 except ImportError:
     pass
 else:
-    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('six', '1.9.0')
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))

@@ -28,5 +28,5 @@ else:
     ms.version.addpkg('ipaddress', '1.0.6')
     ms.version.addpkg('dateutil', '1.5')
     ms.version.addpkg('cdb', '0.34')
-    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('six', '1.9.0')
     ms.version.addpkg('jsonschema', '2.3.0')
