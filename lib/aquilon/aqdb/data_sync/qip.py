@@ -18,8 +18,7 @@
 
 import heapq
 
-from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
-                    NetmaskValueError)
+from ipaddr import IPv4Address, IPv4Network
 
 from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
@@ -170,21 +169,13 @@ class QIPRefresh(object):
             name = qipinfo["SubnetAddress"]
 
         # Parse the network address/netmask
-        try:
-            address = IPv4Network("%s/%s" % (qipinfo["SubnetAddress"],
-                                             qipinfo["SubnetMask"]))
-        except AddressValueError:
-            raise ValueError("Failed to parse the network address")
-        except NetmaskValueError:
-            raise ValueError("Failed to parse the netmask")
+        address = IPv4Network("%s/%s" % (qipinfo["SubnetAddress"],
+                                         qipinfo["SubnetMask"]))
 
         # Parse the list of routers
         if "DefaultRouters" in qipinfo:
             for addr in qipinfo["DefaultRouters"].split(","):
-                try:
-                    routers.append(IPv4Address(addr))
-                except AddressValueError:
-                    raise ValueError("Bad IP address in DefaultRouters")
+                routers.append(IPv4Address(addr))
 
         # Extract MS-specific information from the UDF field
         if "UDF" in qipinfo:

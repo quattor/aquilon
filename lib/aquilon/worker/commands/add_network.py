@@ -16,7 +16,7 @@
 # limitations under the License.
 
 import math
-from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
+from ipaddr import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
@@ -43,10 +43,8 @@ class CommandAddNetwork(BrokerCommand):
 
         try:
             address = IPv4Network("%s/%s" % (ip, netmask))
-        except AddressValueError as e:
+        except ValueError as e:
             raise ArgumentError("Failed to parse the network address: %s" % e)
-        except NetmaskValueError as e:
-            raise ArgumentError("Failed to parse the netmask: %s" % e)
 
         if ip != address.network:
             raise ArgumentError("IP address %s is not a network address.  "

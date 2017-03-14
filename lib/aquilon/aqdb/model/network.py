@@ -20,8 +20,7 @@
 from datetime import datetime
 import logging
 
-from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
-                    NetmaskValueError)
+from ipaddr import IPv4Address, IPv4Network
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, CheckConstraint, desc, event)
@@ -286,7 +285,7 @@ class Network(Base):
         else:
             try:
                 ip = IPv4Address(args[0])
-            except AddressValueError:
+            except ValueError:
                 pass
 
         if ip:
@@ -300,7 +299,7 @@ class Network(Base):
         else:
             try:
                 net = IPv4Network(args[0])
-            except (AddressValueError, NetmaskValueError):
+            except ValueError:
                 pass
         if net:
             return super(Network, cls).get_unique(session, ip=net.network,

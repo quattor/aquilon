@@ -32,7 +32,7 @@ from itertools import islice
 from tempfile import mkstemp
 from uuid import UUID
 
-from ipaddr import IPv4Address, AddressValueError
+from ipaddr import IPv4Address
 import jsonschema
 
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
@@ -99,7 +99,7 @@ def force_ipv4(label, value):
         return value
     try:
         return IPv4Address(value)
-    except AddressValueError as e:
+    except ValueError as e:
         raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
 
 
