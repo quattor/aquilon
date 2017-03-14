@@ -61,7 +61,7 @@ from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
-from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
+from aquilon.utils import (force_int, force_float, force_boolean, force_ip,
                            force_mac, force_ascii, force_list, force_json,
                            force_uuid, force_justification)
 
@@ -417,7 +417,7 @@ class ResourcesCommandEntry(CommandEntry):
         'float': force_float,
         'boolean': force_boolean,
         'flag': force_boolean,
-        'ipv4': force_ipv4,
+        'ip': force_ip,
         'mac': force_mac,
         'json': force_json,
         'string': force_ascii,

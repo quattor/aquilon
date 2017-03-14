@@ -197,8 +197,8 @@
 	    <option name="model" type="string">Model name</option>
 	    <option name="machine_type" type="enum" enum="MachineType">Machine type for the model (blade, virtual_machine, etc.)</option>
 	    <option name="vendor" type="string">Vendor name</option>
-	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
-	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
+	    <option name="ip" type="ip" conflicts="networkip">IP address</option>
+	    <option name="networkip" type="ip" conflicts="ip">Network IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">MAC address of an attached interface</option>
 	    <option name="pg" type="string">Port group of an attached interface</option>
@@ -252,8 +252,8 @@
 	    <option name="model" type="string">Model name</option>
 	    <option name="machine_type" type="enum" enum="MachineType">Machine type for the model (blade, virtual_machine, etc.)</option>
 	    <option name="vendor" type="string">Vendor name</option>
-	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
-	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
+	    <option name="ip" type="ip" conflicts="networkip">IP address</option>
+	    <option name="networkip" type="ip" conflicts="ip">Network IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">MAC address of an attached interface</option>
 	    <option name="interface_name" type="string">Having an interface of the given name</option>
@@ -308,8 +308,8 @@
 	    <option name="dns_domain" type="string">DNS domain</option>
 	    <option name="shortname" type="string">First segment of the fqdn</option>
 	    <option name="type" type="enum" enum="HardwareEntityType">System type (host, chassis, switch, manager, auxiliary)</option>
-	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="networkip" type="ipv4">Network IP address</option>
+	    <option name="ip" type="ip">IP address</option>
+	    <option name="networkip" type="ip">Network IP address</option>
 	    <option name="mac" type="mac">Primary MAC address</option>
 	</optgroup>
 	<optgroup>
@@ -469,8 +469,8 @@
 	    <option name="shortname" type="string">First segment of the fqdn</option>
 	    <option name="archetype" type="string">Archetype name</option>
 	    <option name="buildstatus" type="string">Build status</option>
-	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="networkip" type="ipv4">Network IP address</option>
+	    <option name="ip" type="ip">IP address</option>
+	    <option name="networkip" type="ip">Network IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">[Deprecated] MAC address</option>
 	    <option name="personality" type="string">Personality</option>
@@ -765,7 +765,7 @@
 	--exact_location option can be used to override this behavior.
 	<optgroup mandatory="True" fields="one">
 	    <option name="network" type="string">Network name</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <option name="all" type="flag">All</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
@@ -807,7 +807,7 @@
 	    <option name="network" type="string">Network name</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="network_compartment" type="string">Network compartment</option>
-	    <option name="ip" type="ipv4">IP address of the network or contained in the network</option>
+	    <option name="ip" type="ip">IP address of the network or contained in the network</option>
 	    <option name="type" type="string">Network type</option>
 	    <option name="side" type="string">Network side</option>
 	    <option name="machine" type="string">Networks the machine is attached to</option>
@@ -1003,8 +1003,8 @@
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
 	    </optgroup>
 	    <optgroup fields="one">
-		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ip" type="ip">IP address</option>
+		<option name="ipfromip" type="ip">Choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
@@ -1061,8 +1061,8 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<optgroup fields="one">
-	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+	    <option name="ip" type="ip">IP address</option>
+	    <option name="ipfromip" type="ip">Choose IP address in subnet</option>
 	    <option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 	    <option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	</optgroup>
@@ -1124,8 +1124,8 @@
 	    </optgroup>
 	    <option name="auxiliary" type="string">Fully qualified name for the auxiliary interface</option>
 	    <optgroup fields="one">
-		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ip" type="ip">IP address</option>
+		<option name="ipfromip" type="ip">Choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
@@ -1189,8 +1189,8 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="hostname" type="string">Fully qualified Host name</option>
 	    <optgroup fields="one">
-		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ip" type="ip">IP address</option>
+		<option name="ipfromip" type="ip">Choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
@@ -1541,7 +1541,7 @@
 	or as the number of hosts in the network (like "--mask 256").
 	<optgroup mandatory="True" fields="all">
 	    <option name="network" type="string">Network name</option>
-	    <option name="ip" type="ipv4">Network IP address</option>
+	    <option name="ip" type="ip">Network IP address</option>
 	    <optgroup fields="one">
 		<option name="netmask" type="string">Netmask as dotted quad</option>
 		<option name="prefixlen" type="int">Network prefix length</option>
@@ -1578,7 +1578,7 @@
 	<p/>
 	Specify the network by its IP.
 	<optgroup mandatory="True" fields="all">
-	    <option name="ip" type="ipv4">Network IP address</option>
+	    <option name="ip" type="ip">Network IP address</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
@@ -1594,7 +1594,7 @@
 	Update the network either by name or ip of the network.
 	<optgroup mandatory="True">
 	    <option name="network" type="string">Network name</option>
-	    <option name="ip" type="ipv4">Network address</option>
+	    <option name="ip" type="ip">Network address</option>
 	</optgroup>
 	<optgroup>
 	    <option name="type" type="string">Network type</option>
@@ -1625,9 +1625,9 @@
 	Split a network to smaller subnets.  Any devices on the old network will
 	be reassigned to the new subnets.
 	<optgroup mandatory="True" fields="all">
-	    <option name="ip" type="ipv4">Network address</option>
+	    <option name="ip" type="ip">Network address</option>
 	    <optgroup fields="one">
-		<option name="netmask" type="ipv4">New netmask</option>
+		<option name="netmask" type="ip">New netmask</option>
 		<option name="prefixlen" type="int">New network prefix length</option>
 	    </optgroup>
 	</optgroup>
@@ -1646,9 +1646,9 @@
 	point to the 2nd one; the IP address of the merged network will be calculated using
 	--prefixlen.
 	<optgroup mandatory="True" fields="all">
-	    <option name="ip" type="ipv4">Network address</option>
+	    <option name="ip" type="ip">Network address</option>
 	    <optgroup fields="one">
-		<option name="netmask" type="ipv4">New netmask</option>
+		<option name="netmask" type="ip">New netmask</option>
 		<option name="prefixlen" type="int">New network prefix length</option>
 	    </optgroup>
 	</optgroup>
@@ -1668,7 +1668,7 @@
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="building" type="string">Building where the router is located</option>
-	    <option name="ip" type="ipv4">IP address of the router</option>
+	    <option name="ip" type="ip">IP address of the router</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -1680,7 +1680,7 @@
 	Delete a router address.
 	<optgroup mandatory="True" fields="one">
 	    <option name="fqdn" type="string">Name of the router</option>
-	    <option name="ip" type="ipv4">IP address of the router</option>
+	    <option name="ip" type="ip">IP address of the router</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
@@ -1694,7 +1694,7 @@
 	Display a router address.
 	<optgroup fields="one">
 	    <option name="fqdn" type="string">Name of the router</option>
-	    <option name="ip" type="ipv4">IP address of the router</option>
+	    <option name="ip" type="ip">IP address of the router</option>
 	    <option name="all" type="flag">Show all routers</option>
 	</optgroup>
 	<optgroup>
@@ -1707,7 +1707,7 @@
 	Update router information.
 	<optgroup mandatory="True" fields="one">
 	    <option name="fqdn" type="string">Name of the router</option>
-	    <option name="ip" type="ipv4">IP address of the router</option>
+	    <option name="ip" type="ip">IP address of the router</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
@@ -1724,14 +1724,14 @@
     <command name="add_static_route">
 	Add a static route.
 	<optgroup mandatory="True" fields="all">
-	    <option name="ip" type="ipv4">Address of the destination network range</option>
+	    <option name="ip" type="ip">Address of the destination network range</option>
 	    <optgroup fields="one">
 		<option name="netmask" type="string">Netmask as dotted quad</option>
 		<option name="prefixlen" type="int">Network prefix length</option>
 	    </optgroup>
 	    <optgroup fields="one">
-		<option name="gateway" type="ipv4">Address of the gateway</option>
-		<option name="networkip" type="ipv4">Network IP address</option>
+		<option name="gateway" type="ip">Address of the gateway</option>
+		<option name="networkip" type="ip">Network IP address</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
@@ -1749,8 +1749,8 @@
     <command name="del_static_route">
 	Delete a static route.
 	<optgroup mandatory="True" fields="all">
-	    <option name="gateway" type="ipv4">Address of the gateway</option>
-	    <option name="ip" type="ipv4">Address of the destination network range</option>
+	    <option name="gateway" type="ip">Address of the gateway</option>
+	    <option name="ip" type="ip">Address of the destination network range</option>
 	    <optgroup fields="one">
 		<option name="netmask" type="string">Netmask as dotted quad</option>
 		<option name="prefixlen" type="int">Network prefix length</option>
@@ -1877,8 +1877,8 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<optgroup fields="one">
-	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+	    <option name="ip" type="ip">IP address</option>
+	    <option name="ipfromip" type="ip">Choose IP address in subnet</option>
 	    <option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 	    <option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	</optgroup>
@@ -1900,7 +1900,7 @@
 	    <option name="interface" type="string">Name of the interface</option>
 	    <optgroup>
 		<option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>
-		<option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
+		<option name="ip" type="ip" conflicts="fqdn">IP address</option>
 		<option name="label" type="string" conflicts="fqdn">Interface alias</option>
 	    </optgroup>
 	</optgroup>
@@ -2126,7 +2126,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="ip" type="ipv4" conflicts="service_address cluster">IP address of the host that provides this service</option>
+	    <option name="ip" type="ip" conflicts="service_address cluster">IP address of the host that provides this service</option>
 	    <option name="service_address" type="string" conflicts="ip">The service address of the host/cluster that provides this service</option>
 	    <option name="resourcegroup" type="string">Resourcegroup containing the service address</option>
 	    <option name="position" type="int">Position in the list</option>
@@ -2152,7 +2152,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="ip" type="ipv4" conflicts="service_address cluster">IP address of the host that provides this service</option>
+	    <option name="ip" type="ip" conflicts="service_address cluster">IP address of the host that provides this service</option>
 	    <option name="service_address" type="string" conflicts="ip">The service address of the host/cluster that provides this service</option>
 	    <option name="resourcegroup" type="string">Resourcegroup containing the service address</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -2252,7 +2252,7 @@
 		<option name="bunker" type="string">Bunker</option>
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
-		<option name="networkip" type="ipv4">Network IP address</option>
+		<option name="networkip" type="ip">Network IP address</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup fields="one">
@@ -2289,7 +2289,7 @@
 		<option name="bunker" type="string">Bunker</option>
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
-		<option name="networkip" type="ipv4">Network IP address</option>
+		<option name="networkip" type="ip">Network IP address</option>
 	    </optgroup>
 	    <option name="all" type="flag">Show all maps</option>
 	</optgroup>
@@ -2321,7 +2321,7 @@
 		<option name="bunker" type="string">Bunker</option>
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
-		<option name="networkip" type="ipv4">Network IP address</option>
+		<option name="networkip" type="ip">Network IP address</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup fields="one">
@@ -2840,7 +2840,7 @@
 	    <option name="service" type="string">Name of the service</option>
 	    <option name="city" type="string">Name of the city</option>
 	    <option name="network_device" type="string">Name of the network device</option>
-	    <option name="networkip" type="ipv4">IP address of a network</option>
+	    <option name="networkip" type="ip">IP address of a network</option>
 	    <option name="personality" type="string">Name of personality</option>
 	    <option name="virtual_switch" type="string">Virtual Switch name</option>
 	</optgroup>
@@ -2916,7 +2916,7 @@
 	<option name="model" type="string">Model of chassis to create. Use 'show model --type chassis' to see a list of valid models</option>
 	</optgroup>
 	<optgroup>
-	    <option name="ip" type="ipv4">IP address of the chassis</option>
+	    <option name="ip" type="ip">IP address of the chassis</option>
 	    <option name="interface" type="string">Interface name (like oa)</option>
 	    <option name="mac" type="mac">MAC address of the interface</option>
 	    <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
@@ -2967,7 +2967,7 @@
 	<optgroup>
 	    <option name="model" type="string">Chassis model</option>
 	    <option name="rack" type="string">Rack name</option>
-	    <option name="ip" type="ipv4">Primary IP address</option>
+	    <option name="ip" type="ip">Primary IP address</option>
 	    <option name="vendor" type="string" requires="model">Chassis vendor. Needed if the model name is not unique</option>
 	    <option name="serial" type="string">Serial Number</option>
 	    <option name="comments" type="string">Comments</option>
@@ -3963,7 +3963,7 @@
 	    <option name="allow_metacluster_change" type="boolean">When changing clusters, allow the cluster to be in a different metacluster</option>
 	    <optgroup fields="one">
 		<option name="autoip" type="flag" requires="cluster metacluster vmhost">Re-assign IP addresses</option>
-		<option name="ip" type="ipv4">New primary IP address</option>
+		<option name="ip" type="ip">New primary IP address</option>
 	    </optgroup>
 	    <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
 	    <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>
@@ -4018,7 +4018,7 @@
 	    <option name="type" type="string">Network device type (tor, bor, agg)</option>
 	    <option name="interface" type="string">Interface name (like xge49)</option>
 	    <option name="iftype" type="string">Interface type</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <optgroup fields="one">
 		<option name="rack" type="string">Rack name</option>
 		<option name="building" type="string">Building name</option>
@@ -4056,7 +4056,7 @@
 	    <option name="switch" type="string">Switch fully qualified name</option>
 	    <option name="model" type="string">Switch model</option>
 	    <option name="type" type="string">Switch type (tor, bor, agg)</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <option name="interface" type="string">Interface name (like xge49)</option>
 	    <optgroup fields="one">
 		<option name="rack" type="string">Rack name</option>
@@ -4089,7 +4089,7 @@
 	    </optgroup>
 	    <option name="model" type="string">Network device model</option>
 	    <option name="type" type="string">Network device type (tor, bor, agg)</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <option name="vendor" type="string" requires="model">Network device vendor. Needed if the model name is not unique</option>
 	    <option name="serial" type="string">Serial Number</option>
 	    <option name="comments" type="string">Comments</option>
@@ -4168,8 +4168,8 @@
 	separate line for each.
 	<optgroup mandatory="True">
 	    <option name="network_device" type="string">Network device fully qualified name</option>
-	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
-	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
+	    <option name="ip" type="ip" conflicts="networkip">IP address</option>
+	    <option name="networkip" type="ip" conflicts="ip">Network IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="vlan" type="int">Vlan ID</option>
 	    <option name="type" type="string">Type (tor, bor, agg)</option>
@@ -4215,7 +4215,7 @@
 	separate line for each.
 	<optgroup mandatory="True">
 	    <option name="switch" type="string">Switch fully qualified name</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <option name="vlan" type="int">Vlan ID</option>
 	    <option name="type" type="string">Type (tor, bor, agg)</option>
 	    <option name="model" type="string">Switch model</option>
@@ -4865,8 +4865,8 @@
 	of the IP address.  The prefix defaults to the string 'dynamic'.
 	<optgroup mandatory="True" fields="one">
 	    <optgroup fields="all">
-		<option name="startip" type="ipv4">First IP address in the range to add</option>
-		<option name="endip" type="ipv4">Last IP address in the range to add</option>
+		<option name="startip" type="ip">First IP address in the range to add</option>
+		<option name="endip" type="ip">Last IP address in the range to add</option>
 	    </optgroup>
 	    <option name="fillnetwork" type="string">Allocate dynamic IPs for all available addresses in the network</option>
 	</optgroup>
@@ -4887,8 +4887,8 @@
 	dynamic the command will fail.
 	<optgroup mandatory="True" fields="one">
 	    <optgroup fields="all">
-		<option name="startip" type="ipv4">First IP address in the range to delete</option>
-		<option name="endip" type="ipv4">Last IP address in the range to delete</option>
+		<option name="startip" type="ip">First IP address in the range to delete</option>
+		<option name="endip" type="ip">Last IP address in the range to delete</option>
 	    </optgroup>
 	    <option name="clearnetwork" type="string">Remove dynamic entries from the network</option>
 	</optgroup>
@@ -4903,7 +4903,7 @@
     <command name="show_dynamic_range">
 	Show a range reserved for dynamic DHCP.
 	<optgroup mandatory="True" fields="one">
-	    <option name="ip" type="ipv4">Any IP address inside the range</option>
+	    <option name="ip" type="ip">Any IP address inside the range</option>
 	    <option name="fqdn" type="string">Any FQDN inside the range</option>
 	</optgroup>
 	<optgroup>
@@ -4927,8 +4927,8 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="fqdn" type="string">A fully qualified domain name</option>
 	    <optgroup fields="one">
-		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">Choose IP address in subnet</option>
+		<option name="ip" type="ip">IP address</option>
+		<option name="ipfromip" type="ip">Choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
 	    </optgroup>
 	</optgroup>
@@ -4953,7 +4953,7 @@
 	Delete an address record from the database.
 	<optgroup mandatory="True">
 	    <option name="fqdn" type="string">The fully qualified domain name</option>
-	    <option name="ip" type="ipv4">An IP Address</option>
+	    <option name="ip" type="ip">An IP Address</option>
 	</optgroup>
 	<optgroup>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
@@ -4982,7 +4982,7 @@
 	    <option name="fqdn" type="string">The fully qualified domain name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="ip" type="ipv4">The new IP address</option>
+	    <option name="ip" type="ip">The new IP address</option>
 	    <option name="ttl" type="int">TTL</option>
 	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
@@ -5264,7 +5264,7 @@
 	    <option name="fqdn" type="string">A fully qualified domain name</option>
 	    <option name="shortname" type="string">The short name</option>
 	    <option name="record_type" type="string">The type of the DNS record</option>
-	    <option name="ip" type="ipv4">An IP Address (for A records)</option>
+	    <option name="ip" type="ip">An IP Address (for A records)</option>
 	    <option name="network" type="string">Network name or address (for A records)</option>
 	    <option name="target" type="string">The target of an alias or service (for CNAME records)</option>
 	    <option name="target_domain" type="string">The DNS domain of the target of an alias or service</option>
@@ -5818,7 +5818,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="interfaces" type="string">Comma separated list of interfaces</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="dns_domain" type="string" requires="prefix">Override the default DNS domain for --prefix</option>
 	    <option name="comments" type="string">Comments</option>
@@ -5883,7 +5883,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="interfaces" type="string">Comma separed list of interfaces</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ip">IP address</option>
 	    <option name="network_environment" type="string" requires="ip">Network environment (default: internal)</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
@@ -6678,7 +6678,7 @@
 	Bind a port group to a virtual switch.
 	<optgroup mandatory="True" fields="all">
 	    <option name="virtual_switch" type="string">Name of the virtual switch</option>
-	    <option name="networkip" type="ipv4">IP address of the network</option>
+	    <option name="networkip" type="ip">IP address of the network</option>
 	</optgroup>
 	<optgroup>
 	    <option name="tag" type="int">VLAN/VxLAN/etc. tag used for the network</option>
@@ -6694,7 +6694,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="virtual_switch" type="string">Name of the virtual switch</option>
 	    <optgroup>
-		<option name="networkip" type="ipv4">IP address of the network</option>
+		<option name="networkip" type="ip">IP address of the network</option>
 		<option name="tag" type="int">VLAN/VxLAN/etc. tag used for the network</option>
 	    </optgroup>
 	</optgroup>

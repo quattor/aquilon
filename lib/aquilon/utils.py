@@ -92,7 +92,7 @@ def validate_template_name(label, value):
                             (value, label))
 
 
-def force_ipv4(label, value):
+def force_ip(label, value):
     if value is None:
         return None
     if isinstance(value, IPv4Address):

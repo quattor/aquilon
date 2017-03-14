@@ -22,7 +22,7 @@ from twisted.python import context
 from twisted.python.log import ILogContext
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.utils import force_ascii, force_ipv4
+from aquilon.utils import force_ascii, force_ip
 from aquilon.worker.base_protocol import AQDRequest, AQDSite
 
 LOGGER = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ class KNCHTTPChannel(http.HTTPChannel):
     """
     __KNC_fields = {
         b'CREDS': force_ascii,
-        b'REMOTE_IP': force_ipv4
+        b'REMOTE_IP': force_ip
     }
 
     def __init__(self, *args, **kwargs):
