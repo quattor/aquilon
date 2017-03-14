@@ -37,8 +37,6 @@ class CommandMergeNetwork(BrokerCommand):
             # There must me a faster way, but this is the easy one
             net = IPv4Network("127.0.0.0/%s" % netmask)
             prefixlen = net.prefixlen
-        if prefixlen is None or prefixlen < 8 or prefixlen > 31:
-            raise ArgumentError("The prefix length must be between 8 and 31.")
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -54,7 +52,10 @@ class CommandMergeNetwork(BrokerCommand):
         # IPv4Network has a supernet() object, but that does not normalize the
         # IP address, i.e. IPv4Network('1.2.3.0/24').supernet() will return
         # IPv4Network('1.2.3.0/23'). Do the normalization manually.
-        supernet = dbnetwork.network.supernet(new_prefix=prefixlen)
+        try:
+            supernet = dbnetwork.network.supernet(new_prefix=prefixlen)
+        except ValueError as err:
+            raise ArgumentError("Failed to calculate the supernet: %s" % err)
         supernet = IPv4Network("%s/%d" % (supernet.network, supernet.prefixlen))
 
         q = session.query(Network)

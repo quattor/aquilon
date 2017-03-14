@@ -36,8 +36,6 @@ class CommandSplitNetwork(BrokerCommand):
             # There must me a faster way, but this is the easy one
             net = IPv4Network("127.0.0.0/%s" % netmask)
             prefixlen = net.prefixlen
-        if prefixlen < 8 or prefixlen > 32:
-            raise ArgumentError("The prefix length must be between 8 and 32.")
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -49,8 +47,11 @@ class CommandSplitNetwork(BrokerCommand):
         plenaries.add(dbnetwork)
 
         if prefixlen <= dbnetwork.cidr:
-            raise ArgumentError("The specified --prefixlen must be bigger "
-                                "than the current value.")
+            raise ArgumentError("The specified prefix must be bigger than the "
+                                "current value.")
+        if prefixlen > dbnetwork.network.max_prefixlen:
+            raise ArgumentError("The specified prefix is too big for the "
+                                "address type.")
 
         subnets = dbnetwork.network.subnet(new_prefix=prefixlen)
 
