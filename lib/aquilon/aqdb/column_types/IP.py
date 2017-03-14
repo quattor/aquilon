@@ -22,7 +22,7 @@ from sqlalchemy.types import TypeDecorator, TypeEngine, Integer
 from sqlalchemy.dialects.postgresql import INET
 
 
-class IPV4(TypeDecorator):
+class IP(TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
 
     # Placeholder only

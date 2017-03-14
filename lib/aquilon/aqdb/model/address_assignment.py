@@ -26,7 +26,7 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import IPV4, AqStr, EmptyStr
+from aquilon.aqdb.column_types import IP, AqStr, EmptyStr
 from aquilon.aqdb.model import Base, Interface, ARecord, Network
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 
@@ -60,7 +60,7 @@ class AddressAssignment(Base):
 
     label = Column(EmptyStr(16), nullable=False)
 
-    ip = Column(IPV4, nullable=False)
+    ip = Column(IP, nullable=False)
 
     network_id = Column(ForeignKey(Network.id), nullable=False)
 

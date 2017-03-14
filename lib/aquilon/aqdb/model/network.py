@@ -33,7 +33,7 @@ from sqlalchemy.sql import and_, not_, func, literal_column
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import (Base, Location, NetworkEnvironment,
                                 NetworkCompartment)
-from aquilon.aqdb.column_types import AqStr, IPV4
+from aquilon.aqdb.column_types import AqStr, IP
 from aquilon.config import Config
 
 LOGGER = logging.getLogger(__name__)
@@ -121,7 +121,7 @@ class Network(Base):
     network_type = Column(AqStr(32), nullable=False)
     cidr = Column(Integer, nullable=False)
     name = Column(AqStr(255), nullable=False)
-    ip = Column(IPV4, nullable=False)
+    ip = Column(IP, nullable=False)
     side = Column(AqStr(4), nullable=True, default='a')
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

@@ -23,7 +23,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Network
-from aquilon.aqdb.column_types import IPV4
+from aquilon.aqdb.column_types import IP
 
 _TN = "static_route"
 
@@ -37,7 +37,7 @@ class StaticRoute(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     # TODO: should the gateway be a foreign key to RouterAddress?
-    gateway_ip = Column(IPV4, nullable=False)
+    gateway_ip = Column(IP, nullable=False)
     network_id = Column(ForeignKey(Network.id, ondelete="CASCADE"),
                         nullable=False)
 
@@ -49,7 +49,7 @@ class StaticRoute(Base):
     # entry, therefore the destination cannot be a simple pointer to the network
     # table
     # TODO: define a composite data type for networks
-    dest_ip = Column(IPV4, nullable=False)
+    dest_ip = Column(IP, nullable=False)
     dest_cidr = Column(Integer, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
