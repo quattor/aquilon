@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import math
 from ipaddr import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
@@ -30,16 +29,11 @@ class CommandAddNetwork(BrokerCommand):
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, logger, plenaries, dbuser,
-               network, ip, network_environment, type, side, comments,
-               netmask, prefixlen, mask, network_compartment, **arguments):
-
-        # Handle the different ways of specifying the netmask
-        self.require_one_of(netmask=netmask, prefixlen=prefixlen, mask=mask)
+    def render(self, session, logger, plenaries, dbuser, network, ip,
+               network_environment, type, side, comments, netmask, prefixlen,
+               network_compartment, **arguments):
         if prefixlen:
             netmask = prefixlen
-        elif mask:
-            netmask = 32 - int(math.log(mask, 2))
 
         try:
             address = IPv4Network("%s/%s" % (ip, netmask))
