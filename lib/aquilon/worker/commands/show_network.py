@@ -21,8 +21,6 @@ from sqlalchemy.orm import joinedload, subqueryload, undefer
 from aquilon.aqdb.model import Network, NetworkEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.network import get_network_byname, get_network_byip
-from aquilon.worker.formats.network import SimpleNetworkList
 from aquilon.worker.formats.network import NetworkHostList
 
 
@@ -31,7 +29,7 @@ class CommandShowNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, ip, network_environment, all, hosts,
-               exact_location, **arguments):
+               **arguments):
         options = [undefer('comments'),
                    joinedload('location'),
                    undefer('routers.comments'),
@@ -44,13 +42,14 @@ class CommandShowNetwork(BrokerCommand):
                             joinedload("assignments.interface"),
                             joinedload("assignments.interface.hardware_entity"),
                             joinedload("assignments.dns_records")])
+
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
-        dbnetwork = network and get_network_byname(session, network, dbnet_env,
-                                                   query_options=options) or None
-        dbnetwork = ip and get_network_byip(session, ip, dbnet_env,
-                                            query_options=options) or dbnetwork
-        if dbnetwork:
+
+        if network or ip:
+            dbnetwork = Network.get_unique(session, name=network, ip=ip,
+                                           network_environment=dbnet_env,
+                                           query_options=options, compel=True)
             if hosts:
                 return NetworkHostList([dbnetwork])
             else:
@@ -58,17 +57,9 @@ class CommandShowNetwork(BrokerCommand):
 
         q = session.query(Network)
         q = q.filter_by(network_environment=dbnet_env)
-
-        dblocation = get_location(session, **arguments)
-        if dblocation:
-            if exact_location:
-                q = q.filter_by(location=dblocation)
-            else:
-                childids = dblocation.offspring_ids()
-                q = q.filter(Network.location_id.in_(childids))
         q = q.order_by(Network.ip)
         q = q.options(*options)
         if hosts:
             return NetworkHostList(q.all())
         else:
-            return SimpleNetworkList(q.all())
+            return q.all()

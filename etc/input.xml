@@ -759,30 +759,12 @@
 	<p/>
 	The 'csv' format contains the following fields, in this order:
 	Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
-	<p/>
-	Note that location searches are inclusive.  That is, searching for a
-	building will include all racks, rooms, etc. inside the building.  The
-	--exact_location option can be used to override this behavior.
 	<optgroup mandatory="True" fields="one">
 	    <option name="network" type="string">Network name</option>
 	    <option name="ip" type="ip">IP address</option>
 	    <option name="all" type="flag">All</option>
-	    <optgroup fields="one">
-		<option name="organization" type="string">Organization</option>
-		<option name="hub" type="string">Hub</option>
-		<option name="continent" type="string">Continent</option>
-		<option name="country" type="string">Country</option>
-		<option name="campus" type="string">Campus</option>
-		<option name="city" type="string">City</option>
-		<option name="building" type="string">Building</option>
-		<option name="room" type="string">Room</option>
-		<option name="bunker" type="string">Bunker</option>
-		<option name="rack" type="string">Rack</option>
-		<option name="desk" type="string">Desk</option>
-	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="exact_location" type="flag">Match the location exactly</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="hosts" type="flag">Hosts</option>
 	</optgroup>

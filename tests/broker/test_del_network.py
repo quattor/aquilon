@@ -51,16 +51,12 @@ class TestDelNetwork(TestBrokerCommand):
             command = "show network --ip %s --hosts" % network.ip
             self.notfoundtest(command.split(" "))
 
-    def test_230_shownetwork(self):
-        command = "show network --building ut"
-        out = self.commandtest(command.split(" "))
-        # Unfortunately this command prints a header even if the output is
-        # otherwise empty. Check for a dot, as that will match any IP addresses,
-        # but not the header.
-        self.matchclean(out, ".", command)
+    def test_230_searchnetwork(self):
+        command = "search network --building ut"
+        out = self.noouttest(command.split(" "))
 
-    def test_250_shownetworkproto(self):
-        command = "show network --building ut --format proto"
+    def test_250_searchnetworkproto(self):
+        command = "search network --building ut --format proto"
         self.protobuftest(command.split(" "), expect=0)
 
     def test_210_delnetworkcards(self):

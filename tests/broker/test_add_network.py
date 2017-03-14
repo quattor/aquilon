@@ -187,8 +187,8 @@ class TestAddNetwork(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Comments: Some network comments", command)
 
-    def test_370_shownetworkbuilding(self):
-        command = "show_network --building ut"
+    def test_370_searchnetworkbuilding(self):
+        command = "search network --building ut"
         out = self.commandtest(command.split(" "))
         for network in self.net:
             if not network.autocreate:
@@ -203,7 +203,7 @@ class TestAddNetwork(TestBrokerCommand):
     def test_380_shownetworkcsv(self):
         # Use --exact_location here, so we don't have to worry about networks
         # mapped to child locations
-        command = "show_network --building ut --exact_location --format csv"
+        command = "search_network --building ut --exact_location --format csv"
         out = self.commandtest(command.split(" "))
         for network in self.net:
             if not network.autocreate:
@@ -216,8 +216,8 @@ class TestAddNetwork(TestBrokerCommand):
             else:
                 self.matchclean(out, str(network.ip), command)
 
-    def test_390_shownetworkproto(self):
-        command = "show network --building ut --format proto"
+    def test_390_searchnetworkproto(self):
+        command = "search network --building ut --format proto"
         self.protobuftest(command.split(" "))
 
     def test_400_addlocalnet(self):
@@ -226,26 +226,26 @@ class TestAddNetwork(TestBrokerCommand):
                    "--building", "ut"]
         self.noouttest(command)
 
-    def test_410_shownetworknoenv(self):
-        command = "show network --building np"
+    def test_410_searchnetworknoenv(self):
+        command = "search network --building np --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "excx-net", command)
 
-        command = "show network --building ut"
+        command = "search network --building ut --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "utcolo-net", command)
         self.matchoutput(out, "netsvcmap", command)
         self.matchoutput(out, "netperssvcmap", command)
 
-    def test_420_shownetworkwithenv(self):
-        command = "show network --building np --network_environment excx"
+    def test_420_searchnetworkwithenv(self):
+        command = "search network --building np --network_environment excx --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "excx-net", command)
 
     def test_430_showexcxnoenv(self):
         command = "show network --network excx-net"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Network excx-net not found.", command)
+        self.matchoutput(out, "Network excx-net, network environment internal not found.", command)
 
     def test_440_showexcxwithenv(self):
         net = self.net["unknown0"]

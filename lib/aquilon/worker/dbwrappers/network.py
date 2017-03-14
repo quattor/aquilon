@@ -24,23 +24,6 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Network, AddressAssignment, ARecord
 
 
-def get_network_byname(session, netname, environment, query_options=None):
-    try:
-        q = session.query(Network)
-        q = q.filter_by(network_environment=environment)
-        q = q.filter_by(name=netname)
-        if query_options:
-            q = q.options(*query_options)
-        dbnetwork = q.one()
-    except NoResultFound:
-        raise NotFoundException("Network %s not found." % netname)
-    # FIXME: network names should be unique
-    except MultipleResultsFound:
-        raise ArgumentError("There are multiple networks with name %s." %
-                            netname)
-    return dbnetwork
-
-
 def get_network_byip(session, ipaddr, environment, query_options=None):
     try:
         q = session.query(Network)

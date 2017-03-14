@@ -338,30 +338,3 @@ class NetworkListFormatter(ListFormatter):
                          for network in sorted(objects, key=attrgetter("ip")))
 
 ObjectFormatter.handlers[NetworkList] = NetworkListFormatter()
-
-
-class SimpleNetworkList(list):
-    """By convention, holds a list of networks to be formatted in a simple
-    network map type format."""
-    pass
-
-
-class SimpleNetworkListFormatter(NetworkListFormatter):
-    fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
-
-    def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
-        details = [indent + "\t".join(self.fields)]
-        for network in sorted(nlist, key=attrgetter("ip")):
-            details.append(indent + "\t".join([network.name,
-                                               str(network.ip),
-                                               str(network.netmask),
-                                               str(network.location.sysloc()),
-                                               str(network.location.country),
-                                               network.side,
-                                               network.network_type,
-                                               "False",
-                                               "False",
-                                               str(network.comments)]))
-        return "\n".join(details)
-
-ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
