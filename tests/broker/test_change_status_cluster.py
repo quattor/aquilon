@@ -32,9 +32,11 @@ class TestChangeClusterStatus(TestBrokerCommand):
     # know that we have a cluster (utecl1) which has 5 member hosts,
     # each of which are in "build" status.
     def test_100_BlockPromotion(self):
-        self.successtest(["change_status",
-                          "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--buildstatus", "ready"])
+        command = ["change_status", "--hostname", "evh1.aqd-unittest.ms.com",
+                                    "--buildstatus", "ready"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Warning: requested status was 'ready' but "
+                              "resulting host status is 'almostready'.", command)
 
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
