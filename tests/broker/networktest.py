@@ -16,11 +16,13 @@
 # limitations under the License.
 """ Helper classes for network testing """
 
+from functools import total_ordering
 import os
 from csv import DictReader
 import six.moves.cPickle as pickle  # pylint: disable=F0401
 from six import itervalues
-from ipaddr import IPv4Network, IPv4Address
+from ipaddr import (IPv4Network, IPv4Address, IPv6Network, IPv6Address,
+                    IPNetwork, IPAddress)
 
 # Ranges for dynamic network allocation. The idea is to allocate a /N network
 # inside 10.N.0.0/16.
@@ -32,22 +34,103 @@ SUBNET_RANGE = {
     28: IPv4Network('10.28.0.0/16')}
 
 
-class DummyIP(IPv4Address):
+@total_ordering
+class DummyIP(object):
+    """
+    Wrapper around an IP address
+
+    This class should work like IPv[46]Address, but it allows attaching some
+    convenience methods like MAC address generation.
+    """
+
     def __init__(self, *args, **kwargs):
-        super(DummyIP, self).__init__(*args, **kwargs)
+        self._ip = IPAddress(*args, **kwargs)
 
-        octets = [int(i) for i in str(self).split('.')]
-        self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
+        if isinstance(self._ip, IPv4Address):
+            octets = [int(i) for i in str(self._ip).split('.')]
+            self.mac = "02:02:%02x:%02x:%02x:%02x" % tuple(octets)
+        else:
+            # FIXME
+            self.mac = None
+
+    def __str__(self):
+        return str(self._ip)
+
+    def __repr__(self):
+        return repr(self._ip)
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self._ip == other._ip
+        else:
+            return self._ip == other
+
+    def __lt__(self, other):
+        if isinstance(other, type(self)):
+            return self._ip < other._ip
+        else:
+            return self._ip < other
+
+    def __int__(self):
+        return int(self._ip)
+
+    def __hash__(self):
+        return hash(self._ip)
+
+    def __add__(self, other):
+        return DummyIP(self._ip + other)
+
+    def __sub__(self, other):
+        return DummyIP(self._ip - other)
+
+    def __getattr__(self, name):
+        # Proxy lookups to the wrapped network object
+        if "_ip" not in self.__dict__:
+            # Happens while unpickling
+            raise AttributeError
+        return getattr(self._ip, name)
 
 
-class NetworkInfo(IPv4Network):
+class IPGenerator(object):
+    """
+    Helper for indexing into the usable IP range of a network
+    """
+
+    def __init__(self, network, offset):
+        self.network = network
+        self.offset = offset
+
+    def __getitem__(self, index):
+        if index < 0:
+            # Skip the broadcast address
+            ip = DummyIP(self.network[index - 1])
+            if ip < self.network[self.offset]:
+                raise IndexError("Index too small")
+        else:
+            ip = DummyIP(self.network[index + self.offset])
+            if ip >= self.network.broadcast:
+                raise IndexError("Index too big")
+        return ip
+
+
+@total_ordering
+class NetworkInfo(object):
+    """
+    Wrapper around a network
+
+    This class should work like IPv[46]Network, but it allows attaching
+    Aquilon-related metadata, and a few convenience methods.
+    """
+
     def __init__(self, name, cidr, nettype, loc_type, loc_name, side="a",
                  autocreate=False, comments=None):
-        super(NetworkInfo, self).__init__(cidr)
+        if isinstance(cidr, (IPv4Network, IPv6Network)):
+            self._network = cidr
+        else:
+            self._network = IPNetwork(cidr)
 
         self.name = name
         self.nettype = nettype
-        self.usable = list()
         self.reserved = list()
         self.loc_type = loc_type
         self.loc_name = loc_name
@@ -76,16 +159,66 @@ class NetworkInfo(IPv4Network):
             self.reserved.append(DummyIP(self[offset]))
 
         first_usable = max(offsets or [4]) + 1
-        for i in range(first_usable, self.numhosts - 1):
-            self.usable.append(DummyIP(self[i]))
+        self.usable = IPGenerator(self, first_usable)
+
+    def __getattr__(self, name):
+        # Proxy lookups to the wrapped network object
+        if "_network" not in self.__dict__:
+            # Happens while unpickling
+            raise AttributeError
+        return getattr(self._network, name)
+
+    def __getitem__(self, idx):
+        # Cast the result to DummyIP, so the .mac property can be used
+        return DummyIP(self._network[idx])
+
+    def __str__(self):
+        return str(self._network)
+
+    def __repr__(self):
+        return repr(self._network)
+
+    def __contains__(self, other):
+        # Using a network on the left hand side of "in" works with ipaddr, but
+        # will return the wrong answer with ipaddress.
+        assert isinstance(other, (IPv4Address, IPv6Address, DummyIP))
+        return other in self._network
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self._network == other._network
+        else:
+            return self._network == other
+
+    def __lt__(self, other):
+        if isinstance(other, type(self)):
+            return self._network < other._network
+        else:
+            return self._network < other
+
+    def __hash__(self):
+        return hash(self._network)
 
     @property
     def gateway(self):
         return self[1]
 
-    def __getitem__(self, idx):
-        # Cast the result to DummyIP, so the .mac property can be used
-        return DummyIP(super(NetworkInfo, self).__getitem__(idx))
+    @property
+    def ip(self):
+        return DummyIP(self._network.ip)
+
+    def subnet(self, new_prefix=None):
+        return [NetworkInfo(str(net.ip), net, self.nettype, self.loc_type,
+                            self.loc_name, self.side)
+                for net in self._network.subnet(new_prefix=new_prefix)]
+
+    @property
+    def is_ipv4(self):
+        return isinstance(self._network, IPv4Network)
+
+    @property
+    def is_ipv6(self):
+        return isinstance(self._network, IPv6Network)
 
 
 class DummyNetworks(object):
@@ -119,12 +252,12 @@ class DummyNetworks(object):
                     raise KeyError("Duplicate name '%s' in %s" % (row["name"],
                                                                   filename))
                 for existing in itervalues(self.networks):
-                    if n in existing or existing in n:
+                    if n.overlaps(existing):
                         raise ValueError("Overlapping networks %s and %s in %s"
                                          % (existing, n, filename))
 
                 for dynrange in itervalues(SUBNET_RANGE):
-                    if n in dynrange or dynrange in n:
+                    if n.overlaps(dynrange):
                         raise ValueError("Range %s is reserved for dynamic "
                                          "allocation" % dynrange)
 

@@ -35,7 +35,7 @@ class TestAddNetwork(TestBrokerCommand):
 
             command = ["add_network", "--network=%s" % network.name,
                        "--ip=%s" % network.ip,
-                       "--netmask=%s" % network.netmask,
+                       "--prefixlen=%s" % network.prefixlen,
                        "--" + network.loc_type, network.loc_name,
                        "--type=%s" % network.nettype,
                        "--side=%s" % network.side]
