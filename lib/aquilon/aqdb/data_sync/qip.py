@@ -91,7 +91,7 @@ class QIPRefresh(object):
         q = q.filter_by(network_environment=self.net_env)
         q = q.options(subqueryload("routers"),
                       subqueryload('network_compartment'))
-        self.aqnetworks = {item.ip: item for item in q}
+        self.aqnetworks = {item.network_address: item for item in q}
 
         # Save how many networks we had initially
         self.networks_before = len(self.aqnetworks)
@@ -345,16 +345,16 @@ class QIPRefresh(object):
             update(AddressAssignment.__table__,
                    values={'network_id': None})
             .where(and_(AddressAssignment.network_id == dbnetwork.id,
-                        or_(AddressAssignment.ip < dbnetwork.ip,
-                            AddressAssignment.ip > dbnetwork.broadcast)))
+                        or_(AddressAssignment.ip < dbnetwork.network_address,
+                            AddressAssignment.ip > dbnetwork.broadcast_address)))
         )
 
         self.session.execute(
             update(ARecord.__table__,
                    values={'network_id': None})
             .where(and_(ARecord.network_id == dbnetwork.id,
-                        or_(ARecord.ip < dbnetwork.ip,
-                            ARecord.ip > dbnetwork.broadcast)))
+                        or_(ARecord.ip < dbnetwork.network_address,
+                            ARecord.ip > dbnetwork.broadcast_address)))
         )
 
     def refresh(self, filehandle):
@@ -406,18 +406,18 @@ class QIPRefresh(object):
 
             # We have 3 cases regarding aqnet/qipinfo:
             # - One contains the other: this is a split or a merge
-            # - aqnet.ip < qipinfo.address.ip (or there is no qipinfo): the
-            #   network was deleted from QIP
-            # - qipinfo.address.ip < aqnet.ip (or there is no aqnet): a new
-            #   network was added to QIP
-            if aqnet and qipinfo and (aqnet.ip in qipinfo.address or
+            # - aqnet.network_address < qipinfo.address.ip (or there is no
+            #   qipinfo): the network was deleted from QIP
+            # - qipinfo.address.ip < aqnet.network_address (or there is no
+            #   aqnet): a new network was added to QIP
+            if aqnet and qipinfo and (aqnet.network_address in qipinfo.address or
                                       qipinfo.address.ip in aqnet.network):
                 # This is a split or a merge. The trick here is to perform
                 # multiple network additions/deletions inside the same
                 # transaction even in incremental mode, to maintain relational
                 # integrity
 
-                startip = min(aqnet.ip, qipinfo.address.ip)
+                startip = min(aqnet.network_address, qipinfo.address.ip)
                 prefixlen = min(aqnet.cidr, qipinfo.address.prefixlen)
                 supernet = IPv4Network("%s/%s" % (startip, prefixlen))
                 # We may modify aqnet.network below, so save the original value
@@ -428,7 +428,7 @@ class QIPRefresh(object):
                 # the IP address and the non-null foreign key constraints in
                 # other tables. So we need a flag to remember if we want to keep
                 # the original object or not
-                if aqnet.ip == qipinfo.address.ip:
+                if aqnet.network_address == qipinfo.address.ip:
                     self.logger.client_info("Setting network {0!s} prefix "
                                             "length to {1}"
                                             .format(aqnet,
@@ -477,14 +477,14 @@ class QIPRefresh(object):
                     else:
                         # The first subnet was missing from AQDB before
                         newnet = self.add_network(qipinfo)
-                    while aqnet and aqnet.ip in newnet.network:
+                    while aqnet and aqnet.network_address in newnet.network:
                         # Redirect addresses from the subnet to the merged
                         # network
                         fix_foreign_links(self.session, aqnet, newnet)
                         self.del_network(aqnet)
                         aqnet = heap_pop(aqnets)
                     qipinfo = heap_pop(qipnets)
-            elif aqnet and (not qipinfo or aqnet.ip < qipinfo.address.ip):
+            elif aqnet and (not qipinfo or aqnet.network_address < qipinfo.address.ip):
                 # Network is deleted
                 self.del_network(aqnet)
                 aqnet = heap_pop(aqnets)

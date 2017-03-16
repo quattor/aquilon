@@ -46,7 +46,7 @@ class VirtualSwitchFormatter(ObjectFormatter):
         skeleton.name = vswitch.name
         for pg in vswitch.port_groups:
             pg_msg = skeleton.portgroups.add()
-            pg_msg.ip = str(pg.network.ip)
+            pg_msg.ip = str(pg.network.network_address)
             pg_msg.cidr = pg.network.cidr
             pg_msg.network_tag = pg.network_tag
             pg_msg.usage = pg.usage

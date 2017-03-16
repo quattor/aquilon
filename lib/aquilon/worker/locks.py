@@ -116,7 +116,7 @@ class PlenaryKey(LockKey):
             lockset["virtual_switch"].add(str(virtual_switch))
         if network:
             lockset["network"].add("%s/%s" % (network.network_environment,
-                                              network.ip))
+                                              network.network_address))
 
         # Make sure plenary updates conflict with the global compile lock, which
         # is used by e.g. the flush command.

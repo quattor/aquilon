@@ -91,7 +91,7 @@ class CommandSplitNetwork(BrokerCommand):
         dbnets = []
         for subnet in dbnetwork.network.subnet(new_prefix=prefixlen):
             # Skip the original
-            if subnet.ip == dbnetwork.ip:
+            if subnet.ip == dbnetwork.network_address:
                 continue
 
             # Generate a new name. Make it unique, even if the DB does not

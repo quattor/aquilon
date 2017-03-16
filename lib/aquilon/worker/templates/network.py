@@ -29,7 +29,7 @@ class PlenaryNetwork(StructurePlenary):
     def template_name(cls, dbnetwork):
         return "%s/%s/%s/config" % (cls.prefix,
                                     dbnetwork.network_environment.name,
-                                    dbnetwork.ip)
+                                    dbnetwork.network_address)
 
     def get_key(self, exclusive=True):
         if self.is_deleted():
@@ -40,9 +40,9 @@ class PlenaryNetwork(StructurePlenary):
 
     def body(self, lines):
         pan_assign(lines, "name", self.dbobj.name)
-        pan_assign(lines, "network", self.dbobj.ip)
+        pan_assign(lines, "network", self.dbobj.network_address)
         pan_assign(lines, "netmask", self.dbobj.netmask)
-        pan_assign(lines, "broadcast", self.dbobj.broadcast)
+        pan_assign(lines, "broadcast", self.dbobj.broadcast_address)
         pan_assign(lines, "prefix_length", self.dbobj.cidr)
         lines.append("")
 

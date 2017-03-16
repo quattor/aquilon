@@ -191,7 +191,7 @@ class PlenaryHostData(StructurePlenary):
 
                     ifdesc["ip"] = addr.ip
                     ifdesc["netmask"] = net.netmask
-                    ifdesc["broadcast"] = net.broadcast
+                    ifdesc["broadcast"] = net.broadcast_address
                     if gateway:
                         ifdesc["gateway"] = gateway
                     ifdesc["network_type"] = net.network_type
@@ -201,7 +201,7 @@ class PlenaryHostData(StructurePlenary):
                 else:
                     aliasdesc = {"ip": addr.ip,
                                  "netmask": net.netmask,
-                                 "broadcast": net.broadcast}
+                                 "broadcast": net.broadcast_address}
                     if addr.dns_records:
                         aliasdesc["fqdn"] = addr.dns_records[0]
                     if "aliases" in ifdesc:

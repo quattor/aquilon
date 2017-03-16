@@ -16,11 +16,10 @@
 # limitations under the License.
 """Wrapper to make getting a network type simpler."""
 
-
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_, update
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Network, AddressAssignment, ARecord
 
 
@@ -49,8 +48,8 @@ def fix_foreign_links(session, oldnet, newnet):
         update(AddressAssignment.__table__,
                values={'network_id': newnet.id})
         .where(and_(AddressAssignment.network_id == oldnet.id,
-                    AddressAssignment.ip >= newnet.ip,
-                    AddressAssignment.ip <= newnet.broadcast))
+                    AddressAssignment.ip >= newnet.network_address,
+                    AddressAssignment.ip <= newnet.broadcast_address))
     )
     session.expire(oldnet, ['assignments'])
     session.expire(newnet, ['assignments'])
@@ -59,8 +58,8 @@ def fix_foreign_links(session, oldnet, newnet):
         update(ARecord.__table__,
                values={'network_id': newnet.id})
         .where(and_(ARecord.network_id == oldnet.id,
-                    ARecord.ip >= newnet.ip,
-                    ARecord.ip <= newnet.broadcast))
+                    ARecord.ip >= newnet.network_address,
+                    ARecord.ip <= newnet.broadcast_address))
     )
     session.expire(oldnet, ['dns_records'])
     session.expire(newnet, ['dns_records'])

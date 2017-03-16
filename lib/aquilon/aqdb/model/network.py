@@ -222,12 +222,16 @@ class Network(Base):
         return self.network.netmask
 
     @property
-    def broadcast(self):
+    def broadcast_address(self):
         return self.network.broadcast
 
     @property
+    def network_address(self):
+        return self.network.ip
+
+    @property
     def available_ip_count(self):
-        return int(self.broadcast) - int(self.first_usable_host)
+        return int(self.broadcast_address) - int(self.first_usable_host)
 
     @property
     def is_internal(self):
@@ -361,7 +365,7 @@ class Network(Base):
         q = q.join(AddressAssignment)
         q = q.filter(AddressAssignment.network_id == self.id,
                      AddressAssignment.ip >= self.first_usable_host,
-                     AddressAssignment.ip < self.broadcast)
+                     AddressAssignment.ip < self.broadcast_address)
         cnt = q.scalar()
 
         # Second case: count all interfaces that

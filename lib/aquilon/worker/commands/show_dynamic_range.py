@@ -43,11 +43,11 @@ class CommandShowDynamicRange(BrokerCommand):
         all_stubs = frozenset(int(stub.ip) for stub in q)
 
         start = int(ip)
-        while start > int(dbnetwork.ip) and start - 1 in all_stubs:
+        while start > int(dbnetwork.network_address) and start - 1 in all_stubs:
             start = start - 1
 
         end = int(ip)
-        while end < int(dbnetwork.broadcast) and end + 1 in all_stubs:
+        while end < int(dbnetwork.broadcast_address) and end + 1 in all_stubs:
             end = end + 1
 
         return DynamicRange(dbnetwork, IPv4Address(start), IPv4Address(end))

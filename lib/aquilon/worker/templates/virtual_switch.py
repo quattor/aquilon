@@ -47,7 +47,7 @@ class PlenaryVirtualSwitchData(StructurePlenary):
         for pg in sorted(self.dbobj.port_groups,
                          key=attrgetter("usage", "network_tag")):
             params = {"network_tag": pg.network_tag,
-                      "network_ip": pg.network.ip,
+                      "network_ip": pg.network.network_address,
                       "usage": pg.usage,
 
                       "netmask": pg.network.netmask,

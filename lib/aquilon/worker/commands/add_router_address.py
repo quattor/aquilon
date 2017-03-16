@@ -54,7 +54,7 @@ class CommandAddRouterAddress(BrokerCommand):
             dbnetwork = dbdns_rec.network
 
         assert ip in dbnetwork.network, "IP %s is outside network %s" % (ip,
-                                                                         dbnetwork.ip)
+                                                                         dbnetwork.network_address)
 
         if ip in dbnetwork.router_ips:
             raise ArgumentError("IP address {0} is already present as a router "
@@ -63,7 +63,7 @@ class CommandAddRouterAddress(BrokerCommand):
         # Policy checks are valid only for internal networks
         if dbnetwork.is_internal:
             if ip >= dbnetwork.first_usable_host or \
-               int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
+               int(ip) - int(dbnetwork.network_address) in dbnetwork.reserved_offsets:
                 raise ArgumentError("IP address {0} is not a valid router address "
                                     "on {1:l}.".format(ip, dbnetwork))
 

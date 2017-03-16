@@ -53,7 +53,7 @@ class PlenarySwitchData(StructurePlenary):
 
             vlan["vlanid"] = pan(pg.network_tag)
             net = pg.network
-            vlan["network_ip"] = net.ip
+            vlan["network_ip"] = net.network_address
             vlan["netmask"] = net.netmask
             vlan["network_type"] = net.network_type
             vlan["network_environment"] = net.network_environment.name

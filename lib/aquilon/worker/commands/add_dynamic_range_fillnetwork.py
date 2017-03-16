@@ -31,6 +31,6 @@ class CommandAddDynamicRangeFillnetwork(CommandAddDynamicRange):
                                        compel=True)
 
         arguments['startip'] = dbnetwork.first_usable_host
-        arguments['endip'] = dbnetwork.broadcast - 1
+        arguments['endip'] = dbnetwork.broadcast_address - 1
 
         return CommandAddDynamicRange.render(self, session, **arguments)
