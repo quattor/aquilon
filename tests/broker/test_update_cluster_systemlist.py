@@ -34,6 +34,24 @@ class TestUpdateClusterSystemList(TestBrokerCommand):
                         "--member", "utbhost04.aqd-unittest.ms.com",
                         "--priority", 2])
 
+    def test_100_update_rg_single_host_range_lo(self):
+        command = ["update_cluster_systemlist", "--cluster", "utbvcs1b",
+                   "--resourcegroup", "utbvcs1bas01",
+                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--priority", 0]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Value for priority (0) is outside of the configured range 1..99",
+                         command)
+
+    def test_100_update_rg_single_host_range_hi(self):
+        command = ["update_cluster_systemlist", "--cluster", "utbvcs1b",
+                   "--resourcegroup", "utbvcs1bas01",
+                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--priority", 100]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Value for priority (100) is outside of the configured range 1..99",
+                         command)
+
     def test_105_cat_utbvcs1b(self):
         command = ["cat", "--cluster", "utbvcs1b", "--resourcegroup", "utbvcs1bas01",
                    "--system_list"]

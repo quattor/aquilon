@@ -251,6 +251,8 @@ max_members_default = 8
 [archetype_hacluster]
 allow_cascaded_deco = False
 max_members_default = 2
+max_priority_order = 99
+min_priority_order = 1
 
 [archetype_metacluster]
 default_domain = ny-prod

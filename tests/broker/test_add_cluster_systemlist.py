@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016  Contributor
+# Copyright (C) 2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,25 @@ from brokertest import TestBrokerCommand
 
 class TestAddClusterSystemList(TestBrokerCommand):
 
-    def test_100_add_rg_single_host(self):
+    def test_100_add_rg_single_host_range_lo(self):
+        command = ["add_cluster_systemlist", "--cluster", "utbvcs1b",
+                   "--resourcegroup", "utbvcs1bas01",
+                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--priority", -42]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Value for priority (-42) is outside of the configured range 1..99",
+                         command)
+
+    def test_100_add_rg_single_host_range_hi(self):
+        command = ["add_cluster_systemlist", "--cluster", "utbvcs1b",
+                   "--resourcegroup", "utbvcs1bas01",
+                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--priority", 1000]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Value for priority (1000) is outside of the configured range 1..99",
+                         command)
+
+    def test_102_add_rg_single_host(self):
         self.noouttest(["add_cluster_systemlist", "--cluster", "utbvcs1b",
                         "--resourcegroup", "utbvcs1bas01",
                         "--member", "utbhost04.aqd-unittest.ms.com",
