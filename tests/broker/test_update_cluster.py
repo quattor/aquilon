@@ -159,20 +159,26 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
     def test_162_uncluster_preferred(self):
         command = ["uncluster", "--cluster", "utbvcs2a",
                    "--hostname", "utbhost10.aqd-unittest.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "High Availability Cluster utbvcs2a has "
-                         "no members inside preferred building utb2.", command)
+        (out, err) = self.successtest(command)
+        self.matchoutput(err,
+                         'Warning: Clearing cluster preferred building utb2',
+                         command)
 
-    def test_163_flip_side(self):
+    def test_163_recluster_utbvcs2a(self):
+        command = ["cluster", "--cluster", "utbvcs2a",
+                   "--hostname", "utbhost10.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_164_flip_side(self):
         self.noouttest(["update_cluster", "--cluster", "utbvcs2a",
                         "--preferred_building", "utb1"])
 
-    def test_164_show_utbvcs2a(self):
+    def test_165_show_utbvcs2a(self):
         command = ["show_cluster", "--cluster", "utbvcs2a"]
         out = self.commandtest(command)
         self.matchoutput(out, "Preferred Building: utb1", command)
 
-    def test_164_cat_utbvcs2a(self):
+    def test_165_cat_utbvcs2a(self):
         command = ["cat", "--cluster", "utbvcs2a", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,

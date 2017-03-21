@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.attributes import set_committed_value
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cluster, Personality, PriorityList,
                                 MemberPriority, HostClusterMember)
@@ -27,8 +29,8 @@ class CommandUncluster(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, plenaries, hostname, cluster, personality,
-               personality_stage, **_):
+    def render(self, session, logger, plenaries, hostname, cluster,
+               personality, personality_stage, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if not dbhost.cluster:
@@ -65,6 +67,25 @@ class CommandUncluster(BrokerCommand):
             session.expire(dbresource, ['entries'])
 
         dbcluster.hosts.remove(dbhost)
+
+        # If we removed the last host whose location is preferred,
+        # clear the preferred location.
+        if dbcluster.preferred_location:
+            # repeats some code in the cluster validation.
+            hcq = session.query(HostClusterMember)
+            hcq = hcq.filter_by(cluster=dbcluster)
+            hcq = hcq.options(joinedload('host'),
+                              joinedload('host.hardware_entity'))
+            members = hcq.all()
+            set_committed_value(dbcluster, '_hosts', members)
+
+            mlocs = dbcluster.member_locations(location_class=dbcluster.preferred_location.__class__)
+            if dbcluster.preferred_location not in mlocs:
+                # this was the last host in the preferred location
+                logger.client_info("Warning: Clearing cluster preferred "
+                                   "{0:l}".format (dbcluster.preferred_location))
+                dbcluster.preferred_location = None
+
         dbcluster.validate()
 
         session.flush()

@@ -57,6 +57,12 @@
 	    administrator will be subsequently adding other hosts to the
 	    cluster or deleting the cluster.
 	</para>
+	<para>
+	    Clusters may have a preferred building preference.  If removing
+	    the host(s) from the cluster breaks this constraint then a warning
+	    will be given but the operation will proceed, with the preferred
+	    building preference removed from the cluster.
+	</para>
     </refsect1>
 
     <refsect1>
