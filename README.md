@@ -1,44 +1,40 @@
-Aquilon
-=======
+# Aquilon
 
-Dependencies
-------------
+## Dependencies
 
 Add EPEL repository.
 
-Under Scientific Linux 7, install the following RPMs:
+Under EL7, you need to install RPMs listed below. For this you need to have the following YUM repository
+configured:
+* OS YUM repository
+* EPEL7
+* [Quattor EL7 x86_64 externals](http://yum.quattor.org/externals/x86_64/el7/)
+* [Quattor EL7 noarch externals](http://yum.quattor.org/externals/noarch/el7/)
 
-*   python
-*   python-devel
-*   python-setuptools
-*   python-dateutil
-*   python-lxml
-*   python-virtualenv
-*   PyYAML
-*   protobuf-compiler (to build the protocol buffers)
-*   protobuf-python
-*   gcc
-*   git
-*   git-daemon
-*   ant-contrib-1.0
-*   libxslt-devel
-*   libxml2-devel
-*   make
+RPMS to install are:
 
-* real version of java (not GCJ!); openjdk?, oracle?
+```bash
+yum install python python-devel python-setuptools python-dateutil python-lxml python-psycopg2
+yum install python-coverage python-ipaddr python-mako python-jsonschema PyYAML
+yum install python-db python-twisted-runner python-twisted-web
+yum install ant-apache-regexp ant-contrib-1.0 gcc
+yum install protobuf-compiler protobuf-python
+yum install gcc make git git-daemon libxslt-devel libxml2-devel java-1.8.0-openjdk-devel
+yum install panc
+yum install krb5-workstation
+# If you don't use an external Kerberos server
+yum install krb5-server
+```
 
-Kerberos
+In addition install Python `pip` and the `sqlalchemy` module (the EPEL version is too old):
 
-* krb5-server
-* krb5-workstation
+```bash
+easy_install pip
+pip install sqlalchemy
+```
 
-See instructions for [krb5
-installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html). In
-/etc/krb5.conf, change server to servername in [realms] section.
-
-
-If using a different distribution, you will need python 2.7.x and git
-1.7.x.
+If using a distribution other than EL7, you will need python 2.7.x and git
+1.7+.
 
 * protobuf
 * protobuf-devel
@@ -48,19 +44,22 @@ If using a different distribution, you will need python 2.7.x and git
 Install the knc package from the
 [Quattor repository](http://yum.quattor.org/external), or build your own from
 sources at http://oskt.secure-endpoints.com/knc.html. If you want to rebuild it,
-you will need to install krb5-devel RPM
+you will need to install krb5-devel RPM.
+
+In addition, if you want to be able to run the broker as a normal user (for testing purpose) and to install
+the required dependencies without being `root`, you need to install Python `virtualenv`.
 ```bash
 easy_install virtualenv
 ```
 
 
-Cloning the git repositories
-----------------------------
+## Cloning the git repositories
+
 
 Protocols:
 
 ```bash
-cd ~
+cd your_work_directory
 git clone https://github.com/quattor/aquilon-protocols.git
 ```
 
@@ -68,6 +67,7 @@ Pass in an alternate INSTALLDIR if desired.  Compiling the protocol
 buffers into perl may fail.
 
 ```bash
+cd aquilon-protocols
 make PROTOC=protoc install
 # or
 make INSTALLDIR=/usr/local/lib/aquilon/protocols PROTOC=protoc install
@@ -79,146 +79,160 @@ cd /opt/
 git clone https://github.com/quattor/aquilon.git
 ```
 
-Installation
-------------
+## Installation
 
-Run as root to install to a system directory, or run as a normal user
-to install into a user-writable location.
+If the installation is done as root and all the dependencies (liste in `/opt/aquilon/setup.py` have been installed
+as RPM or using the `pip` command, there is no more installation steps to do and you should be able to run the
+`/opt/aquilon/tests/dev_aqd.sh`. This command should fail with:
+
+```
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) unable to open database file
+```
+
+Any other error means that something is wrong in the installation
+
+### Installation as a non-root user
+
+To install Aquilon without being root you need to install Python virtualenv and run the following commands
 
 ```bash
-cd tools
+cd aquilon/tools
 ./bootstrap_env.py > aq_env.py
+aq_env.py --python=python2.7 --prompt="(aquilon) " /usr/local/aquilon/pythonenv --system-site-packages
 ```
 
-The `cx_Oracle` install will fail if there is no local Oracle client
-installed - that's fine.  Some versions may fail to install, and the
-current stable version will be installed instead.
+Note:
 
-```bash
-python2.7 aq_env.py --python=python2.7 --prompt="(aquilon) " /usr/local/aquilon/pythonenv --system-site-packages
-```
+ * The `cx_Oracle` install will fail if there is no local Oracle client installed - that's fine.
+ * `cdb` package installed as a RPM will be reported as missing but it should not prevent the installation to work
+ * For some packages, the current stable version may be used instead of the minimum requested version
 
-(look in following for installed files
- `/usr/local/aquilon/pythonenv`
- `/opt/aquilon`
- `/usr/local/bin/aquilon`)
+If the installation succeeded, the following directories should be present: `/usr/local/aquilon/pythonenv`
+and `/usr/local/bin/aquilon`.
 
-An environment has now been setup appropriate for running commands and development.
-
-To activate the environment:
-
+To add the Aquilon dependencies to Python path, execute:
 ```bash
 source /usr/local/aquilon/pythonenv/bin/activate
 ```
 
-Alternately, just add the bin directory to the $PATH.
+## Broker Configuration
 
 
-Configuration
--------------
+### Create the Broker Configuration
 
 Setup up the aquilon broker configuration file.  There is an example
-in etc/aqd.conf.example.com.  Copy that to the system /etc/aqd.conf or
-just set the `AQDCONF` environment variable to point wherever it is
-installed.  Update the file as needed. The default will use a sqlite
-database back-end.
+in `/opt/aquilon/etc/aqd.conf.default`.  Copy this file to `/etc/aqd.conf`
+(or define the `AQDCONF` environment variable to point wherever it is
+installed). The default will use a sqlite database back-end. Main required
+changes are:
 
-(change configuration from `database_oracle` to `database_sqlite`)
+* `dsdb`: change to `/bin/true`
+* `git_daemon`: change to `/usr/libexec/git-core/git-daemon`
+* `ant_contrib_jar`: change to `/usr/share/java/ant/ant-contrib.jar`
+* Comment out every else in the `tool_locations` section that point to a path
+starting with `/ms`
+* `pan_compiler`: change to `/usr/bin/panc`
+* `directory`(in `protocols`section): change to `/usr/local/lib/aquilon/protocols/lib/python`
 
-(add directories `/var/quattor` `/var/quattor/logs` `/var/quattor/aquilondb`)
 
-Take a look at the example load file for the database in the aquilon
-source repository's tests/aqdb/data/example.dump.  Update as desired for
-the site.  When ready, a database can be initialized (or recreated)
-with the following command.
+### Configure the Kerberos Server
 
-```bash
-sqlite3 /var/quattor/aquilondb/aquilon.db < /opt/aquilon/tests/data/example.dump 
-```
+If you don't rely on an existing Kerberos server, you need to setup one. See the
+following [instructions](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html).
+In `/etc/krb5.conf`, change server to servername in [realms] section.*
 
-Set up AQDCONF (or have an /etc/aqd.conf) as described above first.
-Create the database directory if using sqlite and it does not exist.
+*Note: if you install the Kerberos on a new machine with not a lot of activity, it may take
+a while for the Kerberos database creation to complete, due to its need to wait for enough
+randomness entropy. To speed up this process, you can follow the recipe at
+http://championofcyrodiil.blogspot.fr/2014/01/increasing-entropy-in-vm-for-kerberos.html.*
 
-```bash
-cd ../tests/aqdb
-./build_db.py -D
-```
+Be sure to definie properly the domain associated with your realm: it must match your actual
+domain.
 
-(ignore warning on administration not setup)
+If you don't run as `root`, be sure to create a keytab for the current user.
 
-Make sure there is a keytab set up for the running user, and then
-try starting up a development broker:
+### Create a User to Run the Broker
 
-(add to configuration file /etc/aqd.conf:
-
-```ini
-[protocols]
-directory=/usr/local/lib/aquilon/protocols/lib/python
-```
-
-and
+It is recommended not to run the broker as root. This is causing quite a number of problem with
+Kerberos in particular. To create and configure a user to run the broker:
 
 ```bash
-export AQDCONF=/etc/aqd.conf
+adduser aquilon
+mkdir /var/spool/keytabs
+kadmin.local
+kadmin.local: addprinc aquilon
+kadmin.local: addprinc aquilon/your.host.fqdn
+kadmin.local: ktadd -k /var/spool/keytabs/aquilon
+kadmin.local: quit
+chown aquilon:aquilon /var/spool/keytabs/aquilon
 ```
-)
 
+### Initialize the Aquilon Database
 
-(change aqd.conf.defaults in aquilon install etc area)
+To create the Aquilon database:
 
 ```bash
-cd ..
-./dev_aqd.sh
+mkdir /var/quattor/aquilondb
+chown -R aquilon:aquilon /var/quattor
+su - aquilon
+kinit        # Enter the password you set previously
+/opt/aquilon/tests/aqdb/build_db.py
 ```
 
-In another window:
+### Test The Broker
+
+To test the broker, run ``/opt/aquilon/tests/dev_aqd.sh` that must run successfully if your
+installation is correct. Before running this script, you need to define `AQDCONF` environment
+variable to `/etc/aqd.conf` (the script uses `/etc/aqd.conf.dev` by default).
+
+To check that the broker is working properly, in another window, execute the
+following command:
 
 ```bash
-cd aqd/bin
-AQSERVICE=$USER ./aq.py status
+/opt/aquilon/bin/aq.py status
 ```
 
-To test without kerberos:
+The command should return some information on your current Aquilon environment, without any error.
+If this is the case, stop the broker started by the `dev_aqd.sh` script.
+
+
+### Start the Production Broker
+
+Starting the production service:
+
+* Edit `/opt/aquilon/etc/rc.d/init.d/aqd` and add the following lines if they are not present
+
+```
+# chkconfig: 2345 99 1
+# description: Aquilon Broker
+```
+
+* Edit `/opt/aquilon/etc/sysconfig/aqd` and change `TWISTD` to `/opt/aquilon/sbin/aqd.py`
+* Create `/var/log/aquilon` and set the owner to `aquilon:aquilon`
+* Create `/var/run/aquilon` and set the owner to `aquilon:aquilon`
+* Configure the init script and start the service
+```bash
+ln -s /opt/aquilon/etc/rc.d/init.d/aqd /etc/init.d
+chkconfig --add aqd
+ln -s /opt/aquilon/etc/sysconfig/aqd /etc/sysconfig
+service aqd start
+```
+
+### Git Daemon Configuration
+
+Create a bare Git repository in /var/quattor/template-king that will be the master repository for
+the templates:
 
 ```bash
-./aq.py status --noauth
+git init --bare /var/quattor/template-king
 ```
 
-Misc. Bits
-----------
-
-```bash
-chmod a+x     /usr/local/aquilon/pythonenv/bin/activate
-```
-source this instead...
-
-Need to create a kerberos keytab...
-
-change service `AQSERVICE`:
-
-```bash
-export AQSERVICE=aqd
-export AQDCONF=/etc/aqd.conf
-```
-
-Setup bare git repository in /var/quattor/template-king.
-
-in aqd.conf.defaults, change:
-
-```ini
-dsdb = /bin/echo
-dsdb_use_testdb = True
-```
-
-
-# starting git
+Then start the Git daemon:
 
 ```bash
 git daemon --export-all --base-path=/var /var/quattor/template-king/ &
 ```
 
-# production service...
+## Aquilon DB Configuration
 
-```bash
-python2.7 /opt/aquilon/bin/twistd.py --logfile=/var/log/aqd.log aqd
-```
+See http://www.quattor.org/documentation/2013/10/25/aquilon-site.html
