@@ -128,7 +128,7 @@ changes are:
 * `ant_contrib_jar`: change to `/usr/share/java/ant/ant-contrib.jar`
 * Comment out every else in the `tool_locations` section that point to a path
 starting with `/ms`
-* `pan_compiler`: change to `/usr/bin/panc`
+* `pan_compiler`: change to `/usr/lib/panc.jar`
 * `directory`(in `protocols`section): change to `/usr/local/lib/aquilon/protocols/lib/python`
 
 
