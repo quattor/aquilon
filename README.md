@@ -1,6 +1,11 @@
 # Aquilon
 
-## Dependencies
+The instruction below describes how to install Aquilon from the sources and run it as a non-root user. The
+installation steps described here require that you are root on the machine. It is possible to do the
+installation itself as an ordinary user, using a Python virtualenv, but this is not described here (if
+you need it, you are assumed to know what is involved in setting a virtualenv environment).
+
+## Install Dependencies
 
 Add EPEL repository.
 
@@ -16,7 +21,7 @@ RPMS to install are:
 ```bash
 yum install python python-devel python-setuptools python-dateutil python-lxml python-psycopg2
 yum install python-coverage python-ipaddr python-mako python-jsonschema PyYAML
-yum install python-db python-twisted-runner python-twisted-web
+yum install python-cdb python-twisted-runner python-twisted-web
 yum install ant-apache-regexp ant-contrib-1.0 gcc
 yum install protobuf-compiler protobuf-python
 yum install gcc make git git-daemon libxslt-devel libxml2-devel java-1.8.0-openjdk-devel
@@ -40,17 +45,6 @@ If using a distribution other than EL7, you will need python 2.7.x and git
 * protobuf-devel
 * protobuf-compiler
 * protobuf-python
-
-Install the knc package from the
-[Quattor repository](http://yum.quattor.org/external), or build your own from
-sources at http://oskt.secure-endpoints.com/knc.html. If you want to rebuild it,
-you will need to install krb5-devel RPM.
-
-In addition, if you want to be able to run the broker as a normal user (for testing purpose) and to install
-the required dependencies without being `root`, you need to install Python `virtualenv`.
-```bash
-easy_install virtualenv
-```
 
 
 ## Cloning the git repositories
@@ -93,7 +87,10 @@ Any other error means that something is wrong in the installation
 
 ### Installation as a non-root user
 
-To install Aquilon without being root you need to install Python virtualenv and run the following commands
+**This section is for advanced users only.**
+
+If you install Aquilon in a Python virtualenv, you need to run the following commands to get the
+dependencies into your virtualenv.
 
 ```bash
 cd aquilon/tools
@@ -172,7 +169,7 @@ chown aquilon:aquilon /var/spool/keytabs/aquilon
 To create the Aquilon database:
 
 ```bash
-mkdir /var/quattor/aquilondb
+mkdir -p /var/quattor/aquilondb
 chown -R aquilon:aquilon /var/quattor
 su - aquilon
 kinit        # Enter the password you set previously
