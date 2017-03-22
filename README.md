@@ -5,6 +5,8 @@ installation steps described here require that you are root on the machine. It i
 installation itself as an ordinary user, using a Python virtualenv, but this is not described here (if
 you need it, you are assumed to know what is involved in setting a virtualenv environment).
 
+*Note: the commands provided in this documentation are intended to be copy/pasted.*
+
 ## Install Dependencies
 
 Add EPEL repository.
@@ -28,10 +30,9 @@ yum install python python-devel python-setuptools python-dateutil python-lxml py
 yum install krb5-server
 ```
 
-In addition install Python `pip` and the `sqlalchemy` module (the EPEL version is too old):
+In addition install the `sqlalchemy` module from PIP (the EPEL version is too old):
 
 ```bash
-easy_install pip
 pip install sqlalchemy
 ```
 
@@ -216,10 +217,19 @@ service aqd start
 ### Git Daemon Configuration
 
 Create a bare Git repository in /var/quattor/template-king that will be the master repository for
-the templates:
+the templates and create its `prod` branch (which is expected to exist after the database
+initialization but is not created):
 
 ```bash
 git init --bare /var/quattor/template-king
+cd /tmp
+git clone /var/quattor/template-king
+cd template-king
+touch README.md      # You may want to add something in it but this is not required
+git add README.md
+# If Git complains about missing user.email and user.name, define them (actual value does not matter)
+git commit -am 'Empty README added'
+git push origin master:prod
 ```
 
 Then start the Git daemon:
