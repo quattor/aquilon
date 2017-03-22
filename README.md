@@ -25,7 +25,7 @@ yum install python-cdb python-twisted-runner python-twisted-web
 yum install ant-apache-regexp ant-contrib-1.0 gcc
 yum install protobuf-compiler protobuf-python
 yum install gcc make git git-daemon libxslt-devel libxml2-devel java-1.8.0-openjdk-devel
-yum install panc
+yum install panc knc
 yum install krb5-workstation
 # If you don't use an external Kerberos server
 yum install krb5-server
