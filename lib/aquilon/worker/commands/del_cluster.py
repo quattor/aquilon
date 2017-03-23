@@ -22,11 +22,10 @@ from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 
 
-def del_cluster(session, logger, dbcluster, config):
+def del_cluster(session, logger, plenaries, dbcluster, config):
     check_no_provided_service(dbcluster)
 
     if dbcluster.virtual_machines:
@@ -50,22 +49,20 @@ def del_cluster(session, logger, dbcluster, config):
             raise ArgumentError("{0} still has {1:l} assigned, please delete "
                                 "it first.".format(dbcluster, res))
 
-    plenaries = PlenaryCollection(logger=logger)
-    plenaries.append(Plenary.get_plenary(dbcluster))
+    plenaries.add(dbcluster)
 
     if dbcluster.metacluster:
         dbmetacluster = dbcluster.metacluster
-        plenaries.append(Plenary.get_plenary(dbmetacluster))
+        plenaries.add(dbmetacluster)
         dbmetacluster.members.remove(dbcluster)
         dbmetacluster.validate()
 
     if dbcluster.resholder:
-        plenaries.extend(map(Plenary.get_plenary,
-                             dbcluster.resholder.resources))
+        plenaries.add(dbcluster.resholder.resources)
 
     # Clean up service bindings
     for si in dbcluster.services_used:
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
+        plenaries.add(si, cls=PlenaryServiceInstanceServer)
 
     del dbcluster.services_used[:]
 
@@ -81,9 +78,10 @@ def del_cluster(session, logger, dbcluster, config):
 
 
 class CommandDelCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, **_):
+    def render(self, session, logger, plenaries, cluster, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        del_cluster(session, logger, dbcluster, self.config)
+        del_cluster(session, logger, plenaries, dbcluster, self.config)

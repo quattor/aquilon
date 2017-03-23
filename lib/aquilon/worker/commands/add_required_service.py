@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,12 +32,14 @@ class CommandAddRequiredService(BrokerCommand):
                                 .format(dbservice, dbarchetype))
         dbarchetype.required_services.append(dbservice)
 
-    def render(self, session, service, archetype, justification, user,
+    def render(self, session, logger, service, archetype, justification, user,
                reason, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        dbarchetype.require_compileable("required services are not supported")
+
         dbservice = Service.get_unique(session, name=service, compel=True)
 
-        validate_prod_archetype(dbarchetype, user, justification, reason)
+        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
 
         self._update_dbobj(dbarchetype, dbservice)
 

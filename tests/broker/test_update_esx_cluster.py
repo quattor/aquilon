@@ -118,13 +118,14 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          """include { "personality/vulcan-10g-server-prod/config" };""",
                          command)
 
+        # FIXME: This is a no-op for now, due to using the prod templates
         command = ["reconfigure", "--membersof=utecl1",
                    "--archetype=vmhost",
-                   "--osname=esxi", "--osver=4.1.0-u1"]
+                   "--osname=esxi", "--osver=5.0.0"]
         out = self.successtest(command)
 
         command = ["search_host", "--cluster=utecl1",
-                   "--osversion=4.1.0-u1"]
+                   "--osversion=5.0.0"]
         updated_hosts = sorted(self.commandtest(command).splitlines())
         self.assertTrue(updated_hosts, "No hosts found using %s" % command)
 
@@ -136,7 +137,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", updated_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         """include { "os/esxi/4.1.0-u1/config" };""",
+                         """include { "os/esxi/5.0.0/config" };""",
                          command)
 
         command = ["reconfigure", "--membersof=utecl1",

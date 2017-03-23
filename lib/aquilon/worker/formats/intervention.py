@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014  Contributor
+# Copyright (C) 2011,2012,2013,2014,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@ class InterventionFormatter(ResourceFormatter):
 
     def extra_details(self, intervention, indent=""):
         details = []
-        details.append("  Start: %s" % intervention.start_date)
-        details.append("  Expires: %s" % intervention.expiry_date)
-        details.append("  Justification: %s" % intervention.justification)
+        details.append(indent + "  Start: %s" % intervention.start_date)
+        details.append(indent + "  Expires: %s" % intervention.expiry_date)
+        details.append(indent + "  Reason: %s" % intervention.reason)
         if intervention.users:
-            details.append("  Allow Users: %s" % intervention.users)
+            details.append(indent + "  Allow Users: %s" % intervention.users)
         if intervention.groups:
-            details.append("  Allow Groups: %s" % intervention.groups)
+            details.append(indent + "  Allow Groups: %s" % intervention.groups)
         if intervention.disabled:
-            details.append("  Disabled Actions: %s" % intervention.disabled)
+            details.append(indent + "  Disabled Actions: %s" % intervention.disabled)
         return details
 
     def fill_proto(self, resource, skeleton, embedded=True,
@@ -47,7 +47,7 @@ class InterventionFormatter(ResourceFormatter):
             skeleton.ivdata.users = resource.users
         if resource.groups is not None:
             skeleton.ivdata.groups = resource.groups
-        skeleton.ivdata.justification = resource.justification
+        skeleton.ivdata.justification = resource.reason
         if resource.disabled is not None:
             skeleton.ivdata.disabled = resource.disabled
 

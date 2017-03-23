@@ -20,14 +20,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser, ChooserCache
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClientCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster", "service"]
 
-    def render(self, session, logger, cluster, service, instance, force=False,
+    def render(self, session, logger, plenaries, cluster, service, instance, force=False,
                **_):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -39,15 +39,13 @@ class CommandBindClientCluster(BrokerCommand):
             dbinstance = None
 
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         # FIXME: this logic should be in the chooser
         for dbobj in dbcluster.all_objects():
             # Always add the binding on the cluster we were called on
             if dbobj == dbcluster or dbservice in dbobj.required_services:
-                chooser = Chooser(dbobj, logger=logger, required_only=False,
-                                  cache=chooser_cache)
-                choosers.append(chooser)
+                chooser = Chooser(dbobj, plenaries, logger=logger,
+                                  required_only=False, cache=chooser_cache)
                 try:
                     chooser.set_single(dbservice, dbinstance, force=force)
                 except ArgumentError as err:
@@ -59,10 +57,7 @@ class CommandBindClientCluster(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
-
         plenaries.write()
 
         return

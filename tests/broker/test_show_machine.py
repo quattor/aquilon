@@ -77,7 +77,7 @@ class TestShowMachine(TestBrokerCommand):
         self.assertEqual(machine.model.name, "hs21-8853")
         self.assertEqual(machine.model.vendor, "ibm")
         self.assertEqual(machine.model.model_type, "blade")
-        self.assertEqual(machine.cpu, "xeon_2660")
+        self.assertEqual(machine.cpu, "e5-2660")
         self.assertEqual(machine.cpu_count, 2)
         self.assertEqual(machine.memory, 8192)
         self.assertEqual(machine.serial_no, "KPDZ406")

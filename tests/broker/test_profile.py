@@ -54,57 +54,11 @@ class TestProfile(TestBrokerCommand):
         self.assertEqual(campus.text, "ny", "Campus value was '%s' instead of ny"
                          % campus.text)
 
-        domains = sysloc.xpath("list[@name='dns_search_domains']/string")
-        self.assertTrue(domains, "No DNS search domains set")
-        searchlist = [e.text for e in domains]
-        # DNS maps:
-        # - aqd-unittest.ms.com comes from rack ut3
-        # - utroom1 also has aqd-unittest.ms.com mapped _after_ td1 and td2,
-        #   but the rack mapping is more specific, so aqd-unittest.ms.com
-        #   remains at the beginning
-        # - new-york.ms.com comes from the campus
-        expect = ['aqd-unittest.ms.com', 'td1.aqd-unittest.ms.com',
-                  'td2.aqd-unittest.ms.com', 'new-york.ms.com']
-        self.assertEqual(searchlist, expect,
-                         "dns_search_domains in sysloc was %s instead of %s" %
-                         (repr(searchlist), repr(expect)))
-
     def testaquilon61sysloc(self):
         tree = self.load_profile("aquilon61.aqd-unittest.ms.com")
         sysloc = tree.xpath("nlist[@name='hardware']/nlist[@name='sysloc']")
         self.assertEqual(len(sysloc), 1, "Number of sysloc elements was %d "
                          "instead of 1" % len(sysloc))
-        sysloc = sysloc[0]
-
-        domains = sysloc.xpath("list[@name='dns_search_domains']/string")
-        self.assertTrue(domains, "No DNS search domains set")
-        searchlist = [e.text for e in domains]
-        # Not in utroom1, so no (td[12].)?aqd-unittest.ms.com
-        expect = ['new-york.ms.com']
-        self.assertEqual(searchlist, expect,
-                         "dns_search_domains in sysloc was %s instead of %s" %
-                         (repr(searchlist), repr(expect)))
-
-    def testresolver(self):
-        tree = self.load_profile("unittest00.one-nyp.ms.com")
-        rs = tree.xpath("nlist[@name='software']/nlist[@name='components']/nlist[@name='resolver']")
-        self.assertEqual(len(rs), 1, "Number of resolver elements was %d "
-                         "instead of 1" % len(rs))
-        rs = rs[0]
-
-        searchlist = [e.text for e in rs.xpath("list[@name='search']/string")]
-        # DNS maps:
-        # - aqd-unittest.ms.com comes from rack ut3
-        # - utroom1 also has aqd-unittest.ms.com mapped _after_ td1 and td2,
-        #   but the rack mapping is more specific, so aqd-unittest.ms.com
-        #   remains at the beginning
-        # - new-york.ms.com comes from the campus
-        # - ms.com comes from DEFAULT_DOMAIN in aquilon/archetype/base.tpl
-        expect = ['aqd-unittest.ms.com', 'td1.aqd-unittest.ms.com',
-                  'td2.aqd-unittest.ms.com', 'new-york.ms.com', 'ms.com']
-        self.assertEqual(searchlist, expect,
-                         "search list in resolver was %s instead of %s" %
-                         (repr(searchlist), repr(expect)))
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestProfile)

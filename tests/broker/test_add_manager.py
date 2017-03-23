@@ -198,6 +198,15 @@ class TestAddManager(TestBrokerCommand):
         self.searchoutput(out, r"Interface: mgmt0 %s$" %
                           self.net["unknown0"].usable[8].mac.lower(), command)
 
+    def testaddunittest17(self):
+        net = self.net["ut8_oob"]
+        ip = net.usable[3]
+        self.dsdb_expect_add("unittest17r.aqd-unittest.ms.com", ip, "mgmt0", ip.mac)
+        command = ["add_manager", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--interface", "mgmt0", "--mac", ip.mac, "--ip", ip]
+        out = self.noouttest(command)
+        self.dsdb_verify()
+
     def testverifymanagerall(self):
         command = ["show", "manager", "--all"]
         out = self.commandtest(command)

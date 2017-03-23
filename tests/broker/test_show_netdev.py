@@ -43,7 +43,7 @@ class TestShowNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
-                         self.net["verari_eth1"].usable[1],
+                         self.net["ut10_eth1"].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: tor", command)
 
@@ -53,7 +53,7 @@ class TestShowNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
                          "Primary Name: ut3gd1r04.aqd-unittest.ms.com [%s]" %
-                         self.net["verari_eth1"].usable[1],
+                         self.net["ut10_eth1"].usable[1],
                          command)
         self.matchoutput(out, "Switch Type: bor", command)
         self.matchoutput(out, "Rack: ut3", command)
@@ -77,7 +77,7 @@ class TestShowNetworkDevice(TestBrokerCommand):
                          "ut3,ut,hp,uttorswitch,SNgd1r01,xge49," % ip,
                          command)
 
-        ip = self.net["verari_eth1"].usable[1]
+        ip = self.net["ut10_eth1"].usable[1]
         self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com,%s,bor,"
                          "ut3,ut,hp,uttorswitch,,loop0," % ip,
                          command)
@@ -92,8 +92,8 @@ class TestShowNetworkDevice(TestBrokerCommand):
                    "--format=csv"]
         out = self.commandtest(command)
 
-        oldip = self.net["verari_eth1"].usable[0]
-        newip = self.net["verari_eth1"].usable[1]
+        oldip = self.net["ut10_eth1"].usable[0]
+        newip = self.net["ut10_eth1"].usable[1]
         self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com,%s,bor,"
                          "ut3,ut,hp,uttorswitch,,loop0," % newip,
                          command)

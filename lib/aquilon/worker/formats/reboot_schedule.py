@@ -22,6 +22,9 @@ from aquilon.aqdb.model import RebootSchedule
 
 
 class RebootScheduleFormatter(ResourceFormatter):
+
+    suppress_name = True
+
     def extra_details(self, rs, indent=""):
         details = []
         details.append(indent + "  Week: {0.week}".format(rs))

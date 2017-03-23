@@ -61,6 +61,7 @@ default_services = {
 
     "utnotify": ["localhost"],
     "utsvc": ["utsi1", "utsi2"],
+    "utsvc2": ["utsi1"],
     "vcenter": ["ut"],
     "vmseasoning": ["salt", "pepper"],
 }
@@ -76,6 +77,8 @@ need_client_list = [
     # clients are added
     "dns"]
 
+allow_alias_bindings = [
+    "utsvc"]
 
 class TestAddService(TestBrokerCommand):
 
@@ -95,6 +98,9 @@ class TestAddService(TestBrokerCommand):
             cmd = ["add_service", "--service", service]
             if service in need_client_list:
                 cmd.append("--need_client_list")
+
+            if service in allow_alias_bindings:
+                cmd.append("--allow_alias_bindings")
 
             self.noouttest(cmd)
 

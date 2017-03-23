@@ -17,7 +17,6 @@
 # limitations under the License.
 """Module for testing the vulcan2 related commands."""
 
-from datetime import datetime
 import unittest
 
 if __name__ == "__main__":

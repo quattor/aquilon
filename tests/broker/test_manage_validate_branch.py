@@ -40,9 +40,9 @@ class TestManageValidateBranch(TestBrokerCommand):
         # aquilon63.aqd-unittest.ms.com & aquilon64.aqd-unittest.ms.com are
         # sitting in "%s/utsandbox" we manage it to managetest1 to start clean.
         self.successtest(["manage", "--hostname=aquilon63.aqd-unittest.ms.com",
-                        "--sandbox=%s/managetest1" % self.user, "--force"])
+                          "--sandbox=%s/managetest1" % self.user, "--force"])
         self.successtest(["manage", "--hostname=aquilon64.aqd-unittest.ms.com",
-                        "--sandbox=%s/managetest1" % self.user, "--force"])
+                          "--sandbox=%s/managetest1" % self.user, "--force"])
 
     def test_101_make_uncommitted_change(self):
         sandboxdir = os.path.join(self.sandboxdir, "managetest1")
@@ -102,7 +102,7 @@ class TestManageValidateBranch(TestBrokerCommand):
 
     def test_120_manage_committed(self):
         self.successtest(["manage", "--hostname=aquilon63.aqd-unittest.ms.com",
-                        "--sandbox=%s/managetest2" % self.user])
+                          "--sandbox=%s/managetest2" % self.user])
 
     def test_121_verify_manage_committed(self):
         command = "show host --hostname aquilon63.aqd-unittest.ms.com"
@@ -113,7 +113,7 @@ class TestManageValidateBranch(TestBrokerCommand):
 
     def test_130_force_manage_committed(self):
         self.successtest(["manage", "--hostname=aquilon64.aqd-unittest.ms.com",
-                        "--sandbox=%s/managetest2" % self.user, "--force"])
+                          "--sandbox=%s/managetest2" % self.user, "--force"])
 
     def test_131_verify_force_manage_committed(self):
         command = "show host --hostname aquilon64.aqd-unittest.ms.com"

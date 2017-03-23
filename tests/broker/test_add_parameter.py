@@ -136,6 +136,8 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'Following required parameters have not been specified:\s*'
                           r'Parameter Definition: windows \[required\]\s*'
                           r'Type: json\s*'
+                          r'Schema: {\s*'
+                          r'(^    .*\n)+\s*'
                           r'Template: windows\s*'
                           r'Activation: dispatch\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
@@ -273,8 +275,9 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
     def test_200_add_noncompileable(self):
         command = ["add", "parameter", "--path", "foo", "--value", "bar",
                    "--archetype", "windows", "--personality", "generic"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Archetype windows is not compileable.", command)
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "parameters are not supported.", command)
 
     def test_200_missing_stage(self):
         command = ["add_parameter", "--personality", "nostage",

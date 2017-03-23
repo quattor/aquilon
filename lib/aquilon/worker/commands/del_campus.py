@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del campus`."""
 
-
+from aquilon.aqdb.model import Campus
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.dbwrappers.location import get_location
 
 
 class CommandDelCampus(CommandDelLocation):
@@ -28,7 +27,7 @@ class CommandDelCampus(CommandDelLocation):
     required_parameters = ["campus"]
 
     def render(self, session, logger, campus, **arguments):
-        dbcampus = get_location(session, campus=campus)
+        dbcampus = Campus.get_unique(session, campus, compel=True)
         name = dbcampus.name
 
         result = CommandDelLocation.render(self, session=session, name=name,

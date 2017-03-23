@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 
 from sqlalchemy.sql import or_
 
-from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
-                                 UnimplementedError)
+from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import (HostFeature, HardwareFeature, InterfaceFeature,
                                 Archetype, Personality, PersonalityStage, Model,
                                 Domain, CompileableMixin)
@@ -28,17 +27,16 @@ from aquilon.worker.dbwrappers.change_management import (validate_justification,
                                                          validate_prod_personality)
 from aquilon.worker.dbwrappers.feature import (add_link, check_feature_template,
                                                get_affected_plenaries)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindFeature(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ['feature']
 
-    def render(self, session, logger, feature, archetype, personality,
+    def render(self, session, logger, plenaries, feature, archetype, personality,
                personality_stage, model, vendor, interface, justification,
                reason, user, **_):
-        plenaries = PlenaryCollection(logger=logger)
 
         params = {}
 
@@ -62,9 +60,7 @@ class CommandBindFeature(BrokerCommand):
             raise ArgumentError("Please specify either an archetype or "
                                 "a personality when binding a feature.")
 
-        if not dbarchetype.is_compileable:
-            raise UnimplementedError("Binding features to non-compilable "
-                                     "archetypes is not implemented.")
+        dbarchetype.require_compileable("feature bindings are not supported")
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.
@@ -104,11 +100,11 @@ class CommandBindFeature(BrokerCommand):
                     raise AuthorizationException("Changing feature bindings for "
                                                  "a owner_only feature where owner grns "
                                                  "do not match requires --justification.")
-                validate_justification(user, justification, reason)
+                validate_justification(user, justification, reason, logger)
             else:
-                validate_prod_personality(dbstage, user, justification, reason)
+                validate_prod_personality(dbstage, user, justification, reason, logger)
         else:
-            validate_prod_archetype(dbarchetype, user, justification, reason)
+            validate_prod_archetype(dbarchetype, user, justification, reason, logger)
 
         # Step 4: do it
         get_affected_plenaries(session, dbfeature, plenaries, **params)

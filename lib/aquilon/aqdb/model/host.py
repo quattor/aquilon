@@ -16,7 +16,6 @@
 # limitations under the License.
 """ The majority of the things we're interested in for now are hosts. """
 
-from collections import defaultdict
 from datetime import datetime
 
 from sqlalchemy import (Boolean, DateTime, String, Column, ForeignKey,
@@ -103,24 +102,6 @@ class Host(CompileableMixin, Base):
             return self.owner_grn
         else:
             return self.personality_stage.owner_grn
-
-    @property
-    def effective_grns(self):
-        # process grns
-        eon_id_map = defaultdict(set)
-        pers_eon_id_map = defaultdict(set)
-
-        # own
-        for grn_rec in self.grns:
-            eon_id_map[grn_rec.target].add(grn_rec.grn)
-        for grn_rec in self.personality_stage.grns:
-            pers_eon_id_map[grn_rec.target].add(grn_rec.grn)
-
-        for target in pers_eon_id_map:
-            if target not in eon_id_map:
-                eon_id_map[target] = pers_eon_id_map[target]
-
-        return eon_id_map
 
     @property
     def required_services(self):

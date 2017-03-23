@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016  Contributor
+# Copyright (C) 2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ PPROD = "justify-prod"
 QPROD = "justify-qa"
 AUTHERR = "The operation has production impact, --justification is required."
 AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
+AUTHERR3 = "Unauthorized: Authorization error"
 
 
 class TestJustification(PersonalityTestMixin, TestBrokerCommand):
@@ -259,6 +260,18 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         self.statustest(command)
+
+    def test_350_map_service(self):
+        command = ["map", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR, command)
+
+    def test_360_unmap_service(self):
+        command = ["unmap", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR, command)
 
     def test_400_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
@@ -632,6 +645,29 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["del", "feature", "--feature", "nonpublicfeature",
                    "--type", "host"]
         self.noouttest(command)
+
+    def test_860_rejected_tcm(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "tcm=87654321"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR3, command)
+
+    def test_870_accepted_sn(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "sn=CHG123456"]
+        self.noouttest(command)
+
+    def test_880_rejected_sn(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "sn=CHG654321"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, AUTHERR3, command)
 
     def test_900_cleanup(self):
         h = "aquilon91.aqd-unittest.ms.com"

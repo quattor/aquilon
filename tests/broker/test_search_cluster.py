@@ -237,6 +237,22 @@ class TestSearchCluster(TestBrokerCommand):
         self.matchclean(out, "utecl3", command)
         self.matchclean(out, "utecl4", command)
 
+    def testmemberlocationlist(self):
+        command = ["search_cluster", "--member_building", "utb1,utb3"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utbvcs4a", command)
+        self.matchoutput(out, "utbvcs4b", command)
+        self.matchoutput(out, "utbvcs5c", command)
+        self.matchclean(out, "utbvcs1", command)
+        self.matchclean(out, "utbvcs2", command)
+        self.matchclean(out, "utecl1", command)
+        self.matchclean(out, "utgrid1", command)
+        self.matchclean(out, "utstorage1", command)
+
+    def testmemberlocationlistempty(self):
+        command = ["search_cluster", "--member_building", "ut,np"]
+        self.noouttest(command)
+
     def testshareavailable(self):
         command = "search cluster --share test_share_2"
         out = self.commandtest(command.split(" "))

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,14 +28,15 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.network import get_network_byip
-from aquilon.worker.templates import Plenary, PlenaryCollection, PlenaryHost
+from aquilon.worker.templates import PlenaryHost
 
 
 class CommandAddStaticRoute(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["ip"]
 
-    def render(self, session, logger, gateway, networkip, ip, netmask,
+    def render(self, session, logger, plenaries, gateway, networkip, ip, netmask,
                prefixlen, network_environment, comments, personality,
                personality_stage, archetype, justification, reason, user, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -75,16 +76,15 @@ class CommandAddStaticRoute(BrokerCommand):
             raise ArgumentError("%s is not a network address; "
                                 "did you mean %s." % (ip, dest.network))
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
-            validate_prod_personality(dbstage, user, justification, reason)
+            validate_prod_personality(dbstage, user, justification, reason, logger)
             if dbstage.created_implicitly:
-                plenaries.append(Plenary.get_plenary(dbstage))
+                plenaries.add(dbstage)
         else:
             dbstage = None
 
@@ -119,7 +119,7 @@ class CommandAddStaticRoute(BrokerCommand):
         q = q.join(HardwareEntity, Interface, AddressAssignment)
         q = q.filter_by(network=dbnetwork)
         q = q.options(PlenaryHost.query_options())
-        plenaries.extend(Plenary.get_plenary(dbhost) for dbhost in q)
+        plenaries.add(q)
 
         plenaries.write(verbose=True)
 

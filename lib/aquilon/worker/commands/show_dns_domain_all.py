@@ -29,8 +29,6 @@ class CommandShowDnsDomainAll(BrokerCommand):
     def render(self, session, **_):
         q = session.query(DnsDomain)
         q = q.options(undefer('comments'),
-                      subqueryload('dns_maps'),
-                      lazyload('dns_maps.dns_domain'),
                       subqueryload('_ns_records'),
                       lazyload('_ns_records.dns_domain'),
                       joinedload('_ns_records.a_record.fqdn'),

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2013,2014,2015,2016  Contributor
+# Copyright (C) 2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -130,8 +130,8 @@ class TestConsistency(TestBrokerCommand):
 
     def test_115_verify_delete_orphaned_branch(self):
         kingdir = self.config.get("broker", "kingdir")
-        command = ["log", "--no-color", "-n", "1", self.config.get("broker",
-                                                                   "trash_branch")]
+        command = ["show", "--no-patch", "--format=%B",
+                   self.config.get("broker", "trash_branch")]
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Delete orphaned branch branch-only", command)
 
@@ -160,12 +160,12 @@ class TestConsistency(TestBrokerCommand):
         self.noouttest(["update_domain", "--domain", "domain-no-filesystem",
                         "--archived"])
         self.statustest(["del_domain", "--domain", "domain-no-filesystem",
-                         "--justification", "tcm=123456"])
+                         "--justification", "tcm=12345678"])
 
         self.noouttest(["update_domain", "--domain", "domain-no-template-king",
                         "--archived"])
         self.statustest(["del_domain", "--domain", "domain-no-template-king",
-                         "--justification", "tcm=123456"])
+                         "--justification", "tcm=12345678"])
 
         self.statustest(["del_sandbox", "--sandbox", "sandbox-no-template-king"])
 

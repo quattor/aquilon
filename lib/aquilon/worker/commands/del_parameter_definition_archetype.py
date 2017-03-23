@@ -22,14 +22,14 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
                                                  lookup_paramdef,
                                                  add_arch_paramdef_plenaries)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelParameterDefintionArchetype(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["path", "archetype"]
 
-    def render(self, session, logger, archetype, path, **_):
+    def render(self, session, plenaries, archetype, path, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         path = ParamDefinition.normalize_path(path, strict=False)
         db_paramdef, _ = lookup_paramdef(dbarchetype, path)
@@ -43,7 +43,6 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
                                 "cannot be deleted: {1!s}"
                                 .format(path, ", ".join(sorted(holders))))
 
-        plenaries = PlenaryCollection(logger=logger)
 
         param_def_holder.param_definitions.remove(db_paramdef)
 

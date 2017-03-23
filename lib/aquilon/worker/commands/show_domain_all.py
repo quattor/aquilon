@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show domain --all`."""
 
-from sqlalchemy.orm import joinedload, undefer
+from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Domain
@@ -27,7 +27,6 @@ class CommandShowDomainAll(BrokerCommand):
     def render(self, session, **_):
         q = session.query(Domain)
         q = q.options(undefer('comments'),
-                      joinedload('owner'),
                       undefer('tracked_branch.comments'))
         q = q.order_by(Domain.name)
         return q.all()

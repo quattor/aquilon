@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ dirs = [config.get("unittest", "scratchdir")]
 if config.has_option("database", "dbfile"):
     dirs.append(os.path.dirname(config.get("database", "dbfile")))
 for label in ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
-              "profilesdir", "plenarydir", "cfgdir", "kingdir", "swrepdir"]:
+              "profilesdir", "plenarydir", "cfgdir", "kingdir"]:
     dirs.append(config.get("broker", label))
 
 existing_dirs = [d for d in dirs if os.path.exists(d)]

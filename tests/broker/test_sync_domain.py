@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class TestSyncDomain(TestBrokerCommand):
 
     def testverifygitlog(self):
         kingdir = self.config.get("broker", "kingdir")
-        command = ["log", "--no-color", "-n", "1", "ut-prod"]
+        command = ["show", "--no-patch", "--format=%B", "ut-prod"]
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Justification: tcm=12345678", command)
 

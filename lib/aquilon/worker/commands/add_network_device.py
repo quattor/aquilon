@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,16 +27,16 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandAddNetworkDevice(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["network_device", "model", "type",
                            "ip", "interface", "iftype"]
 
-    def render(self, session, logger, network_device, label, model, type, ip,
+    def render(self, session, logger, plenaries, network_device, label, model, type, ip,
                interface, iftype, mac, vendor, serial, comments,
                archetype, domain, sandbox, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
@@ -93,10 +93,10 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
-        plenaries.append(Plenary.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbhost))
+        # Add the legacy template separately
+        plenaries.add(dbnetdev, cls=PlenarySwitchData)
+        plenaries.add(dbnetdev)
+        plenaries.add(dbhost)
 
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)

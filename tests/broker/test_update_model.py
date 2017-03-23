@@ -38,7 +38,7 @@ class TestUpdateModel(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
+                          r'create\("hardware/cpu/intel/l5520"\)\s*\);',
                           command)
         self.matchoutput(out, '"capacity", 15*GB,', command)
         self.matchoutput(out, '"interface", "sata",', command)
@@ -103,7 +103,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_210_updatedisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
-                   "--cpuname=xeon_2660", "--cpuvendor=intel",
+                   "--cpuname=e5-2660", "--cpuvendor=intel",
                    "--disktype=local"]
         self.noouttest(command)
 
@@ -112,7 +112,7 @@ class TestUpdateModel(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "MachineSpecs for utvendor utmedium:",
                          command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 1", command)
+        self.matchoutput(out, "Cpu: e5-2660 x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
         self.matchoutput(out, "Disk: sda 45 GB scsi (local)", command)
 

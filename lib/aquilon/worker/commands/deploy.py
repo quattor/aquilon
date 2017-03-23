@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ class CommandDeploy(BrokerCommand):
             #    logger.warning("Warning: this deployment request was not "
             #                   "approved, this will be an error in the future.")
 
-            validate_justification(user, justification, reason)
+            validate_justification(user, justification, reason, logger)
 
         if dbtarget.archived:
             raise ArgumentError("{0} is archived and cannot be changed."
@@ -115,12 +115,22 @@ class CommandDeploy(BrokerCommand):
             merge_msg.append("Merge remote branch 'origin/%s' into %s" %
                              (dbsource.name, dbtarget.name))
             merge_msg.append("")
+
+            # TODO: The rest tries to look RFC2822-parseable, but e.g. a newline
+            # in --reason may cause surprises.
             merge_msg.append("User: %s" % user)
-            merge_msg.append("Request ID: %s" % requestid)
+            merge_msg.append("Request-ID: %s" % requestid)
             if justification:
                 merge_msg.append("Justification: %s" % justification)
             if reason:
                 merge_msg.append("Reason: %s" % reason)
+
+            if dbreview:
+                if dbreview.review_url:
+                    merge_msg.append("Code-Review-URL: %s" %
+                                     dbreview.review_url)
+                if dbreview.testing_url:
+                    merge_msg.append("Testing-URL: %s" % dbreview.testing_url)
 
             try:
                 cmd = ["merge", "--no-ff", "origin/%s" % dbsource.name,

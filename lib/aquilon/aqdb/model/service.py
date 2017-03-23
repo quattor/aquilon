@@ -60,6 +60,7 @@ class Service(Base):
     need_client_list = Column(Boolean, nullable=False, default=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
+    allow_alias_bindings = Column(Boolean, default=False, nullable=False)
     comments = Column(String(255), nullable=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)

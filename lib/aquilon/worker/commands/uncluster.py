@@ -16,17 +16,18 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, Personality
+from aquilon.aqdb.model import (Cluster, Personality, PriorityList,
+                                MemberPriority, HostClusterMember)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUncluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster, personality,
+    def render(self, session, plenaries, hostname, cluster, personality,
                personality_stage, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
@@ -51,15 +52,23 @@ class CommandUncluster(BrokerCommand):
                                 "when leaving the cluster." %
                                 dbhost.personality.name)
 
+        plenaries.add(dbhost)
+        plenaries.add(dbcluster)
+
+        # Clean up plenaries bound to the membership link
+        q = session.query(PriorityList)
+        q = q.join(MemberPriority, HostClusterMember)
+        q = q.filter_by(host=dbhost)
+        for dbresource in q:
+            plenaries.add(dbresource)
+            plenaries.add(dbresource.holder.holder_object)
+            session.expire(dbresource, ['entries'])
+
         dbcluster.hosts.remove(dbhost)
         dbcluster.validate()
 
         session.flush()
         session.expire(dbhost, ['_cluster'])
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhost))
-        plenaries.append(Plenary.get_plenary(dbcluster))
 
         plenaries.write()
 

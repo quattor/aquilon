@@ -44,7 +44,10 @@
 	    </group>
 	    <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 	    <arg><option>--config_override</option></arg>
-	    <arg><option>--staged</option></arg>
+            <group>
+                <arg choice="plain"><option>--staged</option></arg>
+                <arg choice="plain"><option>--unstaged</option></arg>
+            </group>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -167,16 +170,17 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--staged</option>
-		</term>
-		<listitem>
-		    <para>
-			If this flag is specified, the personality will be staged, and changes will be
-			applied to the "next" stage.
-		    </para>
-		</listitem>
+            <varlistentry>
+                <term>
+                    <option>--staged</option>, <option>--unstaged</option>
+                </term>
+                <listitem>
+                    <para>
+                        This flag turns personality staging on or off. If the "staged" flag is specified,
+                        the personality will be staged, and changes will be applied to the "next" stage.
+                        New personalities will be created with staging on.
+                    </para>
+                </listitem>
 	    </varlistentry>
 	</variablelist>
 	<xi:include href="../common/change_management_desc.xml"/>

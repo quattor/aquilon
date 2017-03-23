@@ -28,18 +28,13 @@ class CommandAddResourceGroup(CommandAddResource):
     resource_class = ResourceGroup
     resource_name = "resourcegroup"
 
-    def add_resource(self, session, logger, resourcegroup, required_type,
-                     comments, **_):
+    def setup_resource(self, session, logger, dbrg, required_type, **_):
         if required_type is not None:
             rqtype = Resource.polymorphic_subclass(required_type,
                                                    "Unknown resource type")
-            # Normalize the value
-            required_type = rqtype.__mapper__.polymorphic_identity
-
             if rqtype == ResourceGroup:
                 raise ArgumentError("A resourcegroup can't hold other "
                                     "resourcegroups.")
 
-        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type,
-                             comments=comments)
-        return dbrg
+            # Normalize the value
+            dbrg.required_type = rqtype.__mapper__.polymorphic_identity

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -322,7 +322,7 @@ class TestBindFeature(TestBrokerCommand):
 
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0",
-                   "--justification", "tcm=123456789"]
+                   "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 2/1 templates.", command)
 
@@ -424,8 +424,8 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "windows",
                    "--justification", "tcm=12345678"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "Binding features to non-compilable archetypes "
-                         "is not implemented.", command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "feature bindings are not supported.", command)
 
     def test_200_bind_model_again(self):
         command = ["bind", "feature", "--feature", "bios_setup",

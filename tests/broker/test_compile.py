@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -415,14 +415,12 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                                  "bin", "aq_compile.py")
         basedir = self.config.get("broker", "quattordir")
         templates = os.path.join(self.sandboxdir, "utsandbox")
-        swrep = self.config.get("broker", "swrepdir")
         # Make sure aq_compile uses the same panc.jar as the rest of the tests
         panc = self.config.get("panc", "pan_compiler")
         args = [aqcompile,
                 "--basedir", basedir,
                 "--domain", "utsandbox",
                 "--templates", templates,
-                "--swrep", swrep,
                 "--panc_jar", panc,
                 "--batch_size", "10"]
         if self.config.getboolean('panc', 'gzip_output'):

@@ -46,7 +46,7 @@ def _hcm_host_creator(tuple):
 
 class Cluster(CompileableMixin, Base):
     """
-        A group of two or more hosts for high availablility or grid
+        A group of two or more hosts for high availability or grid
         capabilities.  Location constraint is nullable as it may or
         may not be used.
     """
@@ -58,6 +58,10 @@ class Cluster(CompileableMixin, Base):
 
     location_constraint_id = Column(ForeignKey(Location.id), nullable=False,
                                     index=True)
+
+    preferred_location_id = Column(ForeignKey(Location.id,
+                                              name="clstr_preferred_location_fk"),
+                                   nullable=True, index=True)
 
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
@@ -76,7 +80,9 @@ class Cluster(CompileableMixin, Base):
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True)
-    location_constraint = relation(Location, lazy=False, innerjoin=True)
+    location_constraint = relation(Location, lazy=False, innerjoin=True,
+                                   foreign_keys=location_constraint_id)
+    preferred_location = relation(Location, foreign_keys=preferred_location_id)
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
@@ -114,6 +120,21 @@ class Cluster(CompileableMixin, Base):
             is_percent = True
         return (is_percent, thresh_value)
 
+    def member_locations(self, location_class=None):
+        if location_class:
+            attr = location_class.__mapper__.polymorphic_identity
+        else:
+            attr = None
+
+        def filter(dblocation, attr):
+            if attr is None:
+                return dblocation
+            # TODO: This may return None. Do we care?
+            return getattr(dblocation, attr)
+
+        return set(filter(host.hardware_entity.location, attr)
+                   for host in self.hosts)
+
     @property
     def minimum_location(self):
         location = None
@@ -144,6 +165,21 @@ class Cluster(CompileableMixin, Base):
         session = object_session(self)
         with session.no_autoflush:
             self.validate_membership(value.host)
+        return value
+
+    @validates('location_constraint')
+    @validates('preferred_location')
+    def validate_location_preference(self, key, value):
+        if key == 'location_constraint':
+            if (self.preferred_location and
+                    value not in self.preferred_location.parents):
+                raise ArgumentError("The new location constraint does not "
+                                    "contain the preferred location.")
+        elif key == 'preferred_location':
+            if (value is not None and
+                    self.location_constraint not in value.parents):
+                raise ArgumentError("The new preferred location is not "
+                                    "inside the location constraint.")
         return value
 
     def validate_membership(self, host):
@@ -179,6 +215,12 @@ class Cluster(CompileableMixin, Base):
                       joinedload('host.hardware_entity'))
         members = q.all()
         set_committed_value(self, '_hosts', members)
+
+        if self.preferred_location:
+            member_locs = self.member_locations(location_class=self.preferred_location.__class__)
+            if self.preferred_location not in member_locs:
+                raise ArgumentError("{0} has no members inside preferred {1:l}."
+                                    .format(self, self.preferred_location))
 
         if self.max_hosts is not None and len(self.hosts) > self.max_hosts:
             raise ArgumentError("{0} has {1} hosts bound, which exceeds the "
@@ -313,7 +355,7 @@ class HostClusterMember(Base):
     # Dependency rule tried to blank-out primary key column on deletion
     # of the Cluster and it's links. On the contrary do not have
     # cascade='all' on the forward mapper here, else deletion of
-    # clusters and their links also causes deleteion of hosts (BAD)
+    # clusters and their links also causes deletion of hosts (BAD)
     cluster = relation(Cluster, innerjoin=True,
                        backref=backref('_hosts', cascade='all, delete-orphan',
                                        passive_deletes=True))

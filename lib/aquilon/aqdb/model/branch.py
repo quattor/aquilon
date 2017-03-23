@@ -52,16 +52,12 @@ class Branch(Base):
 
     autosync = Column(Boolean, nullable=False, default=True)
 
-    owner_id = Column(ForeignKey(UserPrincipal.id), nullable=False, index=True)
-
     formats = Column(AqStr(16), nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     comments = deferred(Column(String(255), nullable=True))
-
-    owner = relation(UserPrincipal, innerjoin=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_on': branch_type}
@@ -116,7 +112,11 @@ class Sandbox(Branch):
     branch_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
                        primary_key=True)
 
+    owner_id = Column(ForeignKey(UserPrincipal.id), nullable=False, index=True)
+
     base_commit = Column(AqStr(40), nullable=False)
+
+    owner = relation(UserPrincipal, innerjoin=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _SBX}

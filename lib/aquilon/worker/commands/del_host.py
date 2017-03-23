@@ -23,14 +23,14 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host, remove_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection)
 
 
 class CommandDelHost(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, **_):
+    def render(self, session, logger, plenaries, hostname, **_):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
@@ -47,7 +47,6 @@ class CommandDelHost(BrokerCommand):
                                 "cluster first.".format(dbhost, dbhost.cluster))
 
         # Any service bindings that we need to clean up afterwards
-        plenaries = PlenaryCollection(logger=logger)
 
         oldinfo = None
         if dbhost.archetype.name != 'aurora':
@@ -56,7 +55,7 @@ class CommandDelHost(BrokerCommand):
         remove_host(logger, dbmachine, plenaries)
 
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
 
         # In case of Zebra, the IP may be configured on multiple interfaces
         ip = dbmachine.primary_ip

@@ -29,14 +29,14 @@ from brokertest import TestBrokerCommand
 class TestUpdateRouterAddress(TestBrokerCommand):
 
     def test_100_update_router(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["update_router_address", "--ip", net.gateway,
                    "--building", "np",
                    "--comments", "New router address comments"]
         self.noouttest(command)
 
     def test_105_show_router(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["show", "router", "address", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -49,13 +49,13 @@ class TestUpdateRouterAddress(TestBrokerCommand):
         self.matchoutput(out, "Building: np", command)
 
     def test_110_clear_location_comments(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["update_router_address", "--ip", net.gateway,
                    "--clear_location", "--comments", ""]
         self.noouttest(command)
 
     def test_115_verify_clear(self):
-        net = self.net["verari_eth1"]
+        net = self.net["ut10_eth1"]
         command = ["show", "router", "address", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,

@@ -105,14 +105,14 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
 
     def testexactcpu(self):
-        command = ["search_machine", "--cpuname=xeon_5150", "--cpuvendor=intel"]
+        command = ["search_machine", "--cpuname=l5520", "--cpuvendor=intel"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm1", command)
         self.matchclean(out, "ut9s03p1", command)
         self.matchclean(out, "ut3c5n10", command)
 
     def testexactcpufailvendor(self):
-        command = ["search_machine", "--cpuname=xeon_5150",
+        command = ["search_machine", "--cpuname=l5520",
                    "--cpuvendor=vendor-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Vendor vendor-does-not-exist not found.",
@@ -125,7 +125,7 @@ class TestSearchMachine(TestBrokerCommand):
                          command)
 
     def testcpuname(self):
-        command = ["search_machine", "--cpuname=xeon_5150"]
+        command = ["search_machine", "--cpuname=l5520"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm1", command)
         self.matchclean(out, "ut9s03p1", command)

@@ -34,14 +34,6 @@ class TestDnsConstraints(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment ut-env is still in use by DNS "
                          "records, and cannot be deleted.", command)
 
-    def testdelmappeddomain(self):
-        command = ["del", "dns", "domain", "--dns_domain", "new-york.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "DNS Domain new-york.ms.com is still mapped to "
-                         "locations and cannot be deleted.",
-                         command)
-
     def testdelaliasedaddress(self):
         command = ["del", "address", "--fqdn", "arecord13.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)

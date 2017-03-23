@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,11 +23,15 @@ import logging
 from logging.handlers import WatchedFileHandler
 from threading import Thread, Condition
 
-# -- begin path_setup --
-import ms.version
-ms.version.addpkg('twisted', '12.0.0')
-ms.version.addpkg('zope.interface', '3.6.1')
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('twisted', '12.0.0')
+    ms.version.addpkg('zope.interface', '3.6.1')
 
+# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
 
@@ -189,13 +193,13 @@ def main():
         rootlog.setLevel(level)
 
     # Apply configured log settings
+    defaults = config.defaults()
     for logname, level in config.items("logging"):
+        if logname in defaults:
+            continue
         try:
-            # TODO: Drop the translation from str to int when moving the min.
-            # Python version to 2.7
-            levelno = logging._levelNames[level]
-            logging.getLogger(logname).setLevel(levelno)
-        except (ValueError, KeyError):
+            logging.getLogger(logname).setLevel(level)
+        except ValueError:
             pass
 
     logger = logging.getLogger("aq_notifyd")

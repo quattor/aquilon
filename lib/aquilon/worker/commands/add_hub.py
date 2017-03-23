@@ -17,7 +17,7 @@
 """Contains the logic for `aq add hub`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Company, Hub
+from aquilon.aqdb.model import Organization, Hub
 from aquilon.worker.commands import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 
@@ -33,7 +33,7 @@ class CommandAddHub(BrokerCommand):
             raise ArgumentError("Please specify --organization, since no "
                                 "default is available.")
 
-        dborg = Company.get_unique(session, organization, compel=True)
+        dborg = Organization.get_unique(session, organization, compel=True)
         add_location(session, Hub, hub, dborg, fullname=fullname,
                      comments=comments)
 

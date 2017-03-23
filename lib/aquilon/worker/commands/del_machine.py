@@ -19,24 +19,23 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 
 
 class CommandDelMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, **_):
+    def render(self, session, plenaries, machine, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
 
         if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.add(dbmachine.vm_container)
             holder = dbmachine.vm_container.holder.holder_object
-            plenaries.append(Plenary.get_plenary(holder))
+            plenaries.add(holder)
 
         if dbmachine.host:
             raise ArgumentError("{0} is still using the machine, so the "

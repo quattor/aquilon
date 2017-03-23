@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (lookup_paramdef,
@@ -29,8 +29,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
     def render(self, session, archetype, path, schema, clear_schema, required,
                activation, default, clear_default, description, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if not dbarchetype.is_compileable:
-            raise ArgumentError("{0} is not compileable.".format(dbarchetype))
+        dbarchetype.require_compileable("parameters are not supported")
 
         if default is not None or clear_default:
             raise UnimplementedError("Archetype-wide parameter definitions "

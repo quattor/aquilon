@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
+from aquilon.worker.dbwrappers.cluster import get_cluster_location_preference
 from aquilon.worker.locks import CompileKey, PlenaryKey
 
 
@@ -44,7 +45,6 @@ class PlenaryCluster(PlenaryCollection):
         super(PlenaryCluster, self).__init__(logger=logger,
                                              allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbcluster
         self.append(PlenaryClusterObject.get_plenary(dbcluster,
                                                      allow_incomplete=allow_incomplete))
         self.append(PlenaryClusterData.get_plenary(dbcluster,
@@ -118,6 +118,12 @@ class PlenaryClusterData(StructurePlenary):
         if self.dbobj.metacluster:
             pan_assign(lines, "system/cluster/metacluster/name",
                        self.dbobj.metacluster.name)
+
+        preferred_location = get_cluster_location_preference(self.dbobj)
+        if preferred_location:
+            path = "system/cluster/preferred_location"
+            path = path + "/" + preferred_location.location_type
+            pan_assign(lines, path, preferred_location.name)
 
         fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):

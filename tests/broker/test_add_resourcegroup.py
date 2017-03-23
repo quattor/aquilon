@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class TestAddResourceGroup(TestBrokerCommand):
 
     def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
-                   "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
+                   "--mountpoint=/mnt", "--blockdevice=/dev/vx/dsk/dg.0/gnr.0",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
                    "--resourcegroup=utvcs1as1", "--cluster=utvcs1"]
@@ -65,7 +65,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
         self.matchoutput(out, "Bound to: Resource Group utvcs1as1", command)
-        self.matchoutput(out, "Block Device: /dev/foo/bar", command)
+        self.matchoutput(out, "Block Device: /dev/vx/dsk/dg.0/gnr.0", command)
         self.matchoutput(out, "Mount at boot: True", command)
         self.matchoutput(out, "Mountopts: ro", command)
         self.matchoutput(out, "Mountpoint: /mnt", command)
@@ -109,7 +109,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config;",
                          command)
-        self.matchoutput(out, '"block_device_path" = "/dev/foo/bar";', command)
+        self.matchoutput(out, '"block_device_path" = "/dev/vx/dsk/dg.0/gnr.0";', command)
 
     def test_115_show_cluster(self):
         command = ["show", "cluster", "--cluster", "utvcs1"]
@@ -137,7 +137,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                 self.assertEqual(resource.fsdata.fstype, "ext3")
                 self.assertEqual(resource.fsdata.mountpoint, "/mnt")
                 self.assertEqual(resource.fsdata.mount, True)
-                self.assertEqual(resource.fsdata.blockdevice, "/dev/foo/bar")
+                self.assertEqual(resource.fsdata.blockdevice, "/dev/vx/dsk/dg.0/gnr.0")
                 self.assertEqual(resource.fsdata.opts, "ro")
                 self.assertEqual(resource.fsdata.freq, 1)
                 self.assertEqual(resource.fsdata.passno, 3)

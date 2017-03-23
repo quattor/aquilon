@@ -24,14 +24,14 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandMergeNetwork(BrokerCommand):
+    requires_plenaries = True
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, dbuser, logger,
+    def render(self, session, plenaries, dbuser,
                ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
@@ -51,7 +51,6 @@ class CommandMergeNetwork(BrokerCommand):
             raise ArgumentError("The specified --prefixlen must be smaller "
                                 "than the current value.")
 
-        plenaries = PlenaryCollection(logger=logger)
 
         # IPv4Network has a supernet() object, but that does not normalize the
         # IP address, i.e. IPv4Network('1.2.3.0/24').supernet() will return
@@ -68,7 +67,7 @@ class CommandMergeNetwork(BrokerCommand):
 
         if dbnets[0].ip == supernet.ip:
             dbsuper = dbnets.pop(0)
-            plenaries.append(Plenary.get_plenary(dbsuper))
+            plenaries.add(dbsuper)
             dbsuper.cidr = prefixlen
         else:
             # Create a new network, copying the parameters from the one
@@ -79,10 +78,10 @@ class CommandMergeNetwork(BrokerCommand):
                               side=dbnetwork.side,
                               comments=dbnetwork.comments)
             session.add(dbsuper)
-            plenaries.append(Plenary.get_plenary(dbsuper))
+            plenaries.add(dbsuper)
 
         for oldnet in dbnets:
-            plenaries.append(Plenary.get_plenary(oldnet))
+            plenaries.add(oldnet)
 
             # Delete routers of the old subnets
             for dbrouter in oldnet.routers:

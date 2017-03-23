@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,21 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityParameter,
-                                ParamDefinition, Feature)
+                                ParamDefinition, ArchetypeParamDef, Feature)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.feature import get_affected_plenaries
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  lookup_paramdef)
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddParameter(BrokerCommand):
 
-    required_parameters = ['personality', 'path']
+    requires_plenaries = True
+    required_parameters = ['personality', 'path', 'value']
 
-    def process_parameter(self, session, dbstage, db_paramdef, path, value):
+    def process_parameter(self, session, dbstage, db_paramdef, path, value,
+                          plenaries):
         try:
             parameter = dbstage.parameters[db_paramdef.holder]
         except KeyError:
@@ -38,25 +39,30 @@ class CommandAddParameter(BrokerCommand):
                                              value={})
             dbstage.parameters[db_paramdef.holder] = parameter
 
+            # Since the parameter is new, the PlenaryPersonality collection does
+            # not have it, so we need to add it explicitly for the template to
+            # get created on the disk. It would be nice if PlanaryPersonality
+            # would be able to handle this internally, but that would need
+            # deeper surgery.
+            if isinstance(db_paramdef.holder, ArchetypeParamDef):
+                plenaries.add(parameter)
+
         set_parameter(session, parameter, db_paramdef, path, value)
 
-    def render(self, session, logger, archetype, personality, personality_stage,
-               feature, type, path, user, value=None, justification=None,
-               reason=None, **_):
+    def render(self, session, logger, plenaries, archetype, personality,
+               personality_stage, feature, type, path, user, value=None,
+               justification=None, reason=None, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        if not dbpersonality.archetype.is_compileable:
-            raise ArgumentError("{0} is not compileable."
-                                .format(dbpersonality.archetype))
+        dbpersonality.archetype.require_compileable("parameters are not supported")
 
         dbstage = dbpersonality.active_stage(personality_stage)
 
-        validate_prod_personality(dbstage, user, justification, reason)
+        validate_prod_personality(dbstage, user, justification, reason, logger)
 
         path = ParamDefinition.normalize_path(path, strict=False)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.add(dbstage)
 
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
@@ -78,7 +84,8 @@ class CommandAddParameter(BrokerCommand):
 
         db_paramdef, rel_path = lookup_paramdef(holder_object, path, False)
 
-        self.process_parameter(session, dbstage, db_paramdef, rel_path, value)
+        self.process_parameter(session, dbstage, db_paramdef, rel_path, value,
+                               plenaries)
 
         session.flush()
 

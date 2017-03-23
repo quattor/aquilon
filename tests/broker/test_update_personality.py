@@ -46,10 +46,15 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          command)
 
     def test_120_update_basic_attributes(self):
+        command = ["promote", "--personality", "utunused/dev",
+                   "--archetype=aquilon"]
+        self.successtest(command)
+
         command = ["update_personality", "--personality", "utunused/dev",
                    "--archetype=aquilon",
                    "--cluster_required",
                    "--noconfig_override",
+                   "--unstaged",
                    "--comments", "New personality comments"]
         self.successtest(command)
 

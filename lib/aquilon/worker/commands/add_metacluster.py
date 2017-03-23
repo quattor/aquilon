@@ -21,14 +21,14 @@ from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddMetaCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, archetype, personality,
+    def render(self, session, plenaries, metacluster, archetype, personality,
                personality_stage, domain, sandbox, max_members, buildstatus,
                comments, **arguments):
         validate_nlist_key("metacluster", metacluster)
@@ -54,8 +54,7 @@ class CommandAddMetaCluster(BrokerCommand):
         session.add(dbcluster)
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
         plenaries.write()
 
         return

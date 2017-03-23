@@ -49,61 +49,32 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         cls.linux_version_curr = cls.config.get("unittest",
                                                 "linux_version_curr")
 
-    # If we end up fixing map dns domain, it may be harder to do this test.
-    # Also, these tests would just "keep working", but they wouldn't
-    # actually be testing anything...
-    def test_1000_reconfigure_aquilon95(self):
+    def test_1000_edit_machine_plenary(self):
+        # "aq reconfigure" should refresh the machine plenary. We verify that by
+        # intentionally breaking it first.
+        path = self.plenary_name("machine", "americas", "ut", "ut9",
+                                 "ut9s03p45")
+        with open(path, "a") as fp:
+            fp.write('\n"broken" = "template";\n')
+
+        command = ["cat", "--machine=ut9s03p45"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"broken" = "template";', command)
+
+    def test_1001_reconfigure_aquilon95(self):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
         self.successtest(command)
 
-    def test_1001_verify_machine_plenary(self):
+    def test_1002_verify_machine_plenary(self):
         command = ["cat", "--machine=ut9s03p45"]
         out = self.commandtest(command)
+        self.matchclean(out, "broken", command)
         self.matchoutput(out, '"sysloc/room" = "utroom2";', command)
         self.matchoutput(out, '"sysloc/bunker" = "bucket2.ut";', command)
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
         self.matchoutput(out, '"sysloc/continent" = "na";', command)
         self.matchoutput(out, '"sysloc/country" = "us";', command)
-        self.searchoutput(out,
-                          r'"sysloc/dns_search_domains" = '
-                          r'list\(\s*"new-york.ms.com"\s*\);',
-                          command)
-
-    def test_1002_map_dns_domain(self):
-        self.noouttest(['map_dns_domain', '--building=ut',
-                        '--dns_domain=aqd-unittest.ms.com'])
-
-    def test_1003_reconfigure_aquilon95(self):
-        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
-        err = self.statustest(command)
-        self.matchoutput(err, "1/1 template", command)
-
-    def test_1004_verify_machine_plenary(self):
-        command = ["cat", "--machine=ut9s03p45"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r'"sysloc/dns_search_domains" = '
-                          r'list\(\s*"aqd-unittest.ms.com",\s*'
-                          r'"new-york.ms.com"\s*\);',
-                          command)
-
-    def test_1005_unmap_dns_domain(self):
-        self.noouttest(['unmap_dns_domain', '--building=ut',
-                        '--dns_domain=aqd-unittest.ms.com'])
-
-    def test_1006_reconfigure_aquilon95(self):
-        command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
-        err = self.statustest(command)
-        self.matchoutput(err, "1/1 template", command)
-
-    def test_1007_verify_machine_plenary(self):
-        command = ["cat", "--machine=ut9s03p45"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r'"sysloc/dns_search_domains" = '
-                          r'list\(\s*"new-york.ms.com"\s*\);',
-                          command)
 
     def test_1010_reconfigurelist_grn_pre(self):
         hosts = ["aquilon95.aqd-unittest.ms.com",
@@ -399,23 +370,51 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1070_reconfigure_windows_status(self):
         # Not a compileable archetype, so there should be no messages from the
         # compiler
-        self.noouttest(["reconfigure",
-                        "--hostname", "unittest01.one-nyp.ms.com",
-                        "--buildstatus", "ready"])
+        command = ["reconfigure",
+                   "--hostname", "unittest01.one-nyp.ms.com",
+                   "--buildstatus", "ready"]
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
+        self.assertFalse(os.path.exists(
+            self.build_profile_name("unittest01.one-nyp.ms.com",
+                                    domain="ut-prod")))
 
     def test_1071_reconfigure_windows_personality(self):
         # Not a compileable archetype, so there should be no messages from the
         # compiler
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--personality", "desktop"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
 
     def test_1072_reconfigure_windows_os(self):
         # Not a compileable archetype, so there should be no messages from the
         # compiler
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--osversion", "nt61e"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
+
+    def test_1073_make_compileable(self):
+        # We need a domain which is guaranteed to be compileable...
+        self.statustest(["manage", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--domain", "unittest", "--force"])
+        self.statustest(["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--archetype", "aurora", "--personality", "generic",
+                         "--osname", "linux", "--osversion", self.linux_version_prev])
+        self.assertTrue(os.path.exists(
+            self.build_profile_name("unittest01.one-nyp.ms.com",
+                                    domain="unittest")))
+
+    def test_1074_make_noncompileable(self):
+        self.statustest(["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--archetype", "windows", "--personality", "desktop",
+                         "--osname", "windows", "--osversion", "nt61e"])
+        self.assertFalse(os.path.exists(
+            self.build_profile_name("unittest01.one-nyp.ms.com",
+                                    domain="unittest")))
+        self.statustest(["manage", "--hostname", "unittest01.one-nyp.ms.com",
+                         "--domain", "ut-prod", "--force"])
 
     def test_1075_show_unittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"
@@ -427,6 +426,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Operating System: windows", command)
         self.matchoutput(out, "Version: nt61e", command)
         self.matchoutput(out, "Advertise Status: True", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
 
     def test_1080_reconfigure_os(self):
         command = ["reconfigure",
@@ -761,12 +761,23 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Personality aquilon/clustered requires cluster "
                          "membership", command)
 
+    def test_2000_promote_mixed_personality(self):
+        hosts = ["unittest00.one-nyp.ms.com",
+                 "unittest12.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("promote_mixed_personality",
+                                        "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--personality_stage", "next"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Promoting hosts in multiple personalities is "
+                         "not supported.", command)
+
     def test_3000_missing_required_params(self):
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
-        #self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
+        self.matchoutput(out, "cannot locate template named 'personality/badpersonality/espinfo'", command)
         buildfile = self.build_profile_name("aquilon62.aqd-unittest.ms.com",
                                             domain="utsandbox")
         results = self.grepcommand(["-l", "badpersonality", buildfile])
@@ -779,7 +790,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon", "--personality", "badpersonality"]
         out = self.badrequesttest(command)
-        #self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
+        self.matchoutput(out, "cannot locate template named 'personality/badpersonality/espinfo'", command)
         self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="utsandbox")))

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,24 +19,23 @@
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.machine import add_interface
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, logger, interface, machine, mac, automac, model,
+    def render(self, session, logger, plenaries, interface, machine, mac, automac, model,
                vendor, pg, autopg, iftype, type, bus_address, comments,
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
-        plenaries = PlenaryCollection(logger=logger)
         audit_results = []
 
         if type:
-            self.deprecated_option("type", "Please use --iftype"
+            self.deprecated_option("type", "Please use --iftype "
                                    "instead.", logger=logger, **arguments)
             if not iftype:
                 iftype = type
@@ -60,9 +59,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         if dbmachine.host:
-            plenaries.append(Plenary.get_plenary(dbmachine.host))
+            plenaries.add(dbmachine.host)
 
         # Even though there may be removals going on the write key
         # should be sufficient here.

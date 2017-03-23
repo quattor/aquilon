@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ from aquilon.exceptions_ import AquilonError
 _table_abbrev = {
     'address_assignment': 'addr_assign',
     'archetype': 'arch',
+    'building_preference': 'bldg_pref',
     'cluster_service_binding': 'clstr_svc_bndg',
     'cluster_group': 'clstr_grp',
     'cluster_group_member': 'clstr_grp_mmbr',
@@ -56,6 +57,7 @@ _table_abbrev = {
     'personality_rootnetgroup': 'pers_rootng',
     'personality_service_list_item': 'psli',
     'personality_stage': 'pers_st',
+    'priority_list': 'pl',
     'reboot_intervention': 'reboot_iv',
     'service': 'svc',
     'service_address': 'srv_addr',

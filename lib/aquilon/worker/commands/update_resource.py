@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015  Contributor
+# Copyright (C) 2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdateResource(BrokerCommand):
+    requires_plenaries = True
 
     resource_class = None
     resource_name = None
@@ -29,7 +29,7 @@ class CommandUpdateResource(BrokerCommand):
     def update_resource(self, session, logger, **kwargs):
         pass
 
-    def render(self, session, logger, hostname, cluster, metacluster, comments,
+    def render(self, session, logger, plenaries, hostname, cluster, metacluster, comments,
                **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
@@ -50,10 +50,9 @@ class CommandUpdateResource(BrokerCommand):
         dbresource = self.resource_class.get_unique(session, name=name,
                                                     holder=holder, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
 
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbresource))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbresource)
 
         self.update_resource(dbresource=dbresource, session=session,
                              logger=logger, **kwargs)

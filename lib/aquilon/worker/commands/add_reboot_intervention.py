@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ from aquilon.worker.commands.add_intervention import CommandAddIntervention
 
 class CommandAddRebootIntervention(CommandAddIntervention):
 
-    required_parameters = ["expiry", "justification"]
+    required_parameters = ["expiry", "reason"]
     resource_class = RebootIntervention
 
-    def add_resource(self, **kwargs):
-        return super(CommandAddRebootIntervention, self).add_resource(
-            allowusers=None, allowgroups=None, disabled_actions=None, **kwargs)
+    def setup_resource(self, session, logger, dbresource, **kwargs):
+        return super(CommandAddRebootIntervention, self).setup_resource(
+            session, logger, dbresource, allowusers=None, allowgroups=None,
+            disabled_actions=None, **kwargs)
 
         # More thorough check reboot_schedule and intervention
         # XXX TODO

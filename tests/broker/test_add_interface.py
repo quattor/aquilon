@@ -110,10 +110,10 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
     def testaddut3c5n10eth2badmac(self):
         command = ["add", "interface", "--interface", "eth2",
                    "--machine", "ut3c5n10",
-                   "--mac", self.net["verari_eth1"].usable[0].mac]
+                   "--mac", self.net["ut10_eth1"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "MAC address %s is already used by" %
-                         self.net["verari_eth1"].usable[0].mac, command)
+                         self.net["ut10_eth1"].usable[0].mac, command)
 
     def testaddut3c5n10eth2_2(self):
         command = ["add", "interface", "--interface", "eth2.2",
@@ -540,7 +540,7 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                    "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Interface: xge49 %s" % self.net["verari_eth1"].usable[0].mac,
+                         "Interface: xge49 %s" % self.net["ut10_eth1"].usable[0].mac,
                          command)
         self.matchoutput(out, "Interface: vlan110 (no MAC addr)", command)
         self.matchoutput(out, "Interface: loop0 (no MAC addr)", command)

@@ -16,27 +16,27 @@
 # limitations under the License.
 """Contains the logic for `aq add personality`."""
 
-from sqlalchemy.orm import joinedload, subqueryload
-
 import re
+
 from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
+
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                PersonalityGrnMap, HostEnvironment, ServiceMap,
-                                PersonalityParameter)
+                                PersonalityGrnMap, HostEnvironment, ServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 VALID_PERSONALITY_RE = re.compile(r'^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
 
 
 class CommandAddPersonality(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, grn, eon_id,
+    def render(self, session, logger, plenaries, personality, archetype, grn, eon_id,
                host_environment, comments, cluster_required, copy_from,
                copy_stage, config_override, staged, **_):
         if not VALID_PERSONALITY_RE.match(personality):
@@ -75,6 +75,9 @@ class CommandAddPersonality(BrokerCommand):
                                "on the new personality if needed."
                                .format(dbfrom_persona))
             dbfrom_vers = dbfrom_persona.default_stage(copy_stage)
+
+        if staged is None:
+            staged = True
 
         if not grn and not eon_id:
             raise ArgumentError("GRN or EON ID is required for adding a "
@@ -138,17 +141,9 @@ class CommandAddPersonality(BrokerCommand):
                 target = self.config.get(section, "default_grn_target")
                 dbstage.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
 
-            # Create a parameter object for all parameter templates, because the
-            # default value calculation needs it
-            for defholder in dbarchetype.param_def_holders.values():
-                dbparam = PersonalityParameter(param_def_holder=defholder,
-                                               value={})
-                dbstage.parameters[defholder] = dbparam
-
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.add(dbstage)
         plenaries.write()
 
         return

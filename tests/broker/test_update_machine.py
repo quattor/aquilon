@@ -25,7 +25,6 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 from eventstest import EventsTestMixin
-from eventstest import EventsTestMixin
 
 
 class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
@@ -44,7 +43,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USN99C5553", command)
         self.matchoutput(out, "UUID: 097a2277-840d-4bd5-8327-cf133aa3c9d3",
@@ -65,8 +64,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          r'create\("hardware/cpu/intel/e5-2660"\),\s*'
+                          r'create\("hardware/cpu/intel/e5-2660"\s*\)\s*\);',
                           command)
         self.matchoutput(out, '"chassis" = "ut3c1.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 10;', command)
@@ -117,7 +116,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 20", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
         self.searchoutput(out, "^  Comments: New machine comments", command)
@@ -137,8 +136,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
+                          r'create\("hardware/cpu/intel/e5-2660"\),\s*'
+                          r'create\("hardware/cpu/intel/e5-2660"\s*\)\s*\);',
                           command)
         self.matchoutput(out, '"chassis" = "ut3c5.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 20;', command)
@@ -162,7 +161,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1021_update_ut3c1n4_cpu(self):
         self.event_upd_hardware('ut3c1n4')
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
-                        "--cpuname", "xeon_3000"])
+                        "--cpuname", "e5-2697-v3"])
         self.events_verify()
 
     def test_1022_update_ut3c1n4_rack(self):
@@ -180,7 +179,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut4", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
-        self.matchoutput(out, "Cpu: xeon_3000 x 2", command)
+        self.matchoutput(out, "Cpu: e5-2697-v3 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USNKPDZ407", command)
 
@@ -199,8 +198,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_3000"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_3000"\s*\)\s*\);',
+                          r'create\("hardware/cpu/intel/e5-2697-v3"\),\s*'
+                          r'create\("hardware/cpu/intel/e5-2697-v3"\s*\)\s*\);',
                           command)
 
     def test_1025_cat_unittest01(self):
@@ -539,8 +538,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
-                          r'create\("hardware/cpu/intel/xeon_5150"\),\s*'
-                          r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
+                          r'create\("hardware/cpu/intel/l5520"\),\s*'
+                          r'create\("hardware/cpu/intel/l5520"\)\s*\);',
                           command)
         # Updating the model of the machine changes the NIC model from
         # utvirt/default to generic/generic_nic
@@ -559,7 +558,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
-        self.matchoutput(out, "Cpu: xeon_5150 x 2", command)
+        self.matchoutput(out, "Cpu: l5520 x 2", command)
         self.matchoutput(out, "Memory: 12288 MB", command)
         self.searchoutput(out,
                           r"Interface: eth0 00:50:56:01:20:00 \[boot, default_route\]\s*"

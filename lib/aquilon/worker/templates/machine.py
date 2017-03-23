@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -166,20 +166,6 @@ class PlenaryMachineInfo(StructurePlenary):
             slot = self.dbobj.chassis_slot[0]
             pan_assign(lines, "chassis", slot.chassis.fqdn)
             pan_assign(lines, "slot", slot.slot_number)
-
-        dns_search_domains = []
-        parents = self.dbobj.location.parents[:]
-        parents.append(self.dbobj.location)
-        parents.reverse()
-        for parent in parents:
-            # Filter out duplicates
-            extra_domains = [map.dns_domain.name
-                             for map in parent.dns_maps
-                             if map.dns_domain.name not in dns_search_domains]
-            dns_search_domains.extend(extra_domains)
-
-        if dns_search_domains:
-            pan_assign(lines, "sysloc/dns_search_domains", dns_search_domains)
 
         # Now describe the hardware
         lines.append("")

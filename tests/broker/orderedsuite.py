@@ -32,9 +32,10 @@ from .test_start import TestBrokerStart
 from .test_ping import TestPing
 from .test_status import TestStatus
 from .test_show_active_commands import TestShowActiveCommands
+from .test_add_role import TestAddRole
+from .test_del_role import TestDelRole
 from .test_permission import TestPermission
 from .test_add_dns_domain import TestAddDnsDomain
-from .test_map_dns_domain import TestMapDnsDomain
 from .test_add_dns_environment import TestAddDnsEnvironment
 from .test_update_dns_environment import TestUpdateDnsEnvironment
 from .test_add_sandbox import TestAddSandbox
@@ -143,14 +144,20 @@ from .test_compile import TestCompile
 from .test_profile import TestProfile
 from .test_bind_server import TestBindServer
 from .test_add_filesystem import TestAddFilesystem
+from .test_update_filesystem import TestUpdateFilesystem
 from .test_del_filesystem import TestDelFilesystem
 from .test_add_application import TestAddApplication
+from .test_del_application import TestDelApplication
 from .test_add_hostlink import TestAddHostlink
+from .test_del_hostlink import TestDelHostlink
 from .test_add_intervention import TestAddIntervention
+from .test_del_intervention import TestDelIntervention
 from .test_add_resourcegroup import TestAddResourceGroup
 from .test_del_resourcegroup import TestDelResourceGroup
 from .test_add_reboot_schedule import TestAddRebootSchedule
+from .test_del_reboot_schedule import TestDelRebootSchedule
 from .test_add_reboot_intervention import TestAddRebootIntervention
+from .test_del_reboot_intervention import TestDelRebootIntervention
 from .test_constraints_bind_client import TestBindClientConstraints
 from .test_constraints_bind_server import TestBindServerConstraints
 from .test_constraints_archetype import TestArchetypeConstraints
@@ -265,7 +272,6 @@ from .test_del_user import TestDelUser
 from .test_del_domain import TestDelDomain
 from .test_del_sandbox import TestDelSandbox
 from .test_del_ns_record import TestDelNSRecord
-from .test_unmap_dns_domain import TestUnmapDnsDomain
 from .test_del_dns_domain import TestDelDnsDomain
 from .test_del_dns_environment import TestDelDnsEnvironment
 from .test_del_feature import TestDelFeature
@@ -276,6 +282,17 @@ from .test_usecase_database import TestUsecaseDatabase
 from .test_usecase_hacluster import TestUsecaseHACluster
 from .test_usecase_anycast import TestUsecaseAnycast
 from .test_usecase_networks import TestUsecaseNetworks
+from .test_build_clusters import TestBuildClusters
+from .test_demolish_clusters import TestDemolishClusters
+from .test_add_building_preference import TestAddBuildingPreference
+from .test_del_building_preference import TestDelBuildingPreference
+from .test_update_building_preference import TestUpdateBuildingPreference
+from .test_add_cluster_autostartlist import TestAddClusterAutoStartList
+from .test_del_cluster_autostartlist import TestDelClusterAutoStartList
+from .test_update_cluster_autostartlist import TestUpdateClusterAutoStartList
+from .test_add_cluster_systemlist import TestAddClusterSystemList
+from .test_del_cluster_systemlist import TestDelClusterSystemList
+from .test_update_cluster_systemlist import TestUpdateClusterSystemList
 from .test_grns import TestGrns
 from .test_map_grn import TestMapGrn
 from .test_stop import TestBrokerStop
@@ -311,7 +328,7 @@ class BrokerTestSuite(unittest.TestSuite):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         for test in [TestBrokerStart,
                      TestPing, TestStatus,
-                     TestPermission,
+                     TestAddRole, TestPermission,
                      TestAddDnsDomain, TestAddDnsEnvironment,
                      TestAddUser,
                      TestAddSandbox, TestAddDomain, TestUpdateBranch,
@@ -331,7 +348,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddVendor, TestAddCpu, TestAddModel,
                      TestAddNetworkCompartment,
                      TestAddNetworkEnvironment, TestAddNetwork,
-                     TestAddNSRecord, TestMapDnsDomain,
+                     TestAddNSRecord,
                      TestAddVlan,
                      TestAddVirtualSwitch,
                      TestAddMetaCluster, TestAddESXCluster,
@@ -354,8 +371,10 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddAddressAlias,
                      TestAddSrvRecord,
                      TestMapService, TestBindClient, TestPrebindServer,
-                     TestFlush,
                      TestAddResourceGroup, TestAddShare, TestAddFilesystem,
+                     TestAddApplication, TestAddIntervention,
+                     TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
+                     TestFlush,
                      TestMakeAquilon, TestMakeCluster, TestCluster,
                      TestAddAllowedPersonality,
                      TestDelAllowedPersonality,
@@ -365,6 +384,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMapGrn,
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
+                     TestBuildClusters, TestAddBuildingPreference,
+                     TestAddClusterAutoStartList, TestAddClusterSystemList,
                      TestClusterConstraintsNoVMs,
                      TestAddVirtualHardware,
                      TestVulcanLocalDisk,
@@ -379,8 +400,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestCompile,
                      TestProfile,
                      TestBindServer,
-                     TestAddApplication, TestAddIntervention,
-                     TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
                      TestServiceConstraints,
                      TestBindClientConstraints, TestBindServerConstraints,
                      TestArchetypeConstraints, TestPersonalityConstraints,
@@ -412,6 +431,9 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                      TestUpdateAddressAlias,
                      TestUpdateServiceAddress,
+                     TestUpdateFilesystem,
+                     TestUpdateClusterAutoStartList,
+                     TestUpdateClusterSystemList,
                      TestUpdateNetworkCompartment,
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
@@ -423,7 +445,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateParameterDefinition, TestUpdateParameter,
                      TestUpdateParameterFeature,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
-                     TestUpdateCluster,
+                     TestUpdateCluster, TestUpdateBuildingPreference,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
                      TestManageList,
                      TestRefreshUser, TestRootAccess,
@@ -433,12 +455,16 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestClientBypass,
                      TestConsistency,
                      TestUmaskConstraints,
+                     TestDelClusterAutoStartList, TestDelClusterSystemList,
+                     TestDelBuildingPreference, TestDemolishClusters,
                      TestUnbindServer, TestUnmapService,
                      TestDelParameterFeature,
                      TestUnbindFeature,
                      TestDel10GigHardware, TestDelVirtualHardware,
                      TestUnbindCluster, TestUncluster,
                      TestDelShare, TestDelFilesystem,
+                     TestDelHostlink, TestDelRebootIntervention, TestDelRebootSchedule,
+                     TestDelIntervention, TestDelApplication,
                      TestDelResourceGroup,
                      TestDelStaticRoute,
                      TestDelServiceAddress, TestDelInterfaceAddress,
@@ -457,7 +483,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelModel, TestDelVendor,
                      TestDelParameter, TestDelParameterDefinition,
                      TestDelFeature,
-                     TestUnmapDnsDomain,
                      TestDelDesk, TestDelRack, TestDelBunker, TestDelRoom,
                      TestDelBuilding, TestDelRequiredService,
                      TestDelCity, TestDelCampus,
@@ -465,7 +490,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelService,
                      TestDelDomain, TestDelSandbox,
                      TestDelUser,
-                     TestDelDnsEnvironment, TestDelDnsDomain,
+                     TestDelDnsEnvironment, TestDelDnsDomain, TestDelRole,
                      TestClientFailure, TestAudit, TestShowActiveCommands,
                      TestDocumentation,
                      TestBrokerStop]:

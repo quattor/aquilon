@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016  Contributor
+# Copyright (C) 2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,6 +64,12 @@ class TestAddNetworkCompartment(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Comments: Unit-test Permiter DMZ", command)
 
+    def test_202_show_utper_proto(self):
+        command = ["show", "network", "compartment",
+                   "--network_compartment", "perimeter.ut", "--format", "proto"]
+        compartment = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(compartment.name, "perimeter.ut")
+
     def test_209_show_nonexistant(self):
         command = ["show", "network", "compartment",
                    "--network_compartment", "nonexistant"]
@@ -77,7 +83,6 @@ class TestAddNetworkCompartment(TestBrokerCommand):
         self.matchoutput(out, "Network Compartment: perimeter.ut",
                          command)
         self.matchoutput(out, "Network Compartment: interior.ut", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkCompartment)

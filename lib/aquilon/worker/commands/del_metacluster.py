@@ -21,10 +21,11 @@ from aquilon.worker.commands.del_cluster import del_cluster
 
 
 class CommandDelMetaCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, **_):
+    def render(self, session, logger, plenaries, metacluster, **_):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-        del_cluster(session, logger, dbmetacluster, self.config)
+        del_cluster(session, logger, plenaries, dbmetacluster, self.config)

@@ -19,15 +19,16 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 
 
 class CommandResetAdvertisedStatus(BrokerCommand):
+    requires_plenaries = True
     """ reset advertised status for single host """
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, **_):
+    def render(self, session, logger, plenaries, hostname, **_):
         dbhost = hostname_to_host(session, hostname)
         if dbhost.status.name == 'ready':
             raise ArgumentError("{0:l} is in ready status, "
@@ -40,8 +41,7 @@ class CommandResetAdvertisedStatus(BrokerCommand):
         session.flush()
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhost, allow_incomplete=False))
+        plenaries.add(dbhost, allow_incomplete=False)
         # Force a host lock as pan might overwrite the profile...
         with plenaries.transaction():
             td.compile(session, only=plenaries.object_templates)

@@ -39,7 +39,7 @@ class TestSearchHost(TestBrokerCommand):
         self.statustest(command.split(" "))
         command = "reconfigure --hostname unittest02.one-nyp.ms.com"
         self.successtest(command.split(" "))
-        
+ 
     def testfqdnavailable(self):
         command = "search host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
@@ -441,7 +441,7 @@ class TestSearchHost(TestBrokerCommand):
         self.noouttest(["del", "service", "--service", "baa"])
 
     def testmodelavailable(self):
-        command = "search host --model vb1205xm"
+        command = "search host --model dl360g9"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest15.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)
@@ -449,7 +449,7 @@ class TestSearchHost(TestBrokerCommand):
 
     def testmodellocation(self):
         # Utilize two filters on the same table
-        command = "search host --model vb1205xm --building ut"
+        command = "search host --model dl360g9 --building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest15.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest16.aqd-unittest.ms.com", command)
@@ -462,15 +462,15 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testmodelvendorconflict(self):
-        command = "search host --model vb1205xm --vendor dell"
+        command = "search host --model dl360g9 --vendor dell"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model vb1205xm, vendor dell not found.",
+        self.matchoutput(out, "Model dl360g9, vendor dell not found.",
                          command)
 
     def testmodelmachinetypeconflict(self):
-        command = "search host --model vb1205xm --machine_type virtual_machine"
+        command = "search host --model dl360g9 --machine_type virtual_machine"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model vb1205xm, model_type "
+        self.matchoutput(out, "Model dl360g9, model_type "
                          "virtual_machine not found.", command)
 
     def testvendoravailable(self):

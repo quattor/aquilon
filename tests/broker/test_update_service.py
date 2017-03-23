@@ -163,9 +163,12 @@ class TestUpdateService(TestBrokerCommand):
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
-    def test_141_enable_clientlist(self):
+    def test_141_enable_clientlist_and_aliasbindings(self):
         command = ["update_service", "--service", "support-group",
                    "--need_client_list"]
+        self.noouttest(command)
+        command = ["update_service", "--service", "support-group",
+                   "--allow_alias_bindings"]
         self.noouttest(command)
 
     def test_142_check_clientlist_enabled(self):
@@ -180,10 +183,14 @@ class TestUpdateService(TestBrokerCommand):
         command = ["show_service", "--service", "support-group"]
         out = self.commandtest(command)
         self.matchoutput(out, "Need Client List: True", command)
+        self.matchoutput(out, "Allow Alias Bindings: True", command)
 
-    def test_143_no_clientlist(self):
+    def test_143_no_clientlist_and_aliasbindings(self):
         command = ["update_service", "--service", "support-group",
                    "--noneed_client_list"]
+        self.noouttest(command)
+        command = ["update_service", "--service", "support-group",
+                   "--noallow_alias_bindings"]
         self.noouttest(command)
 
     def test_144_check_clientlist_gone(self):
@@ -198,6 +205,7 @@ class TestUpdateService(TestBrokerCommand):
         command = ["show_service", "--service", "support-group"]
         out = self.commandtest(command)
         self.matchoutput(out, "Need Client List: False", command)
+        self.matchoutput(out, "Allow Alias Bindings: False", command)
 
     # FIXME: Missing functionality and tests for plenaries.
 

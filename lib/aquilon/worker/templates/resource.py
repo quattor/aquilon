@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
-                                VirtualMachine, Share, BundleResource, Host)
+                                VirtualMachine, Share, AutoStartList,
+                                SystemList, BundleResource, Host)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       PlenaryCollection, PlenaryMachineInfo)
@@ -141,7 +142,7 @@ class PlenaryResource(StructurePlenary):
                            StructureTemplate(res_path))
 
     def body_reboot_iv(self, lines):
-        pan_assign(lines, "justification", self.dbobj.justification)
+        pan_assign(lines, "justification", self.dbobj.reason)
         self.body_intervention(lines)
 
     def body_service_address(self, lines):
@@ -174,6 +175,17 @@ class PlenaryResource(StructurePlenary):
                                   'domainname': pn.dns_domain}}
             pan_assign(lines, "system", system)
 
+    def body_auto_start_list(self, lines):
+        key = attrgetter("priority", "member.node_index")
+        hosts = [str(entry.host)
+                 for entry in sorted(self.dbobj.entries.values(), key=key)]
+        pan_assign(lines, "members", hosts)
+
+    def body_system_list(self, lines):
+        hosts = {str(entry.host): entry.priority
+                 for entry in self.dbobj.entries.values()}
+        pan_assign(lines, "members", hosts)
+
 
 Plenary.handlers[Application] = PlenaryResource
 Plenary.handlers[Filesystem] = PlenaryResource
@@ -184,6 +196,8 @@ Plenary.handlers[RebootIntervention] = PlenaryResource
 Plenary.handlers[ServiceAddress] = PlenaryResource
 Plenary.handlers[Share] = PlenaryResource
 Plenary.handlers[VirtualMachine] = PlenaryResource
+Plenary.handlers[AutoStartList] = PlenaryResource
+Plenary.handlers[SystemList] = PlenaryResource
 
 
 class PlenaryResourceGroup(PlenaryCollection):
@@ -191,22 +205,12 @@ class PlenaryResourceGroup(PlenaryCollection):
         super(PlenaryResourceGroup, self).__init__(logger=logger,
                                                    allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbresource
-        self.real_plenary = PlenaryResource.get_plenary(dbresource,
-                                                        allow_incomplete=allow_incomplete)
+        self.append(PlenaryResource.get_plenary(dbresource,
+                                                allow_incomplete=allow_incomplete))
 
-        self.append(self.real_plenary)
         if dbresource.resholder:
             for res in dbresource.resholder.resources:
                 self.append(PlenaryResource.get_plenary(res,
                                                         allow_incomplete=allow_incomplete))
-
-    def read(self):
-        # This is used by the cat command
-        return self.real_plenary.read()
-
-    def _generate_content(self):
-        return self.real_plenary._generate_content()
-
 
 Plenary.handlers[ResourceGroup] = PlenaryResourceGroup

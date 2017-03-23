@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 
-from aquilon.aqdb.model import Base, Archetype
+from aquilon.aqdb.model import Base, Archetype, AssetLifecycle
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'operating_system'
@@ -41,7 +41,11 @@ class OperatingSystem(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
+    lifecycle_id = Column(ForeignKey(AssetLifecycle.id), nullable=False)
+
     archetype = relation(Archetype, lazy=False, innerjoin=True)
+
+    lifecycle = relation(AssetLifecycle, innerjoin=True)
 
     __table_args__ = (UniqueConstraint(archetype_id, name, version),
                       {'info': {'unique_fields': ['name', 'version',

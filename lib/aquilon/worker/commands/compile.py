@@ -24,24 +24,23 @@ from aquilon.aqdb.model import (PersonalityStage, Host, Cluster,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryPersonalityBase)
+from aquilon.worker.templates import PlenaryPersonalityBase
 from aquilon.worker.templates.domain import TemplateDomain
 
 
 class CommandCompile(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = []
     requires_readonly = True
 
-    def render(self, session, logger, domain, sandbox,
+    def render(self, session, logger, plenaries, domain, sandbox,
                pancinclude, pancexclude, pancdebug, cleandeps, **_):
         dbdomain, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
 
         # Grab a shared lock on personalities and services used by the domain.
         # Object templates (hosts, clusters) are protected by the domain lock.
-        plenaries = PlenaryCollection(logger=logger)
 
         for cls_ in CompileableMixin.__subclasses__():
             q = session.query(PersonalityStage)
@@ -53,8 +52,7 @@ class CommandCompile(BrokerCommand):
 
             # Use PlenaryPersonalityBase to avoid having to load parameters and
             # other details
-            plenaries.extend(PlenaryPersonalityBase.get_plenary(dbstage)
-                             for dbstage in q)
+            plenaries.add(q, cls=PlenaryPersonalityBase)
 
         q = session.query(ServiceInstance)
         q = q.filter(ServiceInstance.clients.any(
@@ -68,7 +66,7 @@ class CommandCompile(BrokerCommand):
                  Cluster.sandbox_author == dbauthor)))
         services.update(q)
 
-        plenaries.extend(Plenary.get_plenary(si) for si in services)
+        plenaries.add(services)
 
         if pancdebug:
             pancinclude = r'.*'

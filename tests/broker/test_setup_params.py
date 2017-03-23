@@ -81,6 +81,34 @@ actions_schema = {
     "additionalProperties": False,
 }
 
+maint_window_schema = {
+    "schema": "http://json-schema.org/draft-04/schema#",
+    "type": "array",
+    "uniqueItems": True,
+    "items": {
+        "additionalProperties": False,
+        "type": "object",
+        "properties": {
+            "day": {
+                "pattern": "^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$",
+                "type": "string",
+            },
+            "start": {
+                "pattern": "^[012][0-9]:[0-5][0-9]$",
+                "type": "string",
+            },
+            "duration": {
+                "type": "integer",
+                "minValue": 1,
+            },
+            "breakfix": {
+                "type": "boolean",
+            },
+        },
+        "required": ["day", "start", "duration"],
+    },
+}
+
 # validation parameters by templates
 AQUILON_PARAM_DEFS = {
     "access": [
@@ -165,24 +193,33 @@ AQUILON_PARAM_DEFS = {
             "path": "windows/windows",
             "value_type": "json",
             "required": True,
+            "schema": json.dumps(maint_window_schema),
         }
     ],
 }
 
-AURORA_PARAM_DEFS = {
+ESX_CLUSTER_PARAM_DEFS = {
     "espinfo": [
-        {
-            "path": "espinfo/class",
-            "value_type": "string",
-            "description": "espinfo class",
-            "required": True
-        },
         {
             "path": "espinfo/function",
             "value_type": "string",
             "description": "espinfo function",
             "required": True
         },
+        {
+            "path": "espinfo/class",
+            "value_type": "string",
+            "description": "espinfo class",
+            "required": True
+        },
+    ],
+    "windows": [
+        {
+            "path": "windows/windows",
+            "value_type": "json",
+            "required": True,
+            "schema": json.dumps(maint_window_schema),
+        }
     ],
 }
 
@@ -223,6 +260,14 @@ VMHOST_PARAM_DEFS = {
             "required": True
         },
     ],
+    "windows": [
+        {
+            "path": "windows/windows",
+            "value_type": "json",
+            "required": True,
+            "schema": json.dumps(maint_window_schema),
+        }
+    ],
 }
 
 
@@ -245,9 +290,9 @@ class TestSetupParams(TestBrokerCommand):
         for template, paramlist in AQUILON_PARAM_DEFS.items():
             for params in paramlist:
                 self.add_param_def("aquilon", template, params)
-        for template, paramlist in AURORA_PARAM_DEFS.items():
+        for template, paramlist in ESX_CLUSTER_PARAM_DEFS.items():
             for params in paramlist:
-                self.add_param_def("aurora", template, params)
+                self.add_param_def("esx_cluster", template, params)
         for template, paramlist in HACLUSTER_PARAM_DEFS.items():
             for params in paramlist:
                 self.add_param_def("hacluster", template, params)

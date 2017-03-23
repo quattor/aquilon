@@ -43,7 +43,7 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_105_del_ut3gd1r04(self):
-        self.dsdb_expect_delete(self.net["verari_eth1"].usable[1])
+        self.dsdb_expect_delete(self.net["ut10_eth1"].usable[1])
         command = "del network_device --network_device ut3gd1r04.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
@@ -138,7 +138,7 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_155_del_ut01ga1s04(self):
-        self.dsdb_expect_delete(self.net["verari_eth0"].usable[0])
+        self.dsdb_expect_delete(self.net["ut10_eth0"].usable[0])
         command = "del network_device --network_device ut01ga1s04.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()

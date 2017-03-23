@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_update_building_preference"
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+	<refentrytitle>aq_update_building_preference</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+	<refname>aq update building preference</refname>
+	<refpurpose>
+	    Update an existing building preference
+	</refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update building preference</command>
+	    <arg choice="plain"><option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option></arg>
+	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+            <arg><option>--prefer <replaceable>PREFER</replaceable></option></arg>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <xi:include href="../common/change_management.xml"/>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+	<title>Description</title>
+	<para>
+	    The <command>aq update building preference</command> command
+            changes the preferred building used in determining the default
+            hot-side of clusters based on building code.  The command takes
+            the same arguments as
+	    <citerefentry><refentrytitle>aq_add_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+	</para>
+    </refsect1>
+
+    <refsect1>
+	<title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        Comma-separated pair of building codes that will
+                        identify which global preference is to be updated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Cluster archetype which this preference is valid for.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--prefer <replaceable>PREFER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Building code that should now be preferred.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_search_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

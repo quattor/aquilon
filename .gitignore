@@ -5,7 +5,6 @@ dist
 build/bdist.*
 VERSION
 MANIFEST
-
 # PyCharm project directory
 .idea/
 

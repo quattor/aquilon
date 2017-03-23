@@ -37,7 +37,8 @@ import jsonschema
 
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import (ArgumentError, AquilonError,
+                                 AuthorizationException)
 from aquilon.config import Config
 from aquilon.aqdb.types.mac_address import MACAddress
 
@@ -46,6 +47,10 @@ LOGGER = logging.getLogger(__name__)
 yes_re = re.compile(r"^(true|yes|y|1|on|enabled)$", re.I)
 no_re = re.compile(r"^(false|no|n|0|off|disabled)$", re.I)
 _hex_re = re.compile(r'[0-9a-f]+$')
+
+TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
+SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
+EMERG_RE = re.compile("^emergency$")
 
 # Regexp used to check if a value is suitable to be used as an nlist key,
 # without escaping.
@@ -203,6 +208,13 @@ def force_uuid(label, value):
     except ValueError:
         raise ArgumentError("Expected an UUID for %s." % label)
     return value
+
+
+def force_justification(label, value):  # pylint: disable=W0613
+    """Utility method to validate justitification field"""
+
+    justif = Justification(value)
+    return justif
 
 
 def first_of(iterable, function):
@@ -371,3 +383,43 @@ def validate_json(config, data, schema_name, msg):
                             format_checker=format_checker)
     except jsonschema.ValidationError as err:
         raise ArgumentError("Failed to validate %s: %s" % (msg, err))
+
+
+class Justification(object):
+
+    def __init__(self, justification):
+
+        self.tcm = None
+        result = TCM_RE.search(justification)
+        if result:
+            self.tcm = result.groups()[0]
+
+        self.sn = None
+        result = SN_RE.search(justification)
+        if result:
+            self.sn = result.groups()[0]
+
+        self.emergency = None
+        if EMERG_RE.search(justification):
+            self.emergency = True
+
+        self.data = justification
+        if not (self.tcm or self.sn or self.emergency):
+            raise ArgumentError("Failed to parse the justification: expected "
+                                "tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.")
+
+    def check_reason(self, reason):
+        if self.emergency and not reason:
+            raise AuthorizationException("Justification of 'emergency' requires "
+                                         "--reason to be specified.")
+
+    def __str__(self):
+        ret = []
+        if self.tcm:
+            ret.append("tcm=%s" % self.tcm)
+        if self.sn:
+            ret.append("sn=%s" % self.sn)
+        if self.emergency:
+            ret.append("emergency")
+
+        return ",".join(ret)

@@ -16,15 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ms.version
-
-ms.version.addpkg('lxml', '3.2.5')
-
 import os
 import sys
 import argparse
-from lxml import etree
 from collections import defaultdict
+
+try:
+    import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('lxml', '3.2.5')
+
+from lxml import etree
 
 was_error = False
 

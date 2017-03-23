@@ -81,7 +81,7 @@ class TestSearchNetwork(TestBrokerCommand):
     def testcluster(self):
         command = ["search_network", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, str(self.net["verari_eth0"]), command)
+        self.matchoutput(out, str(self.net["ut10_eth0"]), command)
 
     def testfqdn(self):
         command = ["search_network", "--fqdn=unittest15.aqd-unittest.ms.com"]

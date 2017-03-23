@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class TestDelDomain(TestBrokerCommand):
 
     def test_123_del_deployable_archived(self):
         command = ["del_domain", "--domain=deployable",
-                   "--justification=tcm=123456"]
+                   "--justification=tcm=12345678"]
         self.successtest(command)
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
@@ -76,11 +76,11 @@ class TestDelDomain(TestBrokerCommand):
     def test_124_verify_trash(self):
         trash_branch = self.config.get("broker", "trash_branch")
         kingdir = self.config.get("broker", "kingdir")
-        command = ["log", "--no-color", "-n", "1", trash_branch]
+        command = ["show", "--no-patch", "--format=%B", trash_branch]
         out, _ = self.gitcommand(command, cwd=kingdir)
 
         self.matchoutput(out, "Delete archived branch deployable", command)
-        self.matchoutput(out, "Justification: tcm=123456", command)
+        self.matchoutput(out, "Justification: tcm=12345678", command)
 
     def test_130_del_unittest_xml(self):
         self.noouttest(["del_domain", "--domain", "unittest-xml"])
