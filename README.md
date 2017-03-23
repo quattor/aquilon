@@ -19,14 +19,11 @@ configured:
 RPMS to install are:
 
 ```bash
-yum install python python-devel python-setuptools python-dateutil python-lxml python-psycopg2
-yum install python-coverage python-ipaddr python-mako python-jsonschema PyYAML
-yum install python-cdb python-twisted-runner python-twisted-web
-yum install ant-apache-regexp ant-contrib-1.0 gcc
-yum install protobuf-compiler protobuf-python
-yum install gcc make git git-daemon libxslt-devel libxml2-devel java-1.8.0-openjdk-devel
-yum install panc knc
-yum install krb5-workstation
+yum install python python-devel python-setuptools python-dateutil python-lxml python-psycopg2 \
+  python-coverage python-ipaddr python-mako python-jsonschema PyYAML python-cdb python-twisted-runner \
+  python-twisted-web ant-apache-regexp ant-contrib-1.0 gcc protobuf-compiler protobuf-python \
+  make git git-daemon libxslt-devel libxml2-devel java-1.8.0-openjdk-devel panc \
+  knc krb5-workstation python-pip
 # If you don't use an external Kerberos server
 yum install krb5-server
 ```
@@ -75,8 +72,8 @@ git clone https://github.com/quattor/aquilon.git
 
 ## Installation
 
-If the installation is done as root and all the dependencies (liste in `/opt/aquilon/setup.py` have been installed
-as RPM or using the `pip` command, there is no more installation steps to do and you should be able to run the
+If the installation is done as root and all the dependencies (listed in `/opt/aquilon/setup.py` have been installed
+as RPM or using the `pip` command, there are no more installation steps to do and you should be able to run the
 `/opt/aquilon/tests/dev_aqd.sh`. This command should fail with:
 
 ```
@@ -101,7 +98,7 @@ aq_env.py --python=python2.7 --prompt="(aquilon) " /usr/local/aquilon/pythonenv 
 Note:
 
  * The `cx_Oracle` install will fail if there is no local Oracle client installed - that's fine.
- * `cdb` package installed as a RPM will be reported as missing but it should not prevent the installation to work
+ * `cdb` package installed as a RPM will be reported as missing but it should not prevent the installation from working
  * For some packages, the current stable version may be used instead of the minimum requested version
 
 If the installation succeeded, the following directories should be present: `/usr/local/aquilon/pythonenv`
@@ -118,7 +115,8 @@ source /usr/local/aquilon/pythonenv/bin/activate
 ### Create the Broker Configuration
 
 Setup up the aquilon broker configuration file.  There is an example
-in `/opt/aquilon/etc/aqd.conf.default`.  Copy this file to `/etc/aqd.conf`
+in `/opt/aquilon/etc/aqd.conf.defaults`.  Move this file to `/etc/aqd.conf`
+and create a empty `/opt/aquilon/etc/aqd.conf.defaults` file
 (or define the `AQDCONF` environment variable to point wherever it is
 installed). The default will use a sqlite database back-end. Main required
 changes are:
@@ -143,14 +141,14 @@ a while for the Kerberos database creation to complete, due to its need to wait 
 randomness entropy. To speed up this process, you can follow the recipe at
 http://championofcyrodiil.blogspot.fr/2014/01/increasing-entropy-in-vm-for-kerberos.html.*
 
-Be sure to definie properly the domain associated with your realm: it must match your actual
+Be sure to define properly the domain associated with your realm: it must match your actual
 domain.
 
 If you don't run as `root`, be sure to create a keytab for the current user.
 
 ### Create a User to Run the Broker
 
-It is recommended not to run the broker as root. This is causing quite a number of problem with
+It is recommended not to run the broker as root. This cause quite a number of problem with
 Kerberos in particular. To create and configure a user to run the broker:
 
 ```bash
@@ -178,7 +176,7 @@ kinit        # Enter the password you set previously
 
 ### Test The Broker
 
-To test the broker, run ``/opt/aquilon/tests/dev_aqd.sh` that must run successfully if your
+To test the broker, run `/opt/aquilon/tests/dev_aqd.sh` that must run successfully if your
 installation is correct. Before running this script, you need to define `AQDCONF` environment
 variable to `/etc/aqd.conf` (the script uses `/etc/aqd.conf.dev` by default).
 
