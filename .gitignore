@@ -5,3 +5,4 @@ dist
 build/bdist.*
 VERSION
 MANIFEST
+.idea/

@@ -39,7 +39,7 @@ class TestSearchHost(TestBrokerCommand):
         self.statustest(command.split(" "))
         command = "reconfigure --hostname unittest02.one-nyp.ms.com"
         self.successtest(command.split(" "))
-        
+ 
     def testfqdnavailable(self):
         command = "search host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))

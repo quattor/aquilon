@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 NetworkCompartment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import update, and_, or_
@@ -56,10 +56,10 @@ class QIPInfo(object):
         self.routers = routers
         self.compartment = compartment
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         # The refresh algorithm depends on QIPInfo objects being ordered by the
         # network IP address
-        return cmp(self.address.ip, other.address.ip)
+        return self.address.ip < other.address.ip
 
 
 class QIPRefresh(object):
@@ -312,7 +312,7 @@ class QIPRefresh(object):
         self.logger.client_info("Adding network {0!s}".format(dbnetwork))
         for ip in qipinfo.routers:
             self.add_router(dbnetwork, ip)
-        self.plenaries.append(Plenary.get_plenary(dbnetwork))
+        self.plenaries.add(dbnetwork)
         self.session.flush()
         return dbnetwork
 
@@ -407,14 +407,11 @@ class QIPRefresh(object):
         qipnets = qipnetworks.values()
         heapq.heapify(qipnets)
 
-        prev_aqnet = None
         aqnet = heap_pop(aqnets)
         qipinfo = heap_pop(qipnets)
         while aqnet or qipinfo:
-            if aqnet and aqnet != prev_aqnet:
-                plenary = Plenary.get_plenary(aqnet)
-                self.plenaries.append(plenary)
-                prev_aqnet = aqnet
+            if aqnet:
+                self.plenaries.add(aqnet)
 
             # We have 3 cases regarding aqnet/qipinfo:
             # - One contains the other: this is a split or a merge
@@ -507,6 +504,7 @@ class QIPRefresh(object):
 
             self.commit_if_needed()
         self.session.flush()
+        self.plenaries.flatten()
         self.plenaries.write()
 
         if self.errors:

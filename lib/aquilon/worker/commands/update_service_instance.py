@@ -18,14 +18,14 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdateServiceInstance(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, max_clients, default,
+    def render(self, session, plenaries, service, instance, max_clients, default,
                comments, **_):
         dbservice = Service.get_unique(session, name=service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
@@ -40,8 +40,7 @@ class CommandUpdateServiceInstance(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbsi))
+        plenaries.add(dbsi)
         plenaries.write()
 
         return

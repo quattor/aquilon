@@ -77,7 +77,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_108_manage_unittest02_again(self):
         self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                        "--sandbox", "%s/changetest1" % self.user])
+                          "--sandbox", "%s/changetest1" % self.user])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
@@ -92,7 +92,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
         self.successtest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
-                        "--domain", "unittest", "--force"])
+                          "--domain", "unittest", "--force"])
         command = ["cat", "--hostname", "server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
@@ -110,7 +110,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
         self.successtest(["manage", "--hostname", "unittest00.one-nyp.ms.com",
-                        "--sandbox", "%s/changetest2" % self.user, "--force"])
+                          "--sandbox", "%s/changetest2" % self.user, "--force"])
         self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
                                want_exist=False)
 
@@ -189,14 +189,14 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_140_xml_profiles(self):
         self.successtest(["manage", "--domain", "unittest-xml", "--force",
-                        "--hostname", "unittest20.aqd-unittest.ms.com"])
+                          "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-xml", "unittest20.aqd-unittest.ms.com",
                                xml=True, json=False)
 
     def test_145_json_profiles(self):
         self.successtest(["manage", "--domain", "unittest-json", "--force",
-                        "--hostname", "unittest20.aqd-unittest.ms.com"])
+                          "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-json", "unittest20.aqd-unittest.ms.com",
                                xml=False, json=True)
@@ -208,7 +208,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                         "--visibility", "public",
                         "--activation", "rebuild", "--deactivation", "reboot"])
         self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
-                        "--domain", "unittest", "--force"])
+                          "--domain", "unittest", "--force"])
         self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
                          "--personality", "featuretest"])
 
@@ -223,7 +223,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_152_move_aquilon68_to_sandbox(self):
         self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
-                        "--sandbox", "%s/utsandbox" % self.user, "--force"])
+                          "--sandbox", "%s/utsandbox" % self.user, "--force"])
 
     def test_153_bind_feature(self):
         # The only host in the personality is in a sandbox, so the bind should
@@ -245,11 +245,11 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
     def test_155_manage_notemplate_force(self):
         # --force means you know what you're doing...
         self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
-                        "--domain", "unittest", "--force"])
+                          "--domain", "unittest", "--force"])
 
     def test_159_cleanup_featuretest(self):
         self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
-                        "--sandbox", "%s/utsandbox" % self.user, "--force"])
+                          "--sandbox", "%s/utsandbox" % self.user, "--force"])
         self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
                          "--personality", "inventory"])
         self.statustest(["unbind_feature", "--feature", "notemplate",
@@ -268,7 +268,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_161_manage_host(self):
         self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                        "--sandbox", "otheruser/othersandbox", "--force"])
+                          "--sandbox", "otheruser/othersandbox", "--force"])
 
     def test_162_del_otheruser(self):
         self.noouttest(["del_user", "--username", "otheruser"])
@@ -299,7 +299,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_169_manage_back(self):
         self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                        "--sandbox", "%s/changetest1" % self.user, "--force"])
+                          "--sandbox", "%s/changetest1" % self.user, "--force"])
 
     def test_200_nomanage_host(self):
         command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",

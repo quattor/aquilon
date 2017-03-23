@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,27 +21,26 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_feature
 from aquilon.worker.dbwrappers.parameter import (add_feature_paramdef_plenaries,
                                                  lookup_paramdef,
                                                  update_paramdef_schema)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdParameterDefintionFeature(BrokerCommand):
 
+    requires_plenaries = True
     required_parameters = ["feature", "type", "path"]
 
-    def render(self, session, logger, feature, type, path, schema, clear_schema,
-               required, default, clear_default, description, user,
-               justification, reason, **_):
+    def render(self, session, logger, plenaries, feature, type, path, schema,
+               clear_schema, required, default, clear_default, description,
+               user, justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         path = ParamDefinition.normalize_path(path)
         db_paramdef, _ = lookup_paramdef(dbfeature, path)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed
         if default is not None or clear_default:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
             db_paramdef.default = default
 

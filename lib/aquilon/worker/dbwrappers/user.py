@@ -16,30 +16,25 @@
 # limitations under the License.
 """Wrappers for the user_principal table."""
 
-import logging
-
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.util import KeyedTuple
 
 from aquilon.exceptions_ import ArgumentError, PartialError
 from aquilon.aqdb.model import User, Personality
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryPersonality)
+from aquilon.worker.templates import PlenaryPersonality
 from aquilon.utils import chunk
-
-LOGGER = logging.getLogger(__name__)
 
 
 class UserSync(object):
     # Labels for the passwd entries - the order must match the file format
     labels = ("name", "passwd", "uid", "gid", "full_name", "home_dir", "shell")
 
-    def __init__(self, config, session, logger=LOGGER, incremental=False,
+    def __init__(self, config, session, logger, plenaries, incremental=False,
                  ignore_delete_limit=False):
         self.session = session
         self.logger = logger
-        self.plenaries = PlenaryCollection(logger=logger)
+        self.plenaries = plenaries
         self.incremental = incremental
         self.success = []
         self.errors = []
@@ -141,7 +136,7 @@ class UserSync(object):
 
                 stages.update(p.stages.values())
 
-        self.plenaries.extend(map(Plenary.get_plenary, stages))
+        self.plenaries.add(stages)
 
         for dbuser in userlist:
             self.session.delete(dbuser)

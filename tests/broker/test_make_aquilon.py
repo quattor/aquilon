@@ -113,6 +113,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          self.net["unknown0"].gateway, command)
         self.matchoutput(out, '"system/advertise_status" = false;', command)
         self.matchoutput(out, '"system/archetype/os" = "linux";', command)
+        self.matchoutput(out, '"system/archetype/os_lifecycle" = "evaluation";', command)
         self.matchoutput(out,
                          '"system/archetype/model" = "%s";' % self.linux_version_prev,
                          command)
@@ -383,6 +384,9 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "cannot locate template named 'personality/badpersonality/espinfo'",
+                         command)
         self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="unittest")))

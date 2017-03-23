@@ -54,7 +54,6 @@ from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network_compartment import NetworkCompartment
 from aquilon.aqdb.model.network import Network
 from aquilon.aqdb.model.static_route import StaticRoute
-from aquilon.aqdb.model.dns_map import DnsMap
 from aquilon.aqdb.model.fqdn import Fqdn
 from aquilon.aqdb.model.dns_record import DnsRecord
 from aquilon.aqdb.model.dns_record_target_mixin import DnsRecordTargetMixin
@@ -112,7 +111,7 @@ from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 # CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.building_preference import BuildingPreference
-from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
+from aquilon.aqdb.model.cluster import (Cluster, HostClusterMember, EsxCluster,
                                         ComputeCluster, StorageCluster)
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
                                                          PersonalityESXClusterInfo)
@@ -143,5 +142,7 @@ from aquilon.aqdb.model.virtual_machine import VirtualMachine
 from aquilon.aqdb.model.service_address import ServiceAddress
 from aquilon.aqdb.model.share import Share
 from aquilon.aqdb.model.virtual_disk import VirtualDisk
+from aquilon.aqdb.model.cluster_asl import (PriorityList, MemberPriority,
+                                            SystemList, AutoStartList)
 
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer

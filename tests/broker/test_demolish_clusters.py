@@ -38,22 +38,14 @@ class TestDemolishClusters(MachineTestMixin, TestBrokerCommand):
 
     def test_100_uncluster(self):
         """ Remove hosts from clusters that were added for the use case """
-        for cluster in config["cluster"]:
-            for host in config["cluster"][cluster]["hosts"]:
-                self.runcommand(["uncluster", "--cluster", cluster,
-                                 "--hostn", host_fqdn(host)])
+        for host, params in config["host"].items():
+            self.noouttest(["uncluster", "--cluster", params["cluster"],
+                            "--hostname", host_fqdn(host)])
 
     def test_110_del_cluster(self):
         """ Remove clusters that were added for the use case """
         for cluster in config["cluster"]:
-            for i in range(0, 2):
-                rgname = "%sas%02d" % (cluster, i + 1)
-                self.noouttest(["del_filesystem", "--resourcegroup", rgname,
-                                "--filesystem", rgname])
-                self.noouttest(["del_resourcegroup", "--resourcegroup", rgname,
-                                "--cluster", cluster])
-
-            self.runcommand(["del_cluster", "--cluster", cluster])
+            self.statustest(["del_cluster", "--cluster", cluster])
 
     def test_120_del_host(self):
         """ Remove hosts that were added for the use case """
@@ -65,7 +57,7 @@ class TestDemolishClusters(MachineTestMixin, TestBrokerCommand):
     def test_130_del_rack(self):
         """ Remove racks that were added for the use case """
         for rack in config["rack"]:
-            self.runcommand(["del_rack", "--rack", rack])
+            self.noouttest(["del_rack", "--rack", rack])
 
     def test_140_pre_condition(self):
         # This pair should still exist, and should be gone with the buildings
@@ -79,7 +71,7 @@ class TestDemolishClusters(MachineTestMixin, TestBrokerCommand):
         for building in config["building"]:
             self.dsdb_expect_del_campus_building("ny", building)
             self.dsdb_expect("delete_building_aq -building %s" % building)
-            self.runcommand(["del_building", "--building", building])
+            self.noouttest(["del_building", "--building", building])
             self.dsdb_verify()
 
 if __name__ == '__main__':

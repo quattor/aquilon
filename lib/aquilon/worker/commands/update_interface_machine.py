@@ -23,16 +23,16 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (set_port_group,
                                                  assign_address,
                                                  rename_interface)
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, logger, interface, machine, mac, model, vendor,
+    def render(self, session, logger, plenaries, interface, machine, mac, model, vendor,
                boot, pg, autopg, comments, master, clear_master, default_route,
                rename_to, bus_address, **arguments):
         """This command expects to locate an interface based only on name
@@ -176,13 +176,11 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhw_ent))
+        plenaries.add(dbhw_ent)
         # Interface renaming affects the host and service addresses
         if dbhw_ent.host:
-            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
-        plenaries.extend(map(Plenary.get_plenary,
-                             dbinterface.service_addresses))
+            plenaries.add(dbhw_ent.host)
+        plenaries.add(dbinterface.service_addresses)
 
         with plenaries.transaction():
             if not dbhw_ent.host or dbhw_ent.host.archetype.name != "aurora":

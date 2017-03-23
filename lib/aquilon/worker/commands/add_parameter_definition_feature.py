@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
 from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddParameterDefintionFeature(BrokerCommand):
 
+    requires_plenaries = True
     required_parameters = ["feature", "type", "path", "value_type"]
 
-    def render(self, session, logger, feature, type, path, value_type, schema,
-               required, default, description, user, justification, reason, **_):
+    def render(self, session, logger, plenaries, feature, type, path,
+               value_type, schema, required, default, description, user,
+               justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -41,10 +42,9 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         path = ParamDefinition.normalize_path(path)
         dbfeature.param_def_holder.check_new_path(path)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason)
+            validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         # Activation field has been skipped on purpose

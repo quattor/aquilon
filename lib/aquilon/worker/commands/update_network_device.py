@@ -29,25 +29,24 @@ from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
-from aquilon.worker.templates.switchdata import PlenarySwitchData
+from aquilon.worker.templates import PlenarySwitchData
 from aquilon.utils import validate_json
 
 
 class CommandUpdateNetworkDevice(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, network_device, model, type, ip, vendor,
+    def render(self, session, logger, plenaries, network_device, model, type, ip, vendor,
                serial, rename_to, discovered_macs, clear, discover, comments,
                **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
-        plenaries.append(Plenary.get_plenary(dbnetdev))
-        plenaries.append(Plenary.get_plenary(dbnetdev.host))
+        plenaries.add(dbnetdev, cls=PlenarySwitchData)
+        plenaries.add(dbnetdev)
+        plenaries.add(dbnetdev.host)
 
         if discover:
             discover_network_device(session, logger, self.config,

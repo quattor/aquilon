@@ -32,6 +32,22 @@ class CommandUpdateArchetype(BrokerCommand):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         if compilable is not None:
+            if not compilable:
+                # TODO: We should also check all personalities and OS versions,
+                # but this operation is not expected to be common, so don't
+                # bother for now. This is enough to catch obvious mistakes.
+                if dbarchetype.required_services:
+                    raise ArgumentError("{0} has required services, please "
+                                        "remove those first."
+                                        .format(dbarchetype))
+                if dbarchetype.param_def_holders:
+                    raise ArgumentError("{0} has parameters defined, please "
+                                        "remove those first."
+                                        .format(dbarchetype))
+                if dbarchetype.features:
+                    raise ArgumentError("{0} has features bound, please "
+                                        "remove those first."
+                                        .format(dbarchetype))
             dbarchetype.is_compileable = compilable
 
         if description is not None:

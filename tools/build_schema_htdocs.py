@@ -108,7 +108,8 @@ model_group = {
     },
     'host': {
         'title': 'Hosts',
-        'classes': [Host, OperatingSystem, HostLifecycle, HostGrnMap, Grn,
+        'classes': [Host, HostLifecycle, HostGrnMap, Grn,
+                    OperatingSystem, AssetLifecycle,
                     VirtualSwitch, __VSwitchPGAssignment,
                     __VSwitchHostAssignment],
     },
@@ -133,7 +134,7 @@ model_group = {
         'title': 'DNS',
         'classes': [DnsDomain, DnsRecord, ARecord, SrvRecord, NsRecord, Alias,
                     AddressAlias, ReservedName, Fqdn, DynamicStub,
-                    DnsEnvironment, DnsMap],
+                    DnsEnvironment],
     },
     'cluster': {
         'title': 'Clusters',
@@ -145,7 +146,7 @@ model_group = {
                     ClusterLifecycle, __ClusterAllowedPersonality,
                     VirtualSwitch, __VSwitchClusterAssignment,
                     __VSwitchPGAssignment,
-                    BuildingPreference],
+                    BuildingPreference, MemberPriority, PriorityList],
     },
     'network': {
         'title': 'Network',

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ class TestAudit(TestBrokerCommand):
         self.assertTrue(tran_end_time <= end_time)
 
     def test_230_timezone_proto(self):
-        """ test start/end_times recorded are correctly """
+        """ test start/end_times are recorded correctly """
         cmd1 = ["search_audit", "--username", self.principal, "--command",
                 "search_audit", "--limit", "1"]
         my_start_time = int(time())

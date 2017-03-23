@@ -24,14 +24,14 @@ from aquilon.aqdb.model import (Building, City, HardwareEntity, Machine,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import update_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdateBuilding(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["building"]
 
-    def render(self, session, logger, building, city, address,
+    def render(self, session, logger, plenaries, building, city, address,
                fullname, default_dns_domain, comments, **_):
         dbbuilding = Building.get_unique(session, building, compel=True)
 
@@ -48,7 +48,6 @@ class CommandUpdateBuilding(BrokerCommand):
         update_location(dbbuilding, fullname=fullname, comments=comments,
                         default_dns_domain=default_dns_domain)
 
-        plenaries = PlenaryCollection(logger=logger)
         if city:
             dbcity = City.get_unique(session, city, compel=True)
 
@@ -77,15 +76,15 @@ class CommandUpdateBuilding(BrokerCommand):
                                    "the new location as needed."
                                    .format(maps, dbbuilding.city))
 
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             q = session.query(Cluster)
             q = q.filter(Cluster.location_constraint_id.in_(dbbuilding.offspring_ids()))
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbbuilding.offspring_ids()))
-            plenaries.extend(map(Plenary.get_plenary, q))
+            plenaries.add(q)
 
             dbbuilding.update_parent(parent=dbcity)
 

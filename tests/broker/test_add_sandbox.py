@@ -126,7 +126,7 @@ class TestAddSandbox(TestBrokerCommand):
         command = ["add", "sandbox", "--sandbox", "umasktest"]
         self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "umasktest")
-        sandboxmode = oct(os.stat(sandboxdir).st_mode & 0777)
+        sandboxmode = oct(os.stat(sandboxdir).st_mode & 0o777)
         os.umask(old_umask)
         self.assertEqual(sandboxmode, "0755")
 

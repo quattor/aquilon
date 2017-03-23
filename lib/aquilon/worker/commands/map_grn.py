@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ from aquilon.worker.dbwrappers.change_management import validate_prod_personalit
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandMapGrn(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["target"]
     require_usable_grn = True
@@ -40,14 +40,13 @@ class CommandMapGrn(BrokerCommand):
 
         obj.grns.append(mapcls(grn=grn, target=target))
 
-    def render(self, session, logger, target, grn, eon_id, hostname, list,
+    def render(self, session, logger, plenaries, target, grn, eon_id, hostname, list,
                membersof, personality, personality_stage, archetype,
                justification, reason, user, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config,
                            usable_only=self.require_usable_grn)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         if hostname:
             objs = [hostname_to_host(session, hostname)]
@@ -70,7 +69,7 @@ class CommandMapGrn(BrokerCommand):
             objs = [dbpersonality.active_stage(personality_stage)]
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
-            validate_prod_personality(objs[0], user, justification, reason)
+            validate_prod_personality(objs[0], user, justification, reason, logger)
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 
@@ -87,7 +86,7 @@ class CommandMapGrn(BrokerCommand):
                                     (target, obj.archetype.name,
                                      ", ".join(valid_targets)))
 
-            plenaries.append(Plenary.get_plenary(obj))
+            plenaries.add(obj)
             self._update_dbobj(obj, target, dbgrn, mapcls)
 
         session.flush()

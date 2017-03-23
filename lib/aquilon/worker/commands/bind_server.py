@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 def lookup_target(session, logger, plenaries, hostname, ip, cluster,
@@ -50,10 +49,10 @@ def lookup_target(session, logger, plenaries, hostname, ip, cluster,
 
     if hostname:
         params["host"] = hostname_to_host(session, hostname)
-        plenaries.append(Plenary.get_plenary(params["host"]))
+        plenaries.add(params["host"])
     if cluster:
         params["cluster"] = Cluster.get_unique(session, cluster, compel=True)
-        plenaries.append(Plenary.get_plenary(params["cluster"]))
+        plenaries.add(params["cluster"])
 
     if service_address:
         # TODO: calling get_resource_holder() means doing redundant DB lookups
@@ -108,10 +107,11 @@ def find_server(dbinstance, params):
 
 
 class CommandBindServer(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, position, hostname,
+    def render(self, session, logger, plenaries, service, instance, position, hostname,
                cluster, ip, resourcegroup, service_address, alias,
                justification, reason, user, **_):
         # Check for invalid combinations. We allow binding as a server:
@@ -130,10 +130,9 @@ class CommandBindServer(BrokerCommand):
         dbinstance = ServiceInstance.get_unique(session, service=service,
                                                 name=instance, compel=True)
 
-        validate_prod_service_instance(dbinstance, user, justification, reason)
+        validate_prod_service_instance(dbinstance, user, justification, reason, logger)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbinstance))
+        plenaries.add(dbinstance)
 
         if alias and not dbinstance.service.allow_alias_bindings:
             raise ArgumentError("Service %s is not configured to allow alias "

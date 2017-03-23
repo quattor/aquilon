@@ -91,6 +91,10 @@ def main(*args, **kw):
 
     if opts.delete_db:
         log.debug('Dropping database')
+        # Let SQLAlchemy try first - it may not clean everything, e.g. if there
+        # was a schema change
+        Base.metadata.drop_all(checkfirst=True)
+        # Clean up the rest
         db.drop_all_tables_and_sequences()
 
     if opts.populate:

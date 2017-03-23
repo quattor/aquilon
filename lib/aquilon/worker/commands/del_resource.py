@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015  Contributor
+# Copyright (C) 2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (get_resource_holder,
                                                  check_resource_dependencies)
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelResource(BrokerCommand):
+    requires_plenaries = True
 
     resource_class = None
     resource_name = None
 
-    def render(self, session, logger, hostname, cluster, metacluster, **kwargs):
+    def render(self, session, logger, plenaries, hostname, cluster, metacluster, **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -47,9 +47,8 @@ class CommandDelResource(BrokerCommand):
         dbresource = self.resource_class.get_unique(session, name=name,
                                                     holder=holder, compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbresource))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbresource)
 
         if hasattr(dbresource, 'resholder') and dbresource.resholder:
             for res in dbresource.resholder.resources:

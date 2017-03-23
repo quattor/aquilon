@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -334,7 +334,7 @@ class TestMergeConflicts(TestBrokerCommand):
         self.noouttest(["update_domain", "--domain=changetarget", "--archived"])
 
     def test_845_del_changetarget(self):
-        command = "del domain --domain changetarget --justification=tcm=123456"
+        command = "del domain --domain changetarget --justification=tcm=12345678"
         self.noouttest(command.split(" "))
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "changetest")))

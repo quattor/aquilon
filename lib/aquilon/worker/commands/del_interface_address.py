@@ -24,15 +24,15 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.utils import first_of
 
 
 class CommandDelInterfaceAddress(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ['interface']
 
-    def render(self, session, logger, interface, fqdn, ip, label, keep_dns,
+    def render(self, session, logger, plenaries, interface, fqdn, ip, label, keep_dns,
                network_environment, **kwargs):
         dbhw_ent = get_hardware(session, **kwargs)
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
@@ -106,11 +106,10 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhw_ent))
-        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.add(dbhw_ent)
+        plenaries.add(dbnetwork)
         if dbhw_ent.host:
-            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+            plenaries.add(dbhw_ent.host)
 
         dsdb_runner = DSDBRunner(logger=logger)
 

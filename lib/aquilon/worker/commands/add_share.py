@@ -26,7 +26,3 @@ class CommandAddShare(CommandAddResource):
     required_parameters = ["share"]
     resource_class = Share
     resource_name = "share"
-
-    def add_resource(self, session, logger, share, comments, **_):
-        dbshare = Share(name=share, comments=comments)
-        return dbshare

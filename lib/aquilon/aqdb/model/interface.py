@@ -145,13 +145,13 @@ class Interface(DeviceLinkMixin, Base):
         # make polymorphism work
         return self.validate_mac(key, value)
 
-    def validate_mac(self, key, value):
+    def validate_mac(self, key, value):  # pylint: disable=W0613
         if self.bootable and not value:
             raise ValueError("Bootable interfaces require a MAC address.")
         return value
 
     @validates('name')
-    def validate_name(self, key, value):
+    def validate_name(self, key, value):  # pylint: disable=W0613
         if self.__class__.name_check and \
            not self.__class__.name_check.match(value):
             raise ValueError("Illegal %s interface name '%s'." %
@@ -159,7 +159,7 @@ class Interface(DeviceLinkMixin, Base):
         return value
 
     @validates('master')
-    def validate_master(self, key, value):
+    def validate_master(self, key, value):  # pylint: disable=W0613
         if value is not None and not isinstance(value, BondingInterface) and \
            not isinstance(value, BridgeInterface):
             raise ValueError("The master must be a bonding or bridge interface.")
@@ -313,7 +313,7 @@ class VlanInterface(Interface):
                                              name="%s_parent_vlan_uk" % _TN))
 
     @validates('vlan_id')
-    def validate_vlan_id(self, key, value):
+    def validate_vlan_id(self, key, value):  # pylint: disable=W0613
         if not isinstance(value, int) or value <= 0 or value >= MAX_VLANS:
             raise ValueError("Illegal VLAN ID %s: it must be greater than "
                              "0 and smaller than %s." % (value, MAX_VLANS))

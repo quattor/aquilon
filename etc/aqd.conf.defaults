@@ -130,7 +130,8 @@ openport = 6901
 #bind_address =
 # Using a fix port for sending out notifications makes it easier to configure firewalls
 #cdp_send_port =
-git_port = 9418
+
+_port = 9418
 gzip_level = 9
 git_templates_url = git://%(servername)s:%(git_port)s/quattor/template-king
 git_daemon_basedir = %(basedir)s
@@ -145,9 +146,10 @@ logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
 plenarydir = %(cfgdir)s/plenary
-swrepdir = %(quattordir)s/swrep
-git_path =/usr/libexec/git-core/
-git = /usr/bin/git
+#git_author_name =
+#git_author_email =
+#git_committer_name =
+#git_committer_email =
 dsdb_location_sync = True
 dsdb_use_testdb = False
 ant = %(ant_home)s/bin/ant
@@ -206,6 +208,13 @@ auto_mac_end = 00:50:56:3f:ff:ff
 
 disk_controller_types = cciss, fibrechannel, flash, ide, nvme, sas, sata, scsi
 
+[change_management]
+# The contents of --justification will not be validated externally
+# (syntax checking will still be performed)
+enable = False
+# The result of justification_validation will not effect command execution, a warning will be generated if a failure is detected.
+enforce = False
+
 [tool_locations]
 dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
 ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
@@ -220,6 +229,7 @@ qip_dump_subnetdata = /ms/dist/3rd/qip/usr/sbin/qip-dump-subnetdata
 knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
 krb5_keytab = /ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
 klist = /ms/dist/aurora/bin/klist
+checkedm = /bin/true
 
 java_home = /ms/dist/msjava/PROJ/oraclejdk/1.8.0_92
 ant_home = /ms/dist/ossjava/PROJ/ant/1.9.4
@@ -355,4 +365,4 @@ sqlalchemy.orm    = WARNING
 aquilon = INFO
 
 [protocols]
-directory =  /usr/local/lib/aquilon/protocols/lib/python/
+directory = /usr/local/lib/aquilon/protocols/lib/python/

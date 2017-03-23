@@ -22,6 +22,9 @@ from aquilon.aqdb.model import RebootIntervention
 
 
 class RebootInterventionFormatter(ResourceFormatter):
+
+    suppress_name = True
+
     def extra_details(self, rs, indent=""):
         details = []
         details.append(indent + "  Start: {0.start_date}".format(rs))

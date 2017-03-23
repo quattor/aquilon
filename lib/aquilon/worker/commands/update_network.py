@@ -20,12 +20,12 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUpdateNetwork(BrokerCommand):
+    requires_plenaries = True
 
-    def render(self, session, dbuser, logger, network, ip, network_environment,
+    def render(self, session, plenaries, dbuser, network, ip, network_environment,
                type, side, network_compartment, comments, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -56,7 +56,6 @@ class CommandUpdateNetwork(BrokerCommand):
 
         dblocation = get_location(session, **arguments)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         for dbnetwork in q:
             if type:
@@ -69,7 +68,7 @@ class CommandUpdateNetwork(BrokerCommand):
                 dbnetwork.network_compartment = dbcomp
             if comments is not None:
                 dbnetwork.comments = comments
-            plenaries.append(Plenary.get_plenary(dbnetwork))
+            plenaries.add(dbnetwork)
 
         session.flush()
         plenaries.write()

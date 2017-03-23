@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.network_device import (determine_helper_hostname,
                                                       determine_helper_args)
+from aquilon.worker.locks import ExternalKey
 from aquilon.worker.processes import run_command
 
 
@@ -68,19 +69,20 @@ class CommandPollNetworkDevice(BrokerCommand):
             else:
                 ssh_args = []
 
-            self.poll_mac(session, netdev, now, ssh_args)
-            if vlan:
-                if netdev.switch_type != "tor":
-                    logger.client_info("Skipping VLAN probing on {0:l}, it's "
-                                       "not a ToR network device.".format(netdev))
-                    continue
+            with ExternalKey("poll_network_device", [netdev], logger=logger):
+                self.poll_mac(session, netdev, now, ssh_args)
+                if vlan:
+                    if netdev.switch_type != "tor":
+                        logger.client_info("Skipping VLAN probing on {0:l}, it's "
+                                           "not a ToR network device.".format(netdev))
+                        continue
 
-                try:
-                    self.poll_vlan(session, logger, netdev, now, ssh_args)
-                except ProcessException as e:
-                    failed_vlan += 1
-                    logger.client_info("Failed getting VLAN info for {0:l}: "
-                                       "{1!s}".format(netdev, e))
+                    try:
+                        self.poll_vlan(session, logger, netdev, now, ssh_args)
+                    except ProcessException as e:
+                        failed_vlan += 1
+                        logger.client_info("Failed getting VLAN info for {0:l}: "
+                                           "{1!s}".format(netdev, e))
         if netdevs and failed_vlan == len(netdevs):
             raise ArgumentError("Failed getting VLAN info.")
         return

@@ -32,5 +32,5 @@ for f in os.listdir(_thisdir):
             mymodule = __import__(modulename)
         except Exception as e:  # pragma: no cover
             logger = logging.getLogger(__name__)
-            logger.info("Error importing %s: %s" % (modulename, format_exc()))
+            logger.info("Error importing %s: %s", modulename, format_exc())
             continue

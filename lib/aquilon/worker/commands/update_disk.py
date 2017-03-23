@@ -21,22 +21,21 @@ from aquilon.aqdb.model import Machine, Disk, VirtualDisk, Filesystem, Share
 from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdateDisk(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["machine", "disk"]
 
-    def render(self, session, logger, machine, disk, controller, share,
+    def render(self, session, plenaries, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
                snapshot, rename_to, wwn, bus_address, iops_limit, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
 
         if rename_to:
             Disk.get_unique(session, device_name=rename_to, machine=dbmachine,

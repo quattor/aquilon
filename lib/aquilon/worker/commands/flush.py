@@ -181,11 +181,7 @@ class CommandFlush(BrokerCommand):
             if hosts or clusters or resources or machines:
                 # Most machines are in racks...
                 q = session.query(Rack)
-                q = q.options(subqueryload("dns_maps"),
-                              lazyload("dns_maps.location"),
-                              subqueryload("parents"),
-                              subqueryload("parents.dns_maps"),
-                              lazyload("parents.dns_maps.location"))
+                q = q.options(subqueryload("parents"))
                 racks = q.all()
 
             if machines or resources:

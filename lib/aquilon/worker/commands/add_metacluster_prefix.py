@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class CommandAddMetaClusterPrefix(CommandAddMetaCluster):
                              pack=None, locked=True)
         metacluster = '%s%d' % (prefix, result)
         args['metacluster'] = metacluster
-        CommandAddMetaCluster.render(self, session, logger, **args)
+        CommandAddMetaCluster.render(self, session, logger=logger, **args)
 
         logger.info("Selected metacluster name %s." % metacluster)
         self.audit_result(session, 'metacluster', metacluster, **args)

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -151,16 +151,6 @@ class TestBrokerStart(unittest.TestCase):
         # Set the default branch
         self.run_command([git, "symbolic-ref", "HEAD", "refs/heads/prod"],
                          env=env, cwd=dest)
-
-    def testcloneswrep(self):
-        source = self.config.get("unittest", "swrep_repository")
-        dest = os.path.join(self.config.get("broker", "swrepdir"), "repository")
-        rmtree(dest, ignore_errors=True)
-
-        env = {}
-        env["PATH"] = os.environ.get("PATH", "")
-        git = self.config.lookup_tool("git")
-        self.run_command([git, "clone", source, dest], env=env)
 
     def testdisabletemplatetests(self):
         kingdir = self.config.get("broker", "kingdir")

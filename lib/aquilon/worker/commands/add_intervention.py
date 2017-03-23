@@ -32,9 +32,8 @@ class CommandAddIntervention(CommandAddResource):
     resource_class = Intervention
     resource_name = "intervention"
 
-    def add_resource(self, session, logger, intervention, expiry, start_time,
-                     allowusers, allowgroups, disabled_actions, comments,
-                     reason, **_):
+    def setup_resource(self, session, logger, dbiv, expiry, start_time,
+                       allowusers, allowgroups, disabled_actions, reason, **_):
         try:
             expire_when = parse(expiry)
         except (ValueError, TypeError) as err:
@@ -57,9 +56,9 @@ class CommandAddIntervention(CommandAddResource):
         if start_when < now or expire_when < now:
             raise ArgumentError("The start time or expiry time are in the past.")
 
-        dbiv = self.resource_class(name=intervention, expiry_date=expire_when,
-                                   start_date=start_when, users=allowusers,
-                                   groups=allowgroups,
-                                   disabled=disabled_actions, comments=comments,
-                                   reason=reason)
-        return dbiv
+        dbiv.expiry_date = expire_when
+        dbiv.start_date = start_when
+        dbiv.users = allowusers
+        dbiv.groups = allowgroups
+        dbiv.disabled = disabled_actions
+        dbiv.reason = reason

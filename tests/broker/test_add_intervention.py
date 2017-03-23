@@ -190,28 +190,6 @@ class TestAddIntervention(TestBrokerCommand):
         self.matchoutput(out, '"system/resources/intervention" = append(create("resource/host/server1.aqd-unittest.ms.com/intervention/i1/config"))',
                          command)
 
-        command = ["del_intervention", "--intervention=i1",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        command = ["del_intervention", "--intervention=blank",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        command = ["del_intervention", "--intervention=groups",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        command = ["del_intervention", "--intervention=disable",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-    def test_35_compile(self):
-        command = ["reconfigure", "--hostname=server1.aqd-unittest.ms.com"]
-        # Generate a profile without interventions.
-        self.successtest(command)
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddIntervention)
     unittest.TextTestRunner(verbosity=2).run(suite)

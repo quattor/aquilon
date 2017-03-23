@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import sys
 # This is done by the wrapper script.
 # import aquilon.worker.depends
 
-from zope.interface import implements
+from zope.interface import implementer
 from twisted.python import usage, log
 from twisted.plugin import IPlugin
 from twisted.application import strports
@@ -79,8 +79,8 @@ def make_required_dirs(config):
             log.msg("Could not create directory '%s': %s" % (dir, e))
 
 
+@implementer(IServiceMaker, IPlugin)
 class AQDMaker(object):
-    implements(IServiceMaker, IPlugin)
     tapname = "aqd"
     description = "Aquilon Daemon"
     options = Options
@@ -155,7 +155,7 @@ class AQDMaker(object):
         # importing aqdb.  This is a hack until aqdb can be imported without
         # firing up database connections.
         resources = __import__("aquilon.worker.resources", globals(), locals(),
-                               ["RestServer"], -1)
+                               ["RestServer"], 0)
         RestServer = getattr(resources, "RestServer")
         restServer = RestServer(config)
 

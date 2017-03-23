@@ -34,7 +34,7 @@ from aquilon.aqdb.model.base import _raise_custom
 _TN = 'feature'
 _LINK = 'feature_link'
 
-_VISIBILITY = ('public', 'restricted', 'owner_approved', 'owner_only')
+_VISIBILITY = ('public', 'restricted', 'owner_approved', 'owner_only', 'legacy')
 _ACTIVATION_TYPE = ('rebuild', 'reboot', 'dispatch')
 
 

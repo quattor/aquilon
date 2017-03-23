@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013,2014,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class CommandDelDomain(BrokerCommand):
                 raise AuthorizationException("Deleting a domain may lose "
                                              "history, so --justification is "
                                              "required.")
-            validate_justification(user, justification, reason)
+            validate_justification(user, justification, reason, logger)
 
             if self.config.has_option("broker", "trash_branch"):
                 merge_msg = []

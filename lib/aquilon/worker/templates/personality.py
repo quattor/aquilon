@@ -19,10 +19,10 @@ import logging
 from collections import defaultdict
 from operator import attrgetter
 
-from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
+from aquilon.aqdb.model import (PersonalityStage, PersonalityParameter,
+                                ArchetypeParamDef)
 from aquilon.aqdb.model.feature import host_features
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
@@ -69,27 +69,13 @@ class PlenaryPersonality(PlenaryCollection):
         super(PlenaryPersonality, self).__init__(logger=logger,
                                                  allow_incomplete=allow_incomplete)
 
-        self.dbobj = dbstage
-
         self.append(PlenaryPersonalityBase.get_plenary(dbstage,
                                                        allow_incomplete=allow_incomplete))
-
-        for template, defholder in dbstage.archetype.param_def_holders.items():
-            if defholder not in dbstage.parameters:
-                logger.client_info("{0} does not have parameters for "
-                                   "template {1!s}.".format(dbstage, template))
+        for defholder, dbparam in dbstage.parameters.items():
+            if not isinstance(defholder, ArchetypeParamDef):
                 continue
-
-            plenary = PlenaryPersonalityParameter.get_plenary(dbstage.parameters[defholder],
-                                                              allow_incomplete=allow_incomplete)
-            self.append(plenary)
-
-    def get_key(self, exclusive=True):
-        if inspect(self.dbobj).deleted:
-            return NoLockKey(logger=self.logger)
-        else:
-            return PlenaryKey(personality=self.dbobj, logger=self.logger,
-                              exclusive=exclusive)
+            self.append(PlenaryPersonalityParameter.get_plenary(dbparam,
+                                                                allow_incomplete=allow_incomplete))
 
     @classmethod
     def query_options(cls, prefix="", load_personality=True):

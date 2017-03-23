@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq cat --metacluster`."""
 
-from aquilon.aqdb.model import MetaCluster
+from aquilon.aqdb.model import MetaCluster, ResourceGroup
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary,
                                       PlenaryMetaClusterObject,
-                                      PlenaryMetaClusterData)
+                                      PlenaryMetaClusterData,
+                                      PlenaryResource)
 
 
 class CommandCatMetaCluster(BrokerCommand):
@@ -35,7 +36,11 @@ class CommandCatMetaCluster(BrokerCommand):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbresource = get_resource(session, dbmeta, **arguments)
         if dbresource:
-            plenary_info = Plenary.get_plenary(dbresource, logger=logger)
+            if isinstance(dbresource, ResourceGroup):
+                cls = PlenaryResource
+            else:
+                cls = Plenary
+            plenary_info = cls.get_plenary(dbresource, logger=logger)
         else:
             if data:
                 cls = PlenaryMetaClusterData

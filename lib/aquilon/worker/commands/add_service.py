@@ -16,16 +16,18 @@
 # limitations under the License.
 """Contains the logic for `aq add service`."""
 
+from aquilon.exceptions_ import AuthorizationException
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandAddService(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service"]
 
-    def render(self, session, dbuser, logger, service, need_client_list, comments, allow_alias_bindings, **_):
+    def render(self, session, plenaries, dbuser, service, need_client_list,
+               allow_alias_bindings, comments, **_):
         Service.get_unique(session, service, preclude=True)
 
         if dbuser.role.name != 'aqd_admin' and allow_alias_bindings is not None:
@@ -35,8 +37,7 @@ class CommandAddService(BrokerCommand):
                             need_client_list=need_client_list, allow_alias_bindings=allow_alias_bindings)
         session.add(dbservice)
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbservice))
+        plenaries.add(dbservice)
 
         session.flush()
         plenaries.write()

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2011,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, HostEnvironment, Service,
                                 PersonalityServiceListItem)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["service", "archetype", "personality"]
 
@@ -45,22 +45,23 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                                           host_environment=dbenv)
         dbstage.required_services[dbservice] = psli
 
-    def render(self, session, logger, service, archetype, personality,
+    def render(self, session, logger, plenaries, service, archetype, personality,
                personality_stage, environment_override, justification, reason,
                user, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
+        dbpersonality.archetype.require_compileable("required services are not supported")
+
         dbstage = dbpersonality.active_stage(personality_stage)
         dbservice = Service.get_unique(session, service, compel=True)
         if environment_override:
             dbenv = HostEnvironment.get_instance(session, environment_override)
         else:
             dbenv = None
-        validate_prod_personality(dbstage, user, justification, reason)
+        validate_prod_personality(dbstage, user, justification, reason, logger)
 
-        plenaries = PlenaryCollection(logger=logger)
         if dbstage.created_implicitly:
-            plenaries.append(Plenary.get_plenary(dbstage))
+            plenaries.add(dbstage)
 
         self._update_dbobj(logger, dbstage, dbservice, dbenv)
         session.flush()

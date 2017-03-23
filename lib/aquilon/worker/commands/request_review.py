@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016  Contributor
+# Copyright (C) 2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import GitRepo
 
 
-class CommandAskForReview(BrokerCommand):
+class CommandRequestReview(BrokerCommand):
 
     required_parameters = ["source", "target"]
 
@@ -34,7 +34,8 @@ class CommandAskForReview(BrokerCommand):
                 raise ArgumentError("{0} tracks a sandbox, changes should go "
                                     "through the sandbox.".format(dbtarget))
             raise ArgumentError("The target needs to be a non-tracking domain, "
-                                "maybe you meant {0.name}?".format(dbtarget))
+                                "maybe you meant {0.name}?"
+                                .format(dbtarget.tracked_branch))
 
         # "aq deploy" would check this, so let's catch errors early
         if isinstance(dbsource, Sandbox):
@@ -42,7 +43,7 @@ class CommandAskForReview(BrokerCommand):
             found = repo.ref_contains_commit(dbsource.base_commit)
             if not found:
                 raise ArgumentError("{0} does not contain the commit where "
-                                    "the {1:l} was branched from."
+                                    "{1:l} was branched from."
                                     .format(dbtarget, dbsource))
 
         repo = GitRepo.template_king(logger)

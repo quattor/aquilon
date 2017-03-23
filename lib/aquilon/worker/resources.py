@@ -424,7 +424,7 @@ class ResourcesCommandEntry(CommandEntry):
         'file': force_ascii,
         'list': force_list,
         'uuid': force_uuid,
-        'justification' : force_justification,
+        'justification': force_justification,
     }
 
     def __init__(self, fullname, method, path, name, trigger):
@@ -489,7 +489,7 @@ class ResourcesCommandEntry(CommandEntry):
                 log.msg("Unknown Enum: %s" % e)
                 return
         elif option_name == 'justification':
-                self.parameter_checks[option_name] = self._type_handler[option_name]
+            self.parameter_checks[option_name] = self._type_handler[option_name]
         else:
             if paramtype in self._type_handler:
                 self.parameter_checks[option_name] = self._type_handler[paramtype]

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -116,8 +116,10 @@ class TemplateDomain(object):
                     raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
 
         nothing_to_do = True
-        if only:
-            nothing_to_do = False
+        if only is not None:
+            # "only" may be a generator, which may not yield any entries
+            only = set(only)
+            nothing_to_do = len(only) == 0
         else:
             hostnames = session.query(Fqdn.name.concat(".")
                                       .concat(DnsDomain.name).label('hostname'))

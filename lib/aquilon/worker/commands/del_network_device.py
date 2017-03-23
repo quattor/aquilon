@@ -22,28 +22,27 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 from aquilon.worker.dbwrappers.host import remove_host
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandDelNetworkDevice(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, network_device, **_):
+    def render(self, session, logger, plenaries, network_device, **_):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         check_only_primary_ip(dbnetdev)
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
-        plenaries = PlenaryCollection(logger=logger)
 
         # Update cluster plenaries connected to this network device
-        plenaries.extend(map(Plenary.get_plenary, dbnetdev.esx_clusters))
+        plenaries.add(dbnetdev.esx_clusters)
 
-        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
-        plenaries.append(Plenary.get_plenary(dbnetdev, logger=logger))
+        plenaries.add(dbnetdev, cls=PlenarySwitchData)
+        plenaries.add(dbnetdev)
 
         remove_host(logger, dbnetdev, plenaries)
 

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2010,2011,2012,2013,2014,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,9 +92,8 @@ class Decommissioned(ClusterLifecycle):
 
     # can't set the status to "decommissioned" if the cluster has VMs.
     def onEnter(self, dbcluster):
-        dbdecommissioned = HostLifecycle.get_unique(object_session(dbcluster),
-                                                    "decommissioned",
-                                                    compel=True)
+        dbdecommissioned = HostLifecycle.get_instance(object_session(dbcluster),
+                                                      "decommissioned")
 
         config = Config()
         archetype = dbcluster.archetype

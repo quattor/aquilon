@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015  Contributor
+# Copyright (C) 2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,20 @@
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddResource(BrokerCommand):
+    requires_plenaries = True
 
     resource_class = None
     resource_name = None
+    allow_existing = False
 
-    def add_resource(self, session, logger, **kwargs):
+    def setup_resource(self, session, logger, dbresource, **kwargs):
         pass
 
-    def render(self, session, logger, hostname, cluster, metacluster, **kwargs):
+    def render(self, session, logger, plenaries, hostname, cluster, metacluster, comments,
+               **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -46,19 +48,27 @@ class CommandAddResource(BrokerCommand):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=False)
 
-        self.resource_class.get_unique(session, name=name, holder=holder,
-                                       preclude=True)
-
         with session.no_autoflush:
-            dbresource = self.add_resource(session=session, logger=logger,
-                                           **kwargs)
-            holder.resources.append(dbresource)
+            # For container-like resources, the resource object may already
+            # exist; otherwise, it must not exist
+            if self.allow_existing:
+                dbresource = self.resource_class.get_unique(session, name=name,
+                                                            holder=holder)
+            else:
+                self.resource_class.get_unique(session, name=name, holder=holder,
+                                               preclude=True)
+                dbresource = None
+
+            if not dbresource:
+                dbresource = self.resource_class(name=name, comments=comments)  # pylint: disable=E1102
+                holder.resources.append(dbresource)
+
+            self.setup_resource(session, logger, dbresource, **kwargs)
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(holder.holder_object))
-        plenaries.append(Plenary.get_plenary(dbresource))
+        plenaries.add(holder.holder_object)
+        plenaries.add(dbresource)
         plenaries.write()
 
         return

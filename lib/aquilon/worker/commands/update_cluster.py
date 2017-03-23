@@ -20,11 +20,11 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
                                 NetworkDevice, VirtualSwitch, ClusterGroup)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandUpdateCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
 
@@ -38,13 +38,13 @@ class CommandUpdateCluster(BrokerCommand):
                                 .format(dbcluster,
                                         forbid._get_class_label(tolower=True)))
 
-    def update_cluster_common(self, session, logger, dbcluster, plenaries,
+    def update_cluster_common(self, session, dbcluster, plenaries,
                               personality, personality_stage, max_members,
                               fix_location, clear_location_preference,
                               virtual_switch, comments, **arguments):
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
 
-        update_cluster_location(session, logger, dbcluster, fix_location,
+        update_cluster_location(session, dbcluster, fix_location,
                                 clear_location_preference, plenaries,
                                 **arguments)
 
@@ -80,7 +80,7 @@ class CommandUpdateCluster(BrokerCommand):
                                         "that first.".format(dbcluster))
                 dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                                      compel=True)
-                plenaries.append(Plenary.get_plenary(dbvswitch))
+                plenaries.add(dbvswitch)
             else:
                 dbvswitch = None
 
@@ -89,16 +89,15 @@ class CommandUpdateCluster(BrokerCommand):
         if comments is not None:
             dbcluster.comments = comments
 
-    def render(self, session, logger, cluster, personality, personality_stage,
+    def render(self, session, plenaries, cluster, personality, personality_stage,
                max_members, fix_location, clear_location_preference,
                down_hosts_threshold, maint_threshold, comments, switch,
                virtual_switch, metacluster, group_with, clear_group,
                **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
-        plenaries = PlenaryCollection(logger=logger)
 
-        self.update_cluster_common(session, logger, dbcluster, plenaries,
+        self.update_cluster_common(session, dbcluster, plenaries,
                                    personality, personality_stage, max_members,
                                    fix_location, clear_location_preference,
                                    virtual_switch, comments, **arguments)
@@ -112,7 +111,7 @@ class CommandUpdateCluster(BrokerCommand):
                                         "unbind that first.".format(dbcluster))
                 # FIXME: Verify that any hosts are on the same network
                 dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-                plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
+                plenaries.add(dbnetdev, cls=PlenarySwitchData)
             else:
                 dbnetdev = None
             dbcluster.network_device = dbnetdev
@@ -131,13 +130,13 @@ class CommandUpdateCluster(BrokerCommand):
             if metacluster:
                 dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                        compel=True)
-                plenaries.append(Plenary.get_plenary(dbmetacluster))
+                plenaries.add(dbmetacluster)
             else:
                 dbmetacluster = None
 
             old_metacluster = dbcluster.metacluster
             if old_metacluster:
-                plenaries.append(Plenary.get_plenary(old_metacluster))
+                plenaries.add(old_metacluster)
 
             if old_metacluster != dbmetacluster:
                 if dbcluster.virtual_machines:
@@ -148,7 +147,7 @@ class CommandUpdateCluster(BrokerCommand):
                 # Don't refresh the cluster plenaries twice
                 if dbobj is dbcluster:
                     continue
-                plenaries.append(Plenary.get_plenary(dbobj))
+                plenaries.add(dbobj)
 
             dbcluster.metacluster = dbmetacluster
 
@@ -201,7 +200,7 @@ class CommandUpdateCluster(BrokerCommand):
         return
 
 
-def update_cluster_location(session, logger, dbcluster, fix_location,
+def update_cluster_location(session, dbcluster, fix_location,
                             clear_location_preference, plenaries, **arguments):
     dblocation = get_location(session, **arguments)
     if fix_location:
@@ -233,11 +232,10 @@ def update_cluster_location(session, logger, dbcluster, fix_location,
             for dbmachine in dbcluster.virtual_machines:
                 # The plenary objects should be created before changing the
                 # location, so they can track the change
-                plenaries.append(Plenary.get_plenary(dbmachine,
-                                                     logger=logger))
+                plenaries.add(dbmachine)
                 # Update the path to the machine plenary in the container
                 # resource
-                plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+                plenaries.add(dbmachine.vm_container)
                 dbmachine.location = dblocation
 
             dbcluster.location_constraint = dblocation

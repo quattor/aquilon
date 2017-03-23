@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -91,6 +91,10 @@ def get_resource(session, holder, **arguments_in):
     arguments = dict()
     mapper = inspect(Resource)
     for key, value in arguments_in.items():
+        # Shortcut for resources which do not really have a name
+        if value is True:
+            value = key
+
         if key in mapper.polymorphic_map and value is not None:
             arguments[mapper.polymorphic_map[key].class_] = value
         elif key == "reboot_intervention" and value is not None:

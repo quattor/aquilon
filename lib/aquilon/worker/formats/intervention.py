@@ -27,15 +27,15 @@ class InterventionFormatter(ResourceFormatter):
 
     def extra_details(self, intervention, indent=""):
         details = []
-        details.append("  Start: %s" % intervention.start_date)
-        details.append("  Expires: %s" % intervention.expiry_date)
-        details.append("  Reason: %s" % intervention.reason)
+        details.append(indent + "  Start: %s" % intervention.start_date)
+        details.append(indent + "  Expires: %s" % intervention.expiry_date)
+        details.append(indent + "  Reason: %s" % intervention.reason)
         if intervention.users:
-            details.append("  Allow Users: %s" % intervention.users)
+            details.append(indent + "  Allow Users: %s" % intervention.users)
         if intervention.groups:
-            details.append("  Allow Groups: %s" % intervention.groups)
+            details.append(indent + "  Allow Groups: %s" % intervention.groups)
         if intervention.disabled:
-            details.append("  Disabled Actions: %s" % intervention.disabled)
+            details.append(indent + "  Disabled Actions: %s" % intervention.disabled)
         return details
 
     def fill_proto(self, resource, skeleton, embedded=True,

@@ -20,14 +20,14 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import MetaCluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser, ChooserCache
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClientMetacluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["metacluster", "service"]
 
-    def render(self, session, logger, metacluster, service, instance,
+    def render(self, session, logger, plenaries, metacluster, service, instance,
                force=False, **_):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
@@ -38,15 +38,13 @@ class CommandBindClientMetacluster(BrokerCommand):
             dbinstance = None
 
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         # FIXME: this logic should be in the chooser
         for dbobj in dbmeta.all_objects():
             # Always add the binding on the cluster we were called on
             if dbobj == dbmeta or dbservice in dbobj.required_services:
-                chooser = Chooser(dbobj, logger=logger, required_only=False,
-                                  cache=chooser_cache)
-                choosers.append(chooser)
+                chooser = Chooser(dbobj, plenaries, logger=logger,
+                                  required_only=False, cache=chooser_cache)
                 try:
                     chooser.set_single(dbservice, dbinstance, force=force)
                 except ArgumentError as err:
@@ -58,10 +56,7 @@ class CommandBindClientMetacluster(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
-
         plenaries.write()
 
         return

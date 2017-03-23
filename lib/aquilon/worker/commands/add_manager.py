@@ -24,14 +24,14 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddManager(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, manager, interface, mac,
+    def render(self, session, logger, plenaries, hostname, manager, interface, mac,
                comments, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
@@ -65,8 +65,7 @@ class CommandAddManager(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.add(dbmachine)
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbmachine, oldinfo)

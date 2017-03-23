@@ -1494,6 +1494,9 @@
 	</optgroup>
 	<transport method="get" path="network_compartment/%(network_compartment)s"/>
 	<transport trigger="all" method="get" path="network_compartment"/>
+	<format name="proto" >
+	    <message_class name="NetworkCompartmentList" module="aqdnetworks_pb2"/>
+	</format>
     </command>
 
     <command name="update_network_compartment">
@@ -2636,7 +2639,7 @@
 	<transport method="post" path="command/publish" custom="create_bundle" expect="command"/>
     </command>
 
-    <command name="ask_for_review">
+    <command name="request_review">
 	Announce the intention of deploying a sandbox or domain into a target domain, and ask for review and testing.
 	<optgroup mandatory="True" fields="all">
 	    <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
@@ -2852,11 +2855,15 @@
 	    <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
 	    <option name="hostlink" type="string" requires="hostname cluster metacluster">Name of a hostlink</option>
 	    <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
-	    <option name="reboot_intervention" type="string" requires="hostname cluster metacluster">Name of a reboot intervention</option>
-	    <option name="reboot_schedule" type="string" requires="hostname cluster metacluster">Name of a reboot schedule</option>
+	    <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
+	    <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
 	    <option name="virtual_machine" type="string" requires="hostname cluster metacluster">Name of a virtual machine</option>
 	    <option name="service_address" type="string" requires="hostname cluster metacluster">Name of a service address</option>
 	    <option name="share" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
+	</optgroup>
+	<optgroup>
+	    <option name="system_list" type="flag" requires="cluster">System list entries</option>
+	    <option name="auto_start_list" type="flag" requires="cluster">Auto start list entries</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string" requires="networkip">Network environment (default: internal)</option>
@@ -5291,86 +5298,6 @@
 	<transport method="get" path="find/rack"/>
     </command>
 
-    <command name="map_dns_domain">
-	Map a DNS domain to the given location.
-	<optgroup mandatory="True" fields="all">
-	    <option name="dns_domain" type="string">The fully qualified domain name</option>
-	    <optgroup fields="one">
-		<option name="organization" type="string">Organization</option>
-		<option name="hub" type="string">Hub</option>
-		<option name="continent" type="string">Continent</option>
-		<option name="country" type="string">Country</option>
-		<option name="campus" type="string">Campus</option>
-		<option name="city" type="string">City</option>
-		<option name="building" type="string">Building</option>
-		<option name="room" type="string">Room</option>
-		<option name="bunker" type="string">Bunker</option>
-		<option name="rack" type="string">Rack</option>
-		<option name="desk" type="string">Desk</option>
-	    </optgroup>
-	</optgroup>
-	<optgroup>
-	    <option name="position" type="int">Position in the list</option>
-	    <option name="comments" type="string">Comments</option>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="dns_domain/%(dns_domain)s/command/map"/>
-    </command>
-
-    <command name="unmap_dns_domain">
-	Unmap a DNS domain from the given location.
-	<optgroup mandatory="True" fields="all">
-	    <option name="dns_domain" type="string">The fully qualified domain name</option>
-	    <optgroup fields="one">
-		<option name="organization" type="string">Organization</option>
-		<option name="hub" type="string">Hub</option>
-		<option name="continent" type="string">Continent</option>
-		<option name="country" type="string">Country</option>
-		<option name="campus" type="string">Campus</option>
-		<option name="city" type="string">City</option>
-		<option name="building" type="string">Building</option>
-		<option name="room" type="string">Room</option>
-		<option name="bunker" type="string">Bunker</option>
-		<option name="rack" type="string">Rack</option>
-		<option name="desk" type="string">Desk</option>
-	    </optgroup>
-	</optgroup>
-	<optgroup>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="dns_domain/%(dns_domain)s/command/unmap"/>
-    </command>
-
-    <command name="search_dns_domain_map">
-	Search DNS domain maps.
-	<p/>
-	If a location is specified and the --include_parents flag is used, then any
-	mappings of parent locations are also included. This allows testing what would
-	be included in the DNS search path if a machine was placed at the given location.
-	<optgroup mandatory="True">
-	    <option name="dns_domain" type="string">The fully qualified domain name</option>
-	    <optgroup fields="one">
-		<option name="organization" type="string">Organization</option>
-		<option name="hub" type="string">Hub</option>
-		<option name="continent" type="string">Continent</option>
-		<option name="country" type="string">Country</option>
-		<option name="campus" type="string">Campus</option>
-		<option name="city" type="string">City</option>
-		<option name="building" type="string">Building</option>
-		<option name="room" type="string">Room</option>
-		<option name="bunker" type="string">Bunker</option>
-		<option name="rack" type="string">Rack</option>
-		<option name="desk" type="string">Desk</option>
-	    </optgroup>
-	</optgroup>
-	<optgroup>
-	    <option name="include_parents" type="flag">Include maps of parent locations</option>
-	</optgroup>
-	<transport method="get" path="find/dns_map"/>
-    </command>
-
     <command name="search_audit">
 	Search for activity in the transaction logs.
 	<p/>
@@ -6293,13 +6220,13 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="personality" type="string">Name of personality</option>
 	    <option name="path" type="string">Path of the parameter</option>
+	    <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
 	</optgroup>
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
 	    <option name="type" type="string" requires="feature">Feature type</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
-	    <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -6873,6 +6800,131 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<transport method="delete" path="building_preference/%(building_pair)s"/>
+    </command>
+
+    <command name="add_cluster_autostartlist">
+	Add a specific host to the list of those on which some or all service groups on
+	the cluster will be automatically started when the cluster is first formed.
+	This will override any building or cluster-level preferences set by 'aq add
+	building preference'.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	    <option name="order" type="int">
+Order that this host should appear in the list, which is used to determine
+the system on which to bring the service group online, where lower numbers
+appear earlier
+	    </option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Will be added only to the named resourcegroup, instead of the cluster default
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="cluster/%(cluster)s/autostartlist"/>
+    </command>
+
+    <command name="update_cluster_autostartlist">
+	Update the order of a host in the autostart list for a given cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of the cluster default
+	    </option>
+	    <option name="order" type="int">New order</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="cluster/%(cluster)s/autostartlist"/>
+    </command>
+
+    <command name="del_cluster_autostartlist">
+	Remove a host from the autostart list for a given cluster, or if no host is
+	given, all autostart list entries for the cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <optgroup fields="one">
+		<option name="member" type="string">Host name to remove</option>
+		<option name="all" type="flag">Remove all entries</option>
+	    </optgroup>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of the cluster default
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="cluster/%(cluster)s/autostartlist"/>
+	<transport method="delete" trigger="all" path="cluster/%(cluster)s/autostartlist/all"/>
+    </command>
+
+    <command name="add_cluster_systemlist">
+	Add a specific host to the list of those on which some or all service groups on
+	the cluster may run.  This will override any building or cluster-level
+	preferences set by 'aq add building preference'.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	    <option name="priority" type="int">
+		Priority for failover target where hosts with lower numbers are preferred over
+		those with higher numbers when assessing a failover target
+	    </option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Will be added only to the named resourcegroup, instead of all resourcegroups
+		in the cluster
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="cluster/%(cluster)s/systemlist"/>
+    </command>
+
+    <command name="update_cluster_systemlist">
+	Update the priority of a host in the system list for a given cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <option name="member" type="string">Host name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="priority" type="int">New priority</option>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of all resourcegroups in the
+		cluster
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="cluster/%(cluster)s/systemlist"/>
+    </command>
+
+    <command name="del_cluster_systemlist">
+	Remove a host from the system list for a given cluster, or if no host is given,
+	all system list entries for the cluster.
+	<optgroup mandatory="True" fields="all">
+	    <option name="cluster" type="string">Cluster</option>
+	    <optgroup fields="one">
+		<option name="member" type="string">Host name to remove</option>
+		<option name="all" type="flag">Remove all entries</option>
+	    </optgroup>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string">
+		Update only the named resourcegroup, instead of all resourcegroups in the
+		cluster
+	    </option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="cluster/%(cluster)s/systemlist"/>
+	<transport method="delete" trigger="all" path="cluster/%(cluster)s/systemlist/all"/>
     </command>
 
 </commandline>

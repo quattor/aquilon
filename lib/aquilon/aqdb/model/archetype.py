@@ -20,6 +20,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, Sequence, String, Boolean
 from sqlalchemy.orm import deferred
 
+from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types import AqStr
 
@@ -45,3 +46,8 @@ class Archetype(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
+
+    def require_compileable(self, msg):
+        if not self.is_compileable:
+            raise UnimplementedError("{0} is not compileable, {1!s}."
+                                     .format(self, msg))

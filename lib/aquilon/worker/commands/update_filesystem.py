@@ -19,6 +19,7 @@ from aquilon.aqdb.model import Filesystem
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_resource import CommandUpdateResource
 
+
 class CommandUpdateFilesystem(CommandUpdateResource):
 
     required_parameters = ["filesystem"]

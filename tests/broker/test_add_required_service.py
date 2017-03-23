@@ -333,6 +333,28 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "'no-such-stage' is not a valid personality "
                          "stage.", command)
 
+    def test_200_noncompilable_archetype(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--archetype", "windows"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "required services are not supported.", command)
+
+    def test_200_noncompilable_os(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--archetype", "windows",
+                   "--osname", "windows", "--osversion", "nt61e"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "required services are not supported.", command)
+
+    def test_200_noncompilable_personality(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--archetype", "windows", "--personality", "generic"]
+        out = self.unimplementederrortest(command)
+        self.matchoutput(out, "Archetype windows is not compileable, "
+                         "required services are not supported.", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)
     unittest.TextTestRunner(verbosity=2).run(suite)

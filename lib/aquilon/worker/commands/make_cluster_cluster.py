@@ -19,15 +19,16 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster, MetaCluster
-from aquilon.worker.templates import PlenaryCollection, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser, ChooserCache
 
 
 class CommandMakeClusterCluster(BrokerCommand):
+    requires_plenaries = True
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, metacluster, keepbindings, **_):
+    def render(self, session, logger, plenaries, cluster, metacluster, keepbindings, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -46,18 +47,15 @@ class CommandMakeClusterCluster(BrokerCommand):
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
         chooser_cache = ChooserCache()
-        choosers = []
         failed = []
         for dbobj in dbcluster.all_objects():
-            if dbobj.archetype.is_compileable:
-                chooser = Chooser(dbobj, logger=logger,
-                                  required_only=not keepbindings,
-                                  cache=chooser_cache)
-                choosers.append(chooser)
-                try:
-                    chooser.set_required()
-                except ArgumentError as err:
-                    failed.append(str(err))
+            chooser = Chooser(dbobj, plenaries, logger=logger,
+                              required_only=not keepbindings,
+                              cache=chooser_cache)
+            try:
+                chooser.set_required()
+            except ArgumentError as err:
+                failed.append(str(err))
 
         if failed:
             raise ArgumentError("The following objects failed service "
@@ -65,8 +63,6 @@ class CommandMakeClusterCluster(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,

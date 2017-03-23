@@ -93,7 +93,6 @@ class PlenaryHost(PlenaryCollection):
         if not isinstance(dbhost, Host):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
-        self.dbobj = dbhost
         self.append(PlenaryHostObject.get_plenary(dbhost,
                                                   allow_incomplete=allow_incomplete))
         self.append(PlenaryHostData.get_plenary(dbhost,
@@ -235,6 +234,7 @@ class PlenaryHostData(StructurePlenary):
         dbos = self.dbobj.operating_system
         pan_assign(lines, "system/archetype/os", dbos.name)
         pan_assign(lines, "system/archetype/model", dbos.version)
+        pan_assign(lines, "system/archetype/os_lifecycle", dbos.lifecycle)
 
         lines.append("")
         for name in sorted(interfaces):

@@ -38,7 +38,7 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.feature import check_feature_template
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
-from aquilon.worker.templates import Plenary, PlenaryServiceInstanceServer
+from aquilon.worker.templates import PlenaryServiceInstanceServer
 from aquilon.utils import chunk
 
 
@@ -129,26 +129,26 @@ def remove_host(logger, dbhw, plenaries):
 
     dbhost.lock_row()
 
-    plenaries.append(Plenary.get_plenary(dbhost))
+    plenaries.add(dbhost)
 
     check_no_provided_service(dbhost)
 
     for si in dbhost.services_used:
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
+        plenaries.add(si, cls=PlenaryServiceInstanceServer)
         logger.info("Before deleting {0:l}, removing binding to {1:l}"
                     .format(dbhost, si))
 
     del dbhost.services_used[:]
 
     if dbhost.resholder:
-        plenaries.extend(map(Plenary.get_plenary, dbhost.resholder.resources))
+        plenaries.add(dbhost.resholder.resources)
 
     if dbhost.cluster:
         dbcluster = dbhost.cluster
         dbcluster.hosts.remove(dbhost)
         set_committed_value(dbhost, '_cluster', None)
         dbcluster.validate()
-        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.add(dbcluster)
 
     dbhw.host = None
 

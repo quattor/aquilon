@@ -19,8 +19,10 @@
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import BuildingPreference
 
+
 class ClusterBuildingPreference(object):
     __slots__ = ['cluster']
+
     def __init__(self, cluster):
         self.cluster = cluster
 
