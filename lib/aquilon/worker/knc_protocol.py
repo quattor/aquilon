@@ -31,13 +31,13 @@ LOGGER = logging.getLogger(__name__)
 class KNCRequest(AQDRequest):
 
     def getPrincipal(self):
-        return self.channel.kncinfo.get("CREDS")
+        return self.channel.kncinfo.get(b"CREDS")
 
     def getClientIP(self):
         """The Request object would normally supply this method.
         However, the client IP is being obtained via knc.
         """
-        return self.channel.kncinfo.get("REMOTE_IP")
+        return self.channel.kncinfo.get(b"REMOTE_IP")
 
 
 class KNCProtocolException(Exception):
@@ -51,8 +51,8 @@ class KNCHTTPChannel(http.HTTPChannel):
     We take these data and stash them into the KNC Request.
     """
     __KNC_fields = {
-        'CREDS': force_ascii,
-        'REMOTE_IP': force_ipv4
+        b'CREDS': force_ascii,
+        b'REMOTE_IP': force_ipv4
     }
 
     def __init__(self, *args, **kwargs):
@@ -65,12 +65,12 @@ class KNCHTTPChannel(http.HTTPChannel):
         # KNC uses '\n' to delimit lines, while HTTP uses '\n\r', therefore
         # all of the KNC data comes on the first line.  Split these up
         # and process them speratly.
-        lines = data.split('\n')
+        lines = data.split(b'\n')
         for line in lines:
             if not self.__need_knc_data:
                 # Pass remaining data through the the HTTP Channel
                 http.HTTPChannel.lineReceived(self, line)
-            elif line == 'END':
+            elif line == b'END':
                 # Check that we have now recieved all of the metadata
                 # that we are expecting...
                 for field in self.__KNC_fields:
@@ -81,20 +81,24 @@ class KNCHTTPChannel(http.HTTPChannel):
                 # Fix the log prefix to include the real remote IP
                 logstr = "%s,%s,%s" % (self.__class__.__name__,
                                        self.transport.sessionno,
-                                       self.kncinfo["REMOTE_IP"])
+                                       self.kncinfo[b"REMOTE_IP"])
                 ctx = context.get(ILogContext)
                 ctx.update({"system": logstr})
             else:
                 if not line:
                     raise KNCProtocolException('Malformed KNC request')
-                if ':' not in line:
+                if b':' not in line:
                     raise KNCProtocolException('Malformed KNC metatdata')
-                (key, value) = line.split(':', 1)
+                key, value = line.split(b':', 1)
                 if not key:
                     raise KNCProtocolException('KNC Metadata key missing')
                 if not value:
                     raise KNCProtocolException('KNC Metadata value missing')
                 if key in self.__KNC_fields:
+                    try:
+                        value = value.decode("ascii")
+                    except UnicodeDecodeError:
+                        raise KNCProtocolException('Non-ASCII value in KNC metadata')
                     try:
                         self.kncinfo[key] = self.__KNC_fields[key](key, value)
                     except ArgumentError as err:
@@ -107,7 +111,7 @@ class KNCHTTPChannel(http.HTTPChannel):
                 self.kncLineReceived(line)
             except KNCProtocolException as err:
                 self.logger.warning("Closed KNC Connection: %s", err)
-                self.transport.write("HTTP/1.1 400 Bad KNC Request\r\n\r\n")
+                self.transport.write(b"HTTP/1.1 400 Bad KNC Request\r\n\r\n")
                 self.transport.loseConnection()
         else:
             http.HTTPChannel.lineReceived(self, line)

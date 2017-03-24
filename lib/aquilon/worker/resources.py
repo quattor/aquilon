@@ -146,7 +146,7 @@ class ResponsePage(resource.Resource):
         error handling.
 
         """
-        if request.method == 'PUT':
+        if request.method == b'PUT':
             # For now, assume all put requests use a simple urllib encoding.
             request.content.seek(0)
             # Since these are both lists, there is a theoretical case where
