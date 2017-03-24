@@ -27,7 +27,7 @@ while [ -n "$1" ]; do
 			shift
 			;;
 		--emergency)
-		    EMERGENCY=1
+			EMERGENCY=1
 			;;
 		--ticketing-system)
 			SYSTEM="$2"
@@ -49,24 +49,24 @@ then
     exit 1
 fi
 
-if [ $TICKET == "12345678" -a $SYSTEM == "TCM2" ]
+if [ $TICKET = "12345678" -a $SYSTEM = "TCM2" ]
 then
     exit 0
 fi
 
-if [ $TICKET == "87654321" -a $SYSTEM == "TCM2" ]
+if [ $TICKET = "87654321" -a $SYSTEM = "TCM2" ]
 then
     echo "Not approved ticket"
     exit 1
 fi
 
-if [ $TICKET == "CHG123456" -a $SYSTEM == "SN" ]
+if [ $TICKET = "CHG123456" -a $SYSTEM = "SN" ]
 then
     exit 0
 fi
 
 
-if [ $TICKET == "CHG654321" -a $SYSTEM == "SN" ]
+if [ $TICKET = "CHG654321" -a $SYSTEM = "SN" ]
 then
     exit 1
 fi
