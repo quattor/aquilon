@@ -28,7 +28,7 @@
 		Implied by --debug.
 	    </option>
 	    <option name="format" short="f" type="string">
-		Specify output format as raw (default) or html.
+		Specify output format as raw (default), proto or csv.
 	    </option>
 	    <option name="auth" type="boolean" conflicts="usesock" default="True">
 		Connect to aqport using knc for authentication.

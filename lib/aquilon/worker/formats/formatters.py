@@ -40,7 +40,7 @@ class ResponseFormatter(object):
         handlers and wrapped appropriately.
 
     """
-    formats = ["raw", "csv", "html", "proto", "djb"]
+    formats = ["raw", "csv", "proto", "djb"]
 
     loaded_protocols = {}
 
@@ -131,22 +131,6 @@ class ResponseFormatter(object):
                                        embedded=False)
         return container.SerializeToString()
 
-    def format_html(self, result, request):
-        if request.code and request.code >= 300:
-            title = "%d %s" % (request.code, request.code_message)
-        else:
-            title = request.path
-        msg = ObjectFormatter.redirect_html(result)
-        retval = """
-        <html>
-        <head><title>%s</title></head>
-        <body>
-        %s
-        </body>
-        </html>
-        """ % (title, msg)
-        return str(retval)
-
 
 class ObjectFormatter(object):
     """This class and its subclasses are meant to do the real work of
@@ -179,7 +163,6 @@ class ObjectFormatter(object):
                                    imports=['from string import rstrip',
                                             'from aquilon.worker.formats.formatters import shift'],
                                    default_filters=['unicode', 'rstrip'])
-    lookup_html = build_mako_lookup(config, "html")
 
     # Pass embedded=False if this is the top-level object being rendered.
     # Pass indirect_attrs=False to prevent loading expensive collection-based
@@ -239,12 +222,6 @@ class ObjectFormatter(object):
         raise ProtocolError("{0!r} does not have a protobuf formatter."
                             .format(type(result)))
 
-    def format_html(self, result):
-        if hasattr(self, "template_html"):
-            template = self.lookup_html.get_template(self.template_html)
-            return template.render(record=result, formatter=self)
-        return "<pre>%s</pre>" % result
-
     @staticmethod
     def redirect_raw(result, indent="", embedded=True, indirect_attrs=True):
         handler = ObjectFormatter.handlers.get(result.__class__,
@@ -263,12 +240,6 @@ class ObjectFormatter(object):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
         return handler.format_djb(result)
-
-    @staticmethod
-    def redirect_html(result):
-        handler = ObjectFormatter.handlers.get(result.__class__,
-                                               ObjectFormatter.default_handler)
-        return handler.format_html(result)
 
     @staticmethod
     def redirect_proto(result, container, embedded=True, indirect_attrs=True):
