@@ -12,7 +12,6 @@ Under Scientific Linux 7, install the following RPMs:
 *   python-devel
 *   python-setuptools
 *   python-dateutil
-*   python-cdb
 *   python-lxml
 *   python-virtualenv
 *   PyYAML

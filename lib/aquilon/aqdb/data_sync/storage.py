@@ -20,7 +20,12 @@ from collections import namedtuple
 from operator import itemgetter
 import re
 
-import cdb
+try:
+    import cdb
+except ImportError:
+    _has_cdb = False
+else:
+    _has_cdb = True
 
 from aquilon.config import Config
 
@@ -49,7 +54,7 @@ class StormapParser(object):
         config = Config()
         self.header_defs = []
 
-        if not config.has_option("broker", "sharedata"):
+        if not _has_cdb or not config.has_option("broker", "sharedata"):
             self.cdb_file = {}
             return
 

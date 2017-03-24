@@ -19,7 +19,12 @@
 import os.path
 from csv import DictReader
 
-import cdb
+try:
+    import cdb
+except ImportError:
+    _has_cdb = False
+else:
+    _has_cdb = True
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Grn
@@ -58,7 +63,7 @@ def lookup_autoupdate(datadir, session, logger, grn, eon_id):
 def lookup_grn(session, grn=None, eon_id=None, usable_only=True, logger=None,
                config=None, autoupdate=True):
     dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)
-    if not dbgrn and autoupdate:
+    if not dbgrn and autoupdate and _has_cdb:
         if not config.has_option("broker", "grn_to_eonid_map_location"):
             return None
 
