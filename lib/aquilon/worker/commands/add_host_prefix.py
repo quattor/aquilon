@@ -16,17 +16,18 @@
 # limitations under the License.
 """Contains a wrapper for `aq add host --prefix`."""
 
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import Machine, DnsDomain, Fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_host import CommandAddHost
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.search import search_next
-from aquilon.aqdb.model import Machine, DnsDomain, Fqdn
-from aquilon.aqdb.column_types import AqStr
 
 
 class CommandAddHostPrefix(CommandAddHost):
 
     required_parameters = ["prefix", "machine", "archetype"]
+    requires_format = True
 
     def render(self, session, logger, prefix, dns_domain, hostname, machine,
                **args):

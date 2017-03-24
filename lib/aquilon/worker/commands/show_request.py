@@ -44,7 +44,8 @@ class StatusWriter(StatusSubscriber):
             msg = record.getMessage() or ''
             if msg:
                 msg = "%s\n" % msg
-            self.request.write(str(msg))
+            # The formatter is not used, we're talking raw HTTP here
+            self.request.write(msg.encode("utf-8"))
 
     def finish(self):
         if not self.deferred.called:

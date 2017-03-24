@@ -19,6 +19,7 @@
 import csv
 import sys
 
+from six import text_type
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 
 import google.protobuf.message
@@ -101,21 +102,26 @@ class ResponseFormatter(object):
             this method and let the magic happen.
 
         """
+        # TODO: add Content-Type/Content-Transfer-Encoding headers
         m = getattr(self, "format_" + str(style).lower(), self.format_raw)
-        return str(m(result, request))
+        return m(result, request)
 
     def format_raw(self, result, request):
-        return ObjectFormatter.redirect_raw(result, embedded=False)
+        # Shortcut for text result
+        if isinstance(result, text_type):
+            return result.encode("utf-8")
+        return ObjectFormatter.redirect_raw(result,
+                                            embedded=False).encode("utf-8")
 
     def format_csv(self, result, request):
         strbuf = StringIO()
         writer = csv.writer(strbuf, dialect='aquilon')
         ObjectFormatter.redirect_csv(result, writer)
-        return strbuf.getvalue()
+        return strbuf.getvalue().encode("utf-8")
 
     def format_djb(self, result, request):
         """ For tinydns-data formatting. use raw for now. """
-        return ObjectFormatter.redirect_djb(result)
+        return ObjectFormatter.redirect_djb(result).encode("utf-8")
 
     def format_proto(self, result, request):
         if not self.protobuf_container:  # pragma: no cover

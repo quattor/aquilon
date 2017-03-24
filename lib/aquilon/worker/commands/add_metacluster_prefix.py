@@ -26,6 +26,7 @@ from aquilon.worker.dbwrappers.search import search_next
 class CommandAddMetaClusterPrefix(CommandAddMetaCluster):
 
     required_parameters = ["prefix"]
+    requires_format = True
 
     def render(self, session, logger, prefix, **args):
         prefix = AqStr.normalize(prefix)

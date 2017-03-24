@@ -16,17 +16,17 @@
 # limitations under the License.
 """Contains a wrapper for `aq add machine --prefix`."""
 
-
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_machine import CommandAddMachine
 from aquilon.worker.dbwrappers.search import search_next
-from aquilon.aqdb.model import Machine
-from aquilon.aqdb.column_types import AqStr
 
 
 class CommandAddMachinePrefix(CommandAddMachine):
 
     required_parameters = ["prefix", "model"]
+    requires_format = True
 
     def render(self, session, logger, prefix, **args):
         prefix = AqStr.normalize(prefix)

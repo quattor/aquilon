@@ -30,6 +30,7 @@ from aquilon.worker.logger import CLIENT_INFO
 class CommandPublish(BrokerCommand):
 
     required_parameters = ["bundle"]
+    requires_format = True
 
     def render(self, session, logger, dbuser, branch, sandbox, bundle, sync,
                rebase, **_):
