@@ -102,7 +102,11 @@ class TestBrokerStart(unittest.TestCase):
         self.run_command(args)
 
     def testclonetemplateking(self):
-        source = self.config.get("unittest", "template_base")
+        if self.config.has_option("unittest", "template_base"):
+            source = self.config.get("unittest", "template_base")
+        else:
+            source = None
+
         if not source:
             source = os.path.join(self.config.get("broker", "srcdir"),
                                   "tests/templates")
