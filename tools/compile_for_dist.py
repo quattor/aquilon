@@ -17,7 +17,6 @@
 # limitations under the License.
 """Add /ms/dist to traceback of files compiled in /ms/dev."""
 
-
 import sys
 import py_compile
 import re
@@ -43,9 +42,8 @@ def main(args=None):
             else:
                 dfile = filename
             py_compile.compile(filename, dfile=dfile, doraise=True)
-        except py_compile.PyCompileError, e:
+        except py_compile.PyCompileError as e:
             sys.stderr.write(e.msg)
-
 
 if __name__ == "__main__":
     main()

@@ -17,7 +17,6 @@
 
 from tempfile import NamedTemporaryFile
 from collections import defaultdict
-from types import ListType
 import os.path
 
 from aquilon.exceptions_ import ArgumentError
@@ -29,6 +28,9 @@ from aquilon.worker.processes import run_command
 from aquilon.worker.locks import ExternalKey
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import first_of
+
+# The 'list' argument shadows the keyword...
+_listtype = list
 
 
 class CommandPXESwitchList(BrokerCommand):
@@ -42,6 +44,7 @@ class CommandPXESwitchList(BrokerCommand):
                    'firmware': '--firmwarelist',
                    'blindbuild': '--livecdlist'}
     requires_readonly = True
+
 
     def render(self, session, logger, list, **arguments):
         check_hostlist_size(self.command, self.config, list)
@@ -63,7 +66,7 @@ class CommandPXESwitchList(BrokerCommand):
         dbservice = Service.get_unique(session, "bootserver", compel=True)
         dbhosts = hostlist_to_hosts(session, list)
 
-        hosts_per_instance = defaultdict(ListType)
+        hosts_per_instance = defaultdict(_listtype)
         failed = []
         for dbhost in dbhosts:
             if arguments.get("install", None) and (dbhost.status.name == "ready" or

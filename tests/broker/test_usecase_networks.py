@@ -23,6 +23,8 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+from six import iteritems
+
 from brokertest import TestBrokerCommand
 
 # This test case sets up a network that look like the following:
@@ -240,7 +242,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_201_add_routers(self):
         if 'skip_add' in flags:
             return True
-        for (name, dev_attrs) in config['devices'].iteritems():
+        for (name, dev_attrs) in iteritems(config['devices']):
             fqdn = name + '.' + config['domain']
             interface = dev_attrs['mgmt_interface']
             if_attrs = dev_attrs['interfaces'][interface]
@@ -260,9 +262,9 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_202_add_interfaces(self):
         if 'skip_add' in flags:
             return True
-        for (dev_name, dev_attrs) in config['devices'].iteritems():
+        for (dev_name, dev_attrs) in iteritems(config['devices']):
             fqdn = dev_name + '.' + config['domain']
-            for (if_name, if_attrs) in dev_attrs['interfaces'].iteritems():
+            for (if_name, if_attrs) in iteritems(dev_attrs['interfaces']):
                 if if_name == dev_attrs['mgmt_interface']:
                     continue
                 iftype = if_attrs['type'] if 'type' in if_attrs else "virtual"
@@ -274,9 +276,9 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_203_add_addresses(self):
         if 'skip_add' in flags:
             return True
-        for (dev_name, dev_attrs) in config['devices'].iteritems():
+        for (dev_name, dev_attrs) in iteritems(config['devices']):
             fqdn = dev_name + '.' + config['domain']
-            for (if_name, if_attrs) in dev_attrs['interfaces'].iteritems():
+            for (if_name, if_attrs) in iteritems(dev_attrs['interfaces']):
                 if if_name == dev_attrs['mgmt_interface']:
                     continue
                 net = self.net[if_attrs['net']]
@@ -293,7 +295,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_204_add_hsrp(self):
         if 'skip_add' in flags:
             return True
-        for net_name, gateways in config['gateways'].iteritems():
+        for net_name, gateways in iteritems(config['gateways']):
             net = self.net[net_name]
             ip = net[1] # Always use first address
             gw_fqdn = '-'.join(net.name.split('_')[1:] + ['gateway']) + '.' + config['domain']
@@ -329,7 +331,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
     ########## TESTING STAGE ##########
 
     def test_301_network_plenary(self):
-        for (net_name, net_attrs) in config['gateways'].iteritems():
+        for (net_name, net_attrs) in iteritems(config['gateways']):
             net = self.net[net_name]
 
             pri_router = net_attrs[0][0]
@@ -389,7 +391,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_805_del_hsrp(self):
         if 'skip_delete' in flags:
             return True
-        for net_name, gateways in config['gateways'].iteritems():
+        for net_name, gateways in iteritems(config['gateways']):
             net = self.net[net_name]
             ip = net[1] # Always use first address
             if 'skip_dsdb' not in flags:
@@ -408,9 +410,9 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_806_del_addresses(self):
         if 'skip_delete' in flags:
             return True
-        for (dev_name, dev_attrs) in config['devices'].iteritems():
+        for (dev_name, dev_attrs) in iteritems(config['devices']):
             fqdn = dev_name + '.' + config['domain']
-            for (if_name, if_attrs) in dev_attrs['interfaces'].iteritems():
+            for (if_name, if_attrs) in iteritems(dev_attrs['interfaces']):
                 if if_name == dev_attrs['mgmt_interface']:
                     continue
                 net = self.net[if_attrs['net']]
@@ -426,9 +428,9 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_807_del_interfaces(self):
         if 'skip_delete' in flags:
             return True
-        for (dev_name, dev_attrs) in config['devices'].iteritems():
+        for (dev_name, dev_attrs) in iteritems(config['devices']):
             fqdn = dev_name + '.' + config['domain']
-            for (if_name, if_attrs) in dev_attrs['interfaces'].iteritems():
+            for (if_name, if_attrs) in iteritems(dev_attrs['interfaces']):
                 if if_name == dev_attrs['mgmt_interface']:
                     continue
                 command = ["del", "interface", "--interface", if_name,
@@ -438,7 +440,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_808_del_routers(self):
         if 'skip_delete' in flags:
             return True
-        for (name, dev_attrs) in config['devices'].iteritems():
+        for (name, dev_attrs) in iteritems(config['devices']):
             fqdn = name + '.' + config['domain']
             interface = dev_attrs['mgmt_interface']
             if_attrs = dev_attrs['interfaces'][interface]

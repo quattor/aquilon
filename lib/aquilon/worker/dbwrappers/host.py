@@ -17,7 +17,6 @@
 """Wrappers to make getting and using hosts simpler."""
 
 from collections import defaultdict, Counter
-from types import ListType
 
 from six import itervalues
 
@@ -273,7 +272,7 @@ def preload_machine_data(session, dbhosts):
     machines = [dbhost.hardware_entity.id for dbhost in dbhosts if
                 dbhost.hardware_entity.model.model_type.isMachineType()]
     for machine_chunk in chunk(machines, 1000):
-        disks_by_hw = defaultdict(ListType)
+        disks_by_hw = defaultdict(list)
         q = session.query(Disk)
         q = q.options(undefer('comments'))
         q = q.filter(Disk.machine_id.in_(machine_chunk))
@@ -289,7 +288,7 @@ def preload_machine_data(session, dbhosts):
             else:
                 set_committed_value(dbhw, "disks", [])
 
-        slots_by_hw = defaultdict(ListType)
+        slots_by_hw = defaultdict(list)
         q = session.query(ChassisSlot)
         q = q.filter(ChassisSlot.machine_id.in_(machine_chunk))
         for dbslot in q:
