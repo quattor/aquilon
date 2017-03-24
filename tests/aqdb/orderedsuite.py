@@ -24,8 +24,6 @@ import unittest
 from utils import load_classpath
 load_classpath()
 
-import nose
-
 from aquilon.config import Config
 
 
@@ -55,7 +53,3 @@ class DatabaseTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):
         unittest.TestSuite.__init__(self, *args, **kwargs)
         self.addTest(unittest.TestLoader().loadTestsFromTestCase(TestRebuild))
-
-
-if __name__ == '__main__':
-    nose.runmodule()

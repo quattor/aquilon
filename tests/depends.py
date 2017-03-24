@@ -23,7 +23,6 @@ except ImportError:
 else:
     ms.version.addpkg('setuptools', '0.6c11')
     ms.version.addpkg('coverage', '3.6')
-    ms.version.addpkg('nose', '1.3.0')
     ms.version.addpkg('lxml', '3.2.5')
     ms.version.addpkg('ipaddr', '2.1.9')
     ms.version.addpkg('dateutil', '1.5')
