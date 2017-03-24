@@ -1,1 +1,0 @@
-Build Status: ${record.name}

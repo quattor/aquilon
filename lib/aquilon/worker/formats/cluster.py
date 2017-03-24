@@ -123,7 +123,7 @@ class ClusterFormatter(CompileableFormatter):
                            len(cluster.hosts))
             if cluster.network_device:
                 details.append(indent + "  {0:c}: {0!s}".format(cluster.network_device))
-        details.append(self.redirect_raw(cluster.status, indent + "  "))
+        details.append(indent + "  Build Status: %s" % cluster.status)
         details.append(self.redirect_raw(cluster.personality_stage,
                                          indent + "  "))
         details.append(indent + "  {0:c}: {1}"
