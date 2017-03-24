@@ -18,6 +18,8 @@
 
 import logging
 from twisted.web import http
+from twisted.python import context
+from twisted.python.log import ILogContext
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.utils import force_ascii, force_ipv4
@@ -75,6 +77,13 @@ class KNCHTTPChannel(http.HTTPChannel):
                     if field not in self.kncinfo:
                         raise KNCProtocolException('Missing %s' % field)
                 self.__need_knc_data = 0
+
+                # Fix the log prefix to include the real remote IP
+                logstr = "%s,%s,%s" % (self.__class__.__name__,
+                                       self.transport.sessionno,
+                                       self.kncinfo["REMOTE_IP"])
+                ctx = context.get(ILogContext)
+                ctx.update({"system": logstr})
             else:
                 if not line:
                     raise KNCProtocolException('Malformed KNC request')
