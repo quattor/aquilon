@@ -133,7 +133,7 @@ class DummyNetworks(object):
         # Load dynamic networks
         if os.path.exists(self.statedir):
             for name in os.listdir(self.statedir):
-                with open(os.path.join(self.statedir, name), "r") as f:
+                with open(os.path.join(self.statedir, name), "rb") as f:
                     net = pickle.load(f)
                     self.networks[net.name] = net
         else:
@@ -176,7 +176,7 @@ class DummyNetworks(object):
             command.extend(["--comments", comments])
         testsuite.noouttest(command)
 
-        with open(statefile, "w") as f:
+        with open(statefile, "wb") as f:
             pickle.dump(result, f)
 
         self.networks[name] = result
