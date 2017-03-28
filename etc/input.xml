@@ -475,6 +475,7 @@
 	    <option name="mac" type="mac">[Deprecated] MAC address</option>
 	    <option name="personality" type="string">Personality</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
+	    <option name="feature" type="string">Feature</option>
 	    <option name="host_environment" type="string">Host environment</option>
 	    <option name="osname" type="string">OS name</option>
 	    <option name="osversion" type="string">OS version</option>

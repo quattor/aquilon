@@ -14,7 +14,7 @@
 	<property name="panc.formats" value="pan,dep" />
 	<property name="profile.suffixes" value=".xml" />
 	<property name="panc.batch.size" value="1000" />
-	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/lib/panc.jar" />
+	<property name="panc.jar" location="/var/quattor/panc-${panc.version}-jar-with-dependencies.jar" />
 	<property name="panc.debug.include" value="" />
 	<property name="panc.debug.exclude" value="" />
 	<property name="panc.template_extension" value=".tpl" />
@@ -25,6 +25,7 @@
 	<condition property="panc.checkDependencies" else="false">
 		<isfalse value="${force.build}"/>
 	</condition>
+
 
 	<!--
 	Be careful of the clean.dep.files property... if it is set at
@@ -51,6 +52,15 @@
 	<property name="compiled.profiles" location="${basedir}/build/${domain}" />
 	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
+	<!-- /build/log = log file goes here -->
+	<property name="build.log" location="${basedir}/build/log" />
+
+
+	<!--
+	Logging.
+	-->
+	<property name="panc.logging" value="call" />
+	<property name="panc.logfile" value="${build.log}/panc.log" />
 
 	<!--
 	Note that the old 'deps' directory was only needed for the

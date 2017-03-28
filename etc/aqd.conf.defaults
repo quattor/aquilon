@@ -121,7 +121,7 @@ database_section = database_sqlite
 #log_unique_plans_only = yes
 
 [broker]
-default_organization = ms
+default_organization = example
 servername = %(hostname)s
 umask = 0022
 kncport = 6900
@@ -130,7 +130,8 @@ openport = 6901
 #bind_address =
 # Using a fix port for sending out notifications makes it easier to configure firewalls
 #cdp_send_port =
-git_port = 9418
+
+_port = 9418
 gzip_level = 9
 git_templates_url = git://%(servername)s:%(git_port)s/quattor/template-king
 git_daemon_basedir = %(basedir)s
@@ -151,9 +152,15 @@ plenarydir = %(cfgdir)s/plenary
 #git_committer_email =
 dsdb_location_sync = True
 dsdb_use_testdb = False
-#ant_options = -Xmx2560m -server
+ant = %(ant_home)s/bin/ant
+ant_options = -Xmx2560m -server
+java_home = /usr/java/jdk1.7.0_04/
+ant_home = /opt/apache-ant-1.8.3/
+ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
 service = %(user)s
 keytab = /var/spool/keytabs/%(service)s
+javadir = /usr/share/java/
+service = aqd
 installfe_user = %(user)s
 server_notifications =
 client_notifications = yes
@@ -162,11 +169,14 @@ default_domain_start = prod
 trash_branch = trash
 authorization_rules = aqd-authorization.conf
 authorization_error = Please contact an administrator for access.
+ant = /usr/bin/ant
+windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
 # See comments in aquilon.worker.resources.set_thread_pool_size
 twisted_thread_pool_size = 100
 # The knc daemon can be run by the broker for development purposes.
 # Will default to True until we migrate to a new configuration in prod.
 run_knc = True
+mean = /usr/local/bin/mean
 # Default and maximum numbers of audit (xtn table) rows returned by search audit
 default_audit_rows = 5000
 max_audit_rows = 20000
@@ -210,8 +220,8 @@ dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
 ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
 switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
 get_camtable = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/get-camtable
-git = /ms/dist/fsf/PROJ/git/2.9.0/bin/git
-git_daemon = /ms/dist/fsf/PROJ/git/2.9.0/libexec/git-core/git-daemon
+git = /usr/bin/git
+git_daemon = /usr/libexec/git-core/git-daemon
 aii_installfe = /ms/dist/elfms/PROJ/aii/prod/sbin/aii-installfe
 vlan2net = /ms/dist/aquilon/PROJ/vlan2net/prod/bin/vlan2net
 mean = /ms/dist/storage/PROJ/infra/prod/bin/mean
@@ -318,7 +328,7 @@ default_version = prod
 version = %(default_version)s
 # The update_domain command expects to be able to read this value
 # in raw mode and set the version variable itself.
-pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
+pan_compiler = /var/quattor/panc/panc-9.2-jar-with-dependencies.jar
 # Number of templates to cache in memory during compiles
 batch_size = 1000
 # Option passed to panc the output format that it uses
@@ -331,6 +341,12 @@ transparent_gzip = true
 template_extension = .tpl
 # Max. time a compilation is allowed to take. The value is passed to the "timeout" command verbatim.
 timeout = 30m
+
+[kerberos]
+knc = /usr/local/bin/knc
+krb5_keytab = /etc/krb5.keytab
+klist = /usr/bin/klist
+service = aqd
 
 [site]
 # Site specific settings
@@ -349,4 +365,4 @@ sqlalchemy.orm    = WARNING
 aquilon = INFO
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.31/common/lib/python
+directory = /usr/local/lib/aquilon/protocols/lib/python/
