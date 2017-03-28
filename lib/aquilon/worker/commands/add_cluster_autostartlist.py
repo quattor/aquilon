@@ -24,6 +24,6 @@ from aquilon.worker.commands.add_cluster_member_priority import \
 
 class CommandAddClusterAutoStartList(CommandAddClusterMemberPriority):
 
-    required_parameters = ["cluster", "member", "order"]
+    required_parameters = ["cluster", "hostname", "order"]
     resource_class = AutoStartList
     priority_parameter = "order"

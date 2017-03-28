@@ -44,9 +44,10 @@ class CommandAddClusterMemberPriority(CommandAddResource):
 
         dbresource.hosts[dbhost] = priority
 
-    def render(self, session, **kwargs):
+    def render(self, session, hostname, **kwargs):
         super(CommandAddClusterMemberPriority, self).render(session,
                                                             hostname=None,
                                                             metacluster=None,
                                                             comments=None,
+                                                            member=hostname,
                                                             **kwargs)

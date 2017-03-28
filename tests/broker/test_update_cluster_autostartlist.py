@@ -31,13 +31,13 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
     def test_100_update_rg_single_host(self):
         self.noouttest(["update_cluster_autostartlist", "--cluster", "utbvcs1b",
                         "--resourcegroup", "utbvcs1bas01",
-                        "--member", "utbhost04.aqd-unittest.ms.com",
+                        "--hostname", "utbhost04.aqd-unittest.ms.com",
                         "--order", 2])
 
     def test_100_update_rg_single_host_range_lo(self):
         command = ["update_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--hostname", "utbhost04.aqd-unittest.ms.com",
                    "--order", 0]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Value for order (0) is outside of the configured range 1..99",
@@ -46,7 +46,7 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
     def test_100_update_rg_single_host_range_hi(self):
         command = ["update_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost04.aqd-unittest.ms.com",
+                   "--hostname", "utbhost04.aqd-unittest.ms.com",
                    "--order", 366]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Value for order (366) is outside of the configured range 1..99",
@@ -78,14 +78,14 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
 
     def test_110_update_cluster_default(self):
         self.noouttest(["update_cluster_autostartlist", "--cluster", "utbvcs1d",
-                        "--member", "utbhost07.aqd-unittest.ms.com",
+                        "--hostname", "utbhost07.aqd-unittest.ms.com",
                         "--order", 25])
 
     def test_111_rg_override(self):
         # CamelCase
         self.noouttest(["update_cluster_autostartlist", "--cluster", "utbvcs1d",
                         "--resourcegroup", "UTBvcs1das01",
-                        "--member", "UTBhost07.aqd-unittest.ms.com",
+                        "--hostname", "UTBhost07.aqd-unittest.ms.com",
                         "--order", 10])
 
     def test_115_show_utbvcs1d(self):
@@ -127,7 +127,7 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
     def test_200_no_member(self):
         command = ["update_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "server1.aqd-unittest.ms.com", "--order", 1]
+                   "--hostname", "server1.aqd-unittest.ms.com", "--order", 1]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host server1.aqd-unittest.ms.com does not have "
@@ -137,7 +137,7 @@ class TestUpdateClusterAutoStartList(TestBrokerCommand):
     def test_200_no_asl(self):
         command = ["update_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost03.aqd-unittest.ms.com", "--order", 1]
+                   "--hostname", "utbhost03.aqd-unittest.ms.com", "--order", 1]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host utbhost03.aqd-unittest.ms.com does not have "

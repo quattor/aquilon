@@ -31,7 +31,7 @@ class TestDelClusterAutoStartList(TestBrokerCommand):
     def test_100_del_rg_single_host(self):
         self.noouttest(["del_cluster_autostartlist", "--cluster", "utbvcs1b",
                         "--resourcegroup", "utbvcs1bas01",
-                        "--member", "utbhost04.aqd-unittest.ms.com"])
+                        "--hostname", "utbhost04.aqd-unittest.ms.com"])
 
     def test_105_cat_utbvcs1b(self):
         command = ["cat", "--cluster", "utbvcs1b", "--resourcegroup", "utbvcs1bas01"]
@@ -57,11 +57,11 @@ class TestDelClusterAutoStartList(TestBrokerCommand):
         self.check_plenary_exists(*path)
         self.noouttest(["del_cluster_autostartlist", "--cluster", "utbvcs1d",
                         "--resourcegroup", "utbvcs1das01",
-                        "--member", "utbhost07.aqd-unittest.ms.com"])
+                        "--hostname", "utbhost07.aqd-unittest.ms.com"])
         self.check_plenary_exists(*path)
         self.noouttest(["del_cluster_autostartlist", "--cluster", "utbvcs1d",
                         "--resourcegroup", "utbvcs1das01",
-                        "--member", "utbhost08.aqd-unittest.ms.com"])
+                        "--hostname", "utbhost08.aqd-unittest.ms.com"])
         self.check_plenary_gone(*path)
 
     def test_115_show_utbvcs1d(self):
@@ -85,7 +85,7 @@ class TestDelClusterAutoStartList(TestBrokerCommand):
     def test_200_del_again(self):
         command = ["del_cluster_autostartlist", "--cluster", "utbvcs1b",
                    "--resourcegroup", "utbvcs1bas01",
-                   "--member", "utbhost04.aqd-unittest.ms.com"]
+                   "--hostname", "utbhost04.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "AutoStartList auto_start_list, "
