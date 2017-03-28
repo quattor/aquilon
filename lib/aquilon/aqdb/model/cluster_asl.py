@@ -44,6 +44,7 @@ def _member_priority_creator(host, priority):
 class PriorityList(Resource):
     """ Table providing cluster-specific overrides for system priorities. """
     __tablename__ = _TNPL
+    __description__ = None
 
     resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
@@ -80,7 +81,10 @@ class MemberPriority(Base):
 
 class SystemList(PriorityList):
     __mapper_args__ = {'polymorphic_identity': 'system_list'}
+    __description__ = 'system list'
 
 
 class AutoStartList(PriorityList):
     __mapper_args__ = {'polymorphic_identity': 'auto_start_list'}
+    __description__ = 'autostart list'
+

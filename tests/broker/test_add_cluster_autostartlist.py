@@ -56,6 +56,29 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
                         "--member", "utbhost03.aqd-unittest.ms.com",
                         "--order", 1])
 
+    def test_103_show_cluster_autostartlist_cluster(self):
+        command = ["show_cluster_autostartlist", "--cluster", "utbvcs1b"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1b\s*'
+                          r'Resource Group: utbvcs1bas01\s*'
+                          r'AutoStartList\s*'
+                          r'Member: utbhost04.aqd-unittest.ms.com Order: 1$',
+                          command)
+
+    def test_103_show_cluster_autostartlist_all(self):
+        command = ["show_cluster_autostartlist", "--all"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1b\s*'
+                          r'Resource Group: utbvcs1bas01\s*'
+                          r'AutoStartList\s*'
+                          r'Member: utbhost04.aqd-unittest.ms.com Order: 1\s*'
+                          r'Resource Group: utbvcs1bas02\s*'
+                          r'AutoStartList\s*'
+                          r'Member: utbhost03.aqd-unittest.ms.com Order: 1$',
+                          command)
+
     def test_105_cat_utbvcs1b(self):
         command = ["cat", "--cluster", "utbvcs1b", "--resourcegroup", "utbvcs1bas01"]
         out = self.commandtest(command)
@@ -220,6 +243,26 @@ class TestAddClusterAutoStartList(TestBrokerCommand):
         command = ["cat", "--cluster", "utbvcs1d", "--resourcegroup",
                    "utbvcs1das02", "--auto_start_list"]
         self.notfoundtest(command)
+
+    def test_120_show_cluster_autostartlist_cluster(self):
+        command = ["show_cluster_autostartlist", "--cluster", "utbvcs1d"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1d\s*'
+                          r'AutoStartList\s*'
+                          r'Member: utbhost07.aqd-unittest.ms.com Order: 5\s*'
+                          r'Member: utbhost08.aqd-unittest.ms.com Order: 10\s*',
+                          command)
+
+    def test_120_show_cluster_autostartlist_all(self):
+        command = ["show_cluster_autostartlist", "--all"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'High Availability Cluster: utbvcs1d\s*'
+                          r'AutoStartList\s*'
+                          r'Member: utbhost07.aqd-unittest.ms.com Order: 5\s*'
+                          r'Member: utbhost08.aqd-unittest.ms.com Order: 10\s*',
+                          command)
 
     def test_200_no_member(self):
         command = ["add_cluster_autostartlist", "--cluster", "utbvcs1b",

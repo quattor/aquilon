@@ -6866,6 +6866,16 @@ appear earlier
 	<transport method="delete" trigger="all" path="cluster/%(cluster)s/autostartlist/all"/>
     </command>
 
+    <command name="show_cluster_autostartlist">
+	Show the autostart list for a given cluster or all clusters (where an autostart list resource is present).
+	<optgroup mandatory="True" fields="one">
+	    <option name="cluster" type="string">Individual cluster</option>
+	    <option name="all" type="flag">Show all (where present)</option>
+	</optgroup>
+	<transport method="get" trigger="cluster" path="cluster/%(cluster)s/autostartlist/show"/>
+	<transport method="get" trigger="all" path="cluster/cluster_autostartlist"/>
+    </command>
+
     <command name="add_cluster_systemlist">
 	Add a specific host to the list of those on which some or all service groups on
 	the cluster may run.  This will override any building or cluster-level
@@ -6927,6 +6937,16 @@ appear earlier
 	</optgroup>
 	<transport method="delete" path="cluster/%(cluster)s/systemlist"/>
 	<transport method="delete" trigger="all" path="cluster/%(cluster)s/systemlist/all"/>
+    </command>
+
+    <command name="show_cluster_systemlist">
+	Show the system list for a given cluster or all clusters (where a system list resource is present).
+	<optgroup mandatory="True" fields="one">
+	    <option name="cluster" type="string">Individual cluster</option>
+	    <option name="all" type="flag">Show all (where present)</option>
+	</optgroup>
+	<transport method="get" trigger="cluster" path="cluster/%(cluster)s/systemlist/show"/>
+	<transport method="get" trigger="all" path="cluster/cluster_systemlist"/>
     </command>
 
 </commandline>
