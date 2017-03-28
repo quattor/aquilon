@@ -45,8 +45,7 @@ class TestAddBuildingPreference(TestBrokerCommand):
                    "--archetype", "hacluster"]
         out = self.commandtest(command)
         self.output_equals(out, """
-            Building Pair: utb1,utb2 Archetype: hacluster
-              Preferred Building: utb2
+            Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb2
             """, command)
 
     def test_105_show_utb12_proto(self):
@@ -150,17 +149,24 @@ class TestAddBuildingPreference(TestBrokerCommand):
         command = ["show_building_preference", "--all"]
         out = self.commandtest(command)
         self.output_equals(out, """
-            Building Pair: utb1,utb2 Archetype: hacluster
-              Preferred Building: utb2
-            Building Pair: utb2,utb3 Archetype: hacluster
-              Preferred Building: utb2
+            Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb2
+            Building Pair: utb2,utb3  Archetype: hacluster  Prefer: utb2
             """, command)
 
     def test_300_search_building(self):
         command = ["search_building_preference", "--building", "utb2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utb1,utb2,hacluster", command)
-        self.matchoutput(out, "utb2,utb3,hacluster", command)
+        self.output_equals(out, """
+            Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb2
+            Building Pair: utb2,utb3  Archetype: hacluster  Prefer: utb2
+            """, command)
+
+    def test_300_search_building_pair(self):
+        command = ["search_building_preference", "--building_pair", "utb1,utb2"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb2
+            """, command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuildingPreference)

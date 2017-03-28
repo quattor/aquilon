@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2014,2015,2016  Contributor
+# Copyright (C) 2012,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ from sqlalchemy.sql import null
 
 from aquilon.aqdb.model import BuildingPreference, Building, Archetype, Cluster
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.formats.building_preference import ClusterBuildingPreference
-
+from aquilon.worker.formats.building_preference import BuildingClusterPreference
 
 class CommandShowBuildingPreferenceAll(BrokerCommand):
 
     def render(self, session, **_):
+        # Pick up building-pair preferences
         AB = aliased(Building)
         BB = aliased(Building)
 
@@ -40,28 +40,37 @@ class CommandShowBuildingPreferenceAll(BrokerCommand):
                       contains_eager('b', alias=BB),
                       contains_eager('archetype'))
 
-        pairs = defaultdict(list)
-
+        bcprefs = defaultdict(list)
         for db_pref in q:
             key = db_pref.sorted_name + "," + db_pref.archetype.name
-            pairs[key].append(db_pref)
+            bcprefs[key] = BuildingClusterPreference(db_pref.sorted_name,
+                                                     db_pref.archetype,
+                                                     [],
+                                                     db_pref.prefer)
 
-        # Add clusters which have a preference override
+        # Pick up clusters that have a preference override
         q = session.query(Cluster)
         q = q.filter(Cluster.preferred_location != null())
         q = q.options(subqueryload('_hosts'),
                       joinedload('_hosts.host'),
                       joinedload('_hosts.host.hardware_entity'),
                       joinedload('_hosts.host.hardware_entity.location'))
+
         for dbcluster in q:
             buildings = dbcluster.member_locations(location_class=Building)
+            # TODO: do we really want to 'hide' things that have != 2 buildings?
             if len(buildings) != 2:
                 continue
 
-            key = ",".join(sorted(building.name for building in buildings))
-            key = key + "," + dbcluster.archetype.name
-            clpref = ClusterBuildingPreference(cluster=dbcluster)
-            pairs[key].append(clpref)
+            sortname = ",".join(sorted(building.name for building in buildings))
+            key = sortname + "," + dbcluster.archetype.name
 
-        # Flatten lists within lists, need to return only a simple list
-        return [item for key in sorted(pairs.keys()) for item in pairs[key]]
+            if key not in bcprefs:
+                bcprefs[key] = BuildingClusterPreference(sortname,
+                                                         dbcluster.archetype,
+                                                         [dbcluster])
+            else:
+                bcprefs[key].clusters.append(dbcluster)
+
+        return [bcprefs[key] for key in sorted(bcprefs.keys())]
+

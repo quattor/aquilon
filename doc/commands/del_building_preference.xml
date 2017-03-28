@@ -82,10 +82,10 @@
 	    <title>Removing a global preference</title>
             <para>
                 The following removes a global preference set on the
-                building pair aa and bb:
+                building pair aa and bb for archetype "hacluster":
             </para>
 	    <programlisting>
-aq del building preference --building_pair aa,bb
+aq del building preference --building_pair aa,bb --archetype hacluster
 	    </programlisting>
 	</example>
     </refsect1>

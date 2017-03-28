@@ -31,9 +31,6 @@
 		<arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    </group>
 	    <group>
-		<arg><option>--fullinfo</option></arg>
-	    </group>
-	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <xi:include href="../common/global_options.xml"/>
@@ -45,7 +42,9 @@
 	<para>
 	    The <command>aq search building preference</command> command
             searches for building preferences where a particular building
-            code is set up as preferred.
+            code is set up as preferred.  This includes clusters where a
+	    specific building preference (or building pair) is associated
+	    with the cluster.
 	</para>
     </refsect1>
 
@@ -93,16 +92,6 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--fullinfo</option>
-		</term>
-		<listitem>
-		    <para>
-			Show full information of the matching preferences.
-		    </para>
-		</listitem>
-	    </varlistentry>
 	</variablelist>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
@@ -110,8 +99,10 @@
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>aq_show_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>aq_add_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_update_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_del_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_show_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

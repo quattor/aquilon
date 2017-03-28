@@ -101,11 +101,12 @@
 	<example>
 	    <title>Setting a global preference</title>
             <para>
-                For all clusters that span the two buildings aa and bb,
-                the following would set aa as the preferred side:
+		For all clusters of archetype "hacluster" that span the two
+		buildings aa and bb, the following would set aa as the
+		preferred side:
             </para>
 	    <programlisting>
-aq add building preference --building_pair aa,bb --prefer aa
+aq add building preference --building_pair aa,bb --archetype hacluster --prefer aa
 	    </programlisting>
 	</example>
     </refsect1>

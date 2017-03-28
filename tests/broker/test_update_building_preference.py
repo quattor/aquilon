@@ -45,8 +45,7 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
                    "--archetype", "hacluster"]
         out = self.commandtest(command)
         self.output_equals(out, """
-            Building Pair: utb1,utb2 Archetype: hacluster
-              Preferred Building: utb1
+            Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb1
             """, command)
 
     def test_105_show_utb12_proto(self):
@@ -69,6 +68,13 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"system/cluster/preferred_location/building" = "utb1";',
+                         command)
+
+    def test_106_show_building_preference_utbvcs2a(self):
+        command = ["show_building_preference", "--cluster", "utbvcs2a"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         'Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb1',
                          command)
 
     def test_108_make_utbvcs2a(self):

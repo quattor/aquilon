@@ -17,7 +17,7 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
+from aquilon.aqdb.model import (Building, Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.compileable import CompileableFormatter
@@ -75,6 +75,12 @@ class ClusterFormatter(CompileableFormatter):
         details.append(indent + "  Member Location Constraint:")
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "    "))
+        bldgs = cluster.member_locations(location_class=Building)
+        if len(bldgs) == 0:
+            details.append(indent + "  Member Buildings: (none)")
+        else:
+            details.append(indent + "  Member Buildings: " +
+                           ",".join(sorted(bldg.name for bldg in bldgs)))
         if cluster.preferred_location:
             details.append(indent + "  Preferred {0:c}: {0.name}"
                            .format(cluster.preferred_location))

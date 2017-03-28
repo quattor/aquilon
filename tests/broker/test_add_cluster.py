@@ -52,6 +52,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                   Fullname: Unittest-building
                   Address: unittest address
                   Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Member Buildings: (none)
               Max members: %s
               Down Hosts Threshold: 0
               Build Status: build
@@ -122,6 +123,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                   Fullname: Unittest-building
                   Address: unittest address
                   Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Member Buildings: (none)
               Max members: unlimited
               Down Hosts Threshold: 0 (5%)
               Maintenance Threshold: 0 (6%)

@@ -150,11 +150,19 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         command = ["show_building_preference", "--all"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'^High Availability Cluster: utbvcs2a\s*'
-                          r'Preferred Building: utb2$',
+                          r'^Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb2\s*'
+                          r'Cluster: utbvcs2a  Prefer: utb2$',
                           command)
         self.matchclean(out, "utbvcs2b", command)
         self.matchclean(out, "utbvcs5", command)
+
+    def test_161_search_preferred_archetype(self):
+        command = ["search_building_preference", "--archetype", "hacluster"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                         r'^Building Pair: utb1,utb2  Archetype: hacluster  Prefer: utb2\s*'
+                         r'Cluster: utbvcs2a  Prefer: utb2$',
+                         command)
 
     def test_162_uncluster_preferred(self):
         command = ["uncluster", "--cluster", "utbvcs2a",
