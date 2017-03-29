@@ -52,6 +52,15 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                         "--mac", self.net["unknown0"].usable[1].mac.lower()])
         self.events_verify()
 
+    def testadd_ut8s02p3_eth2(self):
+        net = self.net["routing1"].usable[13]
+        self.event_upd_hardware('ut8s02p3')
+        self.noouttest(["add", "interface", "--interface", "eth2",
+                        "--machine", "ut8s02p3",
+                        "--mac", net.mac.lower()])
+        self.events_verify()
+
+
     def testaddut3c5n10eth1_2(self):
         self.event_upd_hardware('ut3c5n10')
         self.noouttest(["add", "interface", "--interface", "eth1.2",

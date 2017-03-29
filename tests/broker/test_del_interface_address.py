@@ -150,6 +150,15 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_225_delunittest17(self):
+        ip = self.net["routing1"].usable[13]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "interface", "address",
+                   "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--interface", "eth2", "--ip", ip]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def test_230_delut3gd1r04vlan220(self):
         ip = self.net["tor_net_12"].usable[1]
         self.dsdb_expect_delete(ip)

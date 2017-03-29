@@ -337,6 +337,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "[Result: fqdn=unittest26-e1.aqd-unittest.ms.com]",
                          command)
 
+    def test_355_add_unittest17_hostname(self):
+        ip = self.net["routing1"].usable[13]
+        fqdn = "unittest17-eth2.aqd-unittest.ms.com"
+        self.dsdb_expect_add(fqdn, ip, "eth2", ip.mac,
+                             primary="unittest17.aqd-unittest.ms.com")
+        command = ["add", "interface", "address",
+                   "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--interface", "eth2", "--ip", ip]
+        self.statustest(command)
+        self.dsdb_verify()
+
     def test_360_addut3gd1r04vlan110(self):
         ip = self.net["tor_net_12"].usable[1]
         self.dsdb_expect_add("ut3gd1r04-vlan110.aqd-unittest.ms.com", ip,
