@@ -19,7 +19,8 @@
 from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import rename_interface
+from aquilon.worker.dbwrappers.interface import (rename_interface,
+                                                update_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -29,8 +30,10 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
     required_parameters = ["interface", "network_device"]
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, plenaries, interface, network_device, mac, comments,
-               rename_to, **arguments):
+    def render(self, session, logger, plenaries, interface,
+               network_device, mac, comments,
+               rename_to, iftype, **arguments):
+
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise UnimplementedError("update_interface --network_device "
@@ -42,6 +45,9 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
+        if iftype:
+            dbinterface = update_netdev_iftype(session, dbinterface, iftype)
+            dbnetdev = dbinterface.hardware_entity
         if comments is not None:
             dbinterface.comments = comments
         if mac is not None:

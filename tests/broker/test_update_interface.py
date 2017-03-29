@@ -563,6 +563,283 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           command)
         self.matchclean(out, "vlan110", command)
 
+    def test_400_update_iftype_netdev_virtual_to_physical(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "physical"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: physical$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='physical', clean='virtual')
+
+    def test_401_update_iftype_netdev_physical_to_oa(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "oa"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: oa$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='"cards/nic/vlan220" = nlist(\n  "type", "oa"\n);')
+
+
+    def test_402_update_iftype_netdev_oa_to_virtual(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "virtual"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: virtual$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='virtual', clean='oa')
+
+
+    def test_403_update_iftype_netdev_virtual_to_oa(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "oa"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: oa$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='oa', clean='virtual')
+
+
+    def test_404_update_iftype_netdev_oa_to_loop(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "loopback"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: loopback$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='loop', clean='oa')
+
+
+    def test_405_update_iftype_netdev_loopback_to_virtual_with_ips(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "virtual"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: virtual$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='"cards/nic/vlan220" = nlist(\n  "type", "virtual"\n);')
+
+
+    def test_406_update_iftype_netdev_virtual_to_loopback(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "loopback"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: loopback$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='loop', clean='virtual')
+
+    def test_407_update_iftype_netdev_loopback_to_oa(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "oa"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: oa$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='"cards/nic/vlan220" = nlist(\n  "type", "oa"\n);')
+
+    def test_408_update_iftype_netdev_oa_to_physical(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "physical"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: physical$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='physical', clean='oa')
+
+    def test_409_update_iftype_netdev_physical_to_loopback(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "loopback"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: loopback$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='"cards/nic/vlan220" = nlist(\n  "type", "loopback"\n);')
+
+    def test_410_update_iftype_netdev_loopback_to_physical(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "physical"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: physical$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='"cards/nic/vlan220" = nlist(\n  "type", "physical"\n);')
+
+    def test_411_update_iftype_netdev_physical_to_virtual(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", "virtual"]
+        self.noouttest(command)
+
+        command_show = ["show", "network_device", "--network_device", "ut3gd1r04"]
+        out_show = self.commandtest(command_show)
+        self.searchoutput(out_show,
+                          r"Interface: vlan220 \(no MAC addr\)$"
+                          r"\s+Type: virtual$"
+                          r"\s+Network Environment: internal$"
+                          r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
+                          r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
+                          % (self.net["tor_net_12"].usable[1],
+                             self.net["tor_net_12"].usable[2]),
+                          command_show)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='"cards/nic/vlan220" = nlist(\n  "type", "virtual"\n);')
+
+    def test_420_update_iftype_hostname_fail(self):
+        command = ["update", "interface", "--hostname", "unittest25.aqd-unittest.ms.com", "--interface", "eth0", "--iftype", "management"]
+        self.badoptiontest(command)
+
+    def test_425_update_iftype_machine_fail(self):
+        command = ["update", "interface", "--machine", "ut3c5n10", "--interface", "eth1", "--iftype", "management"]
+        self.badoptiontest(command)
+
+    def test_427_update_iftype_chassis_fail(self):
+        command = ["update", "interface", "--chassis", "ut9c1", "--interface", "oa", "--iftype", "management"]
+        self.badoptiontest(command)
+
+    def test_430_update_iftype_netdev_prior_loopback_fail(self):
+        ip = self.net["autopg1"][0]
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "loop0", "--iftype", "oa"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Bad Request: IP address %s is the address of network autopg1." % ip,
+                         command)
+        self.matchoutput(err, str(ip), command)
+
+    def test_450_update_iftype_netdev_with_mac_to_loopback_fail(self):
+        command = ["update", "interface", "--network_device", "ut3gd1r04",
+                   "--interface", "xge49", "--iftype", "loopback"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Loopback interfaces cannot have a MAC address.", command)
+
+    def test_460_update_iftype_netdev_wrong_new_iftype_fail_vlan(self):
+        new_iftype = "vlan"
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", new_iftype]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Interface type %s is not allowed for network devices." % new_iftype, command)
+
+    def test_461_update_iftype_netdev_wrong_new_iftype_fail_public(self):
+        new_iftype = "public"
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", new_iftype]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Interface type %s is not allowed for network devices." % new_iftype, command)
+
+    def test_462_update_iftype_netdev_wrong_new_iftype_fail_bonding(self):
+        new_iftype = "bonding"
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", new_iftype]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Interface type %s is not allowed for network devices." % new_iftype, command)
+
+    def test_463_update_iftype_netdev_wrong_new_iftype_fail_bridge(self):
+        new_iftype = "bridge"
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", new_iftype]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Interface type %s is not allowed for network devices." % new_iftype, command)
+
+    def test_464_update_iftype_netdev_wrong_new_iftype_fail_management(self):
+        new_iftype = "management"
+        command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "vlan220", "--iftype", new_iftype]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Interface type %s is not allowed for network devices." % new_iftype, command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateInterface)

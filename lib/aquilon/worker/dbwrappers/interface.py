@@ -27,6 +27,7 @@ from ipaddress import IPv4Address
 
 from sqlalchemy.orm import aliased, object_session
 from sqlalchemy.sql.expression import desc, type_coerce
+from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import ArgumentError, InternalError, AquilonError
 from aquilon.config import Config
@@ -656,6 +657,42 @@ def rename_interface(session, dbinterface, rename_to):
             Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,
                             dns_environment=dbdns_env, preclude=True)
             dbfqdn.name = new_name
+
+
+def update_netdev_iftype(session, dbinterface, new_iftype):
+
+    # Check if selected new iftype is valid for netdev
+    check_netdev_iftype(new_iftype)
+
+    # Section that would check if current address assignments
+    # will be ok for the new interface type
+    for addr in dbinterface.assignments:
+        check_ip_restrictions(addr.network, addr.ip, relaxed=(new_iftype == 'loopback'))
+
+    new_cls = Interface.polymorphic_subclass(new_iftype, "Invalid interface type")
+    if not all([cls in dbinterface.hardware_entity.iftype_change_allowed for cls
+            in [dbinterface.__class__, new_cls]]):
+        raise ArgumentError("Interface type %s cannot be changed to selected "
+                            "interface type %s for %s." % (dbinterface.interface_type,
+                                                           new_iftype, dbinterface))
+
+    kwargs = {key: getattr(dbinterface, key) for key in inspect(dbinterface).mapper.columns.keys()
+              if key not in ['id', 'interface_type']}
+    try:
+        new_cls(**kwargs)  # Check if new class validations would pass
+    except Exception as e:
+        raise ArgumentError(e)
+
+    try:
+        dbinterface.interface_type = new_iftype
+    except Exception, e:
+        raise ArgumentError(e)
+
+    session.flush()
+    key = inspect(dbinterface).identity
+    session.expunge_all()
+    new_dbinterface = session.query(Interface).get(key)  # re-fetch from the DB with new class
+    return new_dbinterface
 
 
 def check_netdev_iftype(type):

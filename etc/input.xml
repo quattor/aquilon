@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<commandline xmlns:xi="http://www.w3.org/2001/XInclude">
+<commandline>
     %prog command [subcommand] options
     <command name="*">
 	<optgroup>
@@ -1775,6 +1775,11 @@
 	    <option name="autopg" type="flag">Choose portgroup based on switch</option>
 	</optgroup>
 	<optgroup>
+	    <option name="iftype" type="string" requires="network_device"
+		    conflicts="chassis hostname machine">Update of iftype is only
+		allowed for network devices. Interface type options: physical,
+		virtual, loopback, oa.
+	    </option>
 	    <option name="mac" type="mac">MAC address</option>
 	    <option name="boot" type="flag">Mark the interface as bootable</option>
 	    <option name="default_route" type="boolean">Mark that the interface provides the default route</option>
