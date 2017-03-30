@@ -40,6 +40,13 @@ class CommandChangeStatus(BrokerCommand):
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
         plenaries.add(dbhost, allow_incomplete=False)
 
+        # Check to see if the resulting status is the one requested
+        # and generate a message for the client if not.
+        if dbhost.status != dbstatus:
+            logger.client_info("Warning: requested status was '{0}' but resulting "
+                               "host status is '{1}'.".
+                               format (dbstatus.name, dbhost.status.name))
+
         # Force a host lock as pan might overwrite the profile...
         with plenaries.transaction():
             td.compile(session, only=plenaries.object_templates)
