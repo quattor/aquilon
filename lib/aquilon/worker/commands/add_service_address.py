@@ -123,10 +123,11 @@ class CommandAddServiceAddress(BrokerCommand):
         plenaries.add(dbsrv)
 
         with plenaries.transaction():
-            if not newly_created and not shared:
+            if (not newly_created and not shared and
+                    dbdns_rec.network.is_internal):
                 dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
 
-            if newly_created:
+            if newly_created and dbdns_rec.network.is_internal:
                 dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip,
                                              comments=comments)
 

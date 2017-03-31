@@ -28,25 +28,30 @@ from brokertest import TestBrokerCommand
 
 class TestDelNetwork(TestBrokerCommand):
 
-    def testdelnetwork(self):
+    def test_140_del_extnetwork(self):
+        command = ["del_network", "--ip", "192.168.5.0",
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+
+    def test_200_delnetwork(self):
         for network in self.net:
             if not network.autocreate:
                 continue
             command = ["del_network", "--ip=%s" % network.ip]
             self.noouttest(command)
 
-    def testdelnetworkdup(self):
+    def test_220_delnetworkdup(self):
         ip = "192.168.10.0"
         self.noouttest(["del", "network", "--ip", ip])
 
-    def testshownetworkall(self):
+    def test_240_shownetworkall(self):
         for network in self.net:
             if not network.autocreate:
                 continue
             command = "show network --ip %s --hosts" % network.ip
             self.notfoundtest(command.split(" "))
 
-    def testshownetwork(self):
+    def test_230_shownetwork(self):
         command = "show network --building ut"
         out = self.commandtest(command.split(" "))
         # Unfortunately this command prints a header even if the output is
@@ -54,18 +59,18 @@ class TestDelNetwork(TestBrokerCommand):
         # but not the header.
         self.matchclean(out, ".", command)
 
-    def testshownetworkproto(self):
+    def test_250_shownetworkproto(self):
         command = "show network --building ut --format proto"
         self.protobuftest(command.split(" "), expect=0)
 
-    def testdelnetworkcards(self):
+    def test_210_delnetworkcards(self):
         command = ["del_network", "--ip=192.168.1.0"]
         self.noouttest(command)
 
-    def test_autherror_100(self):
+    def test_100_autherror_100(self):
         self.demote_current_user("operations")
 
-    def test_autherror_200(self):
+    def test_110_autherror_200(self):
         # 192.168.2.0 was never actually created, but that check happens
         # after the auth check.
         command = ["del_network", "--ip", "192.168.2.0"]
@@ -78,59 +83,59 @@ class TestDelNetwork(TestBrokerCommand):
                          "network environment." % (role_list, default_ne),
                          command)
 
-    def test_autherror_300(self):
+    def test_120_autherror_300(self):
         command = ["del_network", "--ip", "192.168.3.0",
                    "--network_environment", "cardenv"]
         self.noouttest(command)
 
-    def test_autherror_900(self):
+    def test_130_autherror_900(self):
         self.promote_current_user()
 
-    def testdellocalnet(self):
+    def test_160_dellocalnet(self):
         self.noouttest(["del", "network", "--ip", "127.0.0.0"])
 
-    def testdelexcx(self):
+    def test_150_delexcx(self):
         net = self.net["unknown0"].subnet()[0]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "excx"]
         self.noouttest(command)
 
-    def testdelnetsvcmap(self):
+    def test_180_delnetsvcmap(self):
         net = self.net["netsvcmap"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
-    def testdelnetutdmz1(self):
+    def test_190_delnetutdmz1(self):
         net = self.net["ut_dmz1"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
-    def testdelnetperssvcmap(self):
+    def test_170_delnetperssvcmap(self):
         net = self.net["netperssvcmap"]
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
-    def testdelutcolo(self):
+    def test_225_delutcolo(self):
         net = self.net["unknown1"]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
-    def testverifyexcx(self):
+    def test_260_verifyexcx(self):
         net = self.net["unknown0"].subnet()[0]
         command = ["search", "network", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)
         self.matchclean(out, str(net.ip), command)
 
-    def testverifynetsvcmap(self):
+    def test_270_verifynetsvcmap(self):
         net = self.net["netsvcmap"]
         command = ["show", "network", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "netsvcmap", command)
         self.matchclean(out, str(net.ip), command)
 
-    def testverifyutcolo(self):
+    def test_280_verifyutcolo(self):
         net = self.net["unknown1"]
         command = ["search", "network", "--network_environment", "utcolo"]
         out = self.commandtest(command)

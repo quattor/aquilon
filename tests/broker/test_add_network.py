@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddNetwork(TestBrokerCommand):
 
-    def testaddnetwork(self):
+    def test_100_addnetwork(self):
         for network in self.net:
             if not network.autocreate:
                 continue
@@ -43,7 +43,7 @@ class TestAddNetwork(TestBrokerCommand):
                 command.extend(["--comments", network.comments])
             self.noouttest(command)
 
-    def testverifyauroranetwork(self):
+    def test_110_verifyauroranetwork(self):
         net = self.net["aurora2"]
         command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
@@ -53,7 +53,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "Comments: %s" % net.comments, command)
         self.matchoutput(out, "Building: np", command)
 
-    def testverifybunker(self):
+    def test_120_verifybunker(self):
         net = self.net["np06bals03_v103"]
         command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
@@ -61,7 +61,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % net.ip, command)
         self.matchoutput(out, "Bunker: nyb10.np", command)
 
-    def testaddnetworkdup(self):
+    def test_130_addnetworkdup(self):
         # Old name, new address
         net = self.net["unknown0"]
         command = ["add", "network", "--network", net.name,
@@ -71,7 +71,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(err, "WARNING: Network name %s is already used for "
                          "address %s." % (net.name, str(net)), command)
 
-    def testaddsubnet(self):
+    def test_140_addsubnet(self):
         # Add a subnet of an existing network
         net = self.net["unknown0"]
         subnet = net.subnet()[1]
@@ -83,7 +83,7 @@ class TestAddNetwork(TestBrokerCommand):
                          "named %s with address %s." %
                          (str(subnet.ip), net.name, str(net)), command)
 
-    def testaddnetworkofcards(self):
+    def test_150_addnetworkofcards(self):
         # An entirely fictitious network
         self.noouttest(["add_network", "--ip", "192.168.1.0",
                         "--network", "cardnetwork",
@@ -92,10 +92,10 @@ class TestAddNetwork(TestBrokerCommand):
                         "--type", "unknown",
                         "--comments", "Made-up network"])
 
-    def test_autherror_100(self):
+    def test_200_autherror_100(self):
         self.demote_current_user("operations")
 
-    def test_autherror_200(self):
+    def test_210_autherror_200(self):
         # Another entirely fictitious network
         command = ["add_network", "--ip", "192.168.2.0",
                    "--network", "cardnetwork2", "--netmask", "255.255.255.0",
@@ -110,7 +110,7 @@ class TestAddNetwork(TestBrokerCommand):
                          "network environment." % (role_list, default_ne),
                          command)
 
-    def test_autherror_300(self):
+    def test_220_autherror_300(self):
         # Yet another entirely fictitious network
         command = ["add_network", "--ip", "192.168.3.0",
                    "--network_environment", "cardenv",
@@ -119,10 +119,10 @@ class TestAddNetwork(TestBrokerCommand):
                    "--comments", "Made-up network"]
         self.noouttest(command)
 
-    def test_autherror_900(self):
+    def test_230_autherror_900(self):
         self.promote_current_user()
 
-    def testaddexcx(self):
+    def test_300_addexcx(self):
         net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = ["add", "network", "--network", "excx-net",
@@ -131,7 +131,7 @@ class TestAddNetwork(TestBrokerCommand):
                    "--network_environment", "excx"]
         self.noouttest(command)
 
-    def testaddnetsvcmap(self):
+    def test_310_addnetsvcmap(self):
         net = self.net["netsvcmap"]
         subnet = net.subnet()[0]
         command = ["add", "network", "--network", "netsvcmap",
@@ -139,7 +139,7 @@ class TestAddNetwork(TestBrokerCommand):
                    "--building", "ut", "--type", net.nettype]
         self.noouttest(command)
 
-    def testaddnetperssvcmap(self):
+    def test_320_addnetperssvcmap(self):
         net = self.net["netperssvcmap"]
         subnet = net.subnet()[0]
         command = ["add", "network", "--network", "netperssvcmap",
@@ -147,7 +147,7 @@ class TestAddNetwork(TestBrokerCommand):
                    "--building", "ut", "--type", net.nettype]
         self.noouttest(command)
 
-    def testaddutcolo(self):
+    def test_330_addutcolo(self):
         net = self.net["unknown1"]
         command = ["add", "network", "--network", "utcolo-net",
                    "--ip", net.ip, "--netmask", net.netmask,
@@ -155,7 +155,7 @@ class TestAddNetwork(TestBrokerCommand):
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
-    def testbadip(self):
+    def test_340_badip(self):
         command = ["add_network", "--ip", "10.0.0.1",
                    "--network", "bad-address", "--netmask", "255.255.255.0",
                    "--building", "ut", "--side", "a", "--type", "unknown"]
@@ -163,7 +163,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "IP address 10.0.0.1 is not a network address.  "
                          "Maybe you meant 10.0.0.0?", command)
 
-    def testshownetwork(self):
+    def test_350_shownetwork(self):
         for network in self.net:
             if not network.autocreate:
                 continue
@@ -182,12 +182,12 @@ class TestAddNetwork(TestBrokerCommand):
             self.matchoutput(out, "Network Type: %s" % network.nettype,
                              command)
 
-    def testshownetworkcomments(self):
+    def test_360_shownetworkcomments(self):
         command = "show network --network np06bals03_v103"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Comments: Some network comments", command)
 
-    def testshownetworkbuilding(self):
+    def test_370_shownetworkbuilding(self):
         command = "show_network --building ut"
         out = self.commandtest(command.split(" "))
         for network in self.net:
@@ -200,7 +200,7 @@ class TestAddNetwork(TestBrokerCommand):
             else:
                 self.matchclean(out, str(network.ip), command)
 
-    def testshownetworkcsv(self):
+    def test_380_shownetworkcsv(self):
         # Use --exact_location here, so we don't have to worry about networks
         # mapped to child locations
         command = "show_network --building ut --exact_location --format csv"
@@ -216,17 +216,17 @@ class TestAddNetwork(TestBrokerCommand):
             else:
                 self.matchclean(out, str(network.ip), command)
 
-    def testshownetworkproto(self):
+    def test_390_shownetworkproto(self):
         command = "show network --building ut --format proto"
         self.protobuftest(command.split(" "))
 
-    def testaddlocalnet(self):
+    def test_400_addlocalnet(self):
         command = ["add", "network", "--network", "localnet", "--ip",
                    "127.0.0.0", "--netmask", "255.0.0.0",
                    "--building", "ut"]
         self.noouttest(command)
 
-    def testshownetworknoenv(self):
+    def test_410_shownetworknoenv(self):
         command = "show network --building np"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "excx-net", command)
@@ -237,17 +237,17 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "netsvcmap", command)
         self.matchoutput(out, "netperssvcmap", command)
 
-    def testshownetworkwithenv(self):
+    def test_420_shownetworkwithenv(self):
         command = "show network --building np --network_environment excx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "excx-net", command)
 
-    def testshowexcxnoenv(self):
+    def test_430_showexcxnoenv(self):
         command = "show network --network excx-net"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "Network excx-net not found.", command)
 
-    def testshowexcxwithenv(self):
+    def test_440_showexcxwithenv(self):
         net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = "show network --network excx-net --network_environment excx"
@@ -257,7 +257,7 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % subnet.ip, command)
         self.matchoutput(out, "Netmask: %s" % subnet.netmask, command)
 
-    def testshowutcolowithenv(self):
+    def test_450_showutcolowithenv(self):
         net = self.net["unknown1"]
         command = "show network --network utcolo-net --network_environment utcolo"
         out = self.commandtest(command.split(" "))
@@ -294,6 +294,15 @@ class TestAddNetwork(TestBrokerCommand):
                    "--network_compartment", "perimeter.ut"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "still has networks defined", command)
+
+    def test_900_add_extnetwork(self):
+        # add external network to pick some random addresses from
+        command = ["add_network", "--ip", "192.168.5.0",
+                   "--network", "extnettest", "--netmask", "255.255.255.0",
+                   "--building", "np", "--type", "external",
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+
 
 
 if __name__ == '__main__':

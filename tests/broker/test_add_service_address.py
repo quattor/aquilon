@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 
 class TestAddServiceAddress(TestBrokerCommand):
 
-    def testsystemzebramix(self):
+    def test_100_systemzebramix(self):
         ip = self.net["unknown0"].usable[3]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -40,7 +40,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          "eth1 of machine unittest00.one-nyp.ms.com." % ip,
                          command)
 
-    def testaddzebra2(self):
+    def test_200_addzebra2(self):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
         ip = self.net["zebra_vip"].usable[1]
@@ -57,7 +57,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
         self.dsdb_verify()
 
-    def testverifyzebra2(self):
+    def test_210_verifyzebra2(self):
         ip = self.net["zebra_vip"].usable[1]
         command = ["show", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -69,7 +69,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
-    def testverifyzebra2proto(self):
+    def test_220_verifyzebra2proto(self):
         ip = self.net["zebra_vip"].usable[1]
         command = ["show", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -90,12 +90,12 @@ class TestAddServiceAddress(TestBrokerCommand):
                         ", ".join("%s %s" % (res.type, res.name)
                                   for res in host.resources))
 
-    def testverifyzebra2dns(self):
+    def test_230_verifyzebra2dns(self):
         command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Reverse", command)
 
-    def testaddzebra3(self):
+    def test_300_addzebra3(self):
         zebra3_ip = self.net["zebra_vip"].usable[0]
         self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip,
                              comments="Some service address comments")
@@ -112,20 +112,20 @@ class TestAddServiceAddress(TestBrokerCommand):
                          command)
         self.dsdb_verify()
 
-    def testverifyzebra3dns(self):
+    def test_310_verifyzebra3dns(self):
         command = ["show", "fqdn", "--fqdn", "zebra3.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
                          command)
 
-    def testverifyzebra3audit(self):
+    def test_320_verifyzebra3audit(self):
         command = ["search_audit", "--keyword", "zebra3.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "[Result: service_address=zebra3.aqd-unittest.ms.com]",
                          command)
 
-    def testverifyunittest20(self):
+    def test_400_verifyunittest20(self):
         ip = self.net["zebra_vip"].usable[2]
         zebra2_ip = self.net["zebra_vip"].usable[1]
         zebra3_ip = self.net["zebra_vip"].usable[0]
@@ -154,7 +154,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                           r"\s+Interfaces: eth0, eth1$" % zebra3_ip,
                           command)
 
-    def testfailbadname(self):
+    def test_500_failbadname(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -169,7 +169,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          "host to be managed by Zebra.",
                          command)
 
-    def testfailbadinterface(self):
+    def test_510_failbadinterface(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -182,7 +182,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                          "an interface named eth2.",
                          command)
 
-    def testfailbadnetenv(self):
+    def test_520_failbadnetenv(self):
         net = self.net["unknown0"]
         subnet = net.subnet()[0]
         command = ["add", "service", "address",
@@ -197,6 +197,35 @@ class TestAddServiceAddress(TestBrokerCommand):
                          "address from network environment internal.  Network "
                          "environments cannot be mixed.",
                          command)
+
+    def test_600_addunittest20eth2(self):
+        command = ["add_interface", "--machine", "ut3c5n2",
+                   "--interface", "eth2", "--mac", "08:00:01:02:20:00"]
+        self.successtest(command)
+
+    def test_605_addunittest20eth2addr(self):
+        command = ["add_interface_address", "--machine", "ut3c5n2",
+                   "--interface", "eth2", "--network_environment", "excx",
+                   "--fqdn", "unittest20-e2.aqd-unittest.ms.com",
+                   "--ip", "192.168.5.24"]
+        self.statustest(command)
+        # External IP addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
+
+    def test_610_add_extserviceaddress(self):
+        # check that adding an external service address does not invoke DSDB
+        command = ["add_service_address", "--ip", "192.168.5.25",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--interfaces", "eth2", "--name", "et-unittest20",
+                   "--service_address", "external-unittest20.aqd-unittest.ms.com",
+                   "--network_environment", "excx"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Host unittest20.aqd-unittest.ms.com is missing the "
+                         "following required services",
+                         command)
+        # External IP service addresses should not be added to DSDB
+        self.dsdb_verify(empty=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddServiceAddress)

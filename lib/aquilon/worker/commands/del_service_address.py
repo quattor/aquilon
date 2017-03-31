@@ -58,7 +58,8 @@ class CommandDelServiceAddress(BrokerCommand):
         session.flush()
 
         with plenaries.transaction():
-            if not dbdns_rec.service_addresses and not keep_dns:
+            if (not dbdns_rec.service_addresses and not keep_dns and
+                    dbdns_rec.network.is_internal):
                 dsdb_runner.delete_host_details(old_fqdn, old_ip)
             dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
 
