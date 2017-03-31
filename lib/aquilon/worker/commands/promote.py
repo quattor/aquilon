@@ -49,7 +49,6 @@ class CommandPromote(BrokerCommand):
 
             del dbpersonality.stages["previous"]
 
-
         current = dbpersonality.stages.get("current", None)
         next = dbpersonality.stages["next"]
 

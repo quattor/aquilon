@@ -90,12 +90,12 @@ class CommandSearchBuildingPreference(BrokerCommand):
             if building:
                 # Check if this cluster involves the specified building
                 # (dbbuilding)
-                if not dbbuilding in buildings:
+                if dbbuilding not in buildings:
                     continue
             if building_pair:
                 # Check if this cluster involves _at least_ the specified
                 # buildings (pair.{a,b})
-                if (not pair.a in buildings) or (not pair.b in buildings):
+                if (pair.a not in buildings) or (pair.b not in buildings):
                     continue
 
             sortname = ",".join(sorted(building.name for building in buildings))

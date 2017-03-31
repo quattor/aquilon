@@ -50,7 +50,6 @@ class CommandUpdateResource(BrokerCommand):
         dbresource = self.resource_class.get_unique(session, name=name,
                                                     holder=holder, compel=True)
 
-
         plenaries.add(holder.holder_object)
         plenaries.add(dbresource)
 

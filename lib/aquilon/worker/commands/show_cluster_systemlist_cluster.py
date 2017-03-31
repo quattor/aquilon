@@ -18,12 +18,10 @@
 
 from aquilon.aqdb.model import SystemList
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_cluster_prioritylist_cluster import (
-        CommandShowClusterPriorityListCluster)
+from aquilon.worker.commands.show_cluster_prioritylist_cluster import (CommandShowClusterPriorityListCluster)
 
 
 class CommandShowClusterSystemListCluster(CommandShowClusterPriorityListCluster):
 
-    required_parameters=["cluster"]
+    required_parameters = ["cluster"]
     resource_class = SystemList
-

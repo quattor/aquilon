@@ -56,15 +56,15 @@ class PriorityList(Resource):
     @classmethod
     def get_unique(cls, session, **kwargs):
         try:
-            return super(PriorityList, cls).get_unique (session, **kwargs)
+            return super(PriorityList, cls).get_unique(session, **kwargs)
         except (NotFoundException):
             # This (likely) means that the cluster has no such resource,
             # send back a more helpful error message.
-            if (not 'holder' in kwargs) or (not 'name' in kwargs):
+            if ('holder' not in kwargs) or ('name' not in kwargs):
                 raise
 
             holder = kwargs.get('holder')
-            if not isinstance (holder, ClusterResource):
+            if not isinstance(holder, ClusterResource):
                 raise
 
             raise NotFoundException("{0:c} {0.name} has no {1} resource."
@@ -104,4 +104,3 @@ class SystemList(PriorityList):
 class AutoStartList(PriorityList):
     __mapper_args__ = {'polymorphic_identity': 'auto_start_list'}
     __description__ = 'autostart list'
-

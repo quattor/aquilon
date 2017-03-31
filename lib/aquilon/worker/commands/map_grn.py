@@ -47,7 +47,6 @@ class CommandMapGrn(BrokerCommand):
                            config=self.config,
                            usable_only=self.require_usable_grn)
 
-
         if hostname:
             objs = [hostname_to_host(session, hostname)]
             mapcls = HostGrnMap

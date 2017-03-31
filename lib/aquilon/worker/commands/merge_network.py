@@ -51,7 +51,6 @@ class CommandMergeNetwork(BrokerCommand):
             raise ArgumentError("The specified --prefixlen must be smaller "
                                 "than the current value.")
 
-
         # IPv4Network has a supernet() object, but that does not normalize the
         # IP address, i.e. IPv4Network('1.2.3.0/24').supernet() will return
         # IPv4Network('1.2.3.0/23'). Do the normalization manually.

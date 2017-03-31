@@ -20,8 +20,8 @@ from sqlalchemy.inspection import inspect
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import ClusterResource, Resource, BundleResource
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_cluster_prioritylist_cluster import (
-        CommandShowClusterPriorityListCluster)
+from aquilon.worker.commands.show_cluster_prioritylist_cluster import CommandShowClusterPriorityListCluster
+
 
 class CommandShowClusterPriorityListAll(CommandShowClusterPriorityListCluster):
 
@@ -55,4 +55,3 @@ class CommandShowClusterPriorityListAll(CommandShowClusterPriorityListCluster):
                                     format(self.resource_class.__description__))
 
         return rlist
-

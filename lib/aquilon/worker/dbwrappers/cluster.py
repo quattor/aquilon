@@ -140,8 +140,7 @@ def check_cluster_priority_order(dbcluster, config, priority_parameter, priord):
 
     if (int(priord) < cpri_min) or (int(priord) > cpri_max):
         raise ArgumentError("Value for {0} ({1}) is outside of the {2} range "
-                            "{3}..{4}".format (priority_parameter, priord,
-                                               cpri_src, cpri_min, cpri_max))
+                            "{3}..{4}".format(priority_parameter, priord,
+                                              cpri_src, cpri_min, cpri_max))
 
     return (cpri_min, cpri_max, cpri_src)
-

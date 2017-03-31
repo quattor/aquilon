@@ -83,7 +83,7 @@ class CommandUncluster(BrokerCommand):
             if dbcluster.preferred_location not in mlocs:
                 # this was the last host in the preferred location
                 logger.client_info("Warning: Clearing cluster preferred "
-                                   "{0:l}".format (dbcluster.preferred_location))
+                                   "{0:l}".format(dbcluster.preferred_location))
                 dbcluster.preferred_location = None
 
         dbcluster.validate()

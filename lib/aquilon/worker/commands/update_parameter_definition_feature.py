@@ -36,7 +36,6 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         path = ParamDefinition.normalize_path(path)
         db_paramdef, _ = lookup_paramdef(dbfeature, path)
 
-
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed
         if default is not None or clear_default:

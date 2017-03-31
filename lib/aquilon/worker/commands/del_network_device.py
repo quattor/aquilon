@@ -37,7 +37,6 @@ class CommandDelNetworkDevice(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
-
         # Update cluster plenaries connected to this network device
         plenaries.add(dbnetdev.esx_clusters)
 

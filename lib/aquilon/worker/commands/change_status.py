@@ -45,7 +45,7 @@ class CommandChangeStatus(BrokerCommand):
         if dbhost.status != dbstatus:
             logger.client_info("Warning: requested status was '{0}' but resulting "
                                "host status is '{1}'.".
-                               format (dbstatus.name, dbhost.status.name))
+                               format(dbstatus.name, dbhost.status.name))
 
         # Force a host lock as pan might overwrite the profile...
         with plenaries.transaction():

@@ -24,6 +24,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.formats.cluster_asl import ClusterPriorityList
 
+
 class CommandShowClusterPriorityListCluster(BrokerCommand):
 
     resource_class = None
@@ -55,8 +56,8 @@ class CommandShowClusterPriorityListCluster(BrokerCommand):
                                                      holder=dbcluster.resholder)
                     try:
                         pl = find_resource(self.resource_class, dbcluster,
-                                           dbrgs.name, inspect(self.resource_class)
-                                                       .polymorphic_identity)
+                                           dbrgs.name,
+                                           inspect(self.resource_class).polymorphic_identity)
                         rg_pls.append((dbrgs.name, pl))
                     except NotFoundException:
                         pass
@@ -68,11 +69,10 @@ class CommandShowClusterPriorityListCluster(BrokerCommand):
         except NotFoundException:
             pass
 
-        if (rg_pls == []) and (cr_pl == None):
+        if (rg_pls == []) and (cr_pl is None):
             # cluster has no resource overrides for particular list
             raise NotFoundException("{0:c} {0.name} has no {1} resource(s)".
                                     format(dbcluster, self.resource_class.__description__))
 
         return ClusterPriorityList(inspect(self.resource_class).polymorphic_identity,
                                    dbcluster, cr_pl, rg_pls)
-

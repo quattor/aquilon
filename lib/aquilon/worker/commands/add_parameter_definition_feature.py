@@ -42,7 +42,6 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         path = ParamDefinition.normalize_path(path)
         dbfeature.param_def_holder.check_new_path(path)
 
-
         if default is not None:
             validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)

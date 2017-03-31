@@ -76,7 +76,6 @@ class CommandAddStaticRoute(BrokerCommand):
             raise ArgumentError("%s is not a network address; "
                                 "did you mean %s." % (ip, dest.network))
 
-
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,

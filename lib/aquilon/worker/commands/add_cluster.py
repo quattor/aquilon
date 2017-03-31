@@ -74,7 +74,6 @@ class CommandAddCluster(BrokerCommand):
                               down_maint_percent=dmt_pct,
                               comments=comments, **kw)
 
-
         if metacluster:
             dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                    compel=True)
