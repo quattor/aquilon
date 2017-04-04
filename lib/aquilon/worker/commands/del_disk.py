@@ -18,15 +18,16 @@
 
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 
 
 class CommandDelDisk(BrokerCommand):
     requires_plenaries = True
 
-    required_parameters = ["machine"]
+    required_parameters = []
 
-    def render(self, session, plenaries, machine, disk, all, **_):
-        dbmachine = Machine.get_unique(session, machine, compel=True)
+    def render(self, session, plenaries, disk, all, **kwargs):
+        dbmachine = get_hardware(session, compel=True, **kwargs)
 
         plenaries.add(dbmachine)
         dbcontainer = dbmachine.vm_container

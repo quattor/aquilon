@@ -30,7 +30,10 @@
 	    <group>
 		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
 	    </group>
+             <group choice="req">
+            <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+             </group>
 	    <arg choice="plain"><option>--disk <replaceable>DISK</replaceable></option></arg>
 	    <arg><option>--rename_to <replaceable>NEW_DISK</replaceable></option></arg>
 	    <arg><option>--controller <replaceable>CTRL</replaceable></option></arg>
@@ -81,6 +84,16 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>HOSTNAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The hostname of the machine the disk is bound to.
+                    </para>
+                </listitem>
+            </varlistentry>
 	    <varlistentry>
 		<term>
 		    <option>--disk <replaceable>DISK</replaceable></option>

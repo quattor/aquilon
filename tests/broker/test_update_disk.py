@@ -45,6 +45,34 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
         self.noouttest(command)
         self.events_verify()
 
+    def test_102_update_ut3c1n3_c0d0_hostname(self):
+        self.event_upd_hardware('ut3c1n3')
+        command = ["update_disk", "--hostname", "unittest00.one-nyp.ms.com", "--disk", "c0d1",
+                   "--rename_to", "test", "--boot"]
+        self.noouttest(command)
+        self.events_verify()
+        command_verify = ["show_machine", "--machine", "ut3c1n3"]
+        out = self.commandtest(command_verify)
+        self.searchoutput(out,
+                          r'Disk: test 34 GB cciss \(local\) \[boot\]\s*'
+                          r'WWN: 600508b112233445566778899aabbccd\s*'
+                          r'Controller Bus Address: pci:0000:01:00.0$',
+                          command_verify)
+
+    def test_103_update_ut3c1n3_c0d0_hostname_back(self):
+        self.event_upd_hardware('ut3c1n3')
+        command = ["update_disk", "--hostname", "unittest00.one-nyp.ms.com", "--disk", "test",
+                   "--rename_to", "c0d1", "--boot"]
+        self.noouttest(command)
+        self.events_verify()
+        command_verify = ["show_machine", "--machine", "ut3c1n3"]
+        out = self.commandtest(command_verify)
+        self.searchoutput(out,
+                          r'Disk: c0d1 34 GB cciss \(local\) \[boot\]\s*'
+                          r'WWN: 600508b112233445566778899aabbccd\s*'
+                          r'Controller Bus Address: pci:0000:01:00.0$',
+                          command_verify)
+
     def test_105_show_ut3c1n3(self):
         command = ["show_machine", "--machine", "ut3c1n3"]
         out = self.commandtest(command)

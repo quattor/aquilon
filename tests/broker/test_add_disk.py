@@ -37,7 +37,17 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                         "--size", "34", "--comments", "Some disk comments"])
         self.events_verify()
 
-    def test_110_add_ut3c1n3_disk(self):
+    def test_110_add_ut3c1n3_disk_hostname(self):
+        hostname = "unittest00.one-nyp.ms.com"
+        command = ["add", "disk", "--hostname", hostname, "--disk", "c0d0",
+                   "--controller", "cciss", "--size", "34",
+                   "--wwn", "600508b112233445566778899aabbccd",
+                   "--bus_address", "pci:0000:01:00.0"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Not Found: Host %s not found" % hostname,
+                         command)
+
+    def test_111_add_ut3c1n3_disk(self):
         self.event_upd_hardware('ut3c1n3')
         command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
                    "--controller", "cciss", "--size", "34",
