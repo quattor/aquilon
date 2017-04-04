@@ -23,6 +23,7 @@ from aquilon.worker.broker import BrokerCommand
 class CommandStatus(BrokerCommand):
 
     requires_readonly = True
+    requires_format = True
 
     def render(self, session, dbuser, **_):
         stat = []

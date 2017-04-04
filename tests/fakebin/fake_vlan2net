@@ -17,6 +17,7 @@
 # limitations under the License.
 """Fake the vlan command"""
 
+from __future__ import print_function
 
 import sys
 import os
@@ -28,12 +29,12 @@ def determine_output(args):
     for i in range(len(args)):
         if args[i].startswith("-ip"):
             if i == len(args):
-                print >>sys.stderr, "Missing argument for %s" % args[i]
+                print("Missing argument for %s" % args[i], file=sys.stderr)
                 sys.exit(1)
             ip = args[i+1]
             break
     if not ip:
-        print >>sys.stderr, "Missing -ip argument" % args[i]
+        print("Missing -ip argument" % args[i], file=sys.stderr)
         sys.exit(1)
     fakedir = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                             "vlan2net.d"))

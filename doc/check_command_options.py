@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import os
 import sys
 import argparse
@@ -36,7 +38,7 @@ was_error = False
 def error(message):
     global was_error
 
-    print >>sys.stderr, "ERROR: %s" % message
+    print("ERROR: %s" % message, file=sys.stderr)
     was_error = True
 
 
@@ -45,7 +47,7 @@ def read_docbook(file, commands):
 
     try:
         tree = etree.parse(file)
-    except etree.XMLSyntaxError, err:
+    except etree.XMLSyntaxError as err:
         error("Failed to parse %s: %s" % (file, err))
         return
 

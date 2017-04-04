@@ -1,20 +1,15 @@
-DOCBOOK_VERSION = 5.0
-DOCBOOK_XSL_VERSION = 1.77.1
-LIBXSLT_VERSION = 1.1.26-2.7.8-z1.2a
-LIBXML_VERSION = 2.7.8
+DOCBOOK = /ms/dist/fsf/PROJ/docbook/5.0/common
+DOCBOOK_XSL = /ms/dist/fsf/PROJ/docbook-xsl-ns/1.77.1/common
 
-DOCBOOK = /ms/dist/fsf/PROJ/docbook/$(DOCBOOK_VERSION)
-DOCBOOK_XSL = /ms/dist/fsf/PROJ/docbook-xsl-ns/$(DOCBOOK_XSL_VERSION)/common
-
-XSLTPROC = /ms/dist/gnome/PROJ/libxslt/$(LIBXSLT_VERSION)/exec/bin/xsltproc
+XSLTPROC = /ms/dist/gnome/PROJ/libxslt/1.1.26-2.7.8-z1.2a/exec/bin/xsltproc
 XSLT_PARAMS = --xinclude --nonet --catalogs
 
-XMLLINT = /ms/dist/gnome/PROJ/libxml/$(LIBXML_VERSION)/exec/bin/xmllint
+XMLLINT = /ms/dist/gnome/PROJ/libxml/2.7.8/exec/bin/xmllint
 # For DocBook 5, the normative description is the Relax NG schema
-XMLLINT_PARAMS = --xinclude --nonet --catalogs --noout --relaxng $(DOCBOOK)/rng/docbook.rng
+XMLLINT_PARAMS = --xinclude --nonet --catalogs --noout --relaxng "http://www.oasis-open.org/docbook/xml/5.0/rng/docbook.rng"
 
 # Used by xsltproc & xmllint to convert URIs to file names
-SGML_CATALOG_FILES = $(DOCBOOK)/catalog.xml
+SGML_CATALOG_FILES = $(DOCBOOK)/catalog.xml:$(DOCBOOK_XSL)/catalog.xml
 export SGML_CATALOG_FILES
 
 FORMATS = man html

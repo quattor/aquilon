@@ -26,6 +26,7 @@ from aquilon.worker.dbwrappers.search import search_next
 class CommandAddClusterPrefix(CommandAddCluster):
 
     required_parameters = ["prefix", "down_hosts_threshold"]
+    requires_format = True
 
     def render(self, session, logger, prefix, **args):
         prefix = AqStr.normalize(prefix)

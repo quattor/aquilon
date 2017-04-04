@@ -104,7 +104,7 @@ class HostFormatter(CompileableFormatter):
         details.append(self.redirect_raw(host.operating_system, indent + "  "))
         details.append(indent + "  {0:c}: {1}"
                        .format(host.branch, host.authored_branch))
-        details.append(self.redirect_raw(host.status, indent + "  "))
+        details.append(indent + "  Build Status: %s" % host.status)
         details.append(indent +
                        "  Advertise Status: %s" % host.advertise_status)
 

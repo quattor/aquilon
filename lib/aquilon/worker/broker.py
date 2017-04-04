@@ -18,7 +18,6 @@
 
 import sys
 from inspect import isclass
-from types import NoneType
 
 from sqlalchemy import event
 from sqlalchemy.sql import text
@@ -58,7 +57,7 @@ ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
 
 
 def get_code_for_error_class(e):
-    if e is None or e is NoneType:
+    if e is None or e is type(None):
         return http.OK
     return ERROR_TO_CODE.get(e, http.INTERNAL_SERVER_ERROR)
 

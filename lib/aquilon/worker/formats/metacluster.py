@@ -32,7 +32,7 @@ class MetaClusterFormatter(CompileableFormatter):
         details.append(self.redirect_raw(metacluster.location_constraint,
                                          indent + "    "))
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
-        details.append(self.redirect_raw(metacluster.status, indent + "  "))
+        details.append(indent + "  Build Status: %s" % metacluster.status)
         details.append(self.redirect_raw(metacluster.personality_stage,
                                          indent + "  "))
         details.append(indent + "  {0:c}: {1}"

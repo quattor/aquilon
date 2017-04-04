@@ -16,7 +16,9 @@
 # limitations under the License.
 """Provide an anonymous access channel to the Site."""
 
+from six import text_type
 from twisted.web import server
+
 from aquilon.worker.messages import StatusCatalog
 
 
@@ -38,7 +40,7 @@ def alt_repr(s):
     # Small helper borrowed from twisted: a version of repr() which always uses
     # double quotes
     r = repr(s)
-    if not isinstance(r, unicode):
+    if not isinstance(r, text_type):
         r = r.decode("ascii")
     if r.startswith(u"b"):
         r = r[1:]

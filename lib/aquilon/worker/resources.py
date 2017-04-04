@@ -35,8 +35,8 @@ dormant.
 
 As the request comes in (and passes through the various
 getChildWithDefault() calls) it will be checked for extensions that
-match the available format functions.  A request for location.html,
-for example, will retrieve 'location' and format it with format_html().
+match the available format functions.  A request for location.proto,
+for example, will retrieve 'location' and format it with format_proto().
 
 ToDo:
     - Add some sort of interface that can be implemented for
@@ -146,7 +146,7 @@ class ResponsePage(resource.Resource):
         error handling.
 
         """
-        if request.method == 'PUT':
+        if request.method == b'PUT':
             # For now, assume all put requests use a simple urllib encoding.
             request.content.seek(0)
             # Since these are both lists, there is a theoretical case where

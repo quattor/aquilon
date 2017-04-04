@@ -25,7 +25,7 @@ import logging
 import os
 import subprocess
 
-logging.basicConfig(levl=logging.ERROR)
+logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
 
 import utils

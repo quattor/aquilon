@@ -16,6 +16,7 @@
 # limitations under the License.
 """ Contains the logic of "aq refresh grns" """
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import update_grn_map
 from aquilon.worker.locks import SyncKey
@@ -24,7 +25,11 @@ from aquilon.worker.locks import SyncKey
 class CommandRefreshGrns(BrokerCommand):
 
     def render(self, session, logger, **_):
+        if not self.config.has_option("broker", "grn_to_eonid_map_location"):  # pragma: no cover
+            raise ArgumentError("GRN synchronization is disabled.")
+        datadir = self.config.get("broker", "grn_to_eonid_map_location")
+
         with SyncKey("grn", logger=logger):
-            update_grn_map(self.config, session, logger)
+            update_grn_map(datadir, session, logger)
 
         return

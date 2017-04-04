@@ -19,37 +19,35 @@
 import os.path
 from csv import DictReader
 
-import cdb
+try:
+    import cdb
+except ImportError:
+    _has_cdb = False
+else:
+    _has_cdb = True
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Grn
 from aquilon.worker.locks import SyncKey
 
 
-def lookup_by_name(config, grn):
-    name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
-                        "eon_catalog_by_name.cdb")
-    cdb_file = cdb.init(name)
-    # cdb_file is not iterable, so tell pep8 not to warn about .has_key()
-    return cdb_file.has_key(grn)  # noqa
-
-
-def lookup_by_id(config, eon_id):
-    name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
-                        "eon_catalog_by_id.cdb")
-    cdb_file = cdb.init(name)
-    # cdb_file is not iterable, so tell pep8 not to warn about .has_key()
-    return cdb_file.has_key(str(eon_id))  # noqa
-
-
-def lookup_autoupdate(config, session, logger, grn, eon_id):
+def lookup_autoupdate(datadir, session, logger, grn, eon_id):
     # Check the CDB file first, since that quickly tells us if the cache is
     # stale or if just the input is wrong
-    if grn and not lookup_by_name(config, grn):
-        return None
-    elif eon_id and not lookup_by_id(config, eon_id):
+    if grn:
+        name = os.path.join(datadir, "eon_catalog_by_name.cdb")
+        key = grn
+    else:
+        name = os.path.join(datadir, "eon_catalog_by_id.cdb")
+        key = str(eon_id)
+
+    cdb_file = cdb.init(name)  # pylint: disable=E1101
+    # Tell pep8 not to warn about .has_key()
+    if not cdb_file.has_key(key):  # noqa
         return None
 
+    # We found a GRN which is not in the DB. Pefrorm a full refresh, because it
+    # is quick enough.
     with SyncKey(data="grn", logger=logger):
         # Try again in case a concurrent process have already updated the cache
         # by the time we got the lock
@@ -57,7 +55,7 @@ def lookup_autoupdate(config, session, logger, grn, eon_id):
         if dbgrn:  # pragma: no cover
             return dbgrn
 
-        update_grn_map(config, session, logger)
+        update_grn_map(datadir, session, logger)
         dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)
     return dbgrn
 
@@ -65,10 +63,12 @@ def lookup_autoupdate(config, session, logger, grn, eon_id):
 def lookup_grn(session, grn=None, eon_id=None, usable_only=True, logger=None,
                config=None, autoupdate=True):
     dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)
-    if not dbgrn and autoupdate:
-        if not config or not config.get("broker", "grn_to_eonid_map_location"):  # pragma: no cover
+    if not dbgrn and autoupdate and _has_cdb:
+        if not config.has_option("broker", "grn_to_eonid_map_location"):
             return None
-        dbgrn = lookup_autoupdate(config, session, logger, grn, eon_id)
+
+        datadir = config.get("broker", "grn_to_eonid_map_location")
+        dbgrn = lookup_autoupdate(datadir, session, logger, grn, eon_id)
 
     if not dbgrn:
         if grn:
@@ -82,15 +82,12 @@ def lookup_grn(session, grn=None, eon_id=None, usable_only=True, logger=None,
     return dbgrn
 
 
-def update_grn_map(config, session, logger):
-    if not config.get("broker", "grn_to_eonid_map_location"):  # pragma: no cover
-        raise ArgumentError("GRN synchronization is disabled.")
+def update_grn_map(datadir, session, logger):
 
     q = session.query(Grn)
     grns = {dbgrn.eon_id: dbgrn for dbgrn in q}
 
-    name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
-                        "eon_catalog.csv")
+    name = os.path.join(datadir, "eon_catalog.csv")
     added = 0
     updated = 0
     deleted = 0

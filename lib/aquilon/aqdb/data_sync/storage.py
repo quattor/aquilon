@@ -20,7 +20,12 @@ from collections import namedtuple
 from operator import itemgetter
 import re
 
-import cdb
+try:
+    import cdb
+except ImportError:
+    _has_cdb = False
+else:
+    _has_cdb = True
 
 from aquilon.config import Config
 
@@ -49,10 +54,14 @@ class StormapParser(object):
         config = Config()
         self.header_defs = []
 
+        if not _has_cdb or not config.has_option("broker", "sharedata"):
+            self.cdb_file = {}
+            return
+
         # TODO: This code can be used to parse other data files with the same
         # format. To do that, we'll need to pass the file name as an argument to
         # __init__(), and the index type as an argument to lookup().
-        self.cdb_file = cdb.init(config.get("broker", "sharedata"))
+        self.cdb_file = cdb.init(config.get("broker", "sharedata"))  # pylint: disable=E1101
         num_headers = self.cdb_file["M:HEADER_COUNT"]
         if num_headers is None:
             return

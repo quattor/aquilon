@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import sys
 import os
 import getopt
@@ -59,7 +61,7 @@ import aqdparameters_pb2
 
 
 def usage():
-    print >>sys.stderr, """
+    print("""
     %s [--help] [--file INPUT] --type TYPE
 
     --help      this message
@@ -67,13 +69,13 @@ def usage():
     --type      type of the message
 
     Example: aq show network --ip 1.2.3.4 --format proto | %s --type network
-""" % (sys.argv[0], sys.argv[0])
+""" % (sys.argv[0], sys.argv[0]), file=sys.stderr)
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "f:ht:",
                                ["file=", "help", "type="])
-except getopt.GetoptError, e:
-    print >>sys.stderr, str(e)
+except getopt.GetoptError as e:
+    print(str(e), file=sys.stderr)
     usage()
     sys.exit(2)
 
@@ -103,6 +105,9 @@ typemap = {
 }
 
 input = sys.stdin
+if hasattr(input, "buffer"):
+    # Python 3: avoid text encoding
+    input = input.buffer
 msg = None
 
 for opt, arg in opts:
