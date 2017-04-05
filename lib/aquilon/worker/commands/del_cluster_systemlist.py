@@ -33,4 +33,3 @@ class CommandDelClusterSystemList(CommandDelClusterMemberPriority):
                                                         comments=None,
                                                         member=hostname,
                                                         **kwargs)
-

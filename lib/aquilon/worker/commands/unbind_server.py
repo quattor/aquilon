@@ -48,7 +48,6 @@ class CommandUnbindServer(BrokerCommand):
             q = q.filter_by(service=dbservice)
             dbinstances = q.all()
 
-
         if position is not None:
             params = None
         else:

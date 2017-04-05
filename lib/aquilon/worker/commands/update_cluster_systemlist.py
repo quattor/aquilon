@@ -23,6 +23,7 @@ from aquilon.worker.commands.update_resource import CommandUpdateResource
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.cluster import check_cluster_priority_order
 
+
 class CommandUpdateClusterSystemList(CommandUpdateResource):
 
     required_parameters = ["cluster", "hostname"]

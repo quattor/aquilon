@@ -118,7 +118,6 @@ class CommandAddServiceAddress(BrokerCommand):
 
         session.flush()
 
-
         plenaries.add(holder.holder_object)
         plenaries.add(dbsrv)
 

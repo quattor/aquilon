@@ -78,7 +78,7 @@ class CommandDeploy(BrokerCommand):
                     "{0} is under change management control.  Please specify "
                     "--justification.".format(dbtarget))
 
-            #if not dbreview or not dbreview.approved:
+            # if not dbreview or not dbreview.approved:
             #    logger.warning("Warning: this deployment request was not "
             #                   "approved, this will be an error in the future.")
 

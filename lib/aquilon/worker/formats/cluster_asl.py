@@ -109,12 +109,10 @@ class ClusterPriorityListFormatter(ObjectFormatter):
 
         if cpl.cl_pl is not None:
             details.append(self.redirect_raw(cpl.cl_pl, indent + "  "))
-        for (rgname,rgpl) in cpl.rg_pls:
+        for (rgname, rgpl) in cpl.rg_pls:
             details.append(indent + "  Resource Group: {0}".format(rgname))
             details.append(self.redirect_raw(rgpl, indent + "    "))
 
         return "\n".join(details)
 
 ObjectFormatter.handlers[ClusterPriorityList] = ClusterPriorityListFormatter()
-
-

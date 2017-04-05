@@ -31,8 +31,8 @@ class NetworkCompartmentFormatter(ObjectFormatter):
     def csv_fields(self, network_compartment):
         yield(network_compartment.name, network_compartment.comments)
 
-    def fill_proto(self, network_compartment, skeleton, embedded = True,
-                    indirect_attrs=True):
+    def fill_proto(self, network_compartment, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = network_compartment.name
 
 ObjectFormatter.handlers[NetworkCompartment] = NetworkCompartmentFormatter()

@@ -37,7 +37,8 @@ class BuildingPreferenceFormatter(ObjectFormatter):
         details = []
         details.append(indent + "Building Pair: {0.sorted_name}  {1:c}: "
                        "{1.name}  Prefer: {2.name}".format(db_pref,
-                       db_pref.archetype, db_pref.prefer))
+                                                           db_pref.archetype,
+                                                           db_pref.prefer))
         return "\n".join(details)
 
     def fill_proto(self, db_pref, skeleton, embedded=True, indirect_attrs=True):
@@ -48,9 +49,10 @@ class BuildingPreferenceFormatter(ObjectFormatter):
         self.redirect_proto(db_pref.prefer, skeleton.prefer,
                             indirect_attrs=False)
         # FIXME
-        #skeleton.archetype.name = db_pref.archetype.name
+        # skeleton.archetype.name = db_pref.archetype.name
 
 ObjectFormatter.handlers[BuildingPreference] = BuildingPreferenceFormatter()
+
 
 class BuildingClusterPreferenceFormatter(ObjectFormatter):
 
@@ -74,4 +76,3 @@ class BuildingClusterPreferenceFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[BuildingClusterPreference] = BuildingClusterPreferenceFormatter()
-

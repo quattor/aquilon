@@ -48,7 +48,7 @@ class CommandShowBuildingPreferenceCluster(BrokerCommand):
         if dbcluster is None:
             raise NotFoundException("Cluster %s not found." % cluster)
 
-        #if dbcluster.preferred_location is not None:
+        # if dbcluster.preferred_location is not None:
         #    return ClusterBuildingPreference(cluster=dbcluster)
 
         # See if there's a preference for building(s)
@@ -96,4 +96,3 @@ class CommandShowBuildingPreferenceCluster(BrokerCommand):
 
         raise NotFoundException("Cluster {0.name} has no building preference."
                                 .format(dbcluster))
-

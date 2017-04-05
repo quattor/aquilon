@@ -62,7 +62,6 @@ class CommandUpdatePersonality(BrokerCommand):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-
         if staged is not None:
             if staged is False:
                 if "current" not in dbpersona.stages:

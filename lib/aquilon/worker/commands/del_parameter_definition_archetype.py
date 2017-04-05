@@ -43,7 +43,6 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
                                 "cannot be deleted: {1!s}"
                                 .format(path, ", ".join(sorted(holders))))
 
-
         param_def_holder.param_definitions.remove(db_paramdef)
 
         # This was the last definition for the given template - need to

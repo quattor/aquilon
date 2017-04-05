@@ -44,7 +44,6 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                                 "cannot be deleted: {1!s}"
                                 .format(path, ", ".join(sorted(holders))))
 
-
         if db_paramdef.default is not None:
             validate_prod_feature(dbfeature, user, justification, reason, logger)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)

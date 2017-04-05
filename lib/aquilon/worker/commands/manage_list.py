@@ -159,7 +159,6 @@ class CommandManageList(BrokerCommand):
                         check_feature_template(self.config, dbarch, dbfeature,
                                                dbbranch)
 
-
         for dbobj in objects:
             if dbsource != dbbranch:
                 logger.client_info("Moving {0:l} from {1:l} to {2:l}"

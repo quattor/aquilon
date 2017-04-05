@@ -56,7 +56,6 @@ class CommandUpdateNetwork(BrokerCommand):
 
         dblocation = get_location(session, **arguments)
 
-
         for dbnetwork in q:
             if type:
                 dbnetwork.network_type = type

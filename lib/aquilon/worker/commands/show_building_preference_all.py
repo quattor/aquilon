@@ -25,6 +25,7 @@ from aquilon.aqdb.model import BuildingPreference, Building, Archetype, Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.building_preference import BuildingClusterPreference
 
+
 class CommandShowBuildingPreferenceAll(BrokerCommand):
 
     def render(self, session, **_):
@@ -73,4 +74,3 @@ class CommandShowBuildingPreferenceAll(BrokerCommand):
                 bcprefs[key].clusters.append(dbcluster)
 
         return [bcprefs[key] for key in sorted(bcprefs.keys())]
-

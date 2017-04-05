@@ -20,6 +20,7 @@ from aquilon.aqdb.model import AutoStartList
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_resource import CommandDelResource
 
+
 class CommandDelClusterAutoStartListAll(CommandDelResource):
 
     required_parameters = ["cluster", "all"]

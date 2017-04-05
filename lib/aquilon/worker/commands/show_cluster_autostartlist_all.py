@@ -18,11 +18,10 @@
 
 from aquilon.aqdb.model import AutoStartList
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_cluster_prioritylist_all import (
-        CommandShowClusterPriorityListAll)
+from aquilon.worker.commands.show_cluster_prioritylist_all import CommandShowClusterPriorityListAll
+
 
 class CommandShowClusterAutoStartListAll(CommandShowClusterPriorityListAll):
 
     required_parameters = []
     resource_class = AutoStartList
-
