@@ -101,9 +101,8 @@ class TestAddDnsDomain(TestBrokerCommand):
                    #         1         2         3         4         5         6
                    's234567890123456789012345678901234567890123456789012345678901234' +
                    '.ms.com']
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "DNS name components must have a length between "
-                         "1 and 63.", command)
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "is more than the maximum 64 allowed.", command)
 
     def testaddtopleveldomain(self):
         command = ['add', 'dns_domain', '--dns_domain', 'toplevel']

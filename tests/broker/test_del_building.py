@@ -95,9 +95,9 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_200_del_building_notexist(self):
-        command = "del building --building building-does-not-exist"
+        command = "del building --building bldg-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Building building-does-not-exist not found.",
+        self.matchoutput(out, "Building bldg-not-exist not found.",
                          command)
 
     def test_300_verify_bu(self):

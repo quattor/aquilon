@@ -287,11 +287,17 @@ class TestSearchClusterESX(TestBrokerCommand):
         self.matchclean(out, "utecl3", command)
         self.matchclean(out, "utecl4", command)
 
+    def testvmhostlocationtoolong(self):
+        command = ["search_cluster", "--cluster_type=esx",
+                   "--member_rack=rack-too-long-does-not-exist"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "is more than the maximum 16 allowed.", command)
+
     def testvmhostlocationunavailable(self):
         command = ["search_cluster", "--cluster_type=esx",
-                   "--member_rack=rack-does-not-exist"]
+                   "--member_rack=rack-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Rack rack-does-not-exist not found",
+        self.matchoutput(out, "Rack rack-not-exist not found",
                          command)
 
     # TODO we have an almost duplicate, do we want this?

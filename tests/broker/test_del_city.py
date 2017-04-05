@@ -58,9 +58,9 @@ class TestDelCity(TestBrokerCommand):
                          "Plenary directory '%s' still exists" % dir)
 
     def test_200_del_notexist(self):
-        command = ["del_city", "--city", "city-does-not-exist"]
+        command = ["del_city", "--city", "city-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "City city-does-not-exist not found.", command)
+        self.matchoutput(out, "City city-not-exist not found.", command)
 
     def test_300_verify_ex(self):
         command = ["show_city", "--city", "ex"]

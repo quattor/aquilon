@@ -84,9 +84,9 @@ class TestDelRack(TestBrokerCommand):
         self.notfoundtest(command)
 
     def test_200_del_notexist(self):
-        command = ["del_rack", "--rack", "rack-does-not-exist"]
+        command = ["del_rack", "--rack", "rack-not-exist"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Rack rack-does-not-exist not found.", command)
+        self.matchoutput(out, "Rack rack-not-exist not found.", command)
 
     def test_300_verify_ut3(self):
         command = "show rack --rack ut3"

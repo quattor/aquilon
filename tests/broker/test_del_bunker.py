@@ -49,9 +49,9 @@ class TestDelBunker(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def test_200_del_bunker_notexist(self):
-        command = "del bunker --bunker bunker-does-not-exist"
+        command = "del bunker --bunker bunker-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Bunker bunker-does-not-exist not found.", command)
+        self.matchoutput(out, "Bunker bunker-not-exist not found.", command)
 
     def test_300_verify_del_utbunker1(self):
         command = "show bunker --bunker bucket1.ut"

@@ -17,6 +17,8 @@
 """ Column type to squash trailing/leading whitespace and lower case """
 import sqlalchemy
 
+from aquilon.exceptions_ import ArgumentError
+
 
 class AqStr(sqlalchemy.types.TypeDecorator):
     """a type that decorates String, normalizes case to lower and strips
@@ -31,7 +33,13 @@ class AqStr(sqlalchemy.types.TypeDecorator):
         return str(value).strip().lower()
 
     def process_bind_param(self, value, engine):  # pylint: disable=W0613
-        return self.normalize(value)
+        value = self.normalize(value)
+        if value is None:
+            return value
+        if len(value) > self.impl.length:
+            raise ArgumentError("The length of '%s', which is %d, is more than the maximum %d allowed."
+                                % (value, len(value), self.impl.length))
+        return value
 
     def process_result_value(self, value, engine):  # pylint: disable=W0613
         if value is None:

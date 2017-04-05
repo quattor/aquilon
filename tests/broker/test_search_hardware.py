@@ -118,9 +118,14 @@ class TestSearchHardware(TestBrokerCommand):
         self.matchclean(out, "np06bals03", command)
 
     def testlocationunavailable(self):
-        command = "search hardware --building building-does-not-exist"
+        command = "search hardware --building bldg-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "not found", command)
+
+    def testlocationtoolong(self):
+        command = "search hardware --building building-long-does-not-exist"
+        out = self.internalerrortest(command.split(" "))
+        self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def testall(self):
         command = "search hardware --all"

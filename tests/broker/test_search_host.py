@@ -546,10 +546,14 @@ class TestSearchHost(TestBrokerCommand):
         self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
 
     def testlocationunavailable(self):
-        command = "search host --building building-does-not-exist"
+        command = "search host --building bldg-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Building building-does-not-exist not found",
-                         command)
+        self.matchoutput(out, "Building bldg-not-exist not found", command)
+
+    def testlocationtoolong(self):
+        command = "search host --building building-does-not-exist"
+        out = self.internalerrortest(command.split(" "))
+        self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def testclusteravailable(self):
         command = "search host --cluster utecl1"
