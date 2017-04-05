@@ -3834,6 +3834,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/make_cluster"/>
 	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make_cluster"/>

@@ -95,6 +95,14 @@ def validate_prod_personality(dbstage, user, justification, reason, logger):
     if isinstance(dbstage.host_environment, Production) and q.count() > 0:
         enforce_justification(user, justification, reason, logger)
 
+def validate_prod_cluster(dbcluster, user, justification, reason, logger):
+    session = object_session(dbcluster)
+    # check each host in a 'ready' cluster for prod personality
+    if dbcluster.status.name != 'ready':
+        return
+    for host in dbcluster.hosts:
+        validate_prod_personality(host.personality_stage, user, justification,
+                                  reason, logger)
 
 def validate_prod_archetype(dbarchetype, user, justification, reason, logger):
     session = object_session(dbarchetype)

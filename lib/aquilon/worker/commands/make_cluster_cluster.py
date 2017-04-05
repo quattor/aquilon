@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser, ChooserCache
-
+from aquilon.worker.dbwrappers.change_management import validate_prod_cluster
+from aquilon.aqdb.model.clusterlifecycle import Ready
 
 class CommandMakeClusterCluster(BrokerCommand):
     requires_plenaries = True
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, plenaries, cluster, metacluster, keepbindings, **_):
+    def render(self, session, logger, plenaries, cluster, metacluster, keepbindings,
+               justification, reason, user, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -43,6 +45,8 @@ class CommandMakeClusterCluster(BrokerCommand):
             raise ArgumentError("{0} is not a compilable archetype "
                                 "({1!s}).".format(dbcluster,
                                                   dbcluster.archetype))
+
+        validate_prod_cluster(dbcluster, user, justification, reason, logger)
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
