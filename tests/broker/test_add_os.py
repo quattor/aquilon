@@ -286,7 +286,24 @@ class TestAddOS(TestBrokerCommand):
                               ", withdrawn",
                          command)
 
-
+    def test_500_fix_os_lifecycle(self):
+        # TODO: This should be integrated better
+        self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", self.linux_version_prev,
+                        "--lifecycle", "pre_prod"])
+        self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", self.linux_version_prev,
+                        "--lifecycle", "early_prod"])
+        self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", self.linux_version_curr,
+                        "--lifecycle", "pre_prod"])
+        self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", self.linux_version_curr,
+                        "--lifecycle", "early_prod"])
+        self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "solaris",
+                        "--osversion", "11.1-x86_64", "--lifecycle", "pre_prod"])
+        self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "solaris",
+                        "--osversion", "11.1-x86_64", "--lifecycle", "early_prod"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddOS)
