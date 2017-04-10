@@ -120,7 +120,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          self.net["unknown0"].gateway, command)
         self.matchoutput(out, '"system/advertise_status" = false;', command)
         self.matchoutput(out, '"system/archetype/os" = "linux";', command)
-        self.matchoutput(out, '"system/archetype/os_lifecycle" = "evaluation";', command)
+        self.matchoutput(out, '"system/archetype/os_lifecycle" = "early_prod";', command)
         self.matchoutput(out,
                          '"system/archetype/model" = "%s";' % self.linux_version_prev,
                          command)
