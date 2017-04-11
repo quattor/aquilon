@@ -46,7 +46,10 @@ class CommandMakeClusterCluster(BrokerCommand):
                                 "({1!s}).".format(dbcluster,
                                                   dbcluster.archetype))
 
-        validate_prod_cluster(dbcluster, user, justification, reason, logger)
+        # FIXME: this breaks virt's tooling at present (need patchup for
+        # change-management strategies, or downstream changes).
+
+        # validate_prod_cluster(dbcluster, user, justification, reason, logger)
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
