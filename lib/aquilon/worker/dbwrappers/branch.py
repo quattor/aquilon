@@ -296,11 +296,11 @@ def sync_domain(dbdomain, logger):
     logger.client_info("Updating the checked out copy of {0:l}..."
                        .format(dbdomain))
 
-    domainrepo.run(["fetch", "--prune"])
-    if dbdomain.tracked_branch:
-        rollback_commit = domainrepo.ref_commit()
-
     with CompileKey(domain=dbdomain.name, logger=logger):
+        domainrepo.run(["fetch", "--prune"])
+        if dbdomain.tracked_branch:
+            rollback_commit = domainrepo.ref_commit()
+
         domainrepo.run(["reset", "--hard", "origin/%s" % dbdomain.name])
 
     if dbdomain.tracked_branch:
