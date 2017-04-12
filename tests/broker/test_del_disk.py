@@ -29,10 +29,18 @@ from eventstest import EventsTestMixin
 
 class TestDelDisk(EventsTestMixin, TestBrokerCommand):
 
-    def test_100_del_ut3c1n3_sda(self):
+    def test_100_del_ut3c1n3_sda_hostname(self):
+        hostname = "unittest00.one-nyp.ms.com"
+        command = ["del", "disk", "--hostname", hostname, "--disk", "sda"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Not Found: Host %s not found" % hostname,
+                         command)
+
+    def test_101_del_ut3c1n3_sda(self):
         self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "disk", "--machine", "ut3c1n3", "--disk", "sda"])
         self.events_verify()
+
 
     def test_105_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"

@@ -896,7 +896,10 @@
 	<p/>
 	Examples of valid disk names: hda, hdb (IDE); sda, sdb (SCSI, SATA), c0d0 (CCISS).
 	<optgroup mandatory="True" fields="all">
-	    <option name="machine" type="string">Machine name</option>
+             <optgroup fields="one">
+            <option name="machine" type="string">Machine name</option>
+            <option name="hostname" type="string">Hostname</option>
+            </optgroup>
 	    <option name="disk" type="string">Disk/device name</option>
 	    <option name="controller" type="string">Type of the controller/interface</option>
 	    <option name="size" type="int">Capacity of the disk (GB)</option>
@@ -915,7 +918,7 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
-	<transport method="put" path="machine/%(machine)s/disk/%(disk)s"/>
+	<transport method="put" path="disk/%(disk)s"/>
     </command>
 
     <command name="del_disk">
@@ -924,7 +927,10 @@
 	If more than one disk matches, they will not be deleted.  Use the
 	--all flag to override this and delete all matching disks.
 	<optgroup mandatory="True" fields="all">
-	    <option name="machine" type="string">Machine ID</option>
+             <optgroup fields="one">
+            <option name="machine" type="string">Machine name</option>
+            <option name="hostname" type="string">Hostname</option>
+            </optgroup>
 	    <optgroup fields="one">
 		<option name="disk" type="string">Device name of the disk (like sda)</option>
 		<option name="all" type="flag">Remove any matching disks</option>
@@ -934,14 +940,17 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
-	<transport method="delete" trigger="disk" path="machine/%(machine)s/disk/%(disk)s"/>
-	<transport method="delete" path="machine/%(machine)s/disk"/>
+	<transport method="delete" trigger="disk" path="disk/%(disk)s"/>
+	<transport method="delete" path="disk"/>
     </command>
 
     <command name="update_disk">
 	Update the parameters of an existing disk.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
 	    <option name="machine" type="string">Machine name</option>
+	    <option name="hostname" type="string">Hostname</option>
+	    </optgroup>
 	    <option name="disk" type="string">Disk/device name</option>
 	</optgroup>
 	<optgroup>
@@ -961,7 +970,7 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
-	<transport method="post" path="machine/%(machine)s/disk/%(disk)s"/>
+	<transport method="post" path="disk/%(disk)s"/>
     </command>
 
     <command name="add_host">

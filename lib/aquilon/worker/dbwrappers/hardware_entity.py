@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
 from aquilon.worker.dbwrappers.network import get_network_byip
+from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.utils import first_of
 
 
@@ -265,7 +266,15 @@ def check_only_primary_ip(dbhw_ent):
                             (dbhw_ent, ", ".join(sorted(addrs))))
 
 
-def get_hardware(session, compel=True, **kwargs):
+def get_hardware(session, compel=True, hostname=None, **kwargs):
+    """
+    Get HardwareEntity by hostname, machine name, chassis name
+    or network device name
+    """
+    if hostname:
+        dbhost = hostname_to_host(session, hostname)
+        return dbhost.hardware_entity
+
     mapper = inspect(HardwareEntity)
 
     dbhw_ent = None

@@ -19,18 +19,19 @@
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.machine import add_disk
+from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 
 
 class CommandAddDisk(BrokerCommand):
     requires_plenaries = True
     """Add a disk object (local or share) to a machine"""
 
-    required_parameters = ["machine", "disk", "size", "controller"]
+    required_parameters = ["disk", "size", "controller"]
 
-    def render(self, session, plenaries, machine, disk, controller, share,
+    def render(self, session, plenaries, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, wwn, bus_address, iops_limit, **_):
-        dbmachine = Machine.get_unique(session, machine, compel=True)
+               snapshot, wwn, bus_address, iops_limit, **kwargs):
+        dbmachine = get_hardware(session, compel=True, **kwargs)
 
         add_disk(dbmachine, disk, controller, share, filesystem, resourcegroup,
                  address, size, boot, snapshot, wwn, bus_address, iops_limit,

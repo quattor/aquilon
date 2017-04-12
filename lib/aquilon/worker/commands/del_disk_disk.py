@@ -24,4 +24,4 @@ from aquilon.worker.commands.del_disk import CommandDelDisk
 class CommandDelDiskDisk(CommandDelDisk):
     """The base class already has the necessary logic to handle this."""
 
-    required_parameters = ["machine", "disk"]
+    required_parameters = ["disk"]
