@@ -38,7 +38,8 @@ class DnsRecordTargetMixin(object):
     def check_grn_conflict(self, grn):
         for rec in self.target.dns_records:
             try:
-                rec.check_grn_conflict(grn)
+                if self != rec:     # fix for AQUILON-3933
+                    rec.check_grn_conflict(grn)
             except ArgumentError as e:
                 raise ArgumentError("{0} depends on {1}. It conflicts "
                                     "with {2}: {3}"
