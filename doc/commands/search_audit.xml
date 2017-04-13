@@ -106,11 +106,20 @@
 		<listitem>
 		    <para>
 			Restrict the search to the specified command. The
-			default behavior is only to display commands which
-			create, update or delete data.
+			default behavior is to display commands which create,
+                        update or delete data in DB and also that involve other type
+                        of change activity on configuration
+                        (like 'compile' or 'pxeswitch' commands).
 		    </para>
 		    <para>
-			"--command rw" will fetch _most_ commands (including
+                        "--command wo" will fetch just commands that involve create,
+                        update or delete data action to DB. Previous default behaviour.
+                    </para>
+                    <para>
+                        "--command ro" will fetch just read only commands
+                    </para>
+		    <para>
+			"--command rw" will fetch _most_ commands (excluding
 			show and search commands)
 		    </para>
 		    <para>

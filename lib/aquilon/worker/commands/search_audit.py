@@ -20,6 +20,7 @@ from dateutil.parser import parse
 from dateutil.tz import tzutc
 
 from sqlalchemy.sql.expression import asc, desc, exists
+from sqlalchemy import or_
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Xtn, XtnDetail, XtnEnd
@@ -27,6 +28,8 @@ from aquilon.worker.broker import BrokerCommand
 
 _IGNORED_COMMANDS = ('show_active_locks', 'show_active_commands', 'cat',
                      'search_audit')
+
+_NON_DB_CHANGE_TYPE_COMMANDS = ('compile', 'pxeswitch')
 
 
 class CommandSearchAudit(BrokerCommand):
@@ -45,11 +48,18 @@ class CommandSearchAudit(BrokerCommand):
             elif command == 'rw':
                 # Filter our command list
                 q = q.filter(~Xtn.command.in_(_IGNORED_COMMANDS))
+            elif command == 'wo':
+                # Filter command list to only return manipulate commands to db
+                # Old default behaviour
+                q = q.filter_by(is_readonly=False)
+            elif command == 'ro':
+                # Filter our command list to only return readonly commands
+                q = q.filter_by(is_readonly=True)
             else:
                 q = q.filter_by(command=str(command))
         else:
             # filter out read only
-            q = q.filter_by(is_readonly=False)
+            q = q.filter(or_(Xtn.is_readonly==False, Xtn.command.in_(_NON_DB_CHANGE_TYPE_COMMANDS)))
 
         if username is not None:
             username = username.lower().strip()
