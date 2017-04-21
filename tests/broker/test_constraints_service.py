@@ -70,40 +70,30 @@ class TestServiceConstraints(TestBrokerCommand):
                          "clients and cannot be deleted", command)
 
     def test_160_add_required_service_no_justification(self):
-        command = "add required service --service utsvc --archetype aquilon"
-        out = self.unauthorizedtest(command.split(" "), auth=True,
-                                    msgcheck=False)
-        self.matchoutput(out,
-                         "The operation has production impact, "
-                         "--justification is required.",
-                         command)
+        command = "add required service --service utsvc --archetype aurora"
+        self.justificationmissingtest(command.split(" "), auth=True, msgcheck=False)
 
     def test_165_del_required_afs_no_justification(self):
-        command = "del required service --service afs --archetype aquilon"
-        out = self.unauthorizedtest(command.split(" "), auth=True,
-                                    msgcheck=False)
-        self.matchoutput(out,
-                         "The operation has production impact, "
-                         "--justification is required.",
-                         command)
+        command = "del required service --service afs --archetype aurora"
+        self.justificationmissingtest(command.split(" "), auth=True, msgcheck=False)
 
     def test_170_bind_server(self):
+        command = ["reconfigure", "--hostname", 'server1.aqd-unittest.ms.com',
+                   "--archetype", "aquilon",
+                   "--personality", "utpers-prod", "--buildstatus", "ready"]
+        self.statustest(command)
         command = ['bind_server', '--service', 'dns', '--instance', 'unittest',
                    '--hostname', 'unittest20.aqd-unittest.ms.com']
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "The operation has production impact, "
-                         "--justification is required.",
-                         command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_175_unbind_server(self):
         command = ['unbind_server', '--service', 'dns',
                    '--instance', 'unittest', '--position', 1]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "The operation has production impact, "
-                         "--justification is required.",
-                         command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+        command = ["reconfigure", "--hostname", 'server1.aqd-unittest.ms.com',
+                   "--archetype", "aquilon",
+                   "--personality", "compileserver"]
+        self.statustest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestServiceConstraints)

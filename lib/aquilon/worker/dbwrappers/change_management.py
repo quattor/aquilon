@@ -16,160 +16,278 @@
 # limitations under the License.
 """ Helper functions for change management """
 
+import json
 import shlex
 
+from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
+                                PersonalityStage, InterfaceFeature, Domain,
+                                HardwareFeature, HostFeature, ServiceInstance,
+                                OperatingSystem, ComputeCluster, StorageCluster,
+                                EsxCluster, HostClusterMember, HostEnvironment,
+                                MetaCluster, ClusterLifecycle, HostLifecycle)
+from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
+from aquilon.config import Config
+from aquilon.exceptions_ import AuthorizationException, InternalError, ProcessException
+from aquilon.worker.dbwrappers.user_principal import get_user_principal
+from aquilon.worker.processes import run_command
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import AuthorizationException, ProcessException
-from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
-                                PersonalityStage)
-from aquilon.aqdb.model.host_environment import Production
-from aquilon.worker.processes import run_command
-from aquilon.config import Config
 
-
-def validate_justification(user, justification, reason, logger):
+class ChangeManagement(object):
+    """
+    Class calculate impacted environments with number objects in them
+    for impacted target
+    Command to be called for individual targets:
+    host, cluster, feature, service instance, personality stage,
+    os type, arch type, domain, host environment
+    Calculate target grn (eonid) - TBD
+    Prepare input for aqd_checkedm
+    Call aqd_checkedm
+    """
     config = Config()
     check_enabled = False
-    if config.has_option("change_management", "enable"):
-        check_enabled = config.getboolean("change_management", "enable")
-
-    justification.check_reason(reason)
-
-    if check_enabled:
-        change_management_validate(user, justification, logger, config)
-
-
-def change_management_validate(user, justification, logger, config):
-    check_enforced = False
-    if config.has_option("change_management", "enforce"):
-        check_enforced = config.getboolean("change_management", "enforce")
-
     extra_options = ""
-    if config.has_option("change_management", "extra_options"):
-        extra_options = config.get("change_management", "extra_options")
+    handlers = {}
+    lifecycle_status_edm_check = ['ready']  # Crash and burn: 'build', 'rebuild',
+    # 'decommissioned', 'blind', 'install', 'reinstall', 'almostready', 'failed'
+    success_responses = ["Permitted", "Approved"]
 
-    cmd = ["checkedm",
-           "--resource-instance", "prod",
-           "--output-format", "json",
-           "--requestor", user]
-    if justification.tcm is not None:
-        cmd.extend(["--ticketing-system", "TCM2", "--ticket", justification.tcm])
-    elif justification.sn is not None:
-        cmd.extend(["--ticketing-system", "SN", "--ticket", justification.sn])
-    if justification.emergency:
-        cmd.append("--emergency")
+    def __init__(self, session, user, justification, reason, logger, command):
+        self.command = command
+        self.user = user.split('@')[0]
+        self.justification = justification
+        self.reason = reason
+        self.logger = logger
 
-    cmd.extend(shlex.split(extra_options))
+        self.dict_of_impacted_envs = {}
+        self.eonid = 6980  # to be calculated for each target
 
-    exception_happened = False
-    try:
-        out = run_command(cmd)
-    except ProcessException as err:
-        exception_happened = True
-        out = err.out
+        if self.config.has_option("change_management", "enable"):
+            self.check_enabled = self.config.getboolean("change_management", "enable")
+        if self.config.has_option("change_management", "extra_options"):
+            self.extra_options = self.config.get("change_management", "extra_options")
 
-    logger.info("EDM validation done, request {}; output='{}'".format("denied" if exception_happened else "approved", out))
+        self.role_name = get_user_principal(session, self.user).role.name
 
-    if exception_happened:
-        if check_enforced:
-            raise AuthorizationException("Authorization error")
+    def validate(self, target_obj, enforce_validation=False):
+        print('Is change management enabled?', self.check_enabled)
+        if not self.check_enabled:
+            return
+        print('Calculate impacted environments and target status')
+        env_calculate_method = self.handlers.get(target_obj.__class__, None)
+        if env_calculate_method:
+            env_calculate_method(self, target_obj)
+            print('Prepare impacted envs to call EDM')
+            for env, build_status_list in self.dict_of_impacted_envs.items():
+                self.dict_of_impacted_envs[env] = list(set(build_status_list))
         else:
-            logger.client_info("Change management would reject the justification; reason={0:s}".format(out))
+            raise InternalError('Change management calculate impact fail. Target class unknown.')
+        print('Call aqd_checkedm with metadata')
+        self.change_management_validate(enforce_validation=enforce_validation)
+
+    def change_management_validate(self, enforce_validation):
+        """
+        Method calls adq_checkedm cmd tool with target resources metadata
+        to calculate if change management validation is required.
+        If required, justification validation will happen. If EDM calls
+        enabled, the ticket will be checked in EDM.
+        Args:
+            enforce_validation: enforce justification validation,
+            disregarding impacted environment dict
+
+        Returns: None or raises AuthorizationException
+
+        """
+        cmd = ["aqd_checkedm"] + shlex.split(self.extra_options)
+        metadata = {"ticket": self.justification,
+                    "reason": self.reason,
+                    "requestor": self.user,
+                    "requestor_role": self.role_name,
+                    "command": self.command,
+                    "impacted_envs": self.dict_of_impacted_envs,
+                    "eonid": self.eonid,
+                    "enforce_validation": enforce_validation,
+                    }
+        cmd.extend(["--metadata", json.dumps(metadata)])
+
+        try:
+            out = run_command(cmd)
+            out_dict = json.loads(out)
+        except Exception as err:
+            raise InternalError(str(err))
+
+        if out_dict.get("Status") in self.success_responses:
+            self.logger.info("Status: {}. {}".format(out_dict.get("Status"), out_dict.get("Reason")))
+        else:
+            raise AuthorizationException(out_dict.get("Reason"))
+
+    def validate_default(self, obj):
+        """
+        Method to be used when we do not need calculate impacted environment
+        Used with enforce_validation for some models, i.e. Domain
+        Returns:
+
+        """
+        pass
+
+    def validate_prod_personality(self, personality_stage):
+        session = object_session(personality_stage)
+        if personality_stage.personality.is_cluster:
+            q = session.query(Cluster)
+            q = q.filter_by(personality_stage=personality_stage)
+            q = q.join(ClusterLifecycle)
+
+        else:
+            q = session.query(Host)
+            q = q.filter_by(personality_stage=personality_stage)
+            q = q.join(HostLifecycle)
+        q = q.options(contains_eager('status'))
+        q = q.join(PersonalityStage, Personality, HostEnvironment)
+        q = q.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for target in q.all():
+            self.dict_of_impacted_envs.setdefault(
+                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+
+    def validate_prod_cluster(self, cluster):
+        # validate only cluster status, leave out hosts
+        self.validate_prod_personality(cluster.personality_stage)
+
+    def validate_host_environment(self, host_environment):
+        session = object_session(host_environment)
+
+        q1 = session.query(Cluster)
+        q1 = q1.join(ClusterLifecycle)
+        q1 = q1.options(contains_eager('status'))
+        q1 = q1.join(PersonalityStage)
+        q1 = q1.join(Personality)
+        q1 = q1.filter_by(host_environment=host_environment)
+
+        for cluster in q1.all():
+            self.dict_of_impacted_envs.setdefault(
+                host_environment.name, []).append(cluster.status.name)
+
+        q2 = session.query(Host)
+        q2 = q2.join(HostLifecycle)
+        q2 = q2.options(contains_eager('status'))
+        q2 = q2.join(PersonalityStage)
+        q2 = q2.join(Personality)
+        q2 = q2.filter_by(host_environment=host_environment)
+
+        for host in q2.all():
+            self.dict_of_impacted_envs.setdefault(
+                host_environment.name, []).append(host.status.name)
+
+    def validate_prod_archetype(self, archtype):
+        session = object_session(archtype)
+        if archtype.cluster_type:
+            q = session.query(Cluster)
+            q = q.join(ClusterLifecycle)
+        else:
+            q = session.query(Host)
+            q = q.join(HostLifecycle)
+        q = q.options(contains_eager('status'))
+        q = q.join(PersonalityStage, Personality)
+        q = q.filter_by(archetype=archtype)
+        q = q.join(HostEnvironment)
+        q = q.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for target in q.all():
+            self.dict_of_impacted_envs.setdefault(
+                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+
+    def validate_prod_os(self, ostype):
+        session = object_session(ostype)
+
+        q = session.query(Host)
+        q = q.filter_by(operating_system=ostype)
+        q = q.join(HostLifecycle)
+        q = q.options(contains_eager('status'))
+        q = q.join(PersonalityStage, Personality, HostEnvironment)
+        q = q.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for target in q.all():
+            self.dict_of_impacted_envs.setdefault(
+                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+
+    def validate_prod_service_instance(self, service_instance):
+        session = object_session(service_instance)
+
+        q1 = session.query(Cluster)
+        q1 = q1.filter(Cluster.services_used.contains(service_instance))
+        q1 = q1.join(ClusterLifecycle)
+        q1 = q1.options(contains_eager('status'))
+        q1 = q1.join(PersonalityStage, Personality, HostEnvironment)
+        q1 = q1.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for cluster in q1.all():
+            self.dict_of_impacted_envs.setdefault(
+                cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
+
+        q2 = session.query(Host)
+        q2 = q2.filter(Host.services_used.contains(service_instance))
+        q2 = q2.join(HostLifecycle)
+        q2 = q2.options(contains_eager('status'))
+        q2 = q2.join(PersonalityStage, Personality, HostEnvironment)
+        q2 = q2.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for host in q2.all():
+            self.dict_of_impacted_envs.setdefault(
+                host.personality_stage.personality.host_environment.name, []).append(host.status.name)
+
+    def validate_prod_feature(self, feature):
+        session = object_session(feature)
+
+        # validate that separately from command later
+        q = session.query(Archetype)
+        q = q.join(Archetype.features)
+        q = q.filter_by(feature=feature)
+        for dbarchetype in q:
+            self.validate_prod_archetype(dbarchetype)
+
+        q1 = session.query(Cluster)
+        q1 = q1.join(ClusterLifecycle)
+        q1 = q1.options(contains_eager('status'))
+        q1 = q1.join(PersonalityStage)
+        q1 = q1.join(PersonalityStage.features)
+        q1 = q1.filter_by(feature=feature)
+        q1 = q1.join(Personality, HostEnvironment)
+        q1 = q1.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for cluster in q1.all():
+            self.dict_of_impacted_envs.setdefault(
+                cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
+
+        q2 = session.query(Host)
+        q2 = q2.join(PersonalityStage)
+        q2 = q2.join(PersonalityStage.features)
+        q2 = q2.filter_by(feature=feature)
+        q2 = q2.join(Personality, HostEnvironment)
+        q2 = q2.options(contains_eager('personality_stage.personality.host_environment'))
+
+        for host in q2.all():
+            self.dict_of_impacted_envs.setdefault(
+                host.personality_stage.personality.host_environment.name, []).append(host.status.name)
 
 
-def enforce_justification(user, justification, reason, logger):
-    if not justification:
-        raise AuthorizationException("The operation has production impact, "
-                                     "--justification is required.")
-    validate_justification(user, justification, reason, logger)
-
-
-def validate_prod_personality(dbstage, user, justification, reason, logger):
-    session = object_session(dbstage)
-    if dbstage.personality.is_cluster:
-        q = session.query(Cluster.id)
-    else:
-        q = session.query(Host.hardware_entity_id)
-    q = q.filter_by(personality_stage=dbstage)
-    if isinstance(dbstage.host_environment, Production) and q.count() > 0:
-        enforce_justification(user, justification, reason, logger)
-
-def validate_prod_cluster(dbcluster, user, justification, reason, logger):
-    session = object_session(dbcluster)
-    # check each host in a 'ready' cluster for prod personality
-    if dbcluster.status.name != 'ready':
-        return
-    for host in dbcluster.hosts:
-        validate_prod_personality(host.personality_stage, user, justification,
-                                  reason, logger)
-
-def validate_prod_archetype(dbarchetype, user, justification, reason, logger):
-    session = object_session(dbarchetype)
-    prod = Production.get_instance(session)
-    if dbarchetype.cluster_type:
-        q = session.query(Cluster.id)
-    else:
-        q = session.query(Host.hardware_entity_id)
-    q = q.join(PersonalityStage, Personality)
-    q = q.filter_by(host_environment=prod, archetype=dbarchetype)
-    if q.count() > 0:
-        enforce_justification(user, justification, reason, logger)
-
-
-def validate_prod_os(dbos, user, justification, reason, logger):
-    session = object_session(dbos)
-    prod = Production.get_instance(session)
-    q = session.query(Host.hardware_entity_id)
-    q = q.filter_by(operating_system=dbos)
-    q = q.join(PersonalityStage, Personality)
-    q = q.filter_by(host_environment=prod)
-    if q.count() > 0:
-        enforce_justification(user, justification, reason, logger)
-
-
-def validate_prod_service_instance(dbinstance, user, justification, reason, logger):
-    session = object_session(dbinstance)
-    prod = Production.get_instance(session)
-
-    q1 = session.query(Cluster.id)
-    q1 = q1.filter(Cluster.services_used.contains(dbinstance))
-    q1 = q1.join(PersonalityStage, Personality)
-    q1 = q1.filter_by(host_environment=prod)
-
-    q2 = session.query(Host.hardware_entity_id)
-    q2 = q2.filter(Host.services_used.contains(dbinstance))
-    q2 = q2.join(PersonalityStage, Personality)
-    q2 = q2.filter_by(host_environment=prod)
-
-    if q1.count() > 0 or q2.count() > 0:
-        enforce_justification(user, justification, reason, logger)
-
-
-def validate_prod_feature(dbfeature, user, justification, reason, logger):
-    session = object_session(dbfeature)
-    prod = Production.get_instance(session)
-
-    q = session.query(Archetype)
-    q = q.join(Archetype.features)
-    q = q.filter_by(feature=dbfeature)
-    for dbarchetype in q:
-        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
-
-    q1 = session.query(Cluster.id)
-    q1 = q1.join(PersonalityStage, Personality)
-    q1 = q1.filter_by(host_environment=prod)
-    q1 = q1.join(PersonalityStage.features)
-    q1 = q1.filter_by(feature=dbfeature)
-
-    # This ignores model and interface name restrictions. That means we may
-    # require --justification even if no actual host is impacted - we can live
-    # with that.
-    q2 = session.query(Host.hardware_entity_id)
-    q2 = q2.join(PersonalityStage, Personality)
-    q2 = q2.filter_by(host_environment=prod)
-    q2 = q2.join(PersonalityStage.features)
-    q2 = q2.filter_by(feature=dbfeature)
-
-    if q1.count() > 0 or q2.count() > 0:
-        enforce_justification(user, justification, reason, logger)
+ChangeManagement.handlers[Cluster] = ChangeManagement.validate_prod_cluster
+ChangeManagement.handlers[ComputeCluster] = ChangeManagement.validate_prod_cluster
+ChangeManagement.handlers[StorageCluster] = ChangeManagement.validate_prod_cluster
+ChangeManagement.handlers[EsxCluster] = ChangeManagement.validate_prod_cluster
+ChangeManagement.handlers[HostClusterMember] = ChangeManagement.validate_prod_cluster
+ChangeManagement.handlers[MetaCluster] = ChangeManagement.validate_prod_cluster
+ChangeManagement.handlers[PersonalityStage] = ChangeManagement.validate_prod_personality
+ChangeManagement.handlers[InterfaceFeature] = ChangeManagement.validate_prod_feature
+ChangeManagement.handlers[HardwareFeature] = ChangeManagement.validate_prod_feature
+ChangeManagement.handlers[HostFeature] = ChangeManagement.validate_prod_feature
+ChangeManagement.handlers[ServiceInstance] = ChangeManagement.validate_prod_service_instance
+ChangeManagement.handlers[OperatingSystem] = ChangeManagement.validate_prod_os
+ChangeManagement.handlers[Archetype] = ChangeManagement.validate_prod_archetype
+ChangeManagement.handlers[Development] = ChangeManagement.validate_host_environment
+ChangeManagement.handlers[UAT] = ChangeManagement.validate_host_environment
+ChangeManagement.handlers[QA] = ChangeManagement.validate_host_environment
+ChangeManagement.handlers[Legacy] = ChangeManagement.validate_host_environment
+ChangeManagement.handlers[Production] = ChangeManagement.validate_host_environment
+ChangeManagement.handlers[Infra] = ChangeManagement.validate_host_environment
+ChangeManagement.handlers[Domain] = ChangeManagement.validate_default

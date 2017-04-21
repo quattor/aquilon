@@ -26,8 +26,6 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
-AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
-
 
 class TestUnbindFeature(TestBrokerCommand):
 
@@ -184,8 +182,7 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",
                    "--interface", "eth1"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
         command = ["unbind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",

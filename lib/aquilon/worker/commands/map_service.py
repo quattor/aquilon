@@ -20,8 +20,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, HostEnvironment, ServiceMap,
                                 ServiceInstance, NetworkEnvironment)
 from aquilon.aqdb.model.host_environment import Production
-from aquilon.worker.dbwrappers.change_management import (validate_prod_personality,
-                                                         enforce_justification)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -54,18 +53,18 @@ class CommandMapService(BrokerCommand):
         dbpersona = None
         dbenv = None
 
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         if personality:
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
             for dbstage in dbpersona.stages.values():
-                validate_prod_personality(dbstage, user, justification, reason, logger)
+                cm.validate(dbstage)
         elif host_environment:
             dbenv = HostEnvironment.get_instance(session, host_environment)
-            if isinstance(dbenv, Production):
-                enforce_justification(user, justification, reason, logger)
+            cm.validate(dbenv)
         else:
-            enforce_justification(user, justification, reason, logger)
+            cm.validate(dbinstance)
 
         q = session.query(ServiceMap)
         q = q.filter_by(service_instance=dbinstance,

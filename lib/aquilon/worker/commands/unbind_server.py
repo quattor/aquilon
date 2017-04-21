@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.bind_server import lookup_target, find_server
-from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUnbindServer(BrokerCommand):
@@ -56,7 +56,8 @@ class CommandUnbindServer(BrokerCommand):
                                    alias)
 
         for dbinstance in dbinstances:
-            validate_prod_service_instance(dbinstance, user, justification, reason, logger)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbinstance)
 
             if position is not None:
                 if position < 0 or position >= len(dbinstance.servers):

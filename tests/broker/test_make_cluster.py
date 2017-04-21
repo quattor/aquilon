@@ -183,8 +183,12 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
                          data_cmd)
         self.matchclean(data, '/system/cluster/max_hosts', data_cmd)
 
-    def test_140_make_utvcs1(self):
+    def test_140_make_utvcs1_fail(self):
         command = "make_cluster --cluster utvcs1"
+        self.justificationmissingtest(command.split(" "), auth=True, msgcheck=False)
+
+    def test_140_make_utvcs1(self):
+        command = "make_cluster --cluster utvcs1 --justification tcm=123456"
         self.successtest(command.split(" "))
 
     def test_145_verify_cat_utvcs1(self):

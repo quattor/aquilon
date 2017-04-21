@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import BuildingPreference, Building
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.cluster import get_clusters_by_locations
 
 
@@ -35,7 +35,8 @@ class CommandUpdateBuildingPreference(BrokerCommand):
                                                 compel=True)
         db_pref.lock_row()
 
-        validate_prod_archetype(db_pref.archetype, user, justification, reason, logger)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(db_pref.archetype)
 
         for db_clus in get_clusters_by_locations(session, (db_pref.a, db_pref.b),
                                                  db_pref.archetype):

@@ -19,7 +19,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityParameter,
                                 ParamDefinition, ArchetypeParamDef, Feature)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.feature import get_affected_plenaries
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  lookup_paramdef)
@@ -58,7 +58,8 @@ class CommandAddParameter(BrokerCommand):
 
         dbstage = dbpersonality.active_stage(personality_stage)
 
-        validate_prod_personality(dbstage, user, justification, reason, logger)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(dbstage)
 
         path = ParamDefinition.normalize_path(path, strict=False)
 

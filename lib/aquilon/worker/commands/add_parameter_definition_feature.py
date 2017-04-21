@@ -18,7 +18,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_feature
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
 
 
@@ -43,7 +43,8 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         dbfeature.param_def_holder.check_new_path(path)
 
         if default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason, logger)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbfeature)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         # Activation field has been skipped on purpose

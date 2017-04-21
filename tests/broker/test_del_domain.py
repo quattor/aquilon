@@ -62,9 +62,7 @@ class TestDelDomain(TestBrokerCommand):
 
     def test_122_del_archived_no_justification(self):
         command = ["del_domain", "--domain=deployable"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Deleting a domain may lose history, so "
-                         "--justification is required.", command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_123_del_deployable_archived(self):
         command = ["del_domain", "--domain=deployable",

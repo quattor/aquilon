@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import BuildingPreference, Building, Archetype
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.cluster import get_clusters_by_locations
 
 
@@ -31,7 +31,10 @@ class CommandAddBuildingPreference(BrokerCommand):
     def render(self, session, logger, plenaries, building_pair, prefer,
                archetype, justification, reason, user, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        validate_prod_archetype(dbarchetype, user, justification, reason, logger)
+
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(dbarchetype)
+
         if not dbarchetype.cluster_type:
             raise ArgumentError("{0} is not a cluster archetype."
                                 .format(dbarchetype))

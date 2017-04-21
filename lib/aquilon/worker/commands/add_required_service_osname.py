@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Archetype, OperatingSystem, Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_os
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddRequiredServiceOsname(BrokerCommand):
@@ -42,7 +42,8 @@ class CommandAddRequiredServiceOsname(BrokerCommand):
                                           archetype=dbarchetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
 
-        validate_prod_os(dbos, user, justification, reason, logger)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(dbos)
 
         self._update_dbobj(dbos, dbservice)
         session.flush()

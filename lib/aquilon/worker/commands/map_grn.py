@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityGrnMap, HostGrnMap,
                                 Cluster)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
@@ -68,7 +68,9 @@ class CommandMapGrn(BrokerCommand):
             objs = [dbpersonality.active_stage(personality_stage)]
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
-            validate_prod_personality(objs[0], user, justification, reason, logger)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(objs[0])
+
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 

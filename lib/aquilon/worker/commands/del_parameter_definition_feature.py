@@ -18,7 +18,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ParamDefinition, Feature
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_feature
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
                                                  lookup_paramdef,
                                                  add_feature_paramdef_plenaries)
@@ -45,7 +45,8 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                                 .format(path, ", ".join(sorted(holders))))
 
         if db_paramdef.default is not None:
-            validate_prod_feature(dbfeature, user, justification, reason, logger)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbfeature)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         dbfeature.param_def_holder.param_definitions.remove(db_paramdef)

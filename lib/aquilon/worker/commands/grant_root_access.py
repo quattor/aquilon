@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import Personality, User, NetGroupWhiteList
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_justification
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandGrantRootAccess(BrokerCommand):
@@ -35,9 +35,12 @@ class CommandGrantRootAccess(BrokerCommand):
 
     def render(self, session, logger, plenaries, username, netgroup,
                personality, archetype, justification, user, reason, **_):
-        validate_justification(user, justification, reason, logger)
+
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)
+        for dbstage in dbobj.stages.values():
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbstage)
 
         if username:
             dbuser = User.get_unique(session, name=username,
