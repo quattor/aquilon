@@ -31,7 +31,7 @@ class CommandAddDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, logger, domain, track, start, change_manager,
-               comments, allow_manage, **_):
+               auto_compile, comments, allow_manage, **_):
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
             if getattr(dbtracked, "tracked_branch", None):
@@ -48,7 +48,7 @@ class CommandAddDomain(BrokerCommand):
             dbstart = Branch.get_unique(session, start, compel=True)
 
         dbdomain = add_branch(session, self.config, Domain, domain,
-                              tracked_branch=dbtracked,
+                              tracked_branch=dbtracked, auto_compile=auto_compile,
                               requires_change_manager=bool(change_manager),
                               comments=comments, allow_manage=allow_manage)
 

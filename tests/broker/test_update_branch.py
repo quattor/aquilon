@@ -150,9 +150,12 @@ class TestUpdateBranch(TestBrokerCommand):
 
     def testupdateunittestxml(self):
         # Make this domain produce XML, regardless of the global default
-        command = ["update_domain", "--domain", "unittest-xml",
+        command = ["update_domain", "--domain", "unittest-xml", "--auto_compile",
                    "--profile_formats", "pan"]
         self.noouttest(command)
+        command = ["show_domain", "--domain=unittest-xml"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Auto Compile: True", command)
 
     def testverifyunittestxml(self):
         command = ["show_domain", "--domain", "unittest-xml"]

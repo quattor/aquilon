@@ -198,7 +198,7 @@ class TestCluster(TestBrokerCommand):
         # using --force to bypass normal checks due to git status
         # containing uncommitted files
         command = ["manage", "--sandbox=%s/utsandbox" % self.user,
-                   "--hostname=aquilon61.aqd-unittest.ms.com", "--force"]
+                   "--hostname=aquilon61.aqd-unittest.ms.com", "--force", "--skip_auto_compile"]
         self.successtest(command)
 
         osver = self.config.get("unittest", "linux_version_prev")

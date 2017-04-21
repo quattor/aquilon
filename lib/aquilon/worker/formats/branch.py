@@ -43,6 +43,7 @@ class DomainFormatter(ObjectFormatter):
         details.append(indent + "  Archived: %s" % domain.archived)
         if domain.comments:
             details.append(indent + "  Comments: %s" % domain.comments)
+        details.append(indent + "  Auto Compile: %s" % domain.auto_compile)
         return "\n".join(details)
 
     def fill_proto(self, domain, skeleton, embedded=True, indirect_attrs=True):

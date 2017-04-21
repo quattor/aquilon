@@ -77,7 +77,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_108_manage_unittest02_again(self):
         self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                          "--sandbox", "%s/changetest1" % self.user])
+                          "--sandbox", "%s/changetest1" % self.user, "--skip_auto_compile"])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
@@ -188,11 +188,19 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(mc.domain.type, mc.domain.SANDBOX)
 
     def test_140_xml_profiles(self):
-        self.successtest(["manage", "--domain", "unittest-xml", "--force",
-                          "--hostname", "unittest20.aqd-unittest.ms.com"])
-        self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
+        command = ["manage", "--domain", "unittest-xml", "--force",
+                  "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.statustest(command)
+        self.matchoutput(out, 'Moving host unittest20.aqd-unittest.ms.com '
+                              'from domain unittest to domain unittest-xml', command)
+        self.matchoutput(out, '1/1 template(s) being processed', command)
         self.verify_buildfiles("unittest-xml", "unittest20.aqd-unittest.ms.com",
                                xml=True, json=False)
+
+    def test_141_xml_profiles_compile_not_repeated(self):
+        command = ["compile", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.statustest(command)
+        self.matchoutput(out, '0/1 template(s) being processed', command)
 
     def test_145_json_profiles(self):
         self.successtest(["manage", "--domain", "unittest-json", "--force",
@@ -245,7 +253,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
     def test_155_manage_notemplate_force(self):
         # --force means you know what you're doing...
         self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
-                          "--domain", "unittest", "--force"])
+                          "--domain", "unittest", "--force", "--skip_auto_compile"])
 
     def test_159_cleanup_featuretest(self):
         self.successtest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
@@ -266,9 +274,17 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         dst_dir = os.path.join(self.sandboxdir, "othersandbox")
         self.gitcommand(["clone", kingdir, dst_dir, "--branch", "othersandbox"])
 
-    def test_161_manage_host(self):
+    def test_161_manage_host_fail(self):
+        command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--sandbox", "otheruser/othersandbox", "--force"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Bad Request: Template directory '%s' does not exist." %
+                         os.path.join(self.config.get("broker", "templatesdir"),
+                                      "otheruser", "othersandbox"), command)
+
+    def test_161_manage_host_success(self):
         self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                          "--sandbox", "otheruser/othersandbox", "--force"])
+                          "--sandbox", "otheruser/othersandbox", "--force", "--skip_auto_compile"])
 
     def test_162_del_otheruser(self):
         self.noouttest(["del_user", "--username", "otheruser"])
@@ -299,7 +315,8 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_169_manage_back(self):
         self.successtest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                          "--sandbox", "%s/changetest1" % self.user, "--force"])
+                          "--sandbox", "%s/changetest1" % self.user, "--force",
+                          "--skip_auto_compile"])
 
     def test_200_nomanage_host(self):
         command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",

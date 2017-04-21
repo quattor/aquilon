@@ -27,7 +27,7 @@ class CommandUpdateDomain(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, domain, comments, compiler_version,
+    def render(self, session, domain, comments, compiler_version, auto_compile,
                autosync, change_manager, allow_manage, profile_formats,
                archived, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
@@ -40,6 +40,9 @@ class CommandUpdateDomain(BrokerCommand):
 
         if autosync is not None:
             dbdomain.autosync = autosync
+
+        if auto_compile is not None:
+            dbdomain.auto_compile = auto_compile
 
         if change_manager is not None:
             if dbdomain.tracked_branch:

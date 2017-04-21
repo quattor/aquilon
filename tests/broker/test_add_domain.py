@@ -57,6 +57,7 @@ class TestAddDomain(TestBrokerCommand):
               May Contain Hosts/Clusters: False
               Archived: False
               Comments: aqd unit test tracking domain
+              Auto Compile: True
             """ % {"compiler": self.config.get("panc", "pan_compiler")},
                            command)
 
@@ -87,6 +88,7 @@ class TestAddDomain(TestBrokerCommand):
               Requires Change Manager: False
               May Contain Hosts/Clusters: True
               Archived: False
+              Auto Compile: True
             """ % {"compiler": self.config.get("panc", "pan_compiler")},
                            command)
 
@@ -101,10 +103,14 @@ class TestAddDomain(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Domain: deployable", command)
         self.matchclean(out, "Tracking:", command)
+        self.matchoutput(out, "Auto Compile: True", command)
 
     def test_130_add_leftbehind(self):
-        command = ["add_domain", "--domain=leftbehind", "--start=prod"]
-        self.successtest(command)
+        command = ["add_domain", "--domain=leftbehind", "--start=prod", "--noauto_compile"]
+        out = self.commandtest(command)
+        command = ["show_domain", "--domain=leftbehind"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Auto Compile: False", command)
 
     def test_140_add_nomanage(self):
         command = ["add_domain", "--domain", "nomanage"]
@@ -118,7 +124,10 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_150_add_unittest_xml(self):
         self.successtest(["add_domain", "--domain", "unittest-xml",
-                          "--track", "utsandbox"])
+                          "--track", "utsandbox", "--noauto_compile"])
+        command = ["show_domain", "--domain=unittest-xml"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Auto Compile: False", command)
 
     def test_150_add_unittest_json(self):
         self.successtest(["add_domain", "--domain", "unittest-json",
