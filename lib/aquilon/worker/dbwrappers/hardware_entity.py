@@ -286,7 +286,6 @@ def get_hardware(session, compel=True, hostname=None, **kwargs):
             raise ArgumentError("Multiple devices are specified.")
         dbhw_ent = submapper.class_.get_unique(session, kwargs[hw_type],
                                                compel=True)
-
     if not dbhw_ent and compel:
         raise ArgumentError("Please specify a device.")
 

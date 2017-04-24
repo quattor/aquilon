@@ -1854,6 +1854,7 @@
 	and an IP generation option, then a new DNS record will be created.
 	<optgroup mandatory="True" fields="all">
 	    <optgroup fields="one">
+	        <option name="hostname" type="string">Hostname</option>
 		<option name="machine" type="string">Machine name</option>
 		<option name="chassis" type="string">Chassis name</option>
 		<option name="network_device" type="string">Network device name</option>
@@ -1890,6 +1891,7 @@
 	Delete an IP address from an interface.
 	<optgroup mandatory="True" fields="all">
 	    <optgroup mandatory="True" fields="one">
+	        <option name="hostname" type="string">Hostname</option>
 		<option name="machine" type="string">Machine name</option>
 		<option name="chassis" type="string">Chassis name</option>
 		<option name="network_device" type="string">Network device name</option>

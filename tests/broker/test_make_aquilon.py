@@ -436,9 +436,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.assertEqual(host.ip, str(self.net["tor_net_0"].usable[3]))
         self.assertEqual(host.mac, self.net["tor_net_0"].usable[3].mac)
         self.assertEqual(host.machine.name, "ut8s02p3")
-        self.assertEqual(len(host.machine.interfaces), 3)
+        self.assertEqual(len(host.machine.interfaces), 4)
         eth0_net = self.net["tor_net_0"]
         mgmt_net = self.net["ut8_oob"]
+        eth2_net = self.net["routing1"]
         for i in host.machine.interfaces:
             if i.device == 'eth0':
                 self.assertEqual(i.ip, str(eth0_net.usable[3]))
@@ -449,6 +450,9 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
             elif i.device == 'mgmt0':
                 self.assertEqual(i.ip, str(mgmt_net.usable[3]))
                 self.assertEqual(i.mac, str(mgmt_net.usable[3].mac))
+            elif i.device == 'eth2':
+                self.assertEqual(i.ip, str(eth2_net.usable[13]))
+                self.assertEqual(i.mac, eth2_net.usable[13].mac)
             else:
                 self.fail("Unrecognized interface '%s'" % i.device)
 

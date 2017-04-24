@@ -37,6 +37,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
     def render(self, session, logger, plenaries, fqdn, shortname, interface, label,
                network_environment, map_to_primary, shared, priority, **kwargs):
+
         dbhw_ent = get_hardware(session, **kwargs)
         if shared and not isinstance(dbhw_ent, NetworkDevice):
             raise ArgumentError("The --shared option can only be used with "
