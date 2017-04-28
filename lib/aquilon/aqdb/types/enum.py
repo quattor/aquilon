@@ -17,7 +17,7 @@
 
 import re
 from aquilon.exceptions_ import ArgumentError
-from six import iteritems, add_metaclass
+from six import iteritems, add_metaclass, string_types
 
 _StringEnum_Classes = {}
 
@@ -73,7 +73,7 @@ class EnumMeta(type):
                 continue
 
             # String attibutes create a static instance of this class
-            if isinstance(value, str):
+            if isinstance(value, string_types):
                 # Create a new object storing the name and value
                 ivalue = object.__new__(cls)
                 ivalue._StringEnum__name = name
@@ -104,7 +104,7 @@ class EnumMeta(type):
 @add_metaclass(EnumMeta)
 class StringEnum(object):
     def __new__(cls, value):
-        if not isinstance(value, str):
+        if not isinstance(value, string_types):
             raise TypeError("String expected")
         if cls == StringEnum:
             if value not in _StringEnum_Classes:
@@ -142,7 +142,7 @@ class StringEnum(object):
 
     @classmethod
     def from_database(cls, value, permissive=False):
-        if not isinstance(value, str):
+        if not isinstance(value, string_types):
             raise TypeError("String expected, not %s" % value.__class__)
         if value in cls._StringEnum__lookup:
             return cls._StringEnum__lookup[value]
@@ -159,7 +159,7 @@ class StringEnum(object):
     def to_database(cls, value):
         if isinstance(value, cls):
             return value._StringEnum__value
-        if isinstance(value, str):
+        if isinstance(value, string_types):
             if value not in cls._StringEnum__lookup:
                 raise ValueError("Unknown %s %s" % (cls._class_label(), value))
             ivalue = cls._StringEnum__lookup[value]

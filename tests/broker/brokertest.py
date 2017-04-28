@@ -26,6 +26,7 @@ from difflib import unified_diff
 from textwrap import dedent
 
 from lxml import etree
+from six import string_types
 
 from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611
@@ -426,7 +427,7 @@ class TestBrokerCommand(unittest.TestCase):
                         (command, s, out))
 
     def searchoutput(self, out, r, command):
-        if isinstance(r, str):
+        if isinstance(r, string_types):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
@@ -436,7 +437,7 @@ class TestBrokerCommand(unittest.TestCase):
         return m
 
     def searchclean(self, out, r, command):
-        if isinstance(r, str):
+        if isinstance(r, string_types):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)

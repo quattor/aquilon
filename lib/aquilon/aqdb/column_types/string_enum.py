@@ -16,6 +16,8 @@
 # limitations under the License.
 import sqlalchemy
 
+from six import string_types
+
 from aquilon.aqdb.types import StringEnum
 
 
@@ -31,7 +33,7 @@ class StringEnumColumn(sqlalchemy.types.TypeDecorator):
 
     # return a value suitable for sending to the database
     def process_bind_param(self, value, dialect):
-        if value is None or (isinstance(value, str) and value == ''):
+        if value is None or (isinstance(value, string_types) and value == ''):
             return None
         return self._wrapped_class.to_database(value)
 
@@ -40,4 +42,4 @@ class StringEnumColumn(sqlalchemy.types.TypeDecorator):
         if value is None or value == '':
             return None
         # Force value to be a string as it may well be unicode
-        return self._wrapped_class.from_database(str(value), self._permissive_reads)
+        return self._wrapped_class.from_database(value, self._permissive_reads)
