@@ -461,11 +461,11 @@ class ResourcesCommandEntry(CommandEntry):
 
         # Fill in the required arguments from the instance of BrokerComamnd
         # this will be extended when more options are found in add_option.
-        self.argument_requirments = {"debug": False, "requestid": False}
-        for arg in broker_command.optional_parameters or []:
-            self.argument_requirments[arg] = False
-        for arg in broker_command.required_parameters or []:
-            self.argument_requirments[arg] = True
+        self.argument_requirements = {"debug": False, "requestid": False}
+        for arg in broker_command.optional_parameters:
+            self.argument_requirements[arg] = False
+        for arg in broker_command.required_parameters:
+            self.argument_requirements[arg] = True
 
         # Checks for specific parameters, filled in by add_option
         self.parameter_checks = {}
@@ -473,8 +473,8 @@ class ResourcesCommandEntry(CommandEntry):
     def add_option(self, option_name, paramtype, enumtype=None):
         # If this argument was not specified directly by the instance of
         # BrokerCommand then record it as optional (FIXME)
-        if option_name not in self.argument_requirments:
-            self.argument_requirments[option_name] = False
+        if option_name not in self.argument_requirements:
+            self.argument_requirements[option_name] = False
 
         # Fill in the parameter checker for this option
         if paramtype == 'enum':
@@ -506,7 +506,7 @@ class ResourcesCommandEntry(CommandEntry):
 
         """
         result = {}
-        for (arg, req) in self.argument_requirments.items():
+        for arg, req in self.argument_requirements.items():
             # log.msg("Checking for arg %s with required=%s" % (arg, req))
             if arg not in arguments:
                 if req:
@@ -515,7 +515,7 @@ class ResourcesCommandEntry(CommandEntry):
                     result[arg] = None
                     continue
             value = arguments[arg]
-            if arg in self.parameter_checks or {}:
+            if arg in self.parameter_checks:
                 value = self.parameter_checks[arg]("--" + arg, value)
             result[arg] = value
         return result
