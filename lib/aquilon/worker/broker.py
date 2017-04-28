@@ -32,7 +32,6 @@ from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
 from aquilon.worker.exporter import Exporter
 from aquilon.worker.authorization import AuthorizationBroker
 from aquilon.worker.messages import StatusCatalog
-from aquilon.worker.logger import RequestLogger
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model.xtn import start_xtn, end_xtn
 from aquilon.worker.formats.formatters import ResponseFormatter
@@ -293,9 +292,6 @@ class BrokerCommand(object):
                     rollback_failed = True
                     raise
                 session.close()
-            if logger:
-                # Knowing which exception class was thrown might be useful
-                logger.info("%s: %s", type(e).__name__, e)
             raise
         finally:
             # Obliterating the scoped_session - next call to session()
@@ -316,8 +312,6 @@ class BrokerCommand(object):
                         self.dbf.NLSession.remove()
                     else:
                         self.dbf.Session.remove()
-            if logger:
-                self._cleanup_logger(logger)
 
     def _set_readonly(self, session):
         if session.bind.dialect.name == "oracle" or \
@@ -340,7 +334,7 @@ class BrokerCommand(object):
         request.status.create_description(user=user, command=self.command,
                                           kwargs=command_kwargs,
                                           ignored=_IGNORED_AUDIT_ARGS)
-        logger = RequestLogger(status=request.status, module_logger=self.module_logger)
+        logger = request.logger
         kwargs_str = str(request.status.args)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
@@ -352,10 +346,6 @@ class BrokerCommand(object):
         command_kwargs["user"] = user
         command_kwargs["request"] = request
         return command_kwargs
-
-    def _cleanup_logger(self, logger):
-        logger.debug("Server finishing request.")
-        logger.close_handlers()
 
     @property
     def is_lock_free(self):

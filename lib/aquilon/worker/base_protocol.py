@@ -19,6 +19,7 @@
 from six import text_type
 from twisted.web import server
 
+from aquilon.worker.logger import RequestLogger
 from aquilon.worker.messages import StatusCatalog
 
 
@@ -57,10 +58,11 @@ class AQDRequest(server.Request):
     def __init__(self, *args, **kwargs):
         server.Request.__init__(self, *args, **kwargs)
         self.__sequence_no = _get_next_sequence_no()
-        self.__status = catalog.create_request_status(auditid=self.__sequence_no)
+        self.status = catalog.create_request_status(auditid=self.__sequence_no)
+        self.logger = RequestLogger(self.status)
+
         d = self.notifyFinish()
-        d.addCallback(lambda none: catalog.remove_request_status(self.__status))
-        d.addErrback(lambda reason: catalog.remove_request_status(self.__status))
+        d.addBoth(self.cleanup)
 
     def getPrincipal(self):
         """By default we return None."""
@@ -70,10 +72,18 @@ class AQDRequest(server.Request):
     def sequence_no(self):
         return self.__sequence_no
 
-    @property
-    def status(self):
-        return self.__status
+    def cleanup(self, result):
+        if self.logger:
+            self.logger.debug("Server finishing request.")
+            self.logger.close_handlers()
+            self.logger = None
 
+        if self.status:
+            catalog.remove_request_status(self.status)
+            self.status = None
+
+        # Pass through
+        return result
 
 class AQDSite(server.Site):
     """

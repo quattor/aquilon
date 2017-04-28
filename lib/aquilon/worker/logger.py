@@ -42,12 +42,12 @@ class StatusHandler(Handler):
 
 
 class RequestLogger(Logger):
-    def __init__(self, status=None, module_logger=None):
+    def __init__(self, status):
         Logger.__init__(self, "logger")
-        if module_logger:
-            self.addHandler(CommandHandler(module_logger))
-        if status:
-            self.addHandler(StatusHandler(status))
+        self.addHandler(StatusHandler(status))
+
+    def add_command_handler(self, module_logger):
+        self.addHandler(CommandHandler(module_logger))
 
     def get_handlers_with_status(self):
         return [handler for handler in self.handlers

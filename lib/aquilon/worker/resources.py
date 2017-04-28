@@ -161,19 +161,20 @@ class ResponsePage(resource.Resource):
             # message based on available render_ methods.
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
 
+        # Retieve the instance from the handler and hook up the logger
+        broker_command = handler.broker_command
+        request.logger.add_command_handler(broker_command.module_logger)
+
         # Create a defered chain of actions (or continuation Mondad).  We add
         # a list of the functions that should be called, and error handeling
         # At the end of this block we will invoke the monad with the request
         d = defer.Deferred()
 
-        # Default render would just call the method here.
-        # This is expanded to do argument checking, finish the request,
-        # and do some error handling.
-        arguments = self.extractArguments(request)
+        # Using callbacks here is a bit of a stretch since these calls are not
+        # asynchronous, but it means exceptions will be caught and reported as
+        # expected to the client without any extra effort
+        d.addCallback(self.extractArguments)
         d.addCallback(handler.check_arguments)
-
-        # Retieve the instance from the handler
-        broker_command = handler.broker_command
 
         style = getattr(self, "output_format", None)
         if style is None:
@@ -201,9 +202,10 @@ class ResponsePage(resource.Resource):
         else:
             d = d.addCallback(lambda arguments: broker_command.invoke_render(**arguments))
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.logFailure, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d.callback(arguments)
+        d.callback(request)
         return server.NOT_DONE_YET
 
     def format(self, result, request):
@@ -236,6 +238,12 @@ class ResponsePage(resource.Resource):
             log.msg('Lost client for command #%d.' % request.sequence_no)
         log.msg('Command #%d finished.' % request.sequence_no)
         return
+
+    def logFailure(self, failure, request):
+        request.logger.info("%s: %s", type(failure.value).__name__, failure.value)
+
+        # Pass through
+        return failure
 
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
