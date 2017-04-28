@@ -28,7 +28,7 @@ import logging
 from contextlib import contextmanager
 from subprocess import Popen, PIPE
 from tempfile import mkdtemp
-from threading import Thread
+from threading import Thread, Lock
 
 from six import iteritems
 
@@ -43,6 +43,9 @@ from aquilon.aqdb.model import Machine
 from aquilon.utils import remove_dir
 
 LOGGER = logging.getLogger(__name__)
+
+# subprocess.Popen is not thread-safe in Python 2, so we need locking
+_popen_lock = Lock()
 
 
 class StreamLoggerThread(Thread):
@@ -128,8 +131,9 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     # The context contains the log prefix
     ctx = (context.get(ILogContext) or {}).copy()
 
-    p = Popen(args=command_args, stdin=proc_stdin, stdout=PIPE, stderr=PIPE,
-              cwd=path, env=shell_env)
+    with _popen_lock:
+        p = Popen(args=command_args, stdin=proc_stdin, stdout=PIPE, stderr=PIPE,
+                  cwd=path, env=shell_env)
 
     # If we want to stream the command's output back to the client while the
     # command is still executing, then we have to doit ourselves. Otherwise,
