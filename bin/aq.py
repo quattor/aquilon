@@ -602,10 +602,17 @@ if __name__ == "__main__":
         noexec = not globalOptions.get('exec')
         exit_status = create_sandbox(pageData, noexec=noexec)
     else:
-        format = globalOptions.get("format", None)
-        if format == "proto" or format == "csv":
+        if res.getheader('content-type').startswith('text/'):
+            # TODO: honour the charset in the header, if any - not that the
+            # broker would use anything else
+            pageData = pageData.decode("utf-8")
             sys.stdout.write(pageData)
-        elif pageData:
-            print(pageData)
+            # The CSV formatter adds a terminating newline, raw formatters not
+            # necessarily
+            if pageData and not pageData.endswith("\n"):
+                sys.stdout.write("\n")
+        else:
+            # Non-text result - avoid buffering and charset conversion
+            os.write(sys.stdout.fileno(), pageData)
 
     sys.exit(exit_status)
