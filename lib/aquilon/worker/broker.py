@@ -31,7 +31,6 @@ from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  PartialError, AquilonError, TransientError)
 from aquilon.worker.exporter import Exporter
 from aquilon.worker.authorization import AuthorizationBroker
-from aquilon.worker.messages import StatusCatalog
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model.xtn import start_xtn, end_xtn
 from aquilon.worker.formats.formatters import ResponseFormatter
@@ -144,7 +143,6 @@ class BrokerCommand(object):
         self.config = Config()
         self.az = AuthorizationBroker()
         self.formatter = ResponseFormatter()
-        self.catalog = StatusCatalog()
         # Force the instance to have local copies of the class defaults...
         # This allows resources.py to modify instances without worrying
         # about inheritance issues (classes sharing required or optional
@@ -319,17 +317,9 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    # This is meant to be called before calling invoke_render() in order to
-    # add a logger into the argument list.  It returns the arguments
-    # that will be passed into invoke_render().
-    def add_logger(self, request, **command_kwargs):
-        if self.command != "show_request":
-            # For the show_request requestid is the UUID of the comamnd we
-            # want intofmation for and not the UUID of this command.  As
-            # a result show_request commands do not have a requestid.
-            requestid = command_kwargs.get("requestid", None)
-            command_kwargs['requestid'] = \
-                self.catalog.store_requestid(request.status, requestid)
+    # Prepare the execution of the command.  It returns the arguments that will
+    # be passed to invoke_render()
+    def pre_render(self, request, requestid, **command_kwargs):
         user = request.getPrincipal()
         request.status.create_description(user=user, command=self.command,
                                           kwargs=command_kwargs,
@@ -345,6 +335,7 @@ class BrokerCommand(object):
         command_kwargs["logger"] = logger
         command_kwargs["user"] = user
         command_kwargs["request"] = request
+        command_kwargs["requestid"] = requestid
         return command_kwargs
 
     @property

@@ -100,7 +100,7 @@
 	the client when a request is initiated or by the audit id generated
 	by the server when a request comes in.
 	<optgroup mandatory="True" fields="one">
-	    <option name="requestid" type="string">Client-created Request ID</option>
+	    <option name="requestid" type="uuid">Client-created Request ID</option>
 	    <option name="auditid" type="string">Server-created Audit ID</option>
 	</optgroup>
 	<transport method="get" path="status/requestid/%(requestid)s"/>

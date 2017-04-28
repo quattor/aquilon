@@ -62,6 +62,7 @@ from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
+from aquilon.worker.messages import StatusCatalog
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
                            force_mac, force_ascii, force_list, force_json,
                            force_uuid, force_justification)
@@ -70,6 +71,8 @@ from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
 # Currently only supports stuffing a single variable in a path
 # component.
 varmatch = re.compile(r'^%\((.*)\)s$')
+
+catalog = StatusCatalog()
 
 
 class ResponsePage(resource.Resource):
@@ -165,6 +168,23 @@ class ResponsePage(resource.Resource):
         broker_command = handler.broker_command
         request.logger.add_command_handler(broker_command.module_logger)
 
+        # Process requestid early, so we can keep track of the request even if
+        # parsing the rest of the arguments fail
+        if b"requestid" in request.args:
+            requestid = force_uuid("--requestid",
+                                   request.args[b"requestid"][0].decode("ascii"))
+        else:
+            requestid = None
+
+        # For the show_request command, requestid is the UUID of the command we
+        # want to monitor and not the UUID of this command. As a result,
+        # show_request commands do not have a requestid in request.status.
+        # For other commands, adding the requestid to the catalog here means
+        # that any matching show_request commands will notice any errors which
+        # happen after this point
+        if broker_command.command != "show_request":
+            requestid = catalog.store_requestid(request.status, requestid)
+
         # Create a defered chain of actions (or continuation Mondad).  We add
         # a list of the functions that should be called, and error handeling
         # At the end of this block we will invoke the monad with the request
@@ -182,14 +202,11 @@ class ResponsePage(resource.Resource):
         if style is None:
             style = getattr(broker_command, "default_style", "raw")
 
-        # The logger used to be set up after the session.  However,
-        # this keeps a record of the request from forming immediately
-        # if all the sqlalchmey session threads are in use.
-        # This will be a problem if/when we want an auditid to come
-        # from the database, but we can revisit at that point.
+        # Prepare for command execution: add synthetic arguments and log the
+        # request
         d = d.addCallback(lambda arguments:
-                          broker_command.add_logger(style=style,
-                                                    request=request,
+                          broker_command.pre_render(request, requestid,
+                                                    style=style,
                                                     **arguments))
         if broker_command.defer_to_thread:
             d = d.addCallback(lambda arguments: threads.deferToThread(
@@ -531,9 +548,15 @@ class ResourcesCommandEntry(CommandEntry):
             if arg not in arguments:
                 if req:
                     raise ArgumentError("Missing mandatory argument %s" % arg)
-                else:
+                elif arg != "requestid":
                     result[arg] = None
                     continue
+
+            # requestid was already parsed, and will be re-injected to the
+            # argument list later
+            if arg == "requestid":
+                continue
+
             value = arguments[arg]
             if arg in self.parameter_checks:
                 value = self.parameter_checks[arg]("--" + arg, value)

@@ -24,7 +24,9 @@ from twisted.internet.defer import Deferred
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.logger import CLIENT_INFO
-from aquilon.worker.messages import StatusSubscriber
+from aquilon.worker.messages import StatusSubscriber, StatusCatalog
+
+catalog = StatusCatalog()
 
 
 class StatusWriter(StatusSubscriber):
@@ -61,8 +63,8 @@ class CommandShowRequest(BrokerCommand):
     required_parameters = ["requestid"]
 
     def render(self, request, debug, requestid=None, auditid=None, **_):
-        status = self.catalog.get_request_status(auditid=auditid,
-                                                 requestid=requestid)
+        status = catalog.get_request_status(auditid=auditid,
+                                            requestid=requestid)
         if not status:
             if requestid:
                 raise NotFoundException("Request ID %s not found." % requestid)

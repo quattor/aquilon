@@ -200,7 +200,7 @@ class StatusCatalog(object):
         self.status_by_auditid[auditid] = status
         return status
 
-    def store_requestid(self, status, requestid=None):
+    def store_requestid(self, status, requestid):
         if not requestid:
             requestid = uuid.uuid4()
         with status.lock:
