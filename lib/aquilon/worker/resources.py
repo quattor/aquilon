@@ -52,7 +52,8 @@ from six import iteritems
 
 from twisted.web import server, resource, http
 from twisted.internet import defer, threads
-from twisted.python import log
+from twisted.python import log, context
+from twisted.python.log import ILogContext
 
 from aquilon.config import lookup_file_path
 from aquilon.aqdb.types import StringEnum
@@ -192,6 +193,11 @@ class ResponsePage(resource.Resource):
         if broker_command.defer_to_thread:
             d = d.addCallback(lambda arguments: threads.deferToThread(
                 broker_command.invoke_render, **arguments))
+
+            # Save the current log context, as it does not survive deferring
+            # execution to a thread
+            ctx = context.get(ILogContext)
+            d = d.addBoth(self.restoreContext, ctx)
         else:
             d = d.addCallback(lambda arguments: broker_command.invoke_render(**arguments))
         d = d.addCallback(self.finishRender, request)
@@ -207,6 +213,12 @@ class ResponsePage(resource.Resource):
         # if style is None:
         #     style = getattr(request, "output_format", "raw")
         return self.formatter.format("raw", result, request)
+
+    def restoreContext(self, result, ctx):
+        context.get(ILogContext).update(ctx)
+
+        # Pass through
+        return result
 
     def finishRender(self, result, request):
         if result:
