@@ -52,6 +52,7 @@ class StatusWriter(StatusSubscriber):
     def finish(self):
         if not self.deferred.called:
             self.deferred.callback('')
+        catalog.remove_waiters(self)
 
 
 class CommandShowRequest(BrokerCommand):
@@ -63,17 +64,18 @@ class CommandShowRequest(BrokerCommand):
     required_parameters = ["requestid"]
 
     def render(self, request, debug, requestid=None, auditid=None, **_):
-        status = catalog.get_request_status(auditid=auditid,
-                                            requestid=requestid)
-        if not status:
-            if requestid:
-                raise NotFoundException("Request ID %s not found." % requestid)
-            else:
-                raise NotFoundException("Audit ID %s not found." % auditid)
         if debug:
             loglevel = DEBUG
         else:
             loglevel = CLIENT_INFO
         deferred = Deferred()
-        status.add_subscriber(StatusWriter(deferred, request, loglevel))
+        writer = StatusWriter(deferred, request, loglevel)
+
+        if auditid:
+            status = catalog.get_request_status(auditid=auditid)
+            if not status:
+                raise NotFoundException("Audit ID %s not found." % auditid)
+            status.add_subscriber(StatusWriter(deferred, request, loglevel))
+        else:
+            catalog.subscribe_or_wait(writer, requestid)
         return deferred

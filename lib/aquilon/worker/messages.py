@@ -179,6 +179,10 @@ class StatusCatalog(object):
     status_by_auditid = {}
     status_by_requestid = {}
 
+    # Register show_request commands which arrived before the command they're
+    # interested in
+    wait_for_requestid = {}
+
     def __init__(self):
         """Borg object."""
         self.__dict__ = self.__shared_state
@@ -192,6 +196,16 @@ class StatusCatalog(object):
         if not status and requestid in self.status_by_requestid:
             status = self.status_by_requestid.get(requestid)
         return status
+
+    def subscribe_or_wait(self, writer, requestid):
+        status = self.get_request_status(requestid=requestid)
+        if status:
+            status.add_subscriber(writer)
+        else:
+            # Use the same dict for two-way lookup, because the classes are
+            # different
+            self.wait_for_requestid[requestid] = writer
+            self.wait_for_requestid[writer] = requestid
 
     def create_request_status(self, auditid):
         """Create a new RequestStatus and store it."""
@@ -208,6 +222,11 @@ class StatusCatalog(object):
                 raise InternalError('Request already has a UUID assigned')
             status.requestid = requestid
         self.status_by_requestid[requestid] = status
+        if requestid in self.wait_for_requestid:
+            writer = self.wait_for_requestid[requestid]
+            del self.wait_for_requestid[requestid]
+            del self.wait_for_requestid[writer]
+            status.add_subscriber(writer)
         return requestid
 
     def _cleanup_request_status(self, status):
@@ -221,6 +240,14 @@ class StatusCatalog(object):
         status.finish()
         # Retain the information about the request for one minute
         reactor.callLater(60, self._cleanup_request_status, status)
+
+    def remove_waiters(self, writer):
+        try:
+            requestid = self.wait_for_requestid[writer]
+            del self.wait_for_requestid[writer]
+            del self.wait_for_requestid[requestid]
+        except KeyError:
+            pass
 
 
 class StatusSubscriber(object):
