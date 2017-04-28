@@ -33,7 +33,6 @@
 	<arg choice="plain"><option>--noexec</option></arg>
     </group>
     <!-- FIXME: - -usesock does not seem to exist on the client side -->
-    <!-- FIXME: - -slowstatus: do we need it documented? -->
     <arg><option>--aqport <replaceable>PORT</replaceable></option></arg>
     <arg><option>--aqhost <replaceable>FQDN</replaceable></option></arg>
     <arg><option>--aqservice <replaceable>SERVICE</replaceable></option></arg>

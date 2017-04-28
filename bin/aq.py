@@ -31,8 +31,7 @@ import re
 import subprocess
 import socket
 import csv
-from time import sleep
-from threading import Thread, Condition
+from threading import Thread
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -58,8 +57,6 @@ from six import iteritems
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
                      doublequote=True, lineterminator='\n')
-
-STATUS_RETRY = 5
 
 
 class RESTResource(object):
@@ -240,11 +237,12 @@ class StatusThread(Thread):
         self.finished = False
         self.debug = debug
         self.response_status = None
-        self.retry = STATUS_RETRY
         self.outstream = outstream
         self.waiting_for_request = True
-        self.condition = Condition()
         Thread.__init__(self)
+
+        # Don't block the process exiting if this thread is still around
+        self.daemon = True
 
     def run(self):
         try:
@@ -254,14 +252,6 @@ class StatusThread(Thread):
             pass
 
     def show_request(self):
-        # Delay before attempting to retrieve status messages.
-        # We want to give the main thread a chance to compose and send the
-        # original request before we send the status request.
-        self.condition.acquire()
-        while self.waiting_for_request:
-            # print("Status thread sleeping...", file=sys.stderr)
-            self.condition.wait(1.0)
-        self.condition.release()
         # print("Attempting status connection...", file=sys.stderr)
         # Ideally we would always make a noauth connection here, but we
         # only know the port that's been specified for this command -
@@ -282,20 +272,10 @@ class StatusThread(Thread):
         # handle failed requests
         res = sconn.getresponse()
         self.response_status = res.status
-        if res.status == httplib.NOT_FOUND and not self.finished and \
-           self.retry > 0:
-            sconn.close()
-            self.retry -= 1
-            # Maybe the command has not gotten to the server yet... retry.
-            sleep(.2 * (STATUS_RETRY - self.retry))
-            return self.show_request()
 
         if res.status != httplib.OK:
             if self.debug:
                 print("%s: %s" % (httplib.responses[res.status], res.read()),
-                      file=sys.stderr)
-            if self.retry <= 0:
-                print("Client status messages disabled, retries exceeded.",
                       file=sys.stderr)
             sconn.close()
             return
@@ -306,13 +286,6 @@ class StatusThread(Thread):
                 self.outstream.write(pageData)
         sconn.close()
         return
-
-    def wakeup(self):
-        # print("Waking up status thread", file=sys.stderr)
-        self.condition.acquire()
-        self.waiting_for_request = False
-        self.condition.notify()
-        self.condition.release()
 
 
 def quoteOptions(options):
@@ -403,11 +376,6 @@ if __name__ == "__main__":
     else:
         aqservice = defaultOpts.get('aqservice') or default_aqservice or get_username()
 
-    if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
-        serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
-        false_values = ['false', 'f', 'no', 'n', '0', '']
-        globalOptions['slowstatus'] = serial not in false_values
-
     # Save these in case there are errors...
     globalOptions["aqhost"] = host
     globalOptions["aqport"] = port
@@ -487,7 +455,6 @@ if __name__ == "__main__":
     if command == "show_request":
         status_thread.outstream = sys.stdout
         status_thread.start()
-        status_thread.wakeup()
         status_thread.join()
         if not status_thread.response_status or \
            status_thread.response_status == httplib.OK:
@@ -495,10 +462,7 @@ if __name__ == "__main__":
         else:
             sys.exit(status_thread.response_status // 100)
 
-    # Normally the status thread will start right away.  We should delay
-    # starting it on request - generally because the broker is running
-    # with sqlite and can't reliably handle connections in parallel.
-    if status_thread and not globalOptions.get("slowstatus"):
+    if status_thread:
         status_thread.start()
 
     try:
@@ -542,9 +506,6 @@ if __name__ == "__main__":
                   file=sys.stderr)
             sys.exit(1)
 
-        # handle failed requests
-        if status_thread:
-            status_thread.wakeup()
         res = conn.getresponse()
 
     except (httplib.HTTPException, socket.error) as e:
@@ -566,15 +527,11 @@ if __name__ == "__main__":
             print("Error: %s: %s" % (repr(e), msg), file=sys.stderr)
         sys.exit(1)
 
-    if status_thread:
-        if globalOptions.get("slowstatus"):
-            status_thread.start()
-        # Re-join the thread here before printing data.
-        # Hard-coded timeout of 10 seconds to wait for info, otherwise it
-        # is silently dropped.
-        status_thread.join(10)
-
     pageData = res.read()
+
+    # Wait for additional status messages to arrive, but not for long
+    if status_thread:
+        status_thread.join(5)
 
     if res.status != httplib.OK:
         print("%s: %s" % (httplib.responses.get(res.status, res.status),
