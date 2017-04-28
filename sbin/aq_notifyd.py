@@ -52,12 +52,12 @@ worker_notify = Condition()
 
 
 class NotifyProtocol(LineReceiver):
-    delimiter = "\n"
+    delimiter = b"\n"
 
     def lineReceived(self, line):
         logger = logging.getLogger("aq_notifyd")
 
-        if line == "update":
+        if line == b"update":
             # Wake up the worker thread
             worker_notify.acquire()
             worker_thread.update_queued = True

@@ -241,7 +241,7 @@ class ResponsePage(resource.Resource):
                 (msg, failure.getBriefTraceback()))
         # failure.printDetailedTraceback()
         request.setResponseCode(http.INTERNAL_SERVER_ERROR)
-        return self.finishRender(msg, request)
+        return self.finishRender(msg.encode("utf-8"), request)
 
 
 class RestServer(ResponsePage):

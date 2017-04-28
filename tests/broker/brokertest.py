@@ -614,15 +614,23 @@ class TestBrokerCommand(unittest.TestCase):
                   "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                   % (command, out, err))
 
-    def writescratch(self, filename, contents):
+    def writescratch(self, filename, contents, raw=False):
         scratchfile = os.path.join(self.scratchdir, filename)
-        with open(scratchfile, 'w') as f:
+        if raw:
+            mode = "wb"
+        else:
+            mode = "w"
+        with open(scratchfile, mode) as f:
             f.write(contents)
         return scratchfile
 
-    def readscratch(self, filename):
+    def readscratch(self, filename, raw=False):
         scratchfile = os.path.join(self.scratchdir, filename)
-        with open(scratchfile, 'r') as f:
+        if raw:
+            mode = "rb"
+        else:
+            mode = "r"
+        with open(scratchfile, mode) as f:
             contents = f.read()
         return contents
 

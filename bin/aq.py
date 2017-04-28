@@ -556,11 +556,11 @@ if __name__ == "__main__":
         msg = conn.getError()
         host_failed = "Failed to connect to %s" % host
         port_failed = "%s port %s" % (host_failed, port)
-        if msg.find('Connection refused') >= 0:
+        if msg.find(b'Connection refused') >= 0:
             print("%s: Connection refused." % port_failed, file=sys.stderr)
-        elif msg.find('Connection timed out') >= 0:
+        elif msg.find(b'Connection timed out') >= 0:
             print("%s: Connection timed out." % port_failed, file=sys.stderr)
-        elif msg.find('Unknown host') >= 0:
+        elif msg.find(b'Unknown host') >= 0:
             print("%s: Unknown host." % host_failed, file=sys.stderr)
         else:
             print("Error: %s: %s" % (repr(e), msg), file=sys.stderr)

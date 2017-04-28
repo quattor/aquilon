@@ -17,8 +17,8 @@
 # limitations under the License.
 """Module for testing commands that add virtual hardware."""
 
+from itertools import chain
 import json
-
 import unittest
 
 if __name__ == "__main__":
@@ -341,7 +341,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
 
     def test_210_add_utmc4_interfaces(self):
         # Skip index 8 and 17 - these will fail.
-        for i in range(0, 8) + range(9, 17):
+        for i in chain(range(0, 8), range(9, 17)):
             machine = "evm%d" % (10 + i)
             self.event_upd_hardware(machine)
             self.noouttest(["add", "interface", "--machine", machine,
@@ -371,7 +371,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
     # evm14 -> user-v710, evm15 -> user-v711, evm16 -> user-v712, evm17 -> user-v13
     # and so on and so forth
     def test_215_verify_search_machine_pg(self):
-        for i in range(0, 8) + range(9, 17):
+        for i in chain(range(0, 8), range(9, 17)):
             if i < 9:
                 port_group = "user-v71%d" % (i % 4)
             else:
@@ -538,7 +538,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                 self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
                 self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
                 self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
-        for i in range(0, 8) + range(9, 16):
+        for i in chain(range(0, 8), range(9, 16)):
             machine = "evm%d" % (10 + i)
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
 
@@ -584,7 +584,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                 self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
                 self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
                 self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
-        for i in range(0, 8) + range(9, 17):
+        for i in chain(range(0, 8), range(9, 17)):
             if i < 9:
                 net_index = (i % 4)
                 usable_index = i // 4
@@ -615,7 +615,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                          command)
 
     def test_280_make_hosts(self):
-        for i in range(0, 8) + range(9, 17):
+        for i in chain(range(0, 8), range(9, 17)):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
             command = ["make", "--hostname", hostname]
             self.statustest(command)

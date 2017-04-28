@@ -256,7 +256,7 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
             # notification goes to the right place.
             ip = socket.gethostbyname(host)
             packet = NOTIFICATION_TYPES[ntype] + "\0" + str(int(time.time()))
-            sock.sendto(packet, (ip, CDPPORT))
+            sock.sendto(packet.encode("ascii"), (ip, CDPPORT))
             success = success + 1
 
         except socket.gaierror:
@@ -281,7 +281,7 @@ def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
         logger.error("Failed to connect to notification socket: %s", err)
 
     try:
-        sd.send("update\n")
+        sd.send(b"update\n")
     except socket.error as err:
         logger.error("Failed to send to notification socket: %s", err)
 
