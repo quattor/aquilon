@@ -5315,10 +5315,13 @@
 	<p/>
 	Defaults:
 	<p/>
-	The default is only to search for commands that create, update or
-	delete data.  There are some special values for the command option to
+	The default is to search for commands that create, update or delete data in DB,
+	also that involve other type of change activity on configuration (like 'compile' or 'pxeswitch' commands).
+	There are some special values for the command option to
 	provide customization to this behavior:
-	<p/>"rw": includes read only commands except 'cat' and "show_active_*"
+        <p/>"ro": includes just read only commands
+	<p/>"wo": includes just commands that involve create, update or delete data action to DB. Previous default behaviour.
+	<p/>"rw": includes both read and write commands except 'cat' and "show_active_*"
 	<p/>"all": includes ALL commands including the above
 	<p/>Date specifications: MM-DD-YY (midnight UTC),
 	or "MM-DD-YY HH:MM:SS+OOOO" (quotes needed).
@@ -5331,7 +5334,7 @@
 	    <option name="keyword" type="string">The value of any argument supplied to a command</option>
 	    <option name="argument" type="string">Look at the value of the specified argument only</option>
 	    <option name="username" type="string">The user name who executed the command</option>
-	    <option name="command" type="string">The name of the command (see "Defaults")</option>
+	    <option name="command" type="string">The name of the command or command type (see "Defaults")</option>
 	    <option name="before" type="string">Search for transactions started before a specific date/time</option>
 	    <option name="after" type="string">Search for transactions started after a specific date/time</option>
 	    <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>

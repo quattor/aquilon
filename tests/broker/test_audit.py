@@ -418,6 +418,37 @@ class TestAudit(TestBrokerCommand):
         for host in hosts:
             self.assertIn(host, values)
 
+    def test_920_default_contain_compile_and_pxeswitch(self):
+        """ test default also returning compile and pxeswitch """
+        command = ["search_audit", "--username", self.principal]
+        out = self.commandtest(command)
+        self.searchoutput(out, "200 aq pxeswitch", command)
+        self.searchoutput(out, "200 aq compile", command)
+
+    def test_930_wo_contain_just_not_readonly_commands(self):
+        """ test --command wo option only returs db manipulate type commands """
+        command = ["search_audit", "--username", self.principal, "--command", "wo"]
+
+        out = self.commandtest(command)
+        # This is previous defaul
+        self.searchoutput(out, "200 aq add_building", command)
+        self.searchclean(out, "200 aq show_building", command)
+        self.searchclean(out, "200 aq search_audit", command)
+
+        # To be sure compile and pxeswitch not included
+        self.searchclean(out, "200 aq compile", command)
+        self.searchclean(out, "200 aq search_audit", command)
+
+    def test_940_ro_contain_just_readonly_commands(self):
+        """ test --command ro option only returs db readonly commands """
+        command = ["search_audit", "--username", self.principal, "--command", "ro"]
+        out = self.commandtest(command)
+        self.searchclean(out, "200 aq add_building", command)
+        self.searchoutput(out, "200 aq show_building", command)
+        self.searchoutput(out, "200 aq search_audit", command)
+        self.searchoutput(out, "200 aq compile", command)
+        self.searchoutput(out, "200 aq search_audit", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAudit)
     unittest.TextTestRunner(verbosity=2).run(suite)
