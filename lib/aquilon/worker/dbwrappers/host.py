@@ -248,7 +248,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
         missing.difference_update(hosts_by_fqdn)
         failed.extend("Host %s not found." % item for item in missing)
 
-        return hosts_by_fqdn.values()
+        return list(hosts_by_fqdn.values())
 
     parse_fqdns()
     look_up_dns_domains()

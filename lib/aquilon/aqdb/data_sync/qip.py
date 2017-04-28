@@ -402,9 +402,9 @@ class QIPRefresh(object):
         # What is left after this point is additions, deletions, splits and
         # merges
 
-        aqnets = self.aqnetworks.values()
+        aqnets = list(self.aqnetworks.values())
         heapq.heapify(aqnets)
-        qipnets = qipnetworks.values()
+        qipnets = list(qipnetworks.values())
         heapq.heapify(qipnets)
 
         aqnet = heap_pop(aqnets)
