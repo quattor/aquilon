@@ -101,7 +101,7 @@ class TestAddDnsDomain(TestBrokerCommand):
                    #         1         2         3         4         5         6
                    's234567890123456789012345678901234567890123456789012345678901234' +
                    '.ms.com']
-        out = self.internalerrortest(command)
+        out = self.badrequesttest(command)
         self.matchoutput(out, "is more than the maximum 64 allowed.", command)
 
     def testaddtopleveldomain(self):

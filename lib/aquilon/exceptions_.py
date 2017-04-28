@@ -16,6 +16,14 @@
 # limitations under the License.
 """Exceptions to be used by Aquilon"""
 
+# DontWrapMixin is only meaningful inside the broker. Import it conditionally,
+# so other components don't need to depend on SQLAlchemy
+try:
+    from sqlalchemy.exc import DontWrapMixin
+except ImportError:
+    class DontWrapMixin:
+        pass
+
 
 def deprecated(message):
     import warnings
@@ -26,7 +34,7 @@ class AquilonError(Exception):
     '''Generic error class.'''
 
 
-class ArgumentError(AquilonError):
+class ArgumentError(AquilonError, DontWrapMixin):
     """Raised for all those conditions where invalid arguments are
     sent to constructed objects.  This error generally corresponds to
     construction time state errors.
@@ -84,7 +92,7 @@ class AuthorizationException(AquilonError):
     """
 
 
-class NotFoundException(AquilonError):
+class NotFoundException(AquilonError, DontWrapMixin):
     """Raised when a requested resource cannot be found."""
 
 
