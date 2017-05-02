@@ -262,10 +262,14 @@ class FeatureLink(Base):
         return result
 
     def copy(self):
-        return type(self)(feature=self.feature, model=self.model,
+        # Do not pass feature here, as that could potentially trigger
+        # validate_link() before the other properties have been set up
+        link = type(self)(model=self.model,
                           personality_stage=self.personality_stage,
                           archetype=self.archetype,
                           interface_name=self.interface_name)
+        link.feature = self.feature
+        return link
 
 
 def hardware_features(dbstage, dbmodel):
