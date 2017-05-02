@@ -43,9 +43,9 @@ class StatusWriter(StatusSubscriber):
         if self.request._disconnected:
             return
         if record.levelno >= self.loglevel:
-            msg = record.getMessage() or ''
+            msg = record.message or ''
             if msg:
-                msg = "%s\n" % msg
+                msg = msg + "\n"
             # The formatter is not used, we're talking raw HTTP here
             self.request.write(msg.encode("utf-8"))
 
