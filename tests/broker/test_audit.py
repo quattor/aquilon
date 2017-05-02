@@ -132,6 +132,16 @@ class TestAudit(TestBrokerCommand):
                              "Expected user %s but got %s in line '%s'" %
                              (self.principal, m.group('principal'), line))
 
+    def test_215_user_caps(self):
+        if self.principal[0].islower():
+            badcap = self.principal.capitalize()
+        else:
+            badcap = self.principal.lower()
+        # Even if a user with the bad capitalization does exist on the system,
+        # it should not appear in the tests
+        command = ["search_audit", "--username", badcap]
+        self.noouttest(command)
+
     def test_220_cmd_protobuf(self):
         """ test search audit by command with protobuf output """
         # Need to truncate time to seconds.
