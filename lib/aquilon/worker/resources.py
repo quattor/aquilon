@@ -130,13 +130,24 @@ class ResponsePage(resource.Resource):
     def extractArguments(self, request):
         result = {}
         for arg, values in iteritems(request.args):
+            try:
+                # Parameter names should be plain ASCII
+                arg = arg.decode("ascii")
+            except UnicodeError:
+                raise ProtocolError("Non-ASCII command parameter")
+
             if not isinstance(values, list):  # pragma: no cover
-                raise ProtocolError("Expected list for %s, got '%s'"
-                                    % (arg, str(values)))
+                raise ProtocolError("Expected list for %s, got %s"
+                                    % (arg, type(values)))
             if len(values) > 1:
                 raise ProtocolError("Too many values specified for %s"
                                     % arg)
-            result[arg] = values[0]
+
+            try:
+                result[arg] = values[0].decode("utf-8")
+            except UnicodeError:
+                raise ProtocolError("Value for parameter %s is not "
+                                    "valid UTF-8" % arg)
         return result
 
     def render(self, request):

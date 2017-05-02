@@ -18,7 +18,6 @@
 import logging
 from datetime import datetime
 from dateutil.tz import tzutc
-from six.moves.urllib_parse import quote  # pylint: disable=F0401
 from six import iteritems
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
@@ -152,10 +151,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
     """
     # TODO: one day we should be able to handle non-ASCII characters..
     def sanitized_string(value):
-        try:
-            return str(value).decode('ascii')
-        except UnicodeDecodeError:
-            return quote(value)
+        return str(value).encode('ascii', 'xmlcharrefreplace')
 
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
