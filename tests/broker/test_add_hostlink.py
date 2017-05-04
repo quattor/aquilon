@@ -36,6 +36,35 @@ class TestAddHostlink(TestBrokerCommand):
                    "--comments=Some hostlink comments"]
         self.successtest(command)
 
+    def test_101_add_hostlink_with_mode(self):
+        command = ["add_hostlink", "--hostlink=app2",
+                   "--target=/var/spool/hostlinks/app2",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--owner=user1",
+                   "--mode=1777",
+                   "--comments=Some hostlink comments"]
+        self.successtest(command)
+
+    def test_102_add_hostlink_with_bad_mode(self):
+        command = ["add_hostlink", "--hostlink=app3",
+                   "--target=/var/spool/hostlinks/app3",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--owner=user1",
+                   "--mode=3775",
+                   "--comments=Some hostlink comments"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "mode is out of range (0-1777 octal)", command)
+
+    def test_103_add_hostlink_with_bad_string_mode(self):
+        command = ["add_hostlink", "--hostlink=app4",
+                   "--target=/var/spool/hostlinks/app4",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--owner=user1",
+                   "--mode=rwxrwxrwx",
+                   "--comments=Some hostlink comments"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "mode does not convert to base 8 integer", command)
+
     def test_105_make(self):
         command = ["make", "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
@@ -51,6 +80,24 @@ class TestAddHostlink(TestBrokerCommand):
               Target Path: /var/spool/hostlinks/app1
               Owner: user1
             """, command)
+
+    def test_110_show_hostlink_with_mode(self):
+        command = ["show_hostlink", "--hostlink=app2",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Hostlink: app2
+              Comments: Some hostlink comments
+              Bound to: Host server1.aqd-unittest.ms.com
+              Target Path: /var/spool/hostlinks/app2
+              Owner: user1
+              Mode: 1777
+            """, command)
+
+    def test_112_check_plenary_with_mode(self):
+        self.check_plenary_contents("resource", "host",
+                                    "server1.aqd-unittest.ms.com", "hostlink",
+                                    "app2", "config", contains=['"perm" = "1777";'])
 
     def test_110_show_host(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
