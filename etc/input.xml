@@ -5698,6 +5698,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="group" type="string">Group owner of the target directory</option>
+	    <option name="mode" type="string">Mode (octal) to apply on hostlink target</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>

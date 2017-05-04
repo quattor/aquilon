@@ -15,9 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import String, Column, ForeignKey
+from sqlalchemy import String, Integer, Column, ForeignKey, CheckConstraint
+from sqlalchemy.sql import and_
 from sqlalchemy.orm import validates
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Resource
 
 _TN = 'hostlink'
@@ -34,8 +36,24 @@ class Hostlink(Resource):
     target = Column(String(255), nullable=False)
     owner_user = Column(String(32), default='root', nullable=False)
     owner_group = Column(String(32), nullable=True)
+    # "mode" is a reserved keyword in oracle, so use target_mode in the DB. 
+    target_mode = Column(Integer, nullable=True)
 
-    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
+    __table_args__ = (CheckConstraint(and_(target_mode > 0, target_mode <= 1023)),
+                      {'info': {'unique_fields': ['name', 'holder']}},)
+
+
+    @validates('target_mode')
+    def validate_mode(self, key, value):
+        if value is None:
+            return None
+        try:
+            value = int(value, 8)
+            if not (value > 0 and value <= 0o1777):
+                raise ArgumentError("mode is out of range (0-1777 octal)")
+            return value
+        except ValueError:
+            raise ArgumentError("mode does not convert to base 8 integer")
 
     @validates(owner_user, owner_group)
     def validate_owner(self, key, value):

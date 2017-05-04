@@ -115,6 +115,8 @@ class PlenaryResource(StructurePlenary):
         else:
             owner_string = self.dbobj.owner_user
         pan_assign(lines, "owner", owner_string)
+        if self.dbobj.target_mode:
+            pan_assign(lines, "perm", "%o" % self.dbobj.target_mode)
 
     def body_intervention(self, lines):
         pan_assign(lines, "start", self.dbobj.start_date.isoformat())
