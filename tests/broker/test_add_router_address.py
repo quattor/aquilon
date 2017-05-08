@@ -95,7 +95,7 @@ class TestAddRouterAddress(TestBrokerCommand):
                         "--fqdn", "npvplsgw.aqd-unittest.ms.com"])
 
     def test_140_add_excx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         # Test a different address assignment convention: router addresses are
         # at the end, not at the beginning
         command = ["add", "router", "address", "--ip", net[-2],

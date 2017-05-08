@@ -28,7 +28,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address, IPv4Network
+from ipaddress import IPv4Address, IPv4Network
 
 from brokertest import TestBrokerCommand
 
@@ -63,9 +63,9 @@ class TestRefreshNetwork(TestBrokerCommand):
         command = ["cat", "--networkip", net_ip]
         out = self.commandtest(command)
         self.matchoutput(out, '"prefix_length" = %s;' % prefix, command)
-        net = IPv4Network("%s/%s" % (net_ip, prefix))
+        net = IPv4Network(u"%s/%s" % (net_ip, prefix))
         self.matchoutput(out, '"netmask" = "%s";' % net.netmask, command)
-        self.matchoutput(out, '"broadcast" = "%s";' % net.broadcast, command)
+        self.matchoutput(out, '"broadcast" = "%s";' % net.broadcast_address, command)
 
     # 100 sync up building np
     def test_100_syncfirst(self):
@@ -171,18 +171,19 @@ class TestRefreshNetwork(TestBrokerCommand):
     def test_250_addtestnets(self):
         networks = [
             # Merge various sized subnets, one is missing
-            "0.1.2.0/25", "0.1.2.192/26",
+            u"0.1.2.0/25", u"0.1.2.192/26",
             # Merge various sized subnets, first is missing
-            "0.1.3.64/26", "0.1.3.128/25",
+            u"0.1.3.64/26", u"0.1.3.128/25",
             # Split in QIP
-            "0.1.4.0/24",
+            u"0.1.4.0/24",
             # Another split in QIP
-            "0.1.5.0/24"
+            u"0.1.5.0/24"
         ]
         for net in networks:
             ipnet = IPv4Network(net)
-            self.noouttest(["add", "network", "--network", ipnet.ip,
-                            "--ip", ipnet.ip, "--prefixlen", ipnet.prefixlen,
+            self.noouttest(["add", "network", "--network", ipnet.network_address,
+                            "--ip", ipnet.network_address,
+                            "--prefixlen", ipnet.prefixlen,
                             "--building", "nettest"])
 
     def test_255_add_addresses(self):
@@ -249,8 +250,8 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     # 300 add a small dynamic range to 0.1.1.0
     def test_300_adddynamicrange(self):
-        for ip in range(int(IPv4Address("0.1.1.4")),
-                        int(IPv4Address("0.1.1.8")) + 1):
+        for ip in range(int(IPv4Address(u"0.1.1.4")),
+                        int(IPv4Address(u"0.1.1.8")) + 1):
             self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
                    "--dns_domain=aqd-unittest.ms.com"]
@@ -318,8 +319,8 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     # 650 delete the dynamic range
     def test_650_deldynamicrange(self):
-        for ip in range(int(IPv4Address("0.1.1.4")),
-                        int(IPv4Address("0.1.1.8")) + 1):
+        for ip in range(int(IPv4Address(u"0.1.1.4")),
+                        int(IPv4Address(u"0.1.1.8")) + 1):
             self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
         self.statustest(command)

@@ -282,7 +282,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def test_320_addunittest25excx(self):
         net_internal = self.net["unknown0"]
-        net_excx = self.net["unknown0"].subnet()[0]
+        net_excx = list(self.net["unknown0"].subnets())[0]
         ip = net_excx[3]
         command = ["add", "interface", "address", "--machine", "ut3c5n7",
                    "--interface", "eth2", "--ip", ip,

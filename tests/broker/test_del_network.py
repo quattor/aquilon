@@ -51,16 +51,12 @@ class TestDelNetwork(TestBrokerCommand):
             command = "show network --ip %s --hosts" % network.ip
             self.notfoundtest(command.split(" "))
 
-    def test_230_shownetwork(self):
-        command = "show network --building ut"
-        out = self.commandtest(command.split(" "))
-        # Unfortunately this command prints a header even if the output is
-        # otherwise empty. Check for a dot, as that will match any IP addresses,
-        # but not the header.
-        self.matchclean(out, ".", command)
+    def test_230_searchnetwork(self):
+        command = "search network --building ut"
+        out = self.noouttest(command.split(" "))
 
-    def test_250_shownetworkproto(self):
-        command = "show network --building ut --format proto"
+    def test_250_searchnetworkproto(self):
+        command = "search network --building ut --format proto"
         self.protobuftest(command.split(" "), expect=0)
 
     def test_210_delnetworkcards(self):
@@ -95,7 +91,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(["del", "network", "--ip", "127.0.0.0"])
 
     def test_150_delexcx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["del", "network", "--ip", net.ip,
                    "--network_environment", "excx"]
         self.noouttest(command)
@@ -122,7 +118,7 @@ class TestDelNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def test_260_verifyexcx(self):
-        net = self.net["unknown0"].subnet()[0]
+        net = list(self.net["unknown0"].subnets())[0]
         command = ["search", "network", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)

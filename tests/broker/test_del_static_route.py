@@ -102,7 +102,7 @@ class TestDelStaticRoute(MachineTestMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\)' %
-                          (net.broadcast, net.gateway, ip, net.netmask),
+                          (net.broadcast_address, net.gateway, ip, net.netmask),
                           command)
 
     def testdelunittest27(self):

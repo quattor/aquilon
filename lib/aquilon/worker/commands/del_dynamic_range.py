@@ -36,7 +36,8 @@ class CommandDelDynamicRange(BrokerCommand):
         if startnet != endnet:
             raise ArgumentError("IP addresses %s (%s) and %s (%s) must be "
                                 "on the same subnet." %
-                                (startip, startnet.ip, endip, endnet.ip))
+                                (startip, startnet.network_address,
+                                 endip, endnet.network_address))
 
         # Lock order: DNS domain(s), network
         q = session.query(DnsDomain.id)

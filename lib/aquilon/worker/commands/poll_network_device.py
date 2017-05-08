@@ -24,7 +24,7 @@ from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
                                  ProcessException)
-from aquilon.utils import force_ipv4, validate_json
+from aquilon.utils import force_ip, validate_json
 from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import (NetworkDevice, ObservedMac, PortGroup, Network,
                                 NetworkEnvironment, VlanInfo, Rack)
@@ -158,7 +158,7 @@ class CommandPollNetworkDevice(BrokerCommand):
                                        reader.line_num, row, e)
                     continue
                 try:
-                    network = force_ipv4("network", network)
+                    network = force_ip("network", network)
                 except ArgumentError as e:
                     logger.client_info(str(e))
                     continue

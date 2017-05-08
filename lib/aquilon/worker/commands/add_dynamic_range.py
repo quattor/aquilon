@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
@@ -41,7 +41,8 @@ class CommandAddDynamicRange(BrokerCommand):
         if startnet != endnet:
             raise ArgumentError("IP addresses %s (%s) and %s (%s) must be on "
                                 "the same subnet." %
-                                (startip, startnet.ip, endip, endnet.ip))
+                                (startip, startnet.network_address,
+                                 endip, endnet.network_address))
 
         if dns_domain:
             dbdns_domain = DnsDomain.get_unique(session, dns_domain,

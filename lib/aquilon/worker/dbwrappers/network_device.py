@@ -23,7 +23,9 @@ from random import choice
 from pipes import quote
 from operator import attrgetter
 
-from ipaddr import IPv4Address
+from ipaddress import ip_address
+
+from six import text_type
 
 from aquilon.exceptions_ import (InternalError, NotFoundException,
                                  ProcessException, ArgumentError)
@@ -271,7 +273,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
     networks = []
     for ifname, params in data["interfaces"].items():
         for ipstr, label in params["ip"].items():
-            ip = IPv4Address(ipstr)
+            ip = ip_address(text_type(ipstr))
             try:
                 dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
                 ip_to_iface[ip] = {"name": ifname, "label": label}
@@ -397,7 +399,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
             relaxed = False
 
         for ipstr, label in params["ip"].items():
-            ip = IPv4Address(ipstr)
+            ip = ip_address(text_type(ipstr))
 
             if ip not in ip_to_iface:
                 # Unknown network etc.
@@ -409,7 +411,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
     # Check router addresses
     if "router_ips" in data:
         for ipstr in data["router_ips"]:
-            ip = IPv4Address(ipstr)
+            ip = ip_address(text_type(ipstr))
             try:
                 dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
                 rtr = RouterAddress.get_unique(session, ip=ip,

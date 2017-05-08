@@ -16,14 +16,14 @@
 # limitations under the License.
 
 from datetime import datetime
-from ipaddr import IPv4Network
+from ipaddress import ip_network
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
                         Index)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Network
-from aquilon.aqdb.column_types import IPV4
+from aquilon.aqdb.column_types import IP
 
 _TN = "static_route"
 
@@ -37,7 +37,7 @@ class StaticRoute(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     # TODO: should the gateway be a foreign key to RouterAddress?
-    gateway_ip = Column(IPV4, nullable=False)
+    gateway_ip = Column(IP, nullable=False)
     network_id = Column(ForeignKey(Network.id, ondelete="CASCADE"),
                         nullable=False)
 
@@ -49,7 +49,7 @@ class StaticRoute(Base):
     # entry, therefore the destination cannot be a simple pointer to the network
     # table
     # TODO: define a composite data type for networks
-    dest_ip = Column(IPV4, nullable=False)
+    dest_ip = Column(IP, nullable=False)
     dest_cidr = Column(Integer, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -69,7 +69,7 @@ class StaticRoute(Base):
     @property
     def destination(self):
         # TODO: cache the IPv4Network object
-        return IPv4Network("%s/%s" % (self.dest_ip, self.dest_cidr))
+        return ip_network(u"%s/%s" % (self.dest_ip, self.dest_cidr))
 
     def __init__(self, network=None, gateway_ip=None, **kwargs):
         if not network or not gateway_ip:  # pragma: no cover

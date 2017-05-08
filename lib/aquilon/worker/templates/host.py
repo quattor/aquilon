@@ -176,7 +176,7 @@ class PlenaryHostData(StructurePlenary):
                         gateway = local_rtrs[0]
                         if is_default_route(dbinterface):
                             routers[dbinterface.name] = local_rtrs
-                    elif net.network.numhosts >= 4:
+                    elif net.network.num_addresses >= 4:
                         # No routers defided, fall back to the default
                         gateway = net.network[net.default_gateway_offset]
                     else:
@@ -191,7 +191,7 @@ class PlenaryHostData(StructurePlenary):
 
                     ifdesc["ip"] = addr.ip
                     ifdesc["netmask"] = net.netmask
-                    ifdesc["broadcast"] = net.broadcast
+                    ifdesc["broadcast"] = net.broadcast_address
                     if gateway:
                         ifdesc["gateway"] = gateway
                     ifdesc["network_type"] = net.network_type
@@ -201,7 +201,7 @@ class PlenaryHostData(StructurePlenary):
                 else:
                     aliasdesc = {"ip": addr.ip,
                                  "netmask": net.netmask,
-                                 "broadcast": net.broadcast}
+                                 "broadcast": net.broadcast_address}
                     if addr.dns_records:
                         aliasdesc["fqdn"] = addr.dns_records[0]
                     if "aliases" in ifdesc:
@@ -218,7 +218,7 @@ class PlenaryHostData(StructurePlenary):
                 # the plenaries
                 for route in sorted(list(static_routes),
                                     key=attrgetter('destination', 'gateway_ip')):
-                    ifdesc["route"].append({"address": route.destination.ip,
+                    ifdesc["route"].append({"address": route.destination.network_address,
                                             "netmask": route.destination.netmask,
                                             "gateway": route.gateway_ip})
                 if not ifdesc["route"]:

@@ -162,7 +162,7 @@ class TestAddAddress(TestBrokerCommand):
                          command)
 
     def test_430_failbroadcast(self):
-        ip = self.net["unknown0"].broadcast
+        ip = self.net["unknown0"].broadcast_address
         command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
                    "--ip", ip]
         out = self.badrequesttest(command)

@@ -101,7 +101,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\);' %
-                          (self.net["unknown0"].broadcast,
+                          (self.net["unknown0"].broadcast_address,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[0],
                            self.net["unknown0"].netmask),
@@ -259,7 +259,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\);' %
-                          (self.net["unknown0"].broadcast,
+                          (self.net["unknown0"].broadcast_address,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[2],
                            self.net["unknown0"].netmask),
@@ -274,7 +274,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
                           r'"network_type", "unknown"\s*\)' %
-                          (self.net["unknown0"].broadcast,
+                          (self.net["unknown0"].broadcast_address,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[3],
                            self.net["unknown0"].netmask),

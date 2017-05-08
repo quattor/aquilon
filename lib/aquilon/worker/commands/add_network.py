@@ -15,8 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import math
-from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
+from ipaddress import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
@@ -30,27 +29,16 @@ class CommandAddNetwork(BrokerCommand):
 
     required_parameters = ["network", "ip"]
 
-    def render(self, session, logger, plenaries, dbuser,
-               network, ip, network_environment, type, side, comments,
-               netmask, prefixlen, mask, network_compartment, **arguments):
-
-        # Handle the different ways of specifying the netmask
-        self.require_one_of(netmask=netmask, prefixlen=prefixlen, mask=mask)
+    def render(self, session, logger, plenaries, dbuser, network, ip,
+               network_environment, type, side, comments, netmask, prefixlen,
+               network_compartment, **arguments):
         if prefixlen:
             netmask = prefixlen
-        elif mask:
-            netmask = 32 - int(math.log(mask, 2))
 
         try:
-            address = IPv4Network("%s/%s" % (ip, netmask))
-        except AddressValueError as e:
-            raise ArgumentError("Failed to parse the network address: %s" % e)
-        except NetmaskValueError as e:
-            raise ArgumentError("Failed to parse the netmask: %s" % e)
-
-        if ip != address.network:
-            raise ArgumentError("IP address %s is not a network address.  "
-                                "Maybe you meant %s?" % (ip, address.network))
+            address = IPv4Network(u"%s/%s" % (ip, netmask))
+        except ValueError as e:
+            raise ArgumentError("Failed to parse the network address: %s." % e)
 
         location = get_location(session, **arguments)
         if not type:
@@ -80,11 +68,11 @@ class CommandAddNetwork(BrokerCommand):
 
         # Check if the address is free
         try:
-            dbnetwork = get_net_id_from_ip(session, address.ip,
+            dbnetwork = get_net_id_from_ip(session, address.network_address,
                                            network_environment=dbnet_env)
             raise ArgumentError("IP address %s is part of existing network "
                                 "named %s with address %s." %
-                                (str(address.ip), dbnetwork.name,
+                                (str(address.network_address), dbnetwork.name,
                                  str(dbnetwork.network)))
         except NotFoundException:
             pass

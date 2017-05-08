@@ -97,7 +97,7 @@ class NetworkFormatter(ObjectFormatter):
         sysloc = network.location.sysloc()
         details = [indent + "{0:c}: {0.name}".format(network)]
         details.append(indent + "  {0:c}: {0.name}".format(network.network_environment))
-        details.append(indent + "  IP: %s" % network.ip)
+        details.append(indent + "  IP: %s" % network.network_address)
         details.append(indent + "  Netmask: %s" % netmask)
         details.append(indent + "  Sysloc: %s" % sysloc)
         details.append(self.redirect_raw(network.location, indent + "  "))
@@ -140,15 +140,15 @@ class NetworkFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def csv_fields(self, network):
-        yield (network.name, network.ip, network.netmask,
+        yield (network.name, network.network_address, network.netmask,
                network.location.sysloc(), network.location.country,
                network.side, network.network_type, network.comments)
 
     def fill_proto(self, net, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = net.name
-        skeleton.ip = str(net.ip)
+        skeleton.ip = str(net.network_address)
         skeleton.cidr = net.cidr
-        skeleton.bcast = str(net.broadcast)
+        skeleton.bcast = str(net.broadcast_address)
         skeleton.netmask = str(net.netmask)
         if net.side:
             skeleton.side = net.side
@@ -334,34 +334,7 @@ class NetworkList(list):
 
 class NetworkListFormatter(ListFormatter):
     def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
-        return "\n".join(indent + "%s/%s" % (network.ip, network.cidr)
+        return "\n".join(indent + "%s/%s" % (network.network_address, network.cidr)
                          for network in sorted(objects, key=attrgetter("ip")))
 
 ObjectFormatter.handlers[NetworkList] = NetworkListFormatter()
-
-
-class SimpleNetworkList(list):
-    """By convention, holds a list of networks to be formatted in a simple
-    network map type format."""
-    pass
-
-
-class SimpleNetworkListFormatter(NetworkListFormatter):
-    fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
-
-    def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
-        details = [indent + "\t".join(self.fields)]
-        for network in sorted(nlist, key=attrgetter("ip")):
-            details.append(indent + "\t".join([network.name,
-                                               str(network.ip),
-                                               str(network.netmask),
-                                               str(network.location.sysloc()),
-                                               str(network.location.country),
-                                               network.side,
-                                               network.network_type,
-                                               "False",
-                                               "False",
-                                               str(network.comments)]))
-        return "\n".join(details)
-
-ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()

@@ -16,29 +16,11 @@
 # limitations under the License.
 """Wrapper to make getting a network type simpler."""
 
-
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_, update
 
-from aquilon.exceptions_ import NotFoundException, ArgumentError
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Network, AddressAssignment, ARecord
-
-
-def get_network_byname(session, netname, environment, query_options=None):
-    try:
-        q = session.query(Network)
-        q = q.filter_by(network_environment=environment)
-        q = q.filter_by(name=netname)
-        if query_options:
-            q = q.options(*query_options)
-        dbnetwork = q.one()
-    except NoResultFound:
-        raise NotFoundException("Network %s not found." % netname)
-    # FIXME: network names should be unique
-    except MultipleResultsFound:
-        raise ArgumentError("There are multiple networks with name %s." %
-                            netname)
-    return dbnetwork
 
 
 def get_network_byip(session, ipaddr, environment, query_options=None):
@@ -66,8 +48,8 @@ def fix_foreign_links(session, oldnet, newnet):
         update(AddressAssignment.__table__,
                values={'network_id': newnet.id})
         .where(and_(AddressAssignment.network_id == oldnet.id,
-                    AddressAssignment.ip >= newnet.ip,
-                    AddressAssignment.ip <= newnet.broadcast))
+                    AddressAssignment.ip >= newnet.network_address,
+                    AddressAssignment.ip <= newnet.broadcast_address))
     )
     session.expire(oldnet, ['assignments'])
     session.expire(newnet, ['assignments'])
@@ -76,8 +58,8 @@ def fix_foreign_links(session, oldnet, newnet):
         update(ARecord.__table__,
                values={'network_id': newnet.id})
         .where(and_(ARecord.network_id == oldnet.id,
-                    ARecord.ip >= newnet.ip,
-                    ARecord.ip <= newnet.broadcast))
+                    ARecord.ip >= newnet.network_address,
+                    ARecord.ip <= newnet.broadcast_address))
     )
     session.expire(oldnet, ['dns_records'])
     session.expire(newnet, ['dns_records'])

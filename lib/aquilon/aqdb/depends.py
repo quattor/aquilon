@@ -25,7 +25,7 @@ else:
     ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
     ms.version.addpkg('psycopg2', '2.5-9.2.4')
     ms.version.addpkg('ms.modulecmd', '1.0.4')
-    ms.version.addpkg('ipaddr', '2.1.9')
+    ms.version.addpkg('ipaddress', '1.0.6')
     ms.version.addpkg('dateutil', '1.5')
     ms.version.addpkg('cdb', '0.34')
     ms.version.addpkg('six', '1.7.3')

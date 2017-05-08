@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 from brokertest import TestBrokerCommand
 
 
@@ -155,7 +155,7 @@ class TestAddDynamicRange(TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, self.dynname(ip, domain="one-nyp.ms.com"),
                              command)
-        broadcast = self.net["dyndhcp3"].broadcast
+        broadcast = self.net["dyndhcp3"].broadcast_address
         command = ['search_dns', '--ip', broadcast]
         self.noouttest(command)
 

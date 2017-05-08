@@ -19,7 +19,9 @@
 import re
 from socket import gaierror, gethostbyname
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
+
+from six import text_type
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
@@ -122,7 +124,9 @@ class CommandAddAuroraHost(CommandAddHost):
                     raise ArgumentError("Error when looking up host: %d, %s" %
                                         (e.errno, e.strerror))
 
-                dbnetwork = get_net_id_from_ip(session, IPv4Address(host_ip), dbnet_env)
+                dbnetwork = get_net_id_from_ip(session,
+                                               IPv4Address(text_type(host_ip)),
+                                               dbnet_env)
                 dblocation = dbnetwork.location.building
 
             dbmachine = create_machine(self.config, session, logger, machine,

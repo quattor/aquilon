@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from ipaddr import IPv4Network
+from ipaddress import IPv4Network
 
 from brokertest import TestBrokerCommand
 
@@ -33,19 +33,20 @@ class TestSplitMergeNetwork(TestBrokerCommand):
     def test_100_add_test_nets(self):
         networks = [
             # Merge various sized subnets, one is missing
-            "0.2.2.0/25", "0.2.2.192/26",
+            u"0.2.2.0/25", u"0.2.2.192/26",
             # Merge various sized subnets, first is missing
-            "0.2.3.64/26", "0.2.3.128/25"
+            u"0.2.3.64/26", u"0.2.3.128/25"
         ]
         for net in networks:
             ipnet = IPv4Network(net)
-            self.noouttest(["add", "network", "--network", ipnet.ip,
-                            "--ip", ipnet.ip, "--prefixlen", ipnet.prefixlen,
+            self.noouttest(["add", "network", "--network", ipnet.network_address,
+                            "--ip", ipnet.network_address,
+                            "--prefixlen", ipnet.prefixlen,
                             "--building", "nettest", "--side", "b",
                             "--comments", "Original %s" % ipnet])
 
-            self.check_plenary_exists("network", "internal", str(ipnet.ip),
-                                      "config")
+            self.check_plenary_exists("network", "internal",
+                                      str(ipnet.network_address), "config")
 
     def test_110_add_dns_records(self):
         self.dsdb_expect_add("merge1.aqd-unittest.ms.com", "0.2.2.200")
@@ -138,15 +139,15 @@ class TestSplitMergeNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def test_310_show_subnets(self):
-        supernet = IPv4Network("0.2.2.0/24")
+        supernet = IPv4Network(u"0.2.2.0/24")
         idx = 2
-        for subnet in supernet.subnet(new_prefix=26):
-            command = ["show", "network", "--ip", subnet.ip]
+        for subnet in supernet.subnets(new_prefix=26):
+            command = ["show", "network", "--ip", subnet.network_address]
             out = self.commandtest(command)
             self.matchoutput(out, "Netmask: %s" % subnet.netmask, command)
             self.matchoutput(out, "Side: b", command)
             self.matchoutput(out, "Sysloc: nettest.ny.na", command)
-            if subnet.ip == supernet.ip:
+            if subnet.network_address == supernet.network_address:
                 # This is the same DB object, so its comment should not change
                 self.matchoutput(out, "Comments: Original 0.2.2.0/25", command)
             else:
@@ -154,13 +155,13 @@ class TestSplitMergeNetwork(TestBrokerCommand):
                 self.matchoutput(out, "Network: 0.2.2.0_%d" % idx, command)
                 idx += 1
 
-            self.check_plenary_exists("network", "internal", str(subnet.ip),
-                                      "config")
+            self.check_plenary_exists("network", "internal",
+                                      str(subnet.network_address), "config")
 
-            command = ["cat", "--networkip", subnet.ip]
+            command = ["cat", "--networkip", subnet.network_address]
             out = self.commandtest(command)
             self.matchoutput(out, '"netmask" = "%s";' % subnet.netmask, command)
-            self.matchoutput(out, '"broadcast" = "%s";' % subnet.broadcast, command)
+            self.matchoutput(out, '"broadcast" = "%s";' % subnet.broadcast_address, command)
             self.matchoutput(out, '"prefix_length" = 26;', command)
 
     def test_311_dns_record(self):

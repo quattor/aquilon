@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddr import IPv4Network
+from ipaddress import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import (Network, NetworkEnvironment, AddressAssignment,
@@ -34,10 +34,8 @@ class CommandSplitNetwork(BrokerCommand):
                ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
-            net = IPv4Network("127.0.0.0/%s" % netmask)
+            net = IPv4Network(u"127.0.0.0/%s" % netmask)
             prefixlen = net.prefixlen
-        if prefixlen < 8 or prefixlen > 32:
-            raise ArgumentError("The prefix length must be between 8 and 32.")
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -49,17 +47,20 @@ class CommandSplitNetwork(BrokerCommand):
         plenaries.add(dbnetwork)
 
         if prefixlen <= dbnetwork.cidr:
-            raise ArgumentError("The specified --prefixlen must be bigger "
-                                "than the current value.")
+            raise ArgumentError("The specified prefix must be bigger than the "
+                                "current value.")
+        if prefixlen > dbnetwork.network.max_prefixlen:
+            raise ArgumentError("The specified prefix is too big for the "
+                                "address type.")
 
-        subnets = dbnetwork.network.subnet(new_prefix=prefixlen)
+        subnets = dbnetwork.network.subnets(new_prefix=prefixlen)
 
         # Collect IP addresses that will become network/broadcast addresses
         # after the split
         bad_ips = []
         for subnet in subnets:
-            bad_ips.append(subnet.ip)
-            bad_ips.append(subnet.broadcast)
+            bad_ips.append(subnet.network_address)
+            bad_ips.append(subnet.broadcast_address)
 
         q = session.query(AddressAssignment.ip)
         q = q.filter_by(network=dbnetwork)
@@ -88,9 +89,9 @@ class CommandSplitNetwork(BrokerCommand):
         name_idx = 2
 
         dbnets = []
-        for subnet in dbnetwork.network.subnet(new_prefix=prefixlen):
+        for subnet in dbnetwork.network.subnets(new_prefix=prefixlen):
             # Skip the original
-            if subnet.ip == dbnetwork.ip:
+            if subnet.network_address == dbnetwork.network_address:
                 continue
 
             # Generate a new name. Make it unique, even if the DB does not

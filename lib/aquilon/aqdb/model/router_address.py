@@ -24,7 +24,7 @@ from sqlalchemy.sql import and_
 
 from aquilon.aqdb.model import Base, Network, Location
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
-from aquilon.aqdb.column_types import IPV4
+from aquilon.aqdb.column_types import IP
 
 _TN = "router_address"
 
@@ -36,7 +36,7 @@ class RouterAddress(Base):
     _class_label = 'Router Address'
     _instance_label = 'ip'
 
-    ip = Column(IPV4, nullable=False)
+    ip = Column(IP, nullable=False)
 
     # With the introduction of network environments, the IP alone is not enough
     # to uniquely identify the router

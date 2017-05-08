@@ -210,7 +210,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (self.net["unknown0"].broadcast,
+                          (self.net["unknown0"].broadcast_address,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[0],
                            self.net["unknown0"].netmask,
@@ -305,7 +305,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (self.net["unknown0"].broadcast,
+                          (self.net["unknown0"].broadcast_address,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[2],
                            self.net["unknown0"].netmask,
@@ -327,7 +327,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (self.net["unknown0"].broadcast,
+                          (self.net["unknown0"].broadcast_address,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[3],
                            self.net["unknown0"].netmask,

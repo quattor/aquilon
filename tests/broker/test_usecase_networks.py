@@ -354,7 +354,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
             m('"name" = "%s"' % net.name)
             m('"network" = "%s"' % net.ip)
             m('"netmask" = "%s"' % net.netmask)
-            m('"broadcast" = "%s"' % net.broadcast)
+            m('"broadcast" = "%s"' % net.broadcast_address)
             m('"prefix_length" = %d' % net.prefixlen)
             m('"type" = "%s"' % net.nettype)
             m('"side" = "%s"' % net.side)

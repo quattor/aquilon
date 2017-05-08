@@ -501,7 +501,7 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.0.0"\s*\)\s*'
                           r'\)\s*\)' %
-                          (net.broadcast, net.gateway,
+                          (net.broadcast_address, net.gateway,
                            eth0ip, net.netmask, route_gateway),
                           command)
         self.searchoutput(out, r'"system/network/interfaces/eth1" = nlist\(\s*'

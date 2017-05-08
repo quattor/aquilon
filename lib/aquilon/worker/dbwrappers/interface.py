@@ -23,7 +23,7 @@ To an extent, this has become a dumping ground for any common ip methods.
 from operator import attrgetter
 import re
 
-from ipaddr import IPv4Address
+from ipaddress import IPv4Address
 
 from sqlalchemy.orm import aliased, object_session
 from sqlalchemy.sql.expression import desc, type_coerce
@@ -61,21 +61,21 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
         # Simple passthrough to make calling logic easier.
         return
 
-    if ip < dbnetwork.ip or ip > dbnetwork.broadcast:  # pragma: no cover
+    if ip not in dbnetwork.network:  # pragma: no cover
         raise InternalError("IP address {0!s} is outside "
                             "{1:l}.".format(ip, dbnetwork))
-    if dbnetwork.network.numhosts >= 4 and not relaxed:
+    if dbnetwork.network.num_addresses >= 4 and not relaxed:
         # Skip these checks for /32 and /31 networks
-        if ip == dbnetwork.ip:
+        if ip == dbnetwork.network_address:
             raise ArgumentError("IP address %s is the address of network %s." %
                                 (ip, dbnetwork.name))
-        if ip == dbnetwork.broadcast:
+        if ip == dbnetwork.broadcast_address:
             raise ArgumentError("IP address %s is the broadcast address of "
                                 "network %s." % (ip, dbnetwork.name))
 
-    if dbnetwork.network.numhosts >= 8 and not relaxed:
+    if dbnetwork.network.num_addresses >= 8 and not relaxed:
         # If this network doesn't have enough addresses, the test is irrelevant.
-        if int(ip) - int(dbnetwork.ip) in dbnetwork.reserved_offsets:
+        if int(ip) - int(dbnetwork.network_address) in dbnetwork.reserved_offsets:
             raise ArgumentError("The IP address %s is reserved for dynamic "
                                 "DHCP for a switch on subnet %s." %
                                 (ip, dbnetwork.ip))
@@ -207,7 +207,8 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     used_ips = used_ips.filter_by(network=dbnetwork)
     used_ips = used_ips.filter(ARecord.ip >= startip)
 
-    full_set = set(range(int(startip), int(dbnetwork.broadcast)))
+    # FIXME: this will not work on big IPv6 networks
+    full_set = set(range(int(startip), int(dbnetwork.broadcast_address)))
     used_set = set(int(item.ip) for item in used_ips)
     free_set = full_set - used_set
 
@@ -228,7 +229,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
             ip = IPv4Address(min(free_set))
         else:
             next = max(used_set)
-            if not next + 1 in free_set:
+            if (next + 1) not in free_set:
                 raise ArgumentError("Failed to find an IP that is suitable "
                                     "for --ipalgorithm=max.  Try an other "
                                     "algorithm as there are still some free "

@@ -187,7 +187,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Expected an IPv4 address for --ip: "
-                         "not-an-ip-address",
+                         "Expected 4 octets in u'not-an-ip-address'",
                          command)
 
     def test_122_add_unittest16_bad_domain(self):

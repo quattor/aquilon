@@ -24,7 +24,7 @@ from sqlalchemy.sql import join, and_
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Network, NetworkEnvironment, DnsRecord, Fqdn
-from aquilon.aqdb.column_types import IPV4
+from aquilon.aqdb.column_types import IP
 
 _TN = 'a_record'
 _DTN = 'dynamic_stub'
@@ -37,7 +37,7 @@ class ARecord(DnsRecord):
     dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
 
-    ip = Column(IPV4, nullable=False)
+    ip = Column(IP, nullable=False)
 
     network_id = Column(ForeignKey(Network.id), nullable=False)
 
