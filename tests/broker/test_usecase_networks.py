@@ -363,7 +363,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
 
             s = lambda x: self.searchoutput(out, x, command)
             assignment = lambda lhs, rhs: r'"%s"\s*=\s*%s' % (lhs, rhs)
-            nlisti = lambda (k, v): r'"%s",\s*"%s"\s*' % (k, v)
+            nlisti = lambda i: r'"%s",\s*"%s"\s*' % (i[0], i[1])
             nlist = lambda *l: r'nlist\(\s*' + r',\s*'.join(map(nlisti, l)) + r'\)\s*'
             slist = lambda *l: r'list\(\s*' + r',\s*'.join(l) + r'\)\s*'
             s(assignment(r'router_address/{%s}/providers' % net[1],

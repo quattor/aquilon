@@ -31,15 +31,11 @@ else:
     ms.version.addpkg('setuptools', '0.6c11')
     ms.version.addpkg('protobuf', '3.0.0b2')
     ms.version.addpkg('six', '1.7.3')
-    ms.version.addpkg('python-daemon', '2.0.5')
-    ms.version.addpkg('lockfile', '0.9.1')
 
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import Int32StringReceiver
 from twisted.internet import reactor
 from google.protobuf.json_format import MessageToJson
-from daemon import DaemonContext
-from daemon.pidfile import TimeoutPIDLockFile
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -85,16 +81,8 @@ def run_reactor(sockname, storedir):
     reactor.run()
 
 
-def daemonize(pidfile, sockname, storedir):
-    pidcmgr = TimeoutPIDLockFile(pidfile)
-    with DaemonContext(pidfile=pidcmgr) as dc:
-        run_reactor(sockname, storedir)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Send out broker notifications")
-    parser.add_argument("-d", "--daemon", action='store_true',
-                        help="Run as a daemon process")
     parser.add_argument("-s", "--store", action='store_true',
                         help="Write messages to a file")
     parser.add_argument("-c", "--config", dest="config",
@@ -133,16 +121,23 @@ def main():
         if not os.path.exists(storedir):
             os.makedirs(storedir)
 
-    # Decide if we want to daemionize
-    if opts.daemon:
-        rundir = config.get('broker', 'rundir')
-        if not os.path.exists(rundir):
-            os.makedirs(rundir)
-        pidfile = os.path.join(rundir, 'read_events.pid')
-        daemonize(pidfile, sockname, storedir)
-    else:
-        run_reactor(sockname, storedir)
+    if os.fork():
+        return
 
+    # Leave stdin connected to the terminal
+    with open("/dev/null", "w") as f:
+        os.dup2(f.fileno(), 1)
+        os.dup2(f.fileno(), 2)
+
+    rundir = config.get("broker", "rundir")
+    if not os.path.exists(rundir):
+        os.makedirs(rundir)
+
+    pidfile = os.path.join(rundir, "read_events.pid")
+    with open(pidfile, "w") as f:
+        f.write(str(os.getpid()))
+
+    run_reactor(sockname, storedir)
 
 if __name__ == '__main__':
     main()

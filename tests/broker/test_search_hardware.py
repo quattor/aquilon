@@ -124,7 +124,7 @@ class TestSearchHardware(TestBrokerCommand):
 
     def testlocationtoolong(self):
         command = "search hardware --building building-long-does-not-exist"
-        out = self.internalerrortest(command.split(" "))
+        out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def testall(self):

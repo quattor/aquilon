@@ -62,24 +62,25 @@ class StormapParser(object):
         # format. To do that, we'll need to pass the file name as an argument to
         # __init__(), and the index type as an argument to lookup().
         self.cdb_file = cdb.init(config.get("broker", "sharedata"))  # pylint: disable=E1101
-        num_headers = self.cdb_file["M:HEADER_COUNT"]
+        num_headers = self.cdb_file[b"M:HEADER_COUNT"]
         if num_headers is None:
             return
 
         for header_num in range(0, int(num_headers)):
             # Index of the first item the header refers to
-            start_index = int(self.cdb_file["HEADER_ROW_INDEX:%d" % header_num])
+            start_index = int(self.cdb_file[b"HEADER_ROW_INDEX:%d" % header_num])
             # Definitions for the fields in the given segment
-            header = self.cdb_file["HEADER_ROW_COLUMN_NAMES:%d" % header_num]
+            header = self.cdb_file[b"HEADER_ROW_COLUMN_NAMES:%d" % header_num]
             if not header:
                 continue
 
+            header = header.decode("ascii")
             columns = {name: idx for idx, name in enumerate(header.split('|'))}
             self.header_defs.append(DataBlock(start_index=start_index,
                                               columns=columns))
 
         # Guard element - if a row index is out of range, this will catch it
-        self.header_defs.append(DataBlock(start_index=int(self.cdb_file["M:ROW_COUNT"]),
+        self.header_defs.append(DataBlock(start_index=int(self.cdb_file[b"M:ROW_COUNT"]),
                                           columns={}))
 
         # We need to sort the definitions to be able to find the range a given
@@ -91,15 +92,15 @@ class StormapParser(object):
     def lookup(self, name):
         try:
             # Look up the name in the index...
-            row_key = self.cdb_file["I:pshare:" + str(name)]
+            row_key = self.cdb_file[b"I:pshare:" + name.encode("ascii")]
             # ... and the row containing the data
-            row = self.cdb_file[row_key]
+            row = self.cdb_file[row_key].decode("ascii")
         except KeyError:
             return ShareInfo(server=None, mount=None)
 
         # The key has the line number embedded, which we need to extract to be
         # able to figure out which header defines the structure of this row
-        m = self.row_key_re.match(row_key)
+        m = self.row_key_re.match(row_key.decode("ascii"))
         if not m:
             return ShareInfo(server=None, mount=None)
         row_index = int(m.group(1))

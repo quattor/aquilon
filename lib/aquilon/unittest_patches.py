@@ -31,6 +31,7 @@ if LIBDIR not in sys.path:
 if SBINDIR not in sys.path:
     sys.path.append(SBINDIR)
 
+from aquilon.aqdb import depends  # pylint: disable=W0611
 from aquilon.worker import depends  # pylint: disable=W0611
 from aquilon.config import Config
 

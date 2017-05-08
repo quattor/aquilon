@@ -171,8 +171,8 @@ def force_ascii(label, value):
     if value is None:
         return None
     try:
-        value = value.decode('ascii')
-    except UnicodeDecodeError:
+        value = value.encode('ascii')
+    except UnicodeEncodeError:
         raise ArgumentError("Only ASCII characters are allowed for %s." % label)
     return value
 

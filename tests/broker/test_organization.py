@@ -89,7 +89,7 @@ class TestOrganization(TestBrokerCommand):
 
     def test_231_del_toolongnotexist(self):
         command = "del organization --organization org-long-does-not-exist"
-        out = self.internalerrortest(command.split(" "))
+        out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def test_300_verify_example2(self):

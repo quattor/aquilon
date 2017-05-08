@@ -19,6 +19,7 @@
 
 import os
 import gzip
+from io import BytesIO
 import re
 from shutil import rmtree
 from subprocess import Popen, PIPE
@@ -27,7 +28,6 @@ import time
 import unittest
 import xml.etree.ElementTree as ET
 
-from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
 from six import itervalues
 
@@ -77,10 +77,10 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_010_index(self):
         # Verify and stash mtimes
         stashed_mtimes = self.get_profile_mtimes()
-        buffer = StringIO()
+        buffer = BytesIO()
         pickler = Pickler(buffer)
         pickler.dump(stashed_mtimes)
-        self.writescratch("stashed_mtimes", buffer.getvalue())
+        self.writescratch("stashed_mtimes", buffer.getvalue(), raw=True)
 
         command = ["search_host", "--domain=unittest",
                    "--service=utsvc", "--instance=utsi1"]
@@ -122,7 +122,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_210_index(self):
         new_mtimes = self.get_profile_mtimes()
-        buffer = StringIO(self.readscratch("stashed_mtimes"))
+        buffer = BytesIO(self.readscratch("stashed_mtimes", raw=True))
         unpickler = Unpickler(buffer)
         stashed_mtimes = unpickler.load()
 

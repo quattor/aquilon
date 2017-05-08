@@ -17,10 +17,15 @@
 
 import subprocess
 import os
+from threading import Lock
 
 from six.moves.http_client import NotConnected  # pylint: disable=F0401
 
 from aquilon.client.chunked import ChunkedHTTPConnection
+
+# subprocess.Popen() is not thread safe in Python 2, so we need locking. We only
+# care about two connections racing to launch knc, so a local lock here is fine.
+_popen_lock = Lock()
 
 
 class ProcessWrapper(object):
@@ -71,13 +76,14 @@ class WrappedHTTPConnection(ChunkedHTTPConnection):
     def connect(self):
         try:
             # FIXME: The -o option requires knc >= 1.7.
-            process = subprocess.Popen([self.executable,
-                                        '-o', 'no-half-close',
-                                        self.service + '@' + self.host,
-                                        str(self.port)],
-                                       stdin=subprocess.PIPE,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
+            with _popen_lock:
+                process = subprocess.Popen([self.executable,
+                                            '-o', 'no-half-close',
+                                            self.service + '@' + self.host,
+                                            str(self.port)],
+                                           stdin=subprocess.PIPE,
+                                           stdout=subprocess.PIPE,
+                                           stderr=subprocess.PIPE)
         except OSError as e:
             raise NotConnected(e)
 

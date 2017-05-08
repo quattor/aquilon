@@ -102,25 +102,30 @@ class ResponseFormatter(object):
             this method and let the magic happen.
 
         """
-        # TODO: add Content-Type/Content-Transfer-Encoding headers
         m = getattr(self, "format_" + str(style).lower(), self.format_raw)
         return m(result, request)
 
     def format_raw(self, result, request):
         # Shortcut for text result
         if isinstance(result, text_type):
-            return result.encode("utf-8")
-        return ObjectFormatter.redirect_raw(result,
-                                            embedded=False).encode("utf-8")
+            formatted = result
+        else:
+            formatted = ObjectFormatter.redirect_raw(result, embedded=False)
+
+        formatted = formatted.encode("utf-8")
+        request.setHeader("Content-Type", "text/plain; charset=utf-8")
+        return formatted
 
     def format_csv(self, result, request):
         strbuf = StringIO()
         writer = csv.writer(strbuf, dialect='aquilon')
         ObjectFormatter.redirect_csv(result, writer)
+        request.setHeader("Content-Type", "text/csv; charset=utf-8")
         return strbuf.getvalue().encode("utf-8")
 
     def format_djb(self, result, request):
         """ For tinydns-data formatting. use raw for now. """
+        request.setHeader("Content-Type", "text/plain; charset=utf-8")
         return ObjectFormatter.redirect_djb(result).encode("utf-8")
 
     def format_proto(self, result, request):
@@ -135,6 +140,8 @@ class ResponseFormatter(object):
         field_name = container.DESCRIPTOR.fields[0].name
         ObjectFormatter.redirect_proto(result, getattr(container, field_name),
                                        embedded=False)
+        # TODO: there seems to be no official MIME type for protobuf yet
+        request.setHeader("Content-Type", "application/octet-stream")
         return container.SerializeToString()
 
 

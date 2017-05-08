@@ -97,7 +97,7 @@ class TestBrokerStart(unittest.TestCase):
         # pidfile = os.path.join(self.config.get('broker', 'rundir'), 'read_events.pid')
         read_events = os.path.join(self.config.get('broker', 'srcdir'),
                                    'tests', 'read_events.py')
-        args = [sys.executable, read_events, '--store', '--daemon',
+        args = [sys.executable, read_events, '--store',
                 '--config', self.config.baseconfig]
         self.run_command(args)
 

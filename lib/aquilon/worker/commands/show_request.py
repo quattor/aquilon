@@ -24,7 +24,9 @@ from twisted.internet.defer import Deferred
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.logger import CLIENT_INFO
-from aquilon.worker.messages import StatusSubscriber
+from aquilon.worker.messages import StatusSubscriber, StatusCatalog
+
+catalog = StatusCatalog()
 
 
 class StatusWriter(StatusSubscriber):
@@ -41,15 +43,16 @@ class StatusWriter(StatusSubscriber):
         if self.request._disconnected:
             return
         if record.levelno >= self.loglevel:
-            msg = record.getMessage() or ''
+            msg = record.message or ''
             if msg:
-                msg = "%s\n" % msg
+                msg = msg + "\n"
             # The formatter is not used, we're talking raw HTTP here
             self.request.write(msg.encode("utf-8"))
 
     def finish(self):
         if not self.deferred.called:
             self.deferred.callback('')
+        catalog.remove_waiters(self)
 
 
 class CommandShowRequest(BrokerCommand):
@@ -61,17 +64,18 @@ class CommandShowRequest(BrokerCommand):
     required_parameters = ["requestid"]
 
     def render(self, request, debug, requestid=None, auditid=None, **_):
-        status = self.catalog.get_request_status(auditid=auditid,
-                                                 requestid=requestid)
-        if not status:
-            if requestid:
-                raise NotFoundException("Request ID %s not found." % requestid)
-            else:
-                raise NotFoundException("Audit ID %s not found." % auditid)
         if debug:
             loglevel = DEBUG
         else:
             loglevel = CLIENT_INFO
         deferred = Deferred()
-        status.add_subscriber(StatusWriter(deferred, request, loglevel))
+        writer = StatusWriter(deferred, request, loglevel)
+
+        if auditid:
+            status = catalog.get_request_status(auditid=auditid)
+            if not status:
+                raise NotFoundException("Audit ID %s not found." % auditid)
+            status.add_subscriber(StatusWriter(deferred, request, loglevel))
+        else:
+            catalog.subscribe_or_wait(writer, requestid)
         return deferred

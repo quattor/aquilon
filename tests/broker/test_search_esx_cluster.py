@@ -224,12 +224,6 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Building bldg-not-exist not found",
                          command)
 
-    def testclusterlocationtoolong(self):
-        command = ["search_esx_cluster",
-                   "--cluster_building=building-too-long-does-not-exist"]
-        out = self.internalerrortest(command)
-        self.matchoutput(out, "is more than the maximum 16 allowed.", command)
-
     def testvmhostlocationavailable(self):
         command = "search esx cluster --vmhost_rack ut10"
         out = self.commandtest(command.split(" "))
@@ -249,7 +243,7 @@ class TestSearchESXCluster(TestBrokerCommand):
     def testvmhostlocationtoolong(self):
         command = ["search_esx_cluster",
                    "--vmhost_rack=rack-too-long-does-not-exist"]
-        out = self.internalerrortest(command)
+        out = self.badrequesttest(command)
         self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def testvmhostlocationunavailable(self):

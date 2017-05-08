@@ -102,7 +102,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         for p in personalities:
             pers_by_name_ver[p.name][p.stage] = p
 
-        personality = pers_by_name_ver["badpersonality"].values()[0]
+        personality = list(pers_by_name_ver["badpersonality"].values())[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "badpersonality")
         self.assertEqual(personality.stage, "")

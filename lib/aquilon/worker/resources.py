@@ -52,7 +52,8 @@ from six import iteritems
 
 from twisted.web import server, resource, http
 from twisted.internet import defer, threads
-from twisted.python import log
+from twisted.python import log, context
+from twisted.python.log import ILogContext
 
 from aquilon.config import lookup_file_path
 from aquilon.aqdb.types import StringEnum
@@ -61,6 +62,7 @@ from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
+from aquilon.worker.messages import StatusCatalog
 from aquilon.utils import (force_int, force_float, force_boolean, force_ip,
                            force_mac, force_ascii, force_list, force_json,
                            force_uuid, force_justification)
@@ -69,6 +71,8 @@ from aquilon.utils import (force_int, force_float, force_boolean, force_ip,
 # Currently only supports stuffing a single variable in a path
 # component.
 varmatch = re.compile(r'^%\((.*)\)s$')
+
+catalog = StatusCatalog()
 
 
 class ResponsePage(resource.Resource):
@@ -126,13 +130,24 @@ class ResponsePage(resource.Resource):
     def extractArguments(self, request):
         result = {}
         for arg, values in iteritems(request.args):
+            try:
+                # Parameter names should be plain ASCII
+                arg = arg.decode("ascii")
+            except UnicodeError:
+                raise ProtocolError("Non-ASCII command parameter")
+
             if not isinstance(values, list):  # pragma: no cover
-                raise ProtocolError("Expected list for %s, got '%s'"
-                                    % (arg, str(values)))
+                raise ProtocolError("Expected list for %s, got %s"
+                                    % (arg, type(values)))
             if len(values) > 1:
                 raise ProtocolError("Too many values specified for %s"
                                     % arg)
-            result[arg] = values[0]
+
+            try:
+                result[arg] = values[0].decode("utf-8")
+            except UnicodeError:
+                raise ProtocolError("Value for parameter %s is not "
+                                    "valid UTF-8" % arg)
         return result
 
     def render(self, request):
@@ -160,19 +175,37 @@ class ResponsePage(resource.Resource):
             # message based on available render_ methods.
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
 
+        # Retieve the instance from the handler and hook up the logger
+        broker_command = handler.broker_command
+        request.logger.add_command_handler(broker_command.module_logger)
+
+        # Process requestid early, so we can keep track of the request even if
+        # parsing the rest of the arguments fail
+        if b"requestid" in request.args:
+            requestid = force_uuid("--requestid",
+                                   request.args[b"requestid"][0].decode("ascii"))
+        else:
+            requestid = None
+
+        # For the show_request command, requestid is the UUID of the command we
+        # want to monitor and not the UUID of this command. As a result,
+        # show_request commands do not have a requestid in request.status.
+        # For other commands, adding the requestid to the catalog here means
+        # that any matching show_request commands will notice any errors which
+        # happen after this point
+        if broker_command.command != "show_request":
+            requestid = catalog.store_requestid(request.status, requestid)
+
         # Create a defered chain of actions (or continuation Mondad).  We add
         # a list of the functions that should be called, and error handeling
         # At the end of this block we will invoke the monad with the request
         d = defer.Deferred()
 
-        # Default render would just call the method here.
-        # This is expanded to do argument checking, finish the request,
-        # and do some error handling.
-        arguments = self.extractArguments(request)
+        # Using callbacks here is a bit of a stretch since these calls are not
+        # asynchronous, but it means exceptions will be caught and reported as
+        # expected to the client without any extra effort
+        d.addCallback(self.extractArguments)
         d.addCallback(handler.check_arguments)
-
-        # Retieve the instance from the handler
-        broker_command = handler.broker_command
 
         style = getattr(self, "output_format", None)
         if style is None:
@@ -180,24 +213,27 @@ class ResponsePage(resource.Resource):
         if style is None:
             style = getattr(broker_command, "default_style", "raw")
 
-        # The logger used to be set up after the session.  However,
-        # this keeps a record of the request from forming immediately
-        # if all the sqlalchmey session threads are in use.
-        # This will be a problem if/when we want an auditid to come
-        # from the database, but we can revisit at that point.
+        # Prepare for command execution: add synthetic arguments and log the
+        # request
         d = d.addCallback(lambda arguments:
-                          broker_command.add_logger(style=style,
-                                                    request=request,
+                          broker_command.pre_render(request, requestid,
+                                                    style=style,
                                                     **arguments))
         if broker_command.defer_to_thread:
             d = d.addCallback(lambda arguments: threads.deferToThread(
                 broker_command.invoke_render, **arguments))
+
+            # Save the current log context, as it does not survive deferring
+            # execution to a thread
+            ctx = context.get(ILogContext)
+            d = d.addBoth(self.restoreContext, ctx)
         else:
             d = d.addCallback(lambda arguments: broker_command.invoke_render(**arguments))
         d = d.addCallback(self.finishRender, request)
+        d = d.addErrback(self.logFailure, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
-        d.callback(arguments)
+        d.callback(request)
         return server.NOT_DONE_YET
 
     def format(self, result, request):
@@ -207,6 +243,12 @@ class ResponsePage(resource.Resource):
         # if style is None:
         #     style = getattr(request, "output_format", "raw")
         return self.formatter.format("raw", result, request)
+
+    def restoreContext(self, result, ctx):
+        context.get(ILogContext).update(ctx)
+
+        # Pass through
+        return result
 
     def finishRender(self, result, request):
         if result:
@@ -225,6 +267,12 @@ class ResponsePage(resource.Resource):
         log.msg('Command #%d finished.' % request.sequence_no)
         return
 
+    def logFailure(self, failure, request):
+        request.logger.info("%s: %s", type(failure.value).__name__, failure.value)
+
+        # Pass through
+        return failure
+
     def wrapNonInternalError(self, failure, request):
         """This takes care of 'expected' problems, like NotFoundException."""
         r = failure.trap(*ERROR_TO_CODE.keys())
@@ -241,7 +289,8 @@ class ResponsePage(resource.Resource):
                 (msg, failure.getBriefTraceback()))
         # failure.printDetailedTraceback()
         request.setResponseCode(http.INTERNAL_SERVER_ERROR)
-        return self.finishRender(msg, request)
+        request.setHeader("Content-Type", "text/plain; charset=utf-8")
+        return self.finishRender(msg.encode("utf-8"), request)
 
 
 class RestServer(ResponsePage):
@@ -461,11 +510,11 @@ class ResourcesCommandEntry(CommandEntry):
 
         # Fill in the required arguments from the instance of BrokerComamnd
         # this will be extended when more options are found in add_option.
-        self.argument_requirments = {"debug": False, "requestid": False}
-        for arg in broker_command.optional_parameters or []:
-            self.argument_requirments[arg] = False
-        for arg in broker_command.required_parameters or []:
-            self.argument_requirments[arg] = True
+        self.argument_requirements = {"debug": False, "requestid": False}
+        for arg in broker_command.optional_parameters:
+            self.argument_requirements[arg] = False
+        for arg in broker_command.required_parameters:
+            self.argument_requirements[arg] = True
 
         # Checks for specific parameters, filled in by add_option
         self.parameter_checks = {}
@@ -473,8 +522,8 @@ class ResourcesCommandEntry(CommandEntry):
     def add_option(self, option_name, paramtype, enumtype=None):
         # If this argument was not specified directly by the instance of
         # BrokerCommand then record it as optional (FIXME)
-        if option_name not in self.argument_requirments:
-            self.argument_requirments[option_name] = False
+        if option_name not in self.argument_requirements:
+            self.argument_requirements[option_name] = False
 
         # Fill in the parameter checker for this option
         if paramtype == 'enum':
@@ -506,16 +555,22 @@ class ResourcesCommandEntry(CommandEntry):
 
         """
         result = {}
-        for (arg, req) in self.argument_requirments.items():
+        for arg, req in self.argument_requirements.items():
             # log.msg("Checking for arg %s with required=%s" % (arg, req))
             if arg not in arguments:
                 if req:
                     raise ArgumentError("Missing mandatory argument %s" % arg)
-                else:
+                elif arg != "requestid":
                     result[arg] = None
                     continue
+
+            # requestid was already parsed, and will be re-injected to the
+            # argument list later
+            if arg == "requestid":
+                continue
+
             value = arguments[arg]
-            if arg in self.parameter_checks or {}:
+            if arg in self.parameter_checks:
                 value = self.parameter_checks[arg]("--" + arg, value)
             result[arg] = value
         return result

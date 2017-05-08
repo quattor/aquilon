@@ -56,7 +56,7 @@ class CommandShowActiveCommands(BrokerCommand):
                 if not record:
                     continue
                 if record.levelno >= loglevel:
-                    message = record.getMessage()
+                    message = record.message
                     if self.incoming_re.match(message):
                         # The Incoming command message is highly redundant with
                         # the status description that's already been printed.

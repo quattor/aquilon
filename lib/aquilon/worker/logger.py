@@ -15,8 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from logging import Logger, Handler, addLevelName, NOTSET
+
+from sqlalchemy.util import KeyedTuple
 
 
 CLIENT_INFO = 25
@@ -38,16 +39,21 @@ class StatusHandler(Handler):
         self.status = status
 
     def emit(self, record):
-        self.status.publish(record)
+        # getMessage() is not safe to call in a different thread if the record
+        # contains unsubstituted formatting. So force the formatting to be
+        # evaluated here
+        new_record = KeyedTuple((record.levelno, record.getMessage()),
+                                labels=("levelno", "message"))
+        self.status.publish(new_record)
 
 
 class RequestLogger(Logger):
-    def __init__(self, status=None, module_logger=None):
+    def __init__(self, status):
         Logger.__init__(self, "logger")
-        if module_logger:
-            self.addHandler(CommandHandler(module_logger))
-        if status:
-            self.addHandler(StatusHandler(status))
+        self.addHandler(StatusHandler(status))
+
+    def add_command_handler(self, module_logger):
+        self.addHandler(CommandHandler(module_logger))
 
     def get_handlers_with_status(self):
         return [handler for handler in self.handlers

@@ -43,7 +43,7 @@ def lookup_autoupdate(datadir, session, logger, grn, eon_id):
 
     cdb_file = cdb.init(name)  # pylint: disable=E1101
     # Tell pep8 not to warn about .has_key()
-    if not cdb_file.has_key(key):  # noqa
+    if not cdb_file.has_key(key.encode("ascii")):  # noqa
         return None
 
     # We found a GRN which is not in the DB. Pefrorm a full refresh, because it

@@ -26,6 +26,7 @@ from difflib import unified_diff
 from textwrap import dedent
 
 from lxml import etree
+from six import string_types
 
 from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611
@@ -426,7 +427,7 @@ class TestBrokerCommand(unittest.TestCase):
                         (command, s, out))
 
     def searchoutput(self, out, r, command):
-        if isinstance(r, str):
+        if isinstance(r, string_types):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
@@ -436,7 +437,7 @@ class TestBrokerCommand(unittest.TestCase):
         return m
 
     def searchclean(self, out, r, command):
-        if isinstance(r, str):
+        if isinstance(r, string_types):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
@@ -614,15 +615,23 @@ class TestBrokerCommand(unittest.TestCase):
                   "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                   % (command, out, err))
 
-    def writescratch(self, filename, contents):
+    def writescratch(self, filename, contents, raw=False):
         scratchfile = os.path.join(self.scratchdir, filename)
-        with open(scratchfile, 'w') as f:
+        if raw:
+            mode = "wb"
+        else:
+            mode = "w"
+        with open(scratchfile, mode) as f:
             f.write(contents)
         return scratchfile
 
-    def readscratch(self, filename):
+    def readscratch(self, filename, raw=False):
         scratchfile = os.path.join(self.scratchdir, filename)
-        with open(scratchfile, 'r') as f:
+        if raw:
+            mode = "rb"
+        else:
+            mode = "r"
+        with open(scratchfile, mode) as f:
             contents = f.read()
         return contents
 

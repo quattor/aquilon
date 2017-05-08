@@ -182,7 +182,7 @@ class TestAddAddress(TestBrokerCommand):
                #         1         2         3         4         5         6
                's234567890123456789012345678901234567890123456789012345678901234' +
                '.aqd-unittest.ms.com', '--dns_environment', 'internal', '--ip', ip]
-        out = self.internalerrortest(cmd)
+        out = self.badrequesttest(cmd)
         self.matchoutput(out, "is more than the maximum 63 allowed.", cmd)
 
     def test_455_add_invalid_name(self):

@@ -552,7 +552,7 @@ class TestSearchHost(TestBrokerCommand):
 
     def testlocationtoolong(self):
         command = "search host --building building-does-not-exist"
-        out = self.internalerrortest(command.split(" "))
+        out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def testclusteravailable(self):

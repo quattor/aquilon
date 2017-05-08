@@ -62,7 +62,7 @@ class CommandSearchAudit(BrokerCommand):
             q = q.filter(or_(Xtn.is_readonly==False, Xtn.command.in_(_NON_DB_CHANGE_TYPE_COMMANDS)))
 
         if username is not None:
-            username = username.lower().strip()
+            username = username.strip()
             # 'nobody' is special, it is stored without any realm
             if '@' in username or username == 'nobody':
                 q = q.filter_by(username=str(username))

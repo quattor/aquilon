@@ -16,6 +16,14 @@
 # limitations under the License.
 """Exceptions to be used by Aquilon"""
 
+# DontWrapMixin is only meaningful inside the broker. Import it conditionally,
+# so other components don't need to depend on SQLAlchemy
+try:
+    from sqlalchemy.exc import DontWrapMixin
+except ImportError:
+    class DontWrapMixin(object):
+        pass
+
 
 def deprecated(message):
     import warnings
@@ -26,7 +34,7 @@ class AquilonError(Exception):
     '''Generic error class.'''
 
 
-class ArgumentError(AquilonError):
+class ArgumentError(AquilonError, DontWrapMixin):
     """Raised for all those conditions where invalid arguments are
     sent to constructed objects.  This error generally corresponds to
     construction time state errors.
@@ -84,13 +92,8 @@ class AuthorizationException(AquilonError):
     """
 
 
-class NotFoundException(AquilonError):
+class NotFoundException(AquilonError, DontWrapMixin):
     """Raised when a requested resource cannot be found."""
-
-
-class NameServiceError(AquilonError):
-    """Raised when a host or service name cannot be found, or differs from,
-    what's stored in name services such as dns."""
 
 
 class UnimplementedError(AquilonError):
@@ -99,27 +102,6 @@ class UnimplementedError(AquilonError):
 
 class IncompleteError(AquilonError):
     """Raised when an incomplete/unusable template would be generated."""
-
-
-class DetailedProcessException(AquilonError):
-    """Raised when more details about a process exception should
-    be shown to the client.
-
-    """
-
-    def __init__(self, pe, input=None, output=None):
-        self.processException = pe
-        self.output = output
-        msg = str(pe) + "\n"
-        if input:
-            msg = msg + "\ninput:\n" + input + "\n"
-        if output:
-            msg = msg + "\nstdout:\n" + output + "\n"
-        elif pe.out:
-            msg = msg + "\nstdout:\n" + pe.out + "\n"
-        if pe.err:
-            msg = msg + "\nstderr:\n" + pe.err + "\n"
-        AquilonError.__init__(self, msg)
 
 
 class PartialError(AquilonError):
