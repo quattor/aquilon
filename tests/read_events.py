@@ -30,7 +30,7 @@ else:
     ms.version.addpkg('zope.interface', '3.6.1')
     ms.version.addpkg('setuptools', '0.6c11')
     ms.version.addpkg('protobuf', '3.0.0b2')
-    ms.version.addpkg('six', '1.7.3')
+    ms.version.addpkg('six', '1.9.0')
 
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import Int32StringReceiver
