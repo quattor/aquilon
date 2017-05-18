@@ -40,7 +40,10 @@
 		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
 		<arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
 	    </group>
-	    <arg><option>--force</option></arg>
+	    <group>
+		<arg><option>--force </option></arg>
+		<arg><option>--skip_auto_compile </option></arg>
+	    </group>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -69,6 +72,11 @@
 	    verifies that there are no uncommitted or unpublished changes will be left behind, to
 	    prevent losing such changes by mistake. These checks can also be disabled using the
 	    <option>--force</option> option.
+	</para>
+	<para>
+	    Managing host to a domain with auto_compile True or sandbox to sandbox will always run
+	    compile and rollback if compile fails. To bypass compile manually use
+	    <option>--skip_auto_compile</option> when running manage.
 	</para>
     </refsect1>
 
@@ -155,6 +163,16 @@
 		    <para>
 			Disable sanity checks, and move the objects to the target domain/sandbox
 			anyway.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--skip_auto_compile</option>
+		</term>
+		<listitem>
+		    <para>
+			Skip template compiling check after move to domain/sandbox (potentially dangerous)
 		    </para>
 		</listitem>
 	    </varlistentry>

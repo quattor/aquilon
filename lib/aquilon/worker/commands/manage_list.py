@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
 from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import GitRepo
+from aquilon.worker.templates import TemplateDomain
 
 
 def validate_branch_commits(dbsource, dbsource_author,
@@ -123,9 +124,11 @@ class CommandManageList(BrokerCommand):
 
         return (dbsource, dbsource_author, dbhosts)
 
-    def render(self, session, logger, plenaries, domain, sandbox, force, **arguments):
+    def render(self, session, logger, plenaries, domain, sandbox, force, skip_auto_compile, **arguments):
+
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
+
         if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
             raise ArgumentError("Managing objects to {0:l} is not allowed."
                                 .format(dbbranch))
@@ -133,6 +136,13 @@ class CommandManageList(BrokerCommand):
         dbsource, dbsource_author, objects = self.get_objects(session,
                                                               logger=logger,
                                                               **arguments)
+        auto_compile = False
+        # If target is a sandbox
+        if sandbox and isinstance(dbsource, Sandbox) and not skip_auto_compile:
+            auto_compile = True
+        # If target is a domain
+        elif domain and dbbranch.auto_compile and not skip_auto_compile:
+            auto_compile = True
 
         if not force:
             validate_branch_commits(dbsource, dbsource_author,
@@ -176,8 +186,10 @@ class CommandManageList(BrokerCommand):
             plenaries.stash()
             try:
                 plenaries.write(locked=True)
+                if auto_compile:
+                    td = TemplateDomain(dbbranch, dbauthor, logger=logger)
+                    td.compile(session, only=plenaries.object_templates)
             except:
                 plenaries.restore_stash()
                 raise
-
         return

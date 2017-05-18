@@ -97,6 +97,8 @@ class Domain(Branch):
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))
 
+    auto_compile = Column(Boolean, nullable=False, default=True)
+
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': branch_id == Branch.id}

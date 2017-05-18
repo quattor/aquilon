@@ -318,8 +318,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_560_compile_personality_multiple_domains(self):
         self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',
-                         '--domain=ut-prod', '--force'])
-
+                        '--domain=ut-prod', '--force', '--skip_auto_compile'])
         command = ['compile', '--personality=compileserver', '--archetype=aquilon']
         err = self.badrequesttest(command)
         self.matchoutput(err, 'All objects must be in the same domain or sandbox:',
