@@ -35,6 +35,8 @@ class LocationFormatter(ObjectFormatter):
             details.append(indent + "  Column: %s" % location.rack_column)
         elif isinstance(location, Building):
             details.append(indent + "  Address: %s" % location.address)
+            if location.uri:
+                details.append(indent + "  Location URI: %s" % location.uri)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:
@@ -58,6 +60,8 @@ class LocationFormatter(ObjectFormatter):
             skeleton.col = loc.rack_column
         if hasattr(loc, "timezone"):
             skeleton.timezone = loc.timezone
+        if hasattr(loc, "uri") and loc.uri:
+            skeleton.uri = loc.uri
 
         if indirect_attrs:
             for p in loc.parents:

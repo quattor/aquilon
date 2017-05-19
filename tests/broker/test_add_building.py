@@ -33,7 +33,7 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_addr 12 Cherry Lane")
         self.dsdb_expect_add_campus_building("ny", "bu")
         command = ["add", "building", "--building", "bu", "--city", "ny",
-                   "--address", "12 Cherry Lane"]
+                   "--address", "12 Cherry Lane", "--uri", "assetinventory://003428"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -44,15 +44,22 @@ class TestAddBuilding(TestBrokerCommand):
             Building: bu
               Fullname: bu
               Address: 12 Cherry Lane
+              Location URI: assetinventory://003428
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
+
+    def testaddinvalid(self):
+        command = ["add", "building", "--building", "plaza", "--city", "ex",
+                   "--address", "Nowhere", "--uri", "invalid://003427"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Location URI not valid: unknown system", command)
 
     def testaddbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
                          "-building_addr Nowhere")
         self.dsdb_expect_add_campus_building("ta", "cards")
         command = ["add", "building", "--building", "cards", "--city", "ex",
-                   "--address", "Nowhere"]
+                   "--address", "Nowhere", "--uri", "assetinventory://003427"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -63,6 +70,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: cards
               Fullname: cards
               Address: Nowhere
+              Location URI: assetinventory://003427
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ta, City ex]
             """, command)
 
@@ -70,6 +78,7 @@ class TestAddBuilding(TestBrokerCommand):
         command = "show building --building bu --format proto"
         loc = self.protobuftest(command.split(" "), expect=1)[0]
         self.matchoutput(loc.name, "bu", command)
+        self.matchoutput(loc.uri, "assetinventory://003428", command)
         self.matchoutput(loc.location_type, "building", command)
 
     def testverifybuildingall(self):
