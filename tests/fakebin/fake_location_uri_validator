@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "$1" | egrep -q "^assetinventory://[0-9]+$"
+if [ $? -eq 0 ]; then
+  echo "success"
+  exit 0
+else
+  echo "unknown system" >&2
+  exit 1
+fi

@@ -18,10 +18,11 @@
 
 from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Location, DnsDomain
 from aquilon.utils import validate_nlist_key
-
+from aquilon.config import Config
+from aquilon.worker.processes import run_command
 
 def get_location(session, query_options=None, compel=False, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
@@ -64,6 +65,8 @@ def get_location_list(session, compel=False, **kwargs):
 
 def add_location(session, cls, name, parent, **kwargs):
     validate_nlist_key(cls.__name__, name)
+    if 'uri' in kwargs and kwargs['uri'] is not None:
+        validate_uri(kwargs['uri'])
     cls.get_unique(session, name, preclude=True)
     dbloc = cls(name=name, parent=parent, **kwargs)
     session.add(dbloc)
@@ -83,13 +86,25 @@ def get_default_dns_domain(dblocation):
                             "{0:l}.  Please specify --dns_domain."
                             .format(dblocation))
 
+def validate_uri(uri):
+    config = Config()
+    validator = config.lookup_tool("location_uri_validator")
+    if validator is not None:
+        try:
+            run_command([validator, uri])
+        except ProcessException as err:
+            raise ArgumentError("Location URI not valid: %s%s" % (err.out, err.err))
+    return uri
 
 def update_location(dblocation, fullname=None, default_dns_domain=None,
-                    comments=None):
+                    comments=None, uri=None):
     """ Update common location attributes """
 
     if fullname is not None:
         dblocation.fullname = fullname
+
+    if uri is not None:
+      dblocation.uri = validate_uri(uri)
 
     if default_dns_domain is not None:
         if default_dns_domain:

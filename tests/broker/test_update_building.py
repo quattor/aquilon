@@ -84,6 +84,23 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
                          command)
 
+    def test_125_verify_ut_dnsdomain(self):
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
+                         command)
+
+    def test_126_update_ut_uri(self):
+        command = ["update", "building", "--building", "ut",
+                   "--uri", "assetinventory://003428"]
+        self.noouttest(command)
+
+    def test_127_verify_ut_uri(self):
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Location URI: assetinventory://003428",
+                         command)
+
     def test_130_update_tu_dnsdomain(self):
         command = ["update", "building", "--building", "tu",
                    "--default_dns_domain", "aqd-unittest.ms.com"]
