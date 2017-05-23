@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,27 @@ class TestUpdateAlias(EventsTestMixin, TestBrokerCommand):
                    "--fqdn", "alias2host.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com"]
         self.noouttest(command)
+
+    def test_105_update_self(self):
+        command = ["update_alias",
+                   "--fqdn", "alias2alias.aqd-unittest.ms.com",
+                   "--target", "alias2alias.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot alias alias2alias.aqd-unittest.ms.com "
+                         "to itself",
+                         command)
+
+    def test_105_update_mutual(self):
+        command = ["update_alias",
+                   "--fqdn", "alias2alias.aqd-unittest.ms.com",
+                   "--target", "alias4alias.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot alias alias2alias.aqd-unittest.ms.com to "
+                         "alias4alias.aqd-unittest.ms.com, as that is an "
+                         "alias of alias2alias.aqd-unittest.ms.com",
+                         command)
 
     def test_110_update_mscom(self):
         self.event_upd_dns('alias.ms.com')

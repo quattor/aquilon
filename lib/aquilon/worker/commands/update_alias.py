@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq update alias`."""
 
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Alias, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import (create_target_if_needed,
@@ -54,7 +55,26 @@ class CommandUpdateAlias(BrokerCommand):
             dbalias.owner_grn = None
 
         if target or target_environment:
+            if target == fqdn:
+                raise ArgumentError("Cannot alias {0} to itself"
+                                    .format(fqdn))
+
             old_target = dbalias.target
+
+            # see if the new target is an alias: if so, check we're not
+            # creating a loop
+            try:
+                ntalias = Alias.get_unique(session, fqdn=target,
+                                           dns_environment=dbdns_env, compel=True)
+            except NotFoundException:
+                ntalias = None
+
+            if ntalias is not None:
+                if fqdn in ntalias.get_alias_targets():
+                    raise ArgumentError("Cannot alias {0} to {1}, as that "
+                                        "is an alias of {0}"
+                                        .format(fqdn, target))
+
             dbalias.target = create_target_if_needed(session, logger,
                                                      target, dbtgt_env)
 

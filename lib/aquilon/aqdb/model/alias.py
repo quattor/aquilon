@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2009,2011,2012,2013,2014,2015,2017  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,6 +56,15 @@ class Alias(DnsRecordTargetMixin, DnsRecord):
                 continue
             depth = max(depth, tgt.alias_depth)
         return depth + 1
+
+    def get_alias_targets(self):
+        tlist = [self.target.fqdn]
+        for tgt in self.target_rrs:
+            if not isinstance(tgt, Alias):
+                continue
+            # this may end up with duplicates (ignore)
+            tlist.extend(tgt.get_alias_targets())
+        return tlist
 
     def __init__(self, fqdn, target, **kwargs):
         self.target = target
