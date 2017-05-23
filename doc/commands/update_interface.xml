@@ -35,6 +35,7 @@
 		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg><option>--iftype <replaceable>NEW_IFTYPE</replaceable></option></arg>
 	    <arg><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
 	    <arg><option>--mac <replaceable>MAC</replaceable></option></arg>
 	    <arg><option>--boot</option></arg>
@@ -154,6 +155,25 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--iftype
+			<replaceable>NEW_IFTYPE</replaceable>
+		    </option>
+		</term>
+		<listitem>
+		    <para>
+			Update interface type
+			<replaceable>IFTYPE</replaceable>
+			to<replaceable>NEW_IFTYPE</replaceable>.
+			Update of
+			<replaceable>IFTYPE</replaceable>
+			is only allowed for network devices.
+			Interface type options: physical, virtual, loopback, oa.
+		    </para>
+		</listitem>
+	    </varlistentry>
+
 	    <varlistentry>
 		<term>
 		    <option>--mac <replaceable>MAC</replaceable></option>

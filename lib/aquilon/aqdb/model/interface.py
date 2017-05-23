@@ -31,7 +31,7 @@ from sqlalchemy.sql import desc, case, and_, or_, null
 from aquilon.exceptions_ import InternalError, ArgumentError
 from aquilon.aqdb.column_types import AqMac, AqStr
 from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
-                                ObservedMac, Model)
+                                ObservedMac, Model, NetworkDevice)
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
 _TN = "interface"
@@ -153,7 +153,7 @@ class Interface(DeviceLinkMixin, Base):
     @validates('name')
     def validate_name(self, key, value):  # pylint: disable=W0613
         if self.__class__.name_check and \
-           not self.__class__.name_check.match(value):
+                not self.__class__.name_check.match(value):
             raise ValueError("Illegal %s interface name '%s'." %
                              (self.interface_type, value))
         return value
@@ -390,3 +390,7 @@ class PhysicalInterface(Interface):
     _class_label = "Physical Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'physical'}
+
+
+# Determine whether interface type can be changed once set
+NetworkDevice.iftype_change_allowed = [PhysicalInterface, VirtualInterface, LoopbackInterface, OnboardInterface]

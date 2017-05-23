@@ -92,6 +92,14 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                          "smaller than 4096.",
                          command)
 
+    def testfailbadname(self):
+        command = ["add", "interface", "--interface", "badname",
+                   "--machine", "ut3c5n10"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Illegal public interface name "
+                         "'badname'.", command)
+
     def testfailbadvlanformat(self):
         command = ["add", "interface", "--interface", "eth1.foo",
                    "--machine", "ut3c5n10", "--iftype", "vlan"]
