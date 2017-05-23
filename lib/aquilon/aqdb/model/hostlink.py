@@ -18,6 +18,7 @@
 from sqlalchemy import String, Column, ForeignKey
 from sqlalchemy.orm import validates
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Resource
 
 _TN = 'hostlink'
@@ -37,8 +38,9 @@ class Hostlink(Resource):
 
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
 
-    @validates(owner_user, owner_group)
+    @validates('owner_user', 'owner_group')
     def validate_owner(self, key, value):
-        if ':' in value:
-            raise ValueError("%s cannot contain the ':' character" % key)
+        if value is not None:
+            if ':' in value:
+                raise ArgumentError("%s cannot contain the ':' character" % key)
         return value
