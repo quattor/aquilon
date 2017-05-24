@@ -28,6 +28,8 @@ class HostlinkFormatter(ResourceFormatter):
         details.append(indent + "  Owner: %s" % hostlink.owner_user)
         if hostlink.owner_group is not None:
             details.append(indent + "  Group: %s" % hostlink.owner_group)
+        if hostlink.mode is not None:
+            details.append(indent + "  Mode: %o" % hostlink.mode)
         return details
 
     def fill_proto(self, hostlink, skeleton, embedded=True,
@@ -37,5 +39,8 @@ class HostlinkFormatter(ResourceFormatter):
         skeleton.hostlink.owner_user = hostlink.owner_user
         if hostlink.owner_group:
             skeleton.hostlink.owner_group = hostlink.owner_group
+# TODO: add protobuf support for this attribute
+#        if hostlink.mode:
+#            skeleton.hostlink.mode = hostlink.mode
 
 ObjectFormatter.handlers[Hostlink] = HostlinkFormatter()
