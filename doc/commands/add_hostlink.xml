@@ -47,7 +47,6 @@
 	    <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
 	    <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
 	    <arg><option>--group <replaceable>GROUP</replaceable></option></arg>
-	    <arg><option>--mode <replaceable>MODE</replaceable></option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
@@ -129,18 +128,6 @@
 			The group owner of the target directory. If not
 			specified then the owner user's default group will be
 			used.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--mode <replaceable>MODE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The mode to apply on the target directory, if it is
-			automatically created and managed by aquilon
-			(it is on local storage). This must be an octal value.
 		    </para>
 		</listitem>
 	    </varlistentry>

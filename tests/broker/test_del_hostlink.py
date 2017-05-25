@@ -39,17 +39,6 @@ class TestDelHostlink(TestBrokerCommand):
 
         self.check_plenary_gone(*path, directory_gone=True)
 
-    def test_101_del_hostlink_with_mode(self):
-        path = ["resource", "host", "server1.aqd-unittest.ms.com",
-                "hostlink", "app2", "config"]
-        self.check_plenary_exists(*path)
-
-        command = ["del_hostlink", "--hostlink=app2",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        self.check_plenary_gone(*path, directory_gone=True)
-
     def test_105_del_camelcase(self):
         path = ["resource", "host", "server1.aqd-unittest.ms.com",
                 "hostlink", "camelcase", "config"]
