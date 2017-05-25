@@ -154,6 +154,23 @@ class TestAddHostlink(TestBrokerCommand):
                    "--hostname", "server1.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_200_badowner(self):
+        command = ["add_hostlink", "--hostlink", "badlink",
+                   "--target", "/dev/zero", "--owner", "unittest:unitgroup",
+                   "--hostname", "server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "owner_user cannot contain the ':' character",
+                         command)
+
+    def test_200_badgroup(self):
+        command = ["add_hostlink", "--hostlink", "badlink",
+                   "--target", "/dev/zero", "--owner", "unittest",
+                   "--group", "unit:group",
+                   "--hostname", "server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "owner_group cannot contain the ':' character",
+                         command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHostlink)
     unittest.TextTestRunner(verbosity=2).run(suite)

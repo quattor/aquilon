@@ -55,8 +55,9 @@ class Hostlink(Resource):
         except ValueError:
             raise ArgumentError("mode does not convert to base 8 integer")
 
-    @validates(owner_user, owner_group)
+    @validates('owner_user', 'owner_group')
     def validate_owner(self, key, value):
-        if ':' in value:
-            raise ValueError("%s cannot contain the ':' character" % key)
+        if value is not None:
+            if ':' in value:
+                raise ArgumentError("%s cannot contain the ':' character" % key)
         return value
