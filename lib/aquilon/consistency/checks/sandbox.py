@@ -23,14 +23,14 @@ from aquilon.aqdb.model.branch import Sandbox
 
 
 class SandboxChecker(ConsistencyChecker):
-    """Sandbox Consistancy Checker"""
+    """Sandbox Consistency Checker"""
 
     def check(self, repair=False):
         db_sandboxes = {}
         for sandbox in self.session.query(Sandbox):
             db_sandboxes[sandbox.name] = sandbox
 
-        # Find all of the checked out sanbox's
+        # Find all of the checked out sandboxes
         fs_sandboxes = {}
         templatesdir = self.config.get("broker", "templatesdir")
         for (root, dirs, files) in os.walk(templatesdir):
@@ -43,7 +43,7 @@ class SandboxChecker(ConsistencyChecker):
                 # user = os.path.split(root)[-1]
                 for dir in dirs:
                     fs_sandboxes[dir] = os.path.join(root, dir)
-                # Prevent any furher recursion
+                # Prevent any further recursion
                 dirs[:] = []
 
         #######################################################################
@@ -51,7 +51,7 @@ class SandboxChecker(ConsistencyChecker):
         # Database (sandbox) == Filesystem (sandbox)
         #
 
-        # Branches in the database and not in the fileing system
+        # Branches in the database and not in the filesystem
         for branch in set(db_sandboxes.keys()).difference(fs_sandboxes.keys()):
             self.failure(branch, format(db_sandboxes[branch]),
                          "found in the database but not on the filesystem")
@@ -59,12 +59,12 @@ class SandboxChecker(ConsistencyChecker):
             # running "aq get"
 
         # Note to future self:
-        #   The following check is techncally not needed as we do not delete
-        #   the sandbox from the fileing system when the del_sanbox command
+        #   The following check is technically not needed as we do not delete
+        #   the sandbox from the filesystem when the del_sandbox command
         #   is run.  However, the following has been left just in case we
         #   decide to have a change of heart about this practice.
         #
-        # Branchs on fileing system but not in the database
+        # Branches on filesystem but not in the database
         # for branch in set(fs_sandboxes.keys()).difference(db_sandboxes.keys()):
         #    self.failure(branch, "Sandbox %s" % branch,
         #                 "found on filesystem (%s) but not in database"

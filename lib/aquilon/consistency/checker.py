@@ -30,7 +30,7 @@ class ConsistencyChecker(object):
         self._failures = dict()
 
     def check(self, repair=False):  # pylint: disable=W0613
-        """Perform the consistancy check
+        """Perform the consistency check
 
         This method should be overridden to implement the class.
         """
@@ -38,7 +38,7 @@ class ConsistencyChecker(object):
                             self.__class__.__name__)
 
     def failure(self, key, item, problem):
-        """Record a failuer
+        """Record a failure
 
         Takes a string as a single argument.
         """
@@ -51,7 +51,7 @@ class ConsistencyChecker(object):
     def process_failures(self):
         """Process Failures for this checker
 
-        This mehtod prints out all of the failures that have occured for this
+        This method prints out all of the failures that have occurred for this
         checker.  If there were no failures then True is returned, false
         otherwise.
         """
