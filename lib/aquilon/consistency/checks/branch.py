@@ -26,14 +26,14 @@ from aquilon.worker.dbwrappers.branch import merge_into_trash
 
 class BranchChecker(ConsistencyChecker):
     """
-    Branch Consistancy Checker
+    Branch Consistency Checker
 
     This module performs validation that is common for all branches (both
     domains and sandboxes) in template-king.
     """
 
     def check(self, repair=False):
-        # Find all of the branchs that are listed in the database
+        # Find all of the branches that are listed in the database
         db_branches = {}
         for branch in self.session.query(Branch):
             db_branches[branch.name] = branch
