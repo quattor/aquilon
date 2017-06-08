@@ -39,8 +39,7 @@ class HostlinkFormatter(ResourceFormatter):
         skeleton.hostlink.owner_user = hostlink.owner_user
         if hostlink.owner_group:
             skeleton.hostlink.owner_group = hostlink.owner_group
-# TODO: add protobuf support for this attribute
-#        if hostlink.mode:
-#            skeleton.hostlink.mode = hostlink.mode
+        if hasattr(skeleton.hostlink, "mode") and hostlink.target_mode:
+            skeleton.hostlink.mode = "%o" % (hostlink.target_mode)
 
 ObjectFormatter.handlers[Hostlink] = HostlinkFormatter()
