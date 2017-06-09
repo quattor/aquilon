@@ -102,6 +102,11 @@ class CommandCluster(BrokerCommand):
             if dbcluster.status.name != 'ready':
                 dbalmost = HostAlmostready.get_instance(session)
                 dbhost.status.transition(dbhost, dbalmost)
+                logger.client_info("Notice: changing build status of {0:l} "
+                                   "from '{1}' to '{2}' because {3:l}'s "
+                                   "state is '{4}'.".
+                                   format(dbhost, 'ready', dbalmost.name,
+                                          dbcluster, dbcluster.status.name))
                 plenaries.add(dbhost)
         elif dbhost.status.name == 'almostready':
             if dbcluster.status.name == 'ready':

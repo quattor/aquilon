@@ -81,6 +81,13 @@ class CommandMake(BrokerCommand):
             dbstatus = HostLifecycle.get_instance(session, buildstatus)
             dbhost.status.transition(dbhost, dbstatus)
 
+            # Check to see if the resulting status is the one requested
+            # and generate a message for the client if not.
+            if dbhost.status != dbstatus:
+                logger.client_info("Warning: requested build status was '{0}' "
+                                   "but resulting status is '{1}'.".
+                                   format(dbstatus.name, dbhost.status.name))
+
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)

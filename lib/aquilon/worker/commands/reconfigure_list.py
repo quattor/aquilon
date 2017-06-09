@@ -165,6 +165,11 @@ class CommandReconfigureList(BrokerCommand):
 
             if buildstatus:
                 dbhost.status.transition(dbhost, dbstatus)
+                if dbhost.status != dbstatus:
+                    logger.client_info("Warning: requested build status for {0:l} "
+                                       "was '{1}' but resulting status is '{2}'.".
+                                       format(dbhost, dbstatus.name,
+                                              dbhost.status.name))
 
             if comments is not None:
                 dbhost.comments = comments

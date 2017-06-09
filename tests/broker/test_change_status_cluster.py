@@ -64,9 +64,14 @@ class TestChangeClusterStatus(TestBrokerCommand):
         self.matchoutput(out, "Build Status: build", command)
 
     def test_120_BindDemotion(self):
-        self.successtest(["cluster",
-                          "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--cluster", "utecl2"])
+        command = ["cluster",
+                   "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--cluster", "utecl2"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Notice: changing build status of host "
+                              "evh1.aqd-unittest.ms.com from 'ready' to "
+                              "'almostready' because ESX cluster utecl2's "
+                              "state is 'build'.", command)
 
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
