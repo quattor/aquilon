@@ -74,9 +74,15 @@ class CommandUpdateAlias(BrokerCommand):
                     raise ArgumentError("Cannot alias {0} to {1}, as that "
                                         "is an alias of {0}"
                                         .format(fqdn, target))
-
-            dbalias.target = create_target_if_needed(session, logger,
-                                                     target, dbtgt_env)
+                # Ensure max alias depth requirement not breached
+                if ntalias.alias_depth + 1 > Alias.MAX_ALIAS_DEPTH:
+                    raise ArgumentError("Maximum alias depth would be exceeded - "
+                                        "new target is an alias.")
+                if any([al.alias_depth + ntalias.alias_depth >
+                        Alias.MAX_ALIAS_DEPTH for al in dbalias.all_aliases]):
+                    raise ArgumentError("Maximum alias depth would be exceeded - "
+                                        "new target is an alias.")
+            dbalias.target = create_target_if_needed(session, logger, target, dbtgt_env)
 
             # TODO: at some day we should verify that the new target is also
             # bound as a server, and modify the ServiceInstanceServer bindings

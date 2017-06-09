@@ -321,7 +321,98 @@ class TestUpdateAlias(EventsTestMixin, TestBrokerCommand):
                          "GRN should not be set but derived from the device.",
                          command)
 
+    def test_900_add_deep_alias(self):
+        # Create alias with max depth
+        cmd = ['add', 'alias', '--fqdn', 'test.aqd-unittest.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['add', 'alias', '--fqdn', 'test2.aqd-unittest.ms.com',
+               '--target', 'test.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['add', 'alias', '--fqdn', 'test3.aqd-unittest.ms.com',
+               '--target', 'test2.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['add', 'alias', '--fqdn', 'test4.aqd-unittest.ms.com',
+               '--target', 'test3.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        # Create alias with depth 1
+        cmd = ['add', 'alias', '--fqdn', 'testtest.aqd-unittest.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        self.noouttest(cmd)
 
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAlias)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        # Create alias with depth 2
+        cmd = ['add', 'alias', '--fqdn', 'testtest1.aqd-unittest.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['add', 'alias', '--fqdn', 'testtest2.aqd-unittest.ms.com',
+               '--target', 'testtest1.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+        # Create alias with depth 3
+        cmd = ['add', 'alias', '--fqdn', 'testtest3.aqd-unittest.ms.com',
+               '--target', 'arecord13.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['add', 'alias', '--fqdn', 'testtest4.aqd-unittest.ms.com',
+               '--target', 'testtest3.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['add', 'alias', '--fqdn', 'testtest5.aqd-unittest.ms.com',
+               '--target', 'testtest4.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+    def test_910_update_alias_target_deep_alias_1(self):
+        command = ['update', 'alias', '--fqdn', 'testtest1.aqd-unittest.ms.com',
+                   '--target', 'testtest5.aqd-unittest.ms.com']
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Maximum alias depth would be exceeded - "
+                         "new target is an alias.",
+                         command)
+
+    def test_910_update_alias_target_deep_alias_2(self):
+        command = ['update', 'alias', '--fqdn', 'testtest.aqd-unittest.ms.com',
+                   '--target', 'test4.aqd-unittest.ms.com']
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Maximum alias depth would be exceeded - "
+                         "new target is an alias.",
+                         command)
+
+    def test_910_update_alias_target_deep_alias_3(self):
+        command = ['update', 'alias', '--fqdn', 'test.aqd-unittest.ms.com',
+                   '--target', 'testtest.aqd-unittest.ms.com']
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Maximum alias depth would be exceeded - "
+                         "new target is an alias.",
+                         command)
+
+    def test_920_delete_deep_alias(self):
+        # Delete alias with max depth
+        cmd = ['del', 'alias', '--fqdn', 'test4.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['del', 'alias', '--fqdn', 'test3.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['del', 'alias', '--fqdn', 'test2.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['del', 'alias', '--fqdn', 'test.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        # Delete alias with depth 1
+        cmd = ['del', 'alias', '--fqdn', 'testtest.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        # Delete alias with depth 2
+        cmd = ['del', 'alias', '--fqdn', 'testtest2.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['del', 'alias', '--fqdn', 'testtest1.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        # Delete alias with depth 3
+        cmd = ['del', 'alias', '--fqdn', 'testtest5.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['del', 'alias', '--fqdn', 'testtest4.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+        cmd = ['del', 'alias', '--fqdn', 'testtest3.aqd-unittest.ms.com']
+        self.noouttest(cmd)
+
+
+    if __name__ == '__main__':
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAlias)
+        unittest.TextTestRunner(verbosity=2).run(suite)

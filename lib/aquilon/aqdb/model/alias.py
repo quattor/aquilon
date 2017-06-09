@@ -24,12 +24,12 @@ from sqlalchemy.sql import select, func
 from aquilon.aqdb.model import DnsRecord, Fqdn, DnsRecordTargetMixin
 
 _TN = 'alias'
-MAX_ALIAS_DEPTH = 4
 
 
 class Alias(DnsRecordTargetMixin, DnsRecord):
     """ Aliases a.k.a. CNAMES """
     __tablename__ = _TN
+    MAX_ALIAS_DEPTH = 4
 
     dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
@@ -69,7 +69,7 @@ class Alias(DnsRecordTargetMixin, DnsRecord):
     def __init__(self, fqdn, target, **kwargs):
         self.target = target
         super(Alias, self).__init__(fqdn=fqdn, **kwargs)
-        if self.alias_depth > MAX_ALIAS_DEPTH:
+        if self.alias_depth > self.MAX_ALIAS_DEPTH:
             raise ValueError("Maximum alias depth exceeded")
 
 # Most addresses will not have aliases. This bulk loadable property allows the
