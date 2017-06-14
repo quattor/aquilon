@@ -30,8 +30,7 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
     def test_000_justification(self):
         command = ["update_building_preference", "--building_pair", "utb1,utb2",
                    "--archetype", "hacluster", "--prefer", "utb1"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "The operation has production impact", command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_100_update_utb12(self):
         command = ["update_building_preference", "--building_pair", "utb1,utb2",
@@ -78,7 +77,7 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
                          command)
 
     def test_108_make_utbvcs2a(self):
-        self.statustest(["make_cluster", "--cluster", "utbvcs2a"])
+        self.statustest(["make_cluster", "--cluster", "utbvcs2a", "--justification", "tcm=123456"])
 
     def test_200_single_building(self):
         command = ["update_building_preference", "--building_pair", "ut",

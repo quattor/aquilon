@@ -169,7 +169,7 @@ class TestAddCity(TestBrokerCommand):
         self.dsdb_verify()
 
         # add cluster
-        command = ["add_cluster", "--cluster", "campus-test",
+        command = ["add_cluster", "--cluster", "campus-test", "--buildstatus", "ready",
                    "--archetype", "hacluster", "--personality", "hapersonality",
                    "--domain", "unittest", "--down_hosts_threshold", 0,
                    "--building", "bx"]

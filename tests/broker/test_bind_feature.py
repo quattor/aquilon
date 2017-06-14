@@ -26,8 +26,6 @@ if __name__ == "__main__":
 
 from broker.brokertest import TestBrokerCommand
 
-AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
-
 
 class TestBindFeature(TestBrokerCommand):
 
@@ -234,8 +232,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["bind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver", "--interface", "eth1"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["bind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
@@ -317,8 +314,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_150_bind_interface_personality(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0",
@@ -458,12 +454,8 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_200_bind_archetype_no_justification(self):
         command = ["bind", "feature", "--feature", "post_host",
-                   "--archetype", "aquilon"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "The operation has production impact, "
-                         "--justification is required.",
-                         command)
+                   "--archetype", "aurora"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_200_missing_personality(self):
         command = ["bind", "feature", "--feature", "post_host",
@@ -495,12 +487,8 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_200_bind_model_no_justification(self):
         command = ["bind", "feature", "--feature", "bios_setup",
-                   "--model", "utmedium", "--archetype", "aquilon"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "The operation has production impact, "
-                         "--justification is required.",
-                         command)
+                   "--model", "utmedium", "--archetype", "aurora"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_300_constraint_pre_host(self):
         command = ["del", "feature", "--feature", "pre_host",

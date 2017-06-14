@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import remove_branch, merge_into_trash
-from aquilon.worker.dbwrappers.change_management import validate_justification
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelDomain(BrokerCommand):
@@ -38,11 +38,9 @@ class CommandDelDomain(BrokerCommand):
                 raise ArgumentError("{0} is not archived, it cannot be deleted."
                                     .format(dbdomain))
 
-            if not justification:
-                raise AuthorizationException("Deleting a domain may lose "
-                                             "history, so --justification is "
-                                             "required.")
-            validate_justification(user, justification, reason, logger)
+            # TO DO: for tracked branches we need to probably enforce CM as well?
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbdomain, enforce_validation=True)
 
             if self.config.has_option("broker", "trash_branch"):
                 merge_msg = []

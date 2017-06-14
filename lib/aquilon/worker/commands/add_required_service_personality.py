@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, HostEnvironment, Service,
                                 PersonalityServiceListItem)
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
@@ -58,7 +58,9 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
             dbenv = HostEnvironment.get_instance(session, environment_override)
         else:
             dbenv = None
-        validate_prod_personality(dbstage, user, justification, reason, logger)
+
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(dbstage)
 
         if dbstage.created_implicitly:
             plenaries.add(dbstage)

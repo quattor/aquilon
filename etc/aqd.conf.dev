@@ -30,6 +30,7 @@ version = beta
 dsdb = /bin/echo
 mean = %(srcdir)s/tests/fakebin/fake_mean
 
+
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
 # For sqlalchemy, only INFO and DEBUG produce log messages.
@@ -37,3 +38,10 @@ mean = %(srcdir)s/tests/fakebin/fake_mean
 #sqlalchemy.engine = INFO
 #sqlalchemy.pool = INFO
 #sqlalchemy.orm = INFO
+
+
+[change_management]
+# The contents of --justification will not be validated externally
+# (syntax checking will still be performed)
+enable = True
+extra_options = --mode enforce --disable_edm --edm-instance qa

@@ -187,8 +187,8 @@ class TestUsecaseHACluster(TestBrokerCommand):
         # self.matchoutput(out, "IP: %s" % ips[1], command)
 
     def test_150_make_cluster(self):
-        self.statustest(["make", "cluster", "--cluster", "hacl1"])
-        self.statustest(["make", "cluster", "--cluster", "hacl2"])
+        self.statustest(["make", "cluster", "--cluster", "hacl1", "--justification", "tcm=12345678"])
+        self.statustest(["make", "cluster", "--cluster", "hacl2", "--justification", "tcm=12345678"])
 
     def test_155_cat_hacl2(self):
         command = ["cat", "--cluster", "hacl2", "--data"]

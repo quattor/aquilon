@@ -23,7 +23,7 @@ from aquilon.exceptions_ import (ProcessException, ArgumentError,
 from aquilon.aqdb.model import Domain, Branch, Sandbox, Review
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import sync_domain, sync_all_trackers
-from aquilon.worker.dbwrappers.change_management import validate_justification
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 
@@ -73,16 +73,11 @@ class CommandDeploy(BrokerCommand):
                                 .format(dbsource, dbtarget))
 
         if dbtarget.requires_change_manager and not dryrun:
-            if not justification:
-                raise AuthorizationException(
-                    "{0} is under change management control.  Please specify "
-                    "--justification.".format(dbtarget))
-
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbtarget, enforce_validation=True)
             # if not dbreview or not dbreview.approved:
-            #    logger.warning("Warning: this deployment request was not "
-            #                   "approved, this will be an error in the future.")
-
-            validate_justification(user, justification, reason, logger)
+                # logger.warning("Warning: this deployment request was not "
+                #                "approved, this will be an error in the future.")
 
         if dbtarget.archived:
             raise ArgumentError("{0} is archived and cannot be changed."

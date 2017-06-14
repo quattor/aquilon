@@ -17,7 +17,7 @@
 
 from aquilon.aqdb.model import Feature, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_feature
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.parameter import (add_feature_paramdef_plenaries,
                                                  lookup_paramdef,
                                                  update_paramdef_schema)
@@ -39,7 +39,9 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed
         if default is not None or clear_default:
-            validate_prod_feature(dbfeature, user, justification, reason, logger)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbfeature)
+
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
             db_paramdef.default = default
 

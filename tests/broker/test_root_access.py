@@ -60,19 +60,17 @@ class TestRootAccess(TestBrokerCommand):
         self.matchoutput(out, "User testinvaliduser not found", command)
 
     def test_225_map_personality_invalidjustification(self):
-        command = ["grant_root_access", "--user", "testuser1",
-                   "--personality", "unknownpersonality", "--justification", "foo"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Failed to parse the justification: "
-                         "expected tcm=NNNNNNNNN, sn=XXXNNNNN, or emergency.",
-                         command)
+        command = ["grant_root_access", "--netgroup", "netgroup1",
+                   "--personality", "metrocluster", "--justification", "foo"]
+        self.justificationformattest(command, auth=True, msgcheck=False)
 
     def test_230_map_personality_invalidpersonality(self):
         command = ["grant_root_access", "--user", "testuser1",
-                   "--personality", "unknownpersonality", "--justification", "tcm=12345678"]
+                   "--personality", "unknownpersonality", "--justification", "foo"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality unknownpersonality not found", command)
+        self.matchoutput(out,
+                         "Not Found: Personality unknownpersonality not found.",
+                         command)
 
     def test_240_map_personality_netgroup(self):
         command = ["grant_root_access", "--netgroup", "netgroup1",

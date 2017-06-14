@@ -21,8 +21,8 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser, ChooserCache
-from aquilon.worker.dbwrappers.change_management import validate_prod_cluster
-from aquilon.aqdb.model.clusterlifecycle import Ready
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
+
 
 class CommandMakeClusterCluster(BrokerCommand):
     requires_plenaries = True
@@ -49,7 +49,8 @@ class CommandMakeClusterCluster(BrokerCommand):
         # FIXME: this breaks virt's tooling at present (need patchup for
         # change-management strategies, or downstream changes).
 
-        # validate_prod_cluster(dbcluster, user, justification, reason, logger)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(dbcluster)
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later

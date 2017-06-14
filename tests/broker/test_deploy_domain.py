@@ -70,11 +70,7 @@ class TestDeployDomain(TestBrokerCommand):
     def test_120_deployfail(self):
         command = ["deploy", "--source", "changetest1",
                    "--target", "prod"]
-        _, err = self.failuretest(command, 4)
-        self.matchoutput(err,
-                         "Domain prod is under change management control.  "
-                         "Please specify --justification.",
-                         command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_120_deploydryrun(self):
         kingdir = self.config.get("broker", "kingdir")
@@ -93,8 +89,7 @@ class TestDeployDomain(TestBrokerCommand):
     def test_120_deploybadjustification(self):
         command = ["deploy", "--source", "changetest1", "--target", "prod",
                    "--justification", "I felt like deploying changes."]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Failed to parse the justification", command)
+        self.justificationformattest(command, auth=True, msgcheck=False)
 
     def test_123_request_review(self):
         command = ["request_review", "--source", "changetest1", "--target", "prod"]

@@ -37,7 +37,11 @@ DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_ERROR = "fail_expected_dsdb_error"
 DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
-
+CM_JUSTIFICATION = "Unauthorized: Failed: Change Management failed parsing TCM or SN ticket. Change Justification not provided."
+CM_EMERGANCY = "Unauthorized: Failed: Justification of 'emergency' requires --reason to be specified."
+CM_FOMAT = "Unauthorized: Failed: Change Management failed parsing TCM or SN ticket. Failed to " \
+           "parse the justification: expected tcm=NNNNNNNNN or sn=XXXNNNNN or emergency,sn=XXXNNNNN " \
+           "or tcm=NNNNNNNN,emergency or emergency."
 
 class TestBrokerCommand(unittest.TestCase):
 
@@ -410,6 +414,18 @@ class TestBrokerCommand(unittest.TestCase):
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))
         return err
+
+    def justificationmissingtest(self, command, **kwargs):
+        out = self.unauthorizedtest(command, **kwargs)
+        self.matchoutput(out, CM_JUSTIFICATION, command)
+
+    def reasonmissingtest(self, command, **kwargs):
+        out = self.unauthorizedtest(command, **kwargs)
+        self.matchoutput(out, CM_EMERGANCY, command)
+
+    def justificationformattest(self, command, **kwargs):
+        out = self.unauthorizedtest(command, **kwargs)
+        self.matchoutput(out, CM_FOMAT, command)
 
     def partialerrortest(self, command, **kwargs):
         # Currently these two cases behave the same way - same exit code

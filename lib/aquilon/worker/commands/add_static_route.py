@@ -26,7 +26,7 @@ from aquilon.aqdb.model import (NetworkEnvironment, StaticRoute, Personality,
                                 HardwareEntity, Interface, AddressAssignment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.network import get_network_byip
 from aquilon.worker.templates import PlenaryHost
 
@@ -81,7 +81,10 @@ class CommandAddStaticRoute(BrokerCommand):
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
-            validate_prod_personality(dbstage, user, justification, reason, logger)
+
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbstage)
+
             if dbstage.created_implicitly:
                 plenaries.add(dbstage)
         else:

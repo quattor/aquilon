@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityStage, Cluster, Host,
                                 HostEnvironment, PersonalityESXClusterInfo)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import PlenaryHost
 
@@ -83,15 +83,16 @@ class CommandUpdatePersonality(BrokerCommand):
 
         dbstage = dbpersona.active_stage(personality_stage)
 
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         # It's a bit ugly. If any of the non-staged attributes are touched,
         # then we need to check for prod hosts for all stages
         if (cluster_required is not None or config_override is not None or
                 host_environment or grn or eon_id or
                 leave_existing is not None or comments is not None):
             for ver in dbpersona.stages.values():
-                validate_prod_personality(ver, user, justification, reason, logger)
+                cm.validate(ver)
         else:
-            validate_prod_personality(dbstage, user, justification, reason, logger)
+            cm.validate(dbstage)
 
         if cluster_required is not None and \
            dbpersona.cluster_required != cluster_required:

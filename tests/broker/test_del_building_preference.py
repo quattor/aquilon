@@ -30,8 +30,7 @@ class TestDelBuildingPreference(TestBrokerCommand):
     def test_000_justification(self):
         command = ["del_building_preference", "--building_pair", "utb1,utb2",
                    "--archetype", "hacluster"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "The operation has production impact", command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_100_del_utb12(self):
         command = ["del_building_preference", "--building_pair", "utb1,utb2",
@@ -46,8 +45,13 @@ class TestDelBuildingPreference(TestBrokerCommand):
         self.matchclean(out, 'system/cluster/preferred_location', command)
 
     def test_108_make_utbvcs2a(self):
-        self.statustest(["make_cluster", "--cluster", "utbvcs2a"])
+        command = ["make_cluster", "--cluster", "utbvcs2a"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
+    def test_109_make_utbvcs2a(self):
+        command = ["make_cluster", "--cluster", "utbvcs2a",
+                   "--justification", "tcm=12345678"]
+        self.statustest(command)
     # utb2,utb3 is left in place, to be deleted together with the buildings
 
     def test_110_show_utb12(self):

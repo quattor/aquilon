@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (ServiceInstance, ServiceInstanceServer,
                                 DnsEnvironment, Cluster, ServiceAddress, Alias)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
@@ -130,7 +130,8 @@ class CommandBindServer(BrokerCommand):
         dbinstance = ServiceInstance.get_unique(session, service=service,
                                                 name=instance, compel=True)
 
-        validate_prod_service_instance(dbinstance, user, justification, reason, logger)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.validate(dbinstance)
 
         plenaries.add(dbinstance)
 

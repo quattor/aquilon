@@ -29,9 +29,6 @@ from broker.personalitytest import PersonalityTestMixin
 GRN = "grn:/ms/ei/aquilon/aqd"
 PPROD = "justify-prod"
 QPROD = "justify-qa"
-AUTHERR = "The operation has production impact, --justification is required."
-AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
-AUTHERR3 = "Unauthorized: Authorization error"
 
 
 class TestJustification(PersonalityTestMixin, TestBrokerCommand):
@@ -52,6 +49,11 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--activation", "reboot", "--deactivation", "reboot"]
         self.noouttest(command)
 
+        command = ["add", "feature", "--feature", "testclusterfeature",
+                   "--type", "host", "--grn", GRN, "--visibility", "public",
+                   "--activation", "reboot", "--deactivation", "reboot"]
+        self.noouttest(command)
+
     def test_105_setup_next(self):
         # Force the next stage to be created
         self.noouttest(["update_personality", "--personality", PPROD,
@@ -63,7 +65,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         h = "aquilon91.aqd-unittest.ms.com"
 
         command = ["reconfigure", "--hostname", h,
-                   "--archetype", "aquilon",
+                   "--archetype", "aquilon", "--buildstatus", "ready",
                    "--personality", PPROD, "--personality_stage", "next"]
         self.statustest(command)
 
@@ -71,8 +73,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["update_personality",
                    "--archetype", "aquilon",
@@ -86,8 +87,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--path", "access/users",
                    "--value", "test"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["add_parameter",
                    "--archetype", "aquilon",
@@ -103,8 +103,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--path", "access/users",
                    "--value", "test"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["update_parameter",
                    "--archetype", "aquilon",
@@ -119,8 +118,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--personality", PPROD,
                    "--path", "access/users"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["del_parameter",
                    "--archetype", "aquilon",
@@ -135,8 +133,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["map_grn",
                    "--archetype", "aquilon",
@@ -152,8 +149,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["unmap_grn",
                    "--archetype", "aquilon",
@@ -166,8 +162,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_270_add_required_svc(self):
         command = ["add_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["add_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
@@ -177,8 +172,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_280_del_required_svc(self):
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
@@ -190,8 +184,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
@@ -204,8 +197,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
@@ -217,8 +209,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
@@ -230,8 +221,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
@@ -242,8 +232,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_330_bind_feature(self):
         command = ["bind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["bind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
@@ -253,8 +242,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_340_unbind_feature(self):
         command = ["unbind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["unbind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
@@ -264,14 +252,22 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_350_map_service(self):
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.statustest(command)
 
     def test_360_unmap_service(self):
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.statustest(command)
+
+    def test_370_map_service(self):
+        command = ["map", "service", "--organization", "ms",
+                   "--service", "vmseasoning", "--instance", "pepper"]
+        self.noouttest(command)
+
+    def test_380_unmap_service(self):
+        command = ["unmap", "service", "--organization", "ms",
+                   "--service", "vmseasoning", "--instance", "pepper"]
+        self.noouttest(command)
 
     def test_400_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
@@ -380,22 +376,14 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD, "--personality_stage", "next"]
         self.statustest(command)
 
-    def test_601_bad_justification(self):
-        command = ["update_personality",
-                   "--archetype", "aquilon",
-                   "--personality", PPROD,
-                   "--justification", "something emergency"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Failed to parse the justification", command)
-
-    def test_605_update_personality_reason(self):
+    def test_601_justification_no_reason(self):
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
+    def test_605_update_personality_reason(self):
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", PPROD,
@@ -410,8 +398,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--path", "access/netgroup",
                    "--value", "test",
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["add_parameter",
                    "--archetype", "aquilon",
@@ -429,8 +416,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--path", "access/netgroup",
                    "--value", "test",
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["update_parameter",
                    "--archetype", "aquilon",
@@ -447,8 +433,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--path", "access/netgroup",
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["del_parameter",
                    "--archetype", "aquilon",
@@ -465,8 +450,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--grn", GRN,
                    "--target", "esp",
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["map_grn",
                    "--archetype", "aquilon",
@@ -484,8 +468,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--grn", GRN,
                    "--target", "esp",
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["unmap_grn",
                    "--archetype", "aquilon",
@@ -500,8 +483,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["add_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
@@ -513,12 +495,35 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        self.noouttest(command)
+
+    def test_675_add_required_svc_reason_os(self):
+        command = ["add_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--osname", "linux", "--osversion",
+                   "5.1-x86_64"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = ["add_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--osname", "linux", "--osversion",
+                   "5.1-x86_64", "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        self.noouttest(command)
+
+    def test_676_del_required_svc_reason_os(self):
+        command = ["del_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--osname", "linux", "--osversion",
+                   "5.1-x86_64", "--justification", "emergency"]
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
+
+        command = ["del_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--osname", "linux", "--osversion",
+                   "5.1-x86_64", "--justification", "emergency",
                    "--reason", "reason flag check"]
         self.noouttest(command)
 
@@ -528,8 +533,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
@@ -544,8 +548,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
@@ -559,8 +562,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
@@ -574,8 +576,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
@@ -588,8 +589,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["bind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["bind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
@@ -601,8 +601,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["unbind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR2, command)
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = ["unbind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
@@ -628,8 +627,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_820_bind_feature_restricted_prod(self):
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", PPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR, command)
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
@@ -646,28 +644,66 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--type", "host"]
         self.noouttest(command)
 
-    def test_860_rejected_tcm(self):
+    def test_860_accepted_tcm(self):
+        # To Do: create tests for rejected tickets
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", PPROD,
                    "--justification", "tcm=87654321"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR3, command)
+        self.noouttest(command)
 
     def test_870_accepted_sn(self):
+        # To Do: create tests for rejected tickets
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", PPROD,
                    "--justification", "sn=CHG123456"]
         self.noouttest(command)
 
-    def test_880_rejected_sn(self):
-        command = ["update_personality",
-                   "--archetype", "aquilon",
-                   "--personality", PPROD,
-                   "--justification", "sn=CHG654321"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR3, command)
+    def test_880_bind_feature_prod_cluster(self):
+        command = ["bind_feature", "--feature", "testclusterfeature",
+                   "--personality", "hapersonality"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--justification', 'emergency']
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--reason', 'some reason']
+        self.statustest(command)
+
+    def test_890_add_parameter_definition_prod_cluster(self):
+        command = ["add_parameter_definition", "--feature", "testclusterfeature",
+                   "--type", "host", "--path=teststringcluster", "--value_type=string",
+                   "--default", "default"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--justification', 'emergency']
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--reason', 'some reason']
+        self.statustest(command)
+
+    def test_895_del_parameter_definition_prod_cluster(self):
+        command = ["del_parameter_definition", "--feature", "testclusterfeature",
+                   "--type", "host", "--path=teststringcluster"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--justification', 'emergency']
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--reason', 'some reason']
+        self.statustest(command)
+
+    def test_896_unbind_feature_prod_cluster(self):
+        command = ["unbind_feature", "--feature", "testclusterfeature",
+                   "--personality", "hapersonality"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--justification', 'emergency']
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
+
+        command = command + ['--reason', 'some reason']
+        self.statustest(command)
 
     def test_900_cleanup(self):
         h = "aquilon91.aqd-unittest.ms.com"
@@ -687,6 +723,10 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.noouttest(command)
 
         command = ["del", "feature", "--feature", "testfeature",
+                   "--type", "host"]
+        self.noouttest(command)
+
+        command = ["del", "feature", "--feature", "testclusterfeature",
                    "--type", "host"]
         self.noouttest(command)
 

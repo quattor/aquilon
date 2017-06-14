@@ -22,9 +22,7 @@ from aquilon.aqdb.model import (HostFeature, HardwareFeature, InterfaceFeature,
                                 Archetype, Personality, PersonalityStage, Model,
                                 Domain, CompileableMixin)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import (validate_justification,
-                                                         validate_prod_archetype,
-                                                         validate_prod_personality)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.feature import (add_link, check_feature_template,
                                                get_affected_plenaries)
 
@@ -93,18 +91,16 @@ class CommandBindFeature(BrokerCommand):
         dbfeature = feature_cls.get_unique(session, name=feature, compel=True)
 
         # Step 3: authorization
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         if personality:
             if dbpersonality.owner_grn != dbfeature.owner_grn and \
-               dbfeature.visibility == 'owner_only':
-                if not justification:
-                    raise AuthorizationException("Changing feature bindings for "
-                                                 "a owner_only feature where owner grns "
-                                                 "do not match requires --justification.")
-                validate_justification(user, justification, reason, logger)
-            else:
-                validate_prod_personality(dbstage, user, justification, reason, logger)
+                            dbfeature.visibility == 'owner_only':
+                cm.validate(dbstage, enforce_validation=True)
+            cm.validate(dbstage)
+        elif archetype:
+            cm.validate(dbarchetype)
         else:
-            validate_prod_archetype(dbarchetype, user, justification, reason, logger)
+            cm.validate(dbfeature)
 
         # Step 4: do it
         get_affected_plenaries(session, dbfeature, plenaries, **params)

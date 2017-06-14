@@ -29,9 +29,8 @@ class TestAddBuildingPreference(TestBrokerCommand):
 
     def test_000_justification(self):
         command = ["add_building_preference", "--building_pair", "utb1,utb2",
-                   "--archetype", "hacluster", "--prefer", "utb2"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "The operation has production impact", command)
+                   "--archetype", "aurora", "--prefer", "utb2"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_100_add_utb12(self):
         command = ["add_building_preference", "--building_pair", "utb1,utb2",
@@ -81,8 +80,12 @@ class TestAddBuildingPreference(TestBrokerCommand):
         # No override
         self.matchclean(out, "Preferred", command)
 
+    def test_108_make_utbvcs2a_fail(self):
+        command = ["make_cluster", "--cluster", "utbvcs2a"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
     def test_108_make_utbvcs2a(self):
-        self.statustest(["make_cluster", "--cluster", "utbvcs2a"])
+        self.statustest(["make_cluster", "--cluster", "utbvcs2a", "--justification", "tcm=123456"])
 
     def test_110_add_utb23(self):
         # The pair is not given in lexicographical order; add some whitespace,
