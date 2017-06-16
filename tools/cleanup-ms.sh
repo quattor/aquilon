@@ -17,7 +17,6 @@ grep -lrE '(import aquilon.*depends)|(from aquilon.*import depends)' . \
     |xargs sed -i '/\(import aquilon.*depends\)\|\(from aquilon.*import depends\)/d'
 stylesheets=/usr/share/sgml/docbook/xsl-ns-stylesheets-$(rpm -q --qf %{VERSION} \
     docbook5-style-xsl)
-sed -i '/ms.version/d' tools/gen_completion.py
 sed -i -e "s:^XSLTPROC =.*:XSLTPROC = xsltproc" \
 	-e "s:^XMLLINT =.*:XMLLINT = xmllint" \
 	-e "s:^DOCBOOK_XSL =.*:DOCBOOK_XSL = $stylesheets" \
