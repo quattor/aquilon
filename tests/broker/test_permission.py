@@ -250,6 +250,16 @@ class TestPermission(TestBrokerCommand):
     def test_autherror_900(self):
         self.promote_current_user()
 
+    def test_autherror_910_multiple_principle(self):
+        # Add second principe for the current user with role nobody,
+        # so that authentication would be properly tested
+        command = ["permission", "--principal", "{}@some.test.realm".format(self.user),
+                   "--role", "nobody", "--createrealm", "--createuser"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Realm some.test.realm did not exist, creating.", command)
+        self.matchoutput(err, "User {}@some.test.realm did not exist, creating.".format(self.user),
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPermission)

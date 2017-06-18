@@ -55,7 +55,6 @@ class ChangeManagement(object):
 
     def __init__(self, session, user, justification, reason, logger, command):
         self.command = command
-        self.user = user.split('@')[0]
         self.justification = justification
         self.reason = reason
         self.logger = logger
@@ -68,7 +67,9 @@ class ChangeManagement(object):
         if self.config.has_option("change_management", "extra_options"):
             self.extra_options = self.config.get("change_management", "extra_options")
 
-        self.role_name = get_user_principal(session, self.user).role.name
+        dbuser = get_user_principal(session, user)
+        self.username = dbuser.name
+        self.role_name = dbuser.role.name
 
     def validate(self, target_obj, enforce_validation=False):
         print('Is change management enabled?', self.check_enabled)
@@ -102,7 +103,7 @@ class ChangeManagement(object):
         cmd = ["aqd_checkedm"] + shlex.split(self.extra_options)
         metadata = {"ticket": self.justification,
                     "reason": self.reason,
-                    "requestor": self.user,
+                    "requestor": self.username,
                     "requestor_role": self.role_name,
                     "command": self.command,
                     "impacted_envs": self.dict_of_impacted_envs,
