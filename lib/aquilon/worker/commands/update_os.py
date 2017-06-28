@@ -18,13 +18,15 @@
 from aquilon.aqdb.model import (OperatingSystem, Archetype,
                                 AssetLifecycle)
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateOS(BrokerCommand):
 
     required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, osname, osversion, archetype, lifecycle, comments, **_):
+    def render(self, session, osname, osversion, archetype, lifecycle, comments,
+               user, justification, reason, logger, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,
@@ -34,6 +36,10 @@ class CommandUpdateOS(BrokerCommand):
             dbos.comments = comments
 
         if lifecycle:
+            # Validate ChangeManagement
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(dbos)
+
             dblifecycle = AssetLifecycle.get_instance(session, lifecycle)
             dbos.lifecycle.transition(dbos, dblifecycle)
 

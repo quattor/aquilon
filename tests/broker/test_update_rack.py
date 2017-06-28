@@ -27,19 +27,6 @@ from brokertest import TestBrokerCommand
 
 
 class TestUpdateRack(TestBrokerCommand):
-    # Was row a column 3
-    def testupdateut3(self):
-        self.noouttest(["update", "rack", "--rack", "ut3", "--row", "b"])
-
-    # Was row g column 2
-    def testupdateut8(self):
-        self.noouttest(["update", "rack", "--rack", "ut8", "--column", "8"])
-
-    # Was row g column 3
-    def testupdateut9(self):
-        self.noouttest(["update", "rack", "--rack", "ut9", "--row", "h",
-                        "--column", "9", "--fullname", "My Rack",
-                        "--comments", "New rack comments"])
 
     def testverifyupdateut9(self):
         command = "show rack --rack ut9"
@@ -113,8 +100,27 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, '"sysloc/room" = "utroom2";', command)
         self.matchoutput(out, '"sysloc/bunker" = "bucket2.ut";', command)
 
-    def test_100_updateroom(self):
+
+    def test_100_prepare_CM_setup(self):
+        command = ["update", "machine", "--machine", "ut9s03p41", "--rack", "ut8"]
+        self.noouttest(command)
+        command = "search host --machine ut9s03p41"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "aquilon91.aqd-unittest.ms.com", command)
+        command = "show host --host aquilon91.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Build Status: ready',
+                         command)
+        self.matchoutput(out, 'Rack: ut8',
+                         command)
+
+    def test_105_updateroom(self):
         command = ['update_rack', '--rack=ut8', '--room=utroom1']
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = ['update_rack', '--rack=ut8', '--room=utroom1', '--justification', 'tcm=123']
         self.noouttest(command)
 
     def test_110_verifyroom(self):
@@ -126,6 +132,9 @@ class TestUpdateRack(TestBrokerCommand):
 
     def test_120_swaproom(self):
         command = ['update_rack', '--rack=ut8', '--room=utroom2']
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = ['update_rack', '--rack=ut8', '--room=utroom2', '--justification', 'tcm=123']
         self.noouttest(command)
 
     def test_130_verifyroom(self):
@@ -137,6 +146,9 @@ class TestUpdateRack(TestBrokerCommand):
 
     def test_140_updatebunker(self):
         command = ['update_rack', '--rack=ut8', '--bunker=bucket2.ut']
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = ['update_rack', '--rack=ut8', '--bunker=bucket2.ut', '--justification', 'sn=chng123']
         self.noouttest(command)
 
     def test_145_verifybunker(self):
@@ -149,6 +161,9 @@ class TestUpdateRack(TestBrokerCommand):
 
     def test_150_clearroom(self):
         command = ['update_rack', '--rack=ut8', '--building', 'ut']
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+        command = ['update_rack', '--rack=ut8', '--building', 'ut', '--justification', 'sn=chng123']
         self.noouttest(command)
 
     def test_160_verifyclear(self):
@@ -158,12 +173,32 @@ class TestUpdateRack(TestBrokerCommand):
         self.searchclean(out, r'Location Parents: \[.* Bunker .*\]', command)
 
     def test_170_failchangebuilding(self):
-        command = ['update_rack', '--rack=ut8', '--room=np-lab1']
+        command = ['update_rack', '--rack=ut8', '--room=np-lab1', '--justification', 'sn=chng123']
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change buildings.  Room np-lab1 is in "
                          "Building np while Rack ut8 is in Building ut.",
                          command)
+
+    # Was row a column 3
+    def test_180_updateut3(self):
+        self.noouttest(["update", "rack", "--rack", "ut3", "--row", "b"])
+
+    # Was row g column 2
+    def test_185_updateut8(self):
+        self.justificationmissingtest(["update", "rack", "--rack", "ut8", "--column", "8"],
+                                      auth=True, msgcheck=False)
+
+    # Was row g column 2
+    def test_186_updateut8(self):
+        self.noouttest(["update", "rack", "--rack", "ut8", "--column", "8",
+                        "--justification", "emergency", "--reason", "'I need this'"])
+
+    # Was row g column 3
+    def test_190_updateut9(self):
+        self.noouttest(["update", "rack", "--rack", "ut9", "--row", "h",
+                        "--column", "9", "--fullname", "My Rack",
+                        "--comments", "New rack comments"])
 
     def test_200_defaultdns(self):
         command = ["update", "rack", "--rack", "ut9",

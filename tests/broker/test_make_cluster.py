@@ -183,12 +183,34 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
                          data_cmd)
         self.matchclean(data, '/system/cluster/max_hosts', data_cmd)
 
-    def test_140_make_utvcs1_fail(self):
-        command = "make_cluster --cluster utvcs1"
+    def test_138_make_campus_test_justification_fail(self):
+        command = ["show", "cluster", "--cluster", "campus-test"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Build Status: ready',
+                         command)
+        self.matchoutput(out, 'Cluster Personality: hapersonality',
+                         command)
+        command = "make_cluster --cluster campus-test"
         self.justificationmissingtest(command.split(" "), auth=True, msgcheck=False)
 
+    def test_139_make_campus_test_justification_success(self):
+        command = "make_cluster --cluster campus-test --justification tcm=123456"
+        self.successtest(command.split(" "))
+
     def test_140_make_utvcs1(self):
-        command = "make_cluster --cluster utvcs1 --justification tcm=123456"
+        # Ensure that --justification is not required if cluster is not in prod/ready state
+        # cluster personality is not being validated in CM anymore
+        command = ["show", "cluster", "--cluster", "utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Cluster Personality: hapersonality',
+                         command)
+        self.matchoutput(out, 'Build Status: build',
+                         command)
+        command = "make_cluster --cluster utvcs1"
         self.successtest(command.split(" "))
 
     def test_145_verify_cat_utvcs1(self):

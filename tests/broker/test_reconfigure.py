@@ -77,12 +77,12 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, '"sysloc/country" = "us";', command)
 
     def test_1010_reconfigurelist_grn_pre(self):
-        hosts = ["aquilon95.aqd-unittest.ms.com",
-                 "aquilon91.aqd-unittest.ms.com"]
-        for h in hosts:
+        hosts = {"aquilon95.aqd-unittest.ms.com": "grn:/ms/ei/aquilon/unittest",
+                 "aquilon91.aqd-unittest.ms.com": "grn:/ms/ei/aquilon/aqd"}
+        for h, grn in hosts.iteritems():
             command = "show host --hostname %s" % h
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
+            self.matchoutput(out, "Owned by GRN: %s" % grn, command)
 
     def test_1011_list_grn(self):
         hosts = ["aquilon95.aqd-unittest.ms.com",

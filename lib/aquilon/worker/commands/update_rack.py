@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Rack, Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateRack(BrokerCommand):
@@ -28,8 +29,16 @@ class CommandUpdateRack(BrokerCommand):
     required_parameters = ["rack"]
 
     def render(self, session, plenaries, rack, row, column, room, building, bunker,
-               fullname, default_dns_domain, comments, **_):
+               fullname, default_dns_domain, comments, user, justification, reason, logger, **_):
         dbrack = Rack.get_unique(session, rack, compel=True)
+
+        q = session.query(Machine)
+        q = q.filter(Machine.location_id.in_(dbrack.offspring_ids()))
+
+        if row or column or bunker or room or building:
+            # Validate ChangeManagement
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(q)
 
         if row is not None:
             dbrack.rack_row = row
@@ -53,9 +62,6 @@ class CommandUpdateRack(BrokerCommand):
             dbrack.update_parent(parent=dbparent)
 
         session.flush()
-
-        q = session.query(Machine)
-        q = q.filter(Machine.location_id.in_(dbrack.offspring_ids()))
 
         plenaries.add(q)
         plenaries.write()

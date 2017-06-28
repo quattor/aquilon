@@ -24,6 +24,7 @@ from aquilon.aqdb.model import (City, Campus, HardwareEntity, Machine,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import update_location
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateCity(BrokerCommand):
@@ -32,7 +33,7 @@ class CommandUpdateCity(BrokerCommand):
     required_parameters = ["city"]
 
     def render(self, session, logger, plenaries, city, timezone, fullname, campus,
-               default_dns_domain, comments, **_):
+               default_dns_domain, comments, user, justification, reason, **_):
         dbcity = City.get_unique(session, city, compel=True)
 
         plenaries.add(dbcity)
@@ -65,16 +66,24 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbcampus.hub,
                                         dbcity, dbcity.hub))
 
+            # Validate ChangeManagement
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(q)
             plenaries.add(q)
 
             q = session.query(Cluster)
             q = q.filter(Cluster.location_constraint_id.in_(dbcity.offspring_ids()))
+            # Validate ChangeManagement
+            cm.validate(q.all())
             plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbcity.offspring_ids()))
+            # Validate ChangeManagement
+            # TO DO Either modify validate_prod_cluster method to accept queryset
+            # or convert to a list in validate method
+            cm.validate(q)
             plenaries.add(q)
-
             if dbcity.campus:
                 prev_campus = dbcity.campus
             dbcity.update_parent(parent=dbcampus)

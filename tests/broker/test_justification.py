@@ -33,16 +33,6 @@ QPROD = "justify-qa"
 
 class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_100_setup(self):
-        personalities = {
-            QPROD: {'grn': GRN,
-                    'environment': 'qa',
-                    'staged': True},
-            PPROD: {'grn': GRN,
-                    'environment': 'prod',
-                    'staged': True},
-        }
-        for personality, kwargs in personalities.items():
-            self.create_personality("aquilon", personality, **kwargs)
 
         command = ["add", "feature", "--feature", "testfeature",
                    "--type", "host", "--grn", GRN, "--visibility", "public",
@@ -53,13 +43,6 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--type", "host", "--grn", GRN, "--visibility", "public",
                    "--activation", "reboot", "--deactivation", "reboot"]
         self.noouttest(command)
-
-    def test_105_setup_next(self):
-        # Force the next stage to be created
-        self.noouttest(["update_personality", "--personality", PPROD,
-                        "--archetype", "aquilon"])
-        self.noouttest(["update_personality", "--personality", QPROD,
-                        "--archetype", "aquilon"])
 
     def test_110_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
@@ -704,31 +687,6 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = command + ['--reason', 'some reason']
         self.statustest(command)
-
-    def test_900_cleanup(self):
-        h = "aquilon91.aqd-unittest.ms.com"
-        p = "unixeng-test"
-
-        command = ["reconfigure", "--hostname", h,
-                   "--archetype", "aquilon",
-                   "--personality", p]
-        self.statustest(command)
-
-        command = ["del_personality", "--archetype", "aquilon",
-                   "--personality", "justify-qa"]
-        self.noouttest(command)
-
-        command = ["del_personality", "--archetype", "aquilon",
-                   "--personality", "justify-prod"]
-        self.noouttest(command)
-
-        command = ["del", "feature", "--feature", "testfeature",
-                   "--type", "host"]
-        self.noouttest(command)
-
-        command = ["del", "feature", "--feature", "testclusterfeature",
-                   "--type", "host"]
-        self.noouttest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestJustification)

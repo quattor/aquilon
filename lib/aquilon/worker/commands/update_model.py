@@ -16,13 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq update model`."""
 
-from sqlalchemy.orm import object_session, contains_eager
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.types import CpuType, NicType
 from aquilon.aqdb.model import (Vendor, Model, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.broker import BrokerCommand
+from sqlalchemy.orm import object_session, contains_eager
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateModel(BrokerCommand):
@@ -40,7 +41,8 @@ class CommandUpdateModel(BrokerCommand):
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
     def render(self, session, plenaries, model, vendor, newmodel, newvendor,
-               comments, update_existing_machines, **arguments):
+               comments, update_existing_machines, user, justification, reason,
+               logger, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows
             # for simple equality checks below and removes the need to
@@ -57,6 +59,12 @@ class CommandUpdateModel(BrokerCommand):
         if not update_existing_machines and (newmodel or newvendor):
             raise ArgumentError("Cannot update model name or vendor without "
                                 "updating any existing machines.")
+
+        if update_existing_machines:
+            # Validate ChangeManagement
+            q = session.query(Machine).filter_by(model=dbmodel)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(q)
 
         dbmachines = set()
 

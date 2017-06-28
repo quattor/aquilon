@@ -44,15 +44,10 @@ class TestDelBuildingPreference(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, 'system/cluster/preferred_location', command)
 
-    def test_108_make_utbvcs2a(self):
-        command = ["make_cluster", "--cluster", "utbvcs2a"]
-        self.justificationmissingtest(command, auth=True, msgcheck=False)
-
     def test_109_make_utbvcs2a(self):
-        command = ["make_cluster", "--cluster", "utbvcs2a",
-                   "--justification", "tcm=12345678"]
+        command = ["make_cluster", "--cluster", "utbvcs2a"]
         self.statustest(command)
-    # utb2,utb3 is left in place, to be deleted together with the buildings
+        # utb2,utb3 is left in place, to be deleted together with the buildings
 
     def test_110_show_utb12(self):
         command = ["show_building_preference", "--building_pair", "utb2,utb1",

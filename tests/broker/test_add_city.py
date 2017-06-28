@@ -144,7 +144,7 @@ class TestAddCity(TestBrokerCommand):
         self.matchoutput(out, "City: e3", command)
         self.matchclean(out, "e2", command)
 
-    def test_400_update_city_campus(self):
+    def test_400_add_city_campus(self):
         # add city
         self.dsdb_expect("add_city_aq -city_symbol e4 " +
                          "-country_symbol us -city_name Exampleby")
@@ -183,21 +183,36 @@ class TestAddCity(TestBrokerCommand):
                          command)
         self.matchclean(out, "system/cluster/sysloc/campus", command)
 
+        command = ["show", "cluster", "--cluster", "campus-test"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Build Status: ready',
+                         command)
+        self.matchoutput(out, 'City e4',
+                         command)
+
+    def test_405_update_city_campus_just_fail(self):
+        # update city
+        command = ["update", "city", "--city", "e4", "--campus", "na"]
+        self.justificationmissingtest(command, auth=True, msgcheck=False)
+
+    def test_406_update_city_campus_just_success(self):
         # update city
         self.dsdb_expect("update_city_aq -city e4 -campus na")
-        command = ["update", "city", "--city", "e4", "--campus", "na"]
+        command = ["update", "city", "--city", "e4", "--campus", "na", "--justification", "tcm=123"]
         self.ignoreoutputtest(command)
         self.dsdb_verify()
 
         command = "show city --city e4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
-                         "Continent na, Country us, Campus na]", command)
+                              "Continent na, Country us, Campus na]", command)
 
         command = "show building --building bx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
-                         "Continent na, Country us, Campus na, City e4]",
+                              "Continent na, Country us, Campus na, City e4]",
                          command)
 
         command = ["cat", "--cluster", "campus-test", "--data"]
@@ -215,16 +230,27 @@ class TestAddCity(TestBrokerCommand):
         self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
                          "Continent na, Country us, Campus na]", command)
 
-    def test_420_update_city_dsdb_error(self):
+    def test_420_update_city_just_error(self):
+        command = ["update", "city", "--city", "e4", "--campus", "ta",
+                   "--justification", "emergency"]
+        self.reasonmissingtest(command, auth=True, msgcheck=False)
+
+        command = "show city --city e4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
+                         "Continent na, Country us, Campus na]", command)
+
+    def test_425_update_city_dsdb_error(self):
         self.dsdb_expect("update_city_aq -city e4 -campus ta", fail=True)
-        command = ["update", "city", "--city", "e4", "--campus", "ta"]
+        command = ["update", "city", "--city", "e4", "--campus", "ta",
+                   "--justification", "emergency", "--reason", "'Some reason'"]
         out = self.badrequesttest(command)
         self.dsdb_verify()
 
         command = "show city --city e4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
-                         "Continent na, Country us, Campus na]", command)
+                              "Continent na, Country us, Campus na]", command)
 
     def test_430_update_city_30_bad_campus(self):
         # add city

@@ -99,6 +99,23 @@ class TestDelPersonality(PersonalityTestMixin, TestBrokerCommand):
         self.check_plenary_gone("aquilon", "personality", "camelcase", "config",
                                 directory_gone=True)
 
+    def test_150_clean_up_justification(self):
+        command = ["del_personality", "--archetype", "aquilon",
+                   "--personality", "justify-prod"]
+        self.noouttest(command)
+
+        command = ["del_personality", "--archetype", "aquilon",
+                   "--personality", "justify-qa"]
+        self.noouttest(command)
+
+        command = ["del", "feature", "--feature", "testfeature",
+                   "--type", "host"]
+        self.noouttest(command)
+
+        command = ["del", "feature", "--feature", "testclusterfeature",
+                   "--type", "host"]
+        self.noouttest(command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)

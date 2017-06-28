@@ -38,6 +38,15 @@ class TestAddDesk(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Desk: utdesk1", command)
 
+    def test_110_add_utdesk2(self):
+        command = ["add", "desk", "--desk", "utdesk2", "--building", "ut"]
+        self.noouttest(command)
+
+    def test_115_show_utdesk2(self):
+        command = "show desk --desk utdesk2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Desk: utdesk2", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDesk)
     unittest.TextTestRunner(verbosity=2).run(suite)

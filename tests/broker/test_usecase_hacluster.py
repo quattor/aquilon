@@ -187,8 +187,26 @@ class TestUsecaseHACluster(TestBrokerCommand):
         # self.matchoutput(out, "IP: %s" % ips[1], command)
 
     def test_150_make_cluster(self):
-        self.statustest(["make", "cluster", "--cluster", "hacl1", "--justification", "tcm=12345678"])
-        self.statustest(["make", "cluster", "--cluster", "hacl2", "--justification", "tcm=12345678"])
+        # Ensure that --justification is not required if cluster is not in prod/ready state
+        # cluster personality is not being validated in CM anymore
+        command = ["show", "cluster", "--cluster", "hacl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Cluster Personality: hapersonality',
+                         command)
+        self.matchoutput(out, 'Build Status: build',
+                         command)
+        command = ["show", "cluster", "--cluster", "hacl2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Cluster Personality: hapersonality',
+                         command)
+        self.matchoutput(out, 'Build Status: build',
+                         command)
+        self.statustest(["make", "cluster", "--cluster", "hacl1"])
+        self.statustest(["make", "cluster", "--cluster", "hacl2"])
 
     def test_155_cat_hacl2(self):
         command = ["cat", "--cluster", "hacl2", "--data"]
