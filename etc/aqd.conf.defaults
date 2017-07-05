@@ -247,7 +247,7 @@ max_members_default = 8
 [archetype_gridcluster]
 
 [archetype_hacluster]
-allow_cascaded_deco = False
+allow_cascaded_deco = True
 max_members_default = 2
 max_priority_order = 99
 min_priority_order = 1
