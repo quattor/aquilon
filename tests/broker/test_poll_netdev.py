@@ -66,14 +66,12 @@ class TestPollNetworkDevice(TestBrokerCommand):
         # Need to make sure that last_seen != creation_date for np06bals03
         # so sleep for 2 seconds here...
         sleep(2)
-        # Issues deprecated warning.
         self.successtest(["poll", "network_device", "--rack", "np7", "--type", "tor"])
 
     def test_202_repoll_with_clear(self):
         # Forcing there to "normally" be a difference in last_seen and
         # creation_date to test that clear is working...
         sleep(2)
-        # Issues deprecated warning.
         self.successtest(["poll_network_device", "--network_device=np06fals01.ms.com",
                           "--clear"])
 
@@ -117,7 +115,6 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          (m.group(1), m.group(2), out))
 
     def test_210_poll_ut01ga2s01(self):
-        # Issues deprecated warning.
         command = ["poll", "network_device", "--vlan", "--network_device",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         err = self.statustest(command)
@@ -183,10 +180,44 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s02_v713"].ip, command)
 
     def test_230_poll_ut01ga2s03(self):
-        self.successtest(["poll", "network_device", "--vlan",
-                          "--network_device", "ut01ga2s03.aqd-unittest.ms.com"])
+        # Tell fake_vlan2net to return an alternate output
+        scratchfile = self.writescratch("vlan2net_tag", "relabel")
+        try:
+            self.statustest(["poll", "network_device", "--vlan",
+                             "--network_device", "ut01ga2s03.aqd-unittest.ms.com"])
+        finally:
+            # Don't leave the file lying around to avoid surprises
+            os.unlink(scratchfile)
 
-    def test_235_poll_ut01ga2s04(self):
+    def test_231_verify_alt_tag(self):
+        command = ["show_network_device", "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "VLAN 717: %s" % self.net["ut01ga2s01_v712"].ip, command)
+        self.matchoutput(out, "VLAN 718: %s" % self.net["ut01ga2s01_v713"].ip, command)
+        self.matchclean(out, "712", command)
+        self.matchclean(out, "713", command)
+
+    def test_235_poll_ut01ga2s03_real(self):
+        # Second poll without a tag file, simulating the re-tagging of VLANs
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
+        out = self.statustest(command)
+        net = self.net["ut01ga2s01_v712"]
+        self.matchoutput(out,
+                         "ut01ga2s03.aqd-unittest.ms.com: "
+                         "network %s [%s/%s] updated to VLAN 712, type user" %
+                         (net.name, net.ip, net.prefixlen),
+                         command)
+
+    def test_236_verify_real_tag(self):
+        command = ["show_network_device", "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s01_v712"].ip, command)
+        self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
+        self.matchclean(out, "717", command)
+        self.matchclean(out, "718", command)
+
+    def test_240_poll_ut01ga2s04(self):
         self.successtest(["poll", "network_device", "--vlan",
                           "--network_device", "ut01ga2s04.aqd-unittest.ms.com"])
 

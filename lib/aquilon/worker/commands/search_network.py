@@ -92,15 +92,21 @@ class CommandSearchNetwork(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.network_device:
-                q = q.join(Network.port_group, PortGroup.network_devices,
-                           aliased=True)
-                q = q.filter_by(id=dbcluster.network_device_id)
-                q = q.reset_joinpoint()
+                # Old ESX model
+                net_ids = [dbpg.network_id for dbpg in
+                           dbcluster.network_device.port_groups]
             else:
+                # Non-ESX
+                # TODO: should this include all networks used by the members?
                 net_ids = [h.hardware_entity.primary_name.network.id for h in
                            dbcluster.hosts if getattr(h.hardware_entity.primary_name,
                                                       "network")]
+            # Filtering on an empty list is an expensive way to return
+            # nothing...
+            if net_ids:
                 q = q.filter(Network.id.in_(net_ids))
+            else:
+                q = q.filter(False)
         if pg or virtual_switch:
             PGAlias = aliased(PortGroup)
             q = q.join(PGAlias, Network.port_group)

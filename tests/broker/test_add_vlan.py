@@ -40,6 +40,10 @@ default_vlans = {
           "type": "user"},
     714: {"name": "user-v714",
           "type": "user"},
+    717: {"name": "transit-v717",
+          "type": "transit"},
+    718: {"name": "transit-v718",
+          "type": "transit"},
     999: {"name": "unused-v999",
           "type": "user"},
 }

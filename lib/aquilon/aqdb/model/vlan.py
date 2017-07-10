@@ -133,5 +133,4 @@ class __ObservedVlan(Base):
 
 NetworkDevice.port_groups = relation(PortGroup,
                                      secondary=__ObservedVlan.__table__,
-                                     cascade="save-update, merge",
-                                     backref=backref('network_devices'))
+                                     cascade="save-update, merge")
