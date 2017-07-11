@@ -198,10 +198,10 @@ for dirname in dirs:
     except OSError as e:
         print("Could not create %s: %s" % (dirname, e), file=sys.stderr)
 
-# Set up DSDB coverage directory
-dsdb_coverage_dir = os.path.join(config.get("unittest", "scratchdir"),
-                                 "dsdb_coverage")
-os.environ["AQTEST_DSDB_COVERAGE_DIR"] = dsdb_coverage_dir
+# Set up an environment variable to propagate the location of the scratch
+# directory to tools started by the broker
+scratchdir = config.get("unittest", "scratchdir")
+os.environ["AQTEST_SCRATCHDIR"] = scratchdir
 
 suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
