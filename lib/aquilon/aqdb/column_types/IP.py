@@ -85,7 +85,7 @@ class IP(TypeDecorator):
             return None
 
         if dialect.name == 'postgresql':
-            return ip_address(value)
+            return ip_address(text_type(value))
         else:
             # We could unpack the value unconditionally as IPv6 and use the
             # .ipv4_mapped property for IPv4, but that would add some extra
