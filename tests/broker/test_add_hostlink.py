@@ -33,6 +33,7 @@ class TestAddHostlink(TestBrokerCommand):
                    "--target=/var/spool/hostlinks/app1",
                    "--hostname=server1.aqd-unittest.ms.com",
                    "--owner=user1",
+                   "--mode=775",
                    "--comments=Some hostlink comments"]
         self.successtest(command)
 
@@ -79,6 +80,7 @@ class TestAddHostlink(TestBrokerCommand):
               Bound to: Host server1.aqd-unittest.ms.com
               Target Path: /var/spool/hostlinks/app1
               Owner: user1
+              Mode: 775
             """, command)
 
     def test_110_show_hostlink_with_mode(self):
@@ -115,6 +117,7 @@ class TestAddHostlink(TestBrokerCommand):
                                  "/var/spool/hostlinks/app1")
                 self.assertEqual(resource.hostlink.owner_user, "user1")
                 self.assertEqual(resource.hostlink.owner_group, "")
+                self.assertEqual(resource.hostlink.mode, "775")
                 hostlinkfound = True
         self.assertTrue(hostlinkfound,
                         "Hostlink app1 not found in the resources. "
