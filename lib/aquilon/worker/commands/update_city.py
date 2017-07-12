@@ -68,22 +68,25 @@ class CommandUpdateCity(BrokerCommand):
 
             # Validate ChangeManagement
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(q)
+            cm.consider(q)
             plenaries.add(q)
 
             q = session.query(Cluster)
             q = q.filter(Cluster.location_constraint_id.in_(dbcity.offspring_ids()))
             # Validate ChangeManagement
-            cm.validate(q.all())
+            # TO DO Either modify validate_prod_cluster method to accept queryset
+            # or convert to a list in validate method
+            cm.consider(q.all())
             plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbcity.offspring_ids()))
             # Validate ChangeManagement
-            # TO DO Either modify validate_prod_cluster method to accept queryset
-            # or convert to a list in validate method
-            cm.validate(q)
+            cm.consider(q)
             plenaries.add(q)
+
+            cm.validate()
+
             if dbcity.campus:
                 prev_campus = dbcity.campus
             dbcity.update_parent(parent=dbcampus)

@@ -47,7 +47,8 @@ class CommandMakeClusterCluster(BrokerCommand):
                                                   dbcluster.archetype))
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(dbcluster)
+        cm.consider(dbcluster)
+        cm.validate()
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later

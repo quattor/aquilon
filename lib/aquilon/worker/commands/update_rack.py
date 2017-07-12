@@ -38,7 +38,8 @@ class CommandUpdateRack(BrokerCommand):
         if row or column or bunker or room or building:
             # Validate ChangeManagement
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(q)
+            cm.consider(q)
+            cm.validate()
 
         if row is not None:
             dbrack.rack_row = row

@@ -40,7 +40,8 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         # override it, so more scrunity is needed
         if default is not None or clear_default:
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(dbfeature)
+            cm.consider(dbfeature)
+            cm.validate()
 
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
             db_paramdef.default = default

@@ -95,12 +95,13 @@ class CommandBindFeature(BrokerCommand):
         if personality:
             if dbpersonality.owner_grn != dbfeature.owner_grn and \
                             dbfeature.visibility == 'owner_only':
-                cm.validate(dbstage, enforce_validation=True)
-            cm.validate(dbstage)
+                cm.consider(dbstage, enforce_validation=True)
+            cm.consider(dbstage)
         elif archetype:
-            cm.validate(dbarchetype)
+            cm.consider(dbarchetype)
         else:
-            cm.validate(dbfeature)
+            cm.consider(dbfeature)
+        cm.validate()
 
         # Step 4: do it
         get_affected_plenaries(session, dbfeature, plenaries, **params)

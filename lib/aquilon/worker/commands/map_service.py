@@ -59,12 +59,13 @@ class CommandMapService(BrokerCommand):
                                                archetype=archetype, compel=True)
 
             for dbstage in dbpersona.stages.values():
-                cm.validate(dbstage)
+                cm.consider(dbstage)
         elif host_environment:
             dbenv = HostEnvironment.get_instance(session, host_environment)
-            cm.validate(dbenv)
+            cm.consider(dbenv)
         else:
-            cm.validate(dbinstance)
+            cm.consider(dbinstance)
+        cm.validate()
 
         q = session.query(ServiceMap)
         q = q.filter_by(service_instance=dbinstance,

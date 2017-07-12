@@ -40,7 +40,8 @@ class CommandDelDomain(BrokerCommand):
 
             # TO DO: for tracked branches we need to probably enforce CM as well?
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(dbdomain, enforce_validation=True)
+            cm.consider(dbdomain, enforce_validation=True)
+            cm.validate()
 
             if self.config.has_option("broker", "trash_branch"):
                 merge_msg = []

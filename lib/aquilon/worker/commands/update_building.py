@@ -60,7 +60,7 @@ class CommandUpdateBuilding(BrokerCommand):
 
             # Validate ChangeManagement
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(q)
+            cm.consider(q)
             # This one would change the template's locations hence forbidden
             if dbcity.hub != dbbuilding.hub and q.count():
                 # Doing this both to reduce user error and to limit
@@ -87,15 +87,15 @@ class CommandUpdateBuilding(BrokerCommand):
             # Validate ChangeManagement
             # TO DO Either modify validate_prod_cluster method to accept queryset
             # or convert to a list in validate method
-            cm.validate(q.all())
+            cm.consider(q.all())
             plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbbuilding.offspring_ids()))
             # Validate ChangeManagement
-            cm.validate(q)
+            cm.consider(q)
             plenaries.add(q)
-
+            cm.validate()
             dbbuilding.update_parent(parent=dbcity)
 
             if old_city.campus and (old_city.campus != dbcity.campus):

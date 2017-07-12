@@ -40,7 +40,8 @@ class CommandGrantRootAccess(BrokerCommand):
                                        archetype=archetype, compel=True)
         for dbstage in dbobj.stages.values():
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(dbstage)
+            cm.consider(dbstage)
+            cm.validate()
 
         if username:
             dbuser = User.get_unique(session, name=username,
