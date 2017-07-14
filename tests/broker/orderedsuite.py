@@ -261,6 +261,7 @@ from .test_del_rack import TestDelRack
 from .test_del_room import TestDelRoom
 from .test_del_bunker import TestDelBunker
 from .test_update_building import TestUpdateBuilding
+from .test_update_os import TestUpdateOS
 from .test_update_campus import TestUpdateCampus
 from .test_del_building import TestDelBuilding
 from .test_del_required_service import TestDelRequiredService
@@ -384,6 +385,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMapGrn,
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
+                     TestUpdateOS,
                      TestBuildClusters, TestAddBuildingPreference,
                      TestAddClusterAutoStartList, TestAddClusterSystemList,
                      TestClusterConstraintsNoVMs,

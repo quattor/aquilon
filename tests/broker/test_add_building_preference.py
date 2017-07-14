@@ -80,12 +80,8 @@ class TestAddBuildingPreference(TestBrokerCommand):
         # No override
         self.matchclean(out, "Preferred", command)
 
-    def test_108_make_utbvcs2a_fail(self):
-        command = ["make_cluster", "--cluster", "utbvcs2a"]
-        self.justificationmissingtest(command, auth=True, msgcheck=False)
-
     def test_108_make_utbvcs2a(self):
-        self.statustest(["make_cluster", "--cluster", "utbvcs2a", "--justification", "tcm=123456"])
+        self.statustest(["make_cluster", "--cluster", "utbvcs2a"])
 
     def test_110_add_utb23(self):
         # The pair is not given in lexicographical order; add some whitespace,

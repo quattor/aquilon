@@ -21,13 +21,13 @@ import unittest
 
 if __name__ == "__main__":
     import utils
+
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
 
 
 class TestUpdateModel(TestBrokerCommand):
-
     def test_000_sanitycheck(self):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
@@ -303,7 +303,30 @@ class TestUpdateModel(TestBrokerCommand):
                    '--disksize=1']
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine specfications are only valid "
-                         "for machine types", command)
+                              "for machine types", command)
+
+    def test_900_check_host_for_cm(self):
+        command = "search host --host_environment prod" \
+                  " --buildstatus ready --model bl460cg8"
+        out = self.commandtest(command.split())
+        self.matchoutput(out, "aquilon91.aqd-unittest.ms.com",
+                         command)
+
+    def test_905_justification(self):
+        command = "update model --model bl460cg8 --vendor hp " \
+                  "--memory 65536 --update_existing_machines"
+        self.justificationmissingtest(command.split(), auth=True, msgcheck=False)
+
+    def test_910_justification_not_req(self):
+        # Justification not required is existing machines not being updated
+        command = "update model --model bl460cg8 --vendor hp " \
+                  "--memory 65536"
+        self.commandtest(command.split())
+
+    def test_915_justification_success(self):
+        command = "update model --model bl460cg8 --vendor hp " \
+                  "--memory 65536 --update_existing_machines --justification tcm=123"
+        self.commandtest(command.split())
 
 
 if __name__ == '__main__':

@@ -24,6 +24,7 @@ from aquilon.aqdb.model import (Building, City, HardwareEntity, Machine,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import update_location
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateBuilding(BrokerCommand):
@@ -32,7 +33,7 @@ class CommandUpdateBuilding(BrokerCommand):
     required_parameters = ["building"]
 
     def render(self, session, logger, plenaries, building, city, address,
-               fullname, default_dns_domain, comments, **_):
+               fullname, default_dns_domain, comments, user, justification, reason, **_):
         dbbuilding = Building.get_unique(session, building, compel=True)
 
         old_city = dbbuilding.city
@@ -57,6 +58,9 @@ class CommandUpdateBuilding(BrokerCommand):
             q = q.filter(HWS.hardware_type.in_(['machine', 'network_device']))
             q = q.filter(HWS.location_id.in_(dbbuilding.offspring_ids()))
 
+            # Validate ChangeManagement
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.validate(q)
             # This one would change the template's locations hence forbidden
             if dbcity.hub != dbbuilding.hub and q.count():
                 # Doing this both to reduce user error and to limit
@@ -80,10 +84,16 @@ class CommandUpdateBuilding(BrokerCommand):
 
             q = session.query(Cluster)
             q = q.filter(Cluster.location_constraint_id.in_(dbbuilding.offspring_ids()))
+            # Validate ChangeManagement
+            # TO DO Either modify validate_prod_cluster method to accept queryset
+            # or convert to a list in validate method
+            cm.validate(q.all())
             plenaries.add(q)
 
             q = session.query(Network)
             q = q.filter(Network.location_id.in_(dbbuilding.offspring_ids()))
+            # Validate ChangeManagement
+            cm.validate(q)
             plenaries.add(q)
 
             dbbuilding.update_parent(parent=dbcity)

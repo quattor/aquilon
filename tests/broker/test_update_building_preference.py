@@ -77,7 +77,7 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
                          command)
 
     def test_108_make_utbvcs2a(self):
-        self.statustest(["make_cluster", "--cluster", "utbvcs2a", "--justification", "tcm=123456"])
+        self.statustest(["make_cluster", "--cluster", "utbvcs2a"])
 
     def test_200_single_building(self):
         command = ["update_building_preference", "--building_pair", "ut",

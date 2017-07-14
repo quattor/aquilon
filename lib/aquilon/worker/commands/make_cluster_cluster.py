@@ -46,9 +46,6 @@ class CommandMakeClusterCluster(BrokerCommand):
                                 "({1!s}).".format(dbcluster,
                                                   dbcluster.archetype))
 
-        # FIXME: this breaks virt's tooling at present (need patchup for
-        # change-management strategies, or downstream changes).
-
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         cm.validate(dbcluster)
 
