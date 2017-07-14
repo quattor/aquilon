@@ -36,7 +36,8 @@ class CommandUpdateBuildingPreference(BrokerCommand):
         db_pref.lock_row()
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(db_pref.archetype)
+        cm.consider(db_pref.archetype)
+        cm.validate()
 
         for db_clus in get_clusters_by_locations(session, (db_pref.a, db_pref.b),
                                                  db_pref.archetype):

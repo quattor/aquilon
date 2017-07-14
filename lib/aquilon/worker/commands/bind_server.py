@@ -131,7 +131,8 @@ class CommandBindServer(BrokerCommand):
                                                 name=instance, compel=True)
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(dbinstance)
+        cm.consider(dbinstance)
+        cm.validate()
 
         plenaries.add(dbinstance)
 

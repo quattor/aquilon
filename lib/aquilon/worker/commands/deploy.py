@@ -74,7 +74,8 @@ class CommandDeploy(BrokerCommand):
 
         if dbtarget.requires_change_manager and not dryrun:
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(dbtarget, enforce_validation=True)
+            cm.consider(dbtarget, enforce_validation=True)
+            cm.validate()
             # if not dbreview or not dbreview.approved:
                 # logger.warning("Warning: this deployment request was not "
                 #                "approved, this will be an error in the future.")

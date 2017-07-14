@@ -38,7 +38,8 @@ class CommandUpdateOS(BrokerCommand):
         if lifecycle:
             # Validate ChangeManagement
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(dbos)
+            cm.consider(dbos)
+            cm.validate()
 
             dblifecycle = AssetLifecycle.get_instance(session, lifecycle)
             dbos.lifecycle.transition(dbos, dblifecycle)

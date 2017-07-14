@@ -64,7 +64,8 @@ class CommandUpdateModel(BrokerCommand):
             # Validate ChangeManagement
             q = session.query(Machine).filter_by(model=dbmodel)
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(q)
+            cm.consider(q)
+            cm.validate()
 
         dbmachines = set()
 

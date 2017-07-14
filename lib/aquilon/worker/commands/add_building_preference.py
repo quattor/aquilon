@@ -33,7 +33,8 @@ class CommandAddBuildingPreference(BrokerCommand):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(dbarchetype)
+        cm.consider(dbarchetype)
+        cm.validate()
 
         if not dbarchetype.cluster_type:
             raise ArgumentError("{0} is not a cluster archetype."

@@ -90,9 +90,10 @@ class CommandUpdatePersonality(BrokerCommand):
                 host_environment or grn or eon_id or
                 leave_existing is not None or comments is not None):
             for ver in dbpersona.stages.values():
-                cm.validate(ver)
+                cm.consider(ver)
         else:
-            cm.validate(dbstage)
+            cm.consider(dbstage)
+        cm.validate()
 
         if cluster_required is not None and \
            dbpersona.cluster_required != cluster_required:

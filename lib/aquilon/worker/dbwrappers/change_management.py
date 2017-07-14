@@ -65,6 +65,7 @@ class ChangeManagement(object):
 
         self.dict_of_impacted_envs = {}
         self.eonid = 6980  # to be calculated for each target
+        self.enforce_validation = False
 
         if self.config.has_option("change_management", "enable"):
             self.check_enabled = self.config.getboolean("change_management", "enable")
@@ -75,7 +76,7 @@ class ChangeManagement(object):
         self.username = dbuser.name
         self.role_name = dbuser.role.name
 
-    def validate(self, target_obj, enforce_validation=False):
+    def consider(self, target_obj, enforce_validation=False):
         """
         Entry point validation method, chooses right validation method based on the object class
         and self.handlers dict
@@ -84,6 +85,8 @@ class ChangeManagement(object):
             enforce_validation: True or False
         Returns: None or raises InternalError/AuthorizationException
         """
+        if enforce_validation:
+            self.enforce_validation = enforce_validation
         if not self.check_enabled:
             self.logger.debug('Change management is disabled. Exiting validate.')
             return
@@ -103,7 +106,6 @@ class ChangeManagement(object):
         else:
             self._call_handler_method(target_obj)
         self.logger.debug('Call aqd_checkedm with metadata')
-        self.change_management_validate(enforce_validation=enforce_validation)
 
     def _call_handler_method(self, obj, queryset=None):
         env_calculate_method = self.handlers.get(obj.__class__, None)
@@ -115,24 +117,25 @@ class ChangeManagement(object):
         else:
             env_calculate_method(self, obj)
 
-    def change_management_validate(self, enforce_validation):
+    def validate(self):
         """
         Method calls adq_checkedm cmd tool with target resources metadata
         to calculate if change management validation is required.
         If required, justification validation will happen. If EDM calls
         enabled, the ticket will be checked in EDM.
-        Args:
-            enforce_validation: enforce justification validation,
-            disregarding impacted environment dict
-
         Returns: None or raises AuthorizationException
-
         """
+        if not self.check_enabled:
+            self.logger.debug('Change management is disabled. Exiting validate.')
+            return
+        if not self.dict_of_impacted_envs and not self.enforce_validation:
+            self.logger.debug('No impacted environments found and CM is not enforced.')
+            return
+
         # Clean final impacted env list
         self.logger.debug('Prepare impacted envs to call EDM')
         for env, build_status_list in self.dict_of_impacted_envs.items():
             self.dict_of_impacted_envs[env] = list(set(build_status_list))
-
         # Prepare aqd_checkedm input dict
         cmd = ["aqd_checkedm"] + shlex.split(self.extra_options)
         metadata = {"ticket": self.justification,
@@ -142,10 +145,9 @@ class ChangeManagement(object):
                     "command": self.command,
                     "impacted_envs": self.dict_of_impacted_envs,
                     "eonid": self.eonid,
-                    "enforce_validation": enforce_validation,
+                    "enforce_validation": self.enforce_validation,
                     }
         cmd.extend(["--metadata", json.dumps(metadata)])
-
         try:
             out = run_command(cmd)
             out_dict = json.loads(out)

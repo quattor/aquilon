@@ -59,7 +59,8 @@ class CommandAddParameter(BrokerCommand):
         dbstage = dbpersonality.active_stage(personality_stage)
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(dbstage)
+        cm.consider(dbstage)
+        cm.validate()
 
         path = ParamDefinition.normalize_path(path, strict=False)
 

@@ -60,7 +60,8 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
             dbenv = None
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(dbstage)
+        cm.consider(dbstage)
+        cm.validate()
 
         if dbstage.created_implicitly:
             plenaries.add(dbstage)

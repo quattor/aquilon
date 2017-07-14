@@ -40,7 +40,8 @@ class CommandAddRequiredService(BrokerCommand):
         dbservice = Service.get_unique(session, name=service, compel=True)
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.validate(dbarchetype)
+        cm.consider(dbarchetype)
+        cm.validate()
 
         self._update_dbobj(dbarchetype, dbservice)
 

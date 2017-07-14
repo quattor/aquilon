@@ -69,7 +69,9 @@ class CommandMapGrn(BrokerCommand):
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(objs[0])
+            # Why we only consider one obj?
+            cm.consider(objs[0])
+            cm.validate()
 
         for obj in objs:
             section = "archetype_" + obj.archetype.name

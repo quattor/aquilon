@@ -57,7 +57,8 @@ class CommandUnbindServer(BrokerCommand):
 
         for dbinstance in dbinstances:
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.validate(dbinstance)
+            cm.consider(dbinstance)
+            cm.validate()
 
             if position is not None:
                 if position < 0 or position >= len(dbinstance.servers):
