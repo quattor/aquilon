@@ -19,6 +19,7 @@
 
 import os
 import sys
+from subprocess import call
 
 
 def load_classpath():
@@ -36,3 +37,27 @@ def load_classpath():
 
     import depends
     import aquilon.aqdb.depends
+
+
+def copy_sqldb(config, target='DB', dump_path=None):
+    """
+    Function that copy sqlite DB files: either takes a database snapshot
+     or restored database from snapshot
+    :param config:
+    :param taget: DB or SNAPSHOT
+    :param dump_path:
+    :return:
+    """
+    dsn = config.get("database", "dsn")
+    if dsn.startswith("sqlite:///"):
+        work_db_file = config.get("database", "dbfile")
+        if dump_path:
+            dump = dump_path
+        else:
+            dump = config.get('unittest', 'last_success_db_snapshot')
+        if target == 'DB':
+            call(["/bin/cp", "-a", dump, work_db_file])
+        elif target =='SNAPSHOT':
+            call(["/bin/cp", "-a", work_db_file, dump])
+        else:
+            raise AttributeError('Target should either be a DB or a snapshot')
