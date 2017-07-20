@@ -46,6 +46,7 @@ class CommandMakeClusterCluster(BrokerCommand):
                                 "({1!s}).".format(dbcluster,
                                                   dbcluster.archetype))
 
+        # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         cm.consider(dbcluster)
         cm.validate()

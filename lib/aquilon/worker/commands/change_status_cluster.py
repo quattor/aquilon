@@ -19,6 +19,7 @@
 from aquilon.aqdb.model import Cluster, MetaCluster, ClusterLifecycle
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import TemplateDomain
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandChangeClusterStatus(BrokerCommand):
@@ -26,7 +27,8 @@ class CommandChangeClusterStatus(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, plenaries, cluster, metacluster, buildstatus, **_):
+    def render(self, session, logger, plenaries, cluster, metacluster, buildstatus,
+               user, justification, reason, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -36,6 +38,11 @@ class CommandChangeClusterStatus(BrokerCommand):
         else:
             dbcluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbcluster)
+        cm.validate()
 
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 

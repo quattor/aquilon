@@ -175,7 +175,6 @@ class ChangeManagement(object):
             q = session.query(Cluster)
             q = q.filter_by(personality_stage=personality_stage)
             q = q.join(ClusterLifecycle)
-
         else:
             q = session.query(Host)
             q = q.filter_by(personality_stage=personality_stage)
@@ -184,9 +183,12 @@ class ChangeManagement(object):
         q = q.join(PersonalityStage, Personality, HostEnvironment)
         q = q.options(contains_eager('personality_stage.personality.host_environment'))
 
-        for target in q.all():
-            self.dict_of_impacted_envs.setdefault(
-                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+        if isinstance(q.first(), Cluster):
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+        else:
+            for host in q.all():
+                self.validate_host(host)
 
     def validate_cluster(self, cluster):
         """
@@ -202,6 +204,11 @@ class ChangeManagement(object):
         # Also validate cluster hosts
         for host in cluster.hosts:
             self.validate_host(host)
+        if hasattr(cluster, 'members'):
+            for cluster_member in cluster.members:
+                self.validate_cluster(cluster_member)
+        # To do: Do we want to check if cluster is assigned
+        # to metacluster and if yes validate metacluster and its clusters/hosts?
 
     def validate_host(self, host):
         """
@@ -326,8 +333,7 @@ class ChangeManagement(object):
         q1 = q1.filter_by(host_environment=host_environment)
 
         for cluster in q1.all():
-            self.dict_of_impacted_envs.setdefault(
-                host_environment.name, []).append(cluster.status.name)
+            self.validate_cluster(cluster)
 
         q2 = session.query(Host)
         q2 = q2.join(HostLifecycle)
@@ -337,8 +343,7 @@ class ChangeManagement(object):
         q2 = q2.filter_by(host_environment=host_environment)
 
         for host in q2.all():
-            self.dict_of_impacted_envs.setdefault(
-                host_environment.name, []).append(host.status.name)
+            self.validate_host(host)
 
     def validate_prod_archetype(self, archtype):
         session = object_session(archtype)
@@ -354,9 +359,12 @@ class ChangeManagement(object):
         q = q.join(HostEnvironment)
         q = q.options(contains_eager('personality_stage.personality.host_environment'))
 
-        for target in q.all():
-            self.dict_of_impacted_envs.setdefault(
-                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+        if isinstance(q.first(), Cluster):
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+        else:
+            for host in q.all():
+                self.validate_host(host)
 
     def validate_prod_os(self, ostype):
         session = object_session(ostype)
@@ -368,9 +376,8 @@ class ChangeManagement(object):
         q = q.join(PersonalityStage, Personality, HostEnvironment)
         q = q.options(contains_eager('personality_stage.personality.host_environment'))
 
-        for target in q.all():
-            self.dict_of_impacted_envs.setdefault(
-                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+        for host in q.all():
+            self.validate_host(host)
 
     def validate_prod_service_instance(self, service_instance):
         session = object_session(service_instance)
@@ -383,8 +390,7 @@ class ChangeManagement(object):
         q1 = q1.options(contains_eager('personality_stage.personality.host_environment'))
 
         for cluster in q1.all():
-            self.dict_of_impacted_envs.setdefault(
-                cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
+            self.validate_cluster(cluster)
 
         q2 = session.query(Host)
         q2 = q2.filter(Host.services_used.contains(service_instance))
@@ -394,8 +400,7 @@ class ChangeManagement(object):
         q2 = q2.options(contains_eager('personality_stage.personality.host_environment'))
 
         for host in q2.all():
-            self.dict_of_impacted_envs.setdefault(
-                host.personality_stage.personality.host_environment.name, []).append(host.status.name)
+            self.validate_host(host)
 
     def validate_prod_feature(self, feature):
         session = object_session(feature)
@@ -417,8 +422,7 @@ class ChangeManagement(object):
         q1 = q1.options(contains_eager('personality_stage.personality.host_environment'))
 
         for cluster in q1.all():
-            self.dict_of_impacted_envs.setdefault(
-                cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
+            self.validate_cluster(cluster)
 
         q2 = session.query(Host)
         q2 = q2.join(PersonalityStage)
@@ -428,8 +432,7 @@ class ChangeManagement(object):
         q2 = q2.options(contains_eager('personality_stage.personality.host_environment'))
 
         for host in q2.all():
-            self.dict_of_impacted_envs.setdefault(
-                host.personality_stage.personality.host_environment.name, []).append(host.status.name)
+            self.validate_host(host)
 
 
 ChangeManagement.handlers[Cluster] = ChangeManagement.validate_cluster

@@ -21,6 +21,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.switchdata import PlenarySwitchData
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateCluster(BrokerCommand):
@@ -93,8 +94,14 @@ class CommandUpdateCluster(BrokerCommand):
                max_members, fix_location, clear_location_preference,
                down_hosts_threshold, maint_threshold, comments, switch,
                virtual_switch, metacluster, group_with, clear_group,
-               **arguments):
+               user, justification, reason, logger, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbcluster)
+        cm.validate()
+
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
 
         self.update_cluster_common(session, dbcluster, plenaries,
