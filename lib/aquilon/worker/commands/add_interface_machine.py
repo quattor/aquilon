@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.machine import add_interface
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddInterfaceMachine(BrokerCommand):
@@ -29,8 +30,14 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     def render(self, session, logger, plenaries, interface, machine, mac, automac, model,
                vendor, pg, autopg, iftype, type, bus_address, comments,
-               **arguments):
+               user, justification, reason, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
+
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         audit_results = []
 

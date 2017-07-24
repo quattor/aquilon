@@ -25,6 +25,7 @@ from aquilon.worker.dbwrappers.interface import (set_port_group,
                                                  rename_interface)
 from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateInterfaceMachine(BrokerCommand):
@@ -34,7 +35,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
     def render(self, session, logger, plenaries, interface, machine, mac, model, vendor,
                boot, pg, autopg, comments, master, clear_master, default_route,
-               rename_to, bus_address, **arguments):
+               rename_to, bus_address, user, justification, reason, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -51,6 +52,12 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         audit_results = []
 
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhw_ent)
+        cm.validate()
+
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, compel=True)
 

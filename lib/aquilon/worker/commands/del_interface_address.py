@@ -25,6 +25,7 @@ from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelInterfaceAddress(BrokerCommand):
@@ -33,8 +34,14 @@ class CommandDelInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, plenaries, interface, fqdn, ip, label, keep_dns,
-               network_environment, **kwargs):
+               network_environment, user, justification, reason, **kwargs):
         dbhw_ent = get_hardware(session, **kwargs)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhw_ent)
+        cm.validate()
+
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, compel=True)
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,

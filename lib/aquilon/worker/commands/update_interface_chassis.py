@@ -21,6 +21,7 @@ from aquilon.aqdb.model import Chassis, Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateInterfaceChassis(BrokerCommand):
@@ -29,13 +30,19 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
     invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
     def render(self, session, logger, interface, chassis, mac, comments,
-               rename_to, **arguments):
+               rename_to, user, justification, reason, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise UnimplementedError("update_interface --chassis cannot use "
                                          "the --%s option." % arg)
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbchassis)
+        cm.validate()
+
         dbinterface = Interface.get_unique(session, hardware_entity=dbchassis,
                                            name=interface, compel=True)
 

@@ -92,7 +92,7 @@ class TestServiceConstraints(TestBrokerCommand):
         self.justificationmissingtest(command, auth=True, msgcheck=False)
         command = ["reconfigure", "--hostname", 'server1.aqd-unittest.ms.com',
                    "--archetype", "aquilon",
-                   "--personality", "compileserver"]
+                   "--personality", "compileserver", "--justification", "tcm=123"]
         self.statustest(command)
 
 if __name__ == '__main__':

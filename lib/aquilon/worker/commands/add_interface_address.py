@@ -28,6 +28,7 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddInterfaceAddress(BrokerCommand):
@@ -36,9 +37,16 @@ class CommandAddInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, plenaries, fqdn, shortname, interface, label,
-               network_environment, map_to_primary, shared, priority, **kwargs):
+               network_environment, map_to_primary, shared, priority,
+               user, justification, reason, **kwargs):
 
         dbhw_ent = get_hardware(session, **kwargs)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhw_ent)
+        cm.validate()
+
         if shared and not isinstance(dbhw_ent, NetworkDevice):
             raise ArgumentError("The --shared option can only be used with "
                                 "network devices.")

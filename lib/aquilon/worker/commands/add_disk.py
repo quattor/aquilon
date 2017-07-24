@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.machine import add_disk
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddDisk(BrokerCommand):
@@ -30,8 +31,14 @@ class CommandAddDisk(BrokerCommand):
 
     def render(self, session, plenaries, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, wwn, bus_address, iops_limit, **kwargs):
+               snapshot, wwn, bus_address, iops_limit,
+               user, justification, reason, logger, **kwargs):
         dbmachine = get_hardware(session, compel=True, **kwargs)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
 
         add_disk(dbmachine, disk, controller, share, filesystem, resourcegroup,
                  address, size, boot, snapshot, wwn, bus_address, iops_limit,

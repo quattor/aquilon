@@ -24,6 +24,7 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddManager(BrokerCommand):
@@ -32,8 +33,14 @@ class CommandAddManager(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, plenaries, hostname, manager, interface, mac,
-               comments, **arguments):
+               comments, user, justification, reason, **arguments):
         dbhost = hostname_to_host(session, hostname)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhost)
+        cm.validate()
+
         dbmachine = dbhost.hardware_entity
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         audit_results = []

@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.resources import (find_resource,
 from aquilon.worker.templates import (PlenaryHostData,
                                       PlenaryServiceInstanceToplevel)
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 _disk_map_re = re.compile(r'^([^/]+)/(?:([^/]+)/)?([^/]+):([^/]+)/(?:([^/]+)/)?([^/]+)$')
 
@@ -181,10 +182,15 @@ class CommandUpdateMachine(BrokerCommand):
                clear_uuid, chassis, slot, clearchassis, multislot, vmhost,
                cluster, metacluster, allow_metacluster_change, cpuname,
                cpuvendor, cpucount, memory, ip, autoip, uri, remap_disk,
-               comments, **arguments):
+               comments, user, justification, reason, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
 
         plenaries.add(dbmachine)
         if dbmachine.vm_container:

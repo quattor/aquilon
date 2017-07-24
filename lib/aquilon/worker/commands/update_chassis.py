@@ -17,11 +17,12 @@
 """Contains the logic for `aq update chassis`."""
 
 from aquilon.aqdb.types import ChassisType
-from aquilon.aqdb.model import Model, Chassis
+from aquilon.aqdb.model import Model, Chassis, HardwareEntity
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateChassis(BrokerCommand):
@@ -29,7 +30,7 @@ class CommandUpdateChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, logger, chassis, model, rack, ip, vendor, serial,
-               comments, **_):
+               comments, user, justification, reason, **_):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
@@ -43,6 +44,13 @@ class CommandUpdateChassis(BrokerCommand):
         dblocation = get_location(session, rack=rack)
         if dblocation:
             dbchassis.location = dblocation
+
+            # Validate ChangeManagement
+            # Only if lacation being updated
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.consider(dbchassis)
+            cm.validate()
+
 
         if serial is not None:
             dbchassis.serial_no = serial

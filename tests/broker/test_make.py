@@ -284,7 +284,8 @@ class TestMake(TestBrokerCommand):
     def test_130_make_vm_hosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--osname", "esxi", "--osversion", "5.0.0"]
+                       "--osname", "esxi", "--osversion", "5.0.0", "--justification",
+                       "tcm=123"]
             err = self.statustest(command)
             self.matchclean(err, "removing binding", command)
 
@@ -317,7 +318,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "3/3 compiled", command)
 
     def test_145_make_aurora(self):
-        command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]
+        command = ["make", "--hostname", self.aurora_with_node + ".ms.com", "--justification", "tcm=123"]
         self.statustest(command)
 
     def test_150_make_zebra(self):

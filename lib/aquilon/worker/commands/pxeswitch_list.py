@@ -28,6 +28,7 @@ from aquilon.worker.processes import run_command
 from aquilon.worker.locks import ExternalKey
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import first_of
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 # The 'list' argument shadows the keyword...
 _listtype = list
@@ -46,14 +47,14 @@ class CommandPXESwitchList(BrokerCommand):
     requires_readonly = True
 
 
-    def render(self, session, logger, list, **arguments):
+    def render(self, session, logger, list, justification, reason, user, **arguments):
         check_hostlist_size(self.command, self.config, list)
         # The default is now --configure, but that does not play nice with
         # --status. Turn --configure off if --status is present
         if arguments.get("status", False):
             arguments["configure"] = None
 
-        user = self.config.get("broker", "installfe_user")
+        install_user = self.config.get("broker", "installfe_user")
         args = ["aii-installfe", "--cfgfile", "/dev/null"]
         ssh = self.config.lookup_tool("ssh")
         if ssh[0] == '/':
@@ -68,6 +69,8 @@ class CommandPXESwitchList(BrokerCommand):
 
         hosts_per_instance = defaultdict(_listtype)
         failed = []
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dbhost in dbhosts:
             if arguments.get("install", None) and (dbhost.status.name == "ready" or
                                                    dbhost.status.name == "almostready"):
@@ -75,6 +78,8 @@ class CommandPXESwitchList(BrokerCommand):
                               "before switching the PXE link to install."
                               .format(dbhost))
 
+            # Validate ChangeManagement
+            cm.consider(dbhost)
             # Find what "bootserver" instance we're bound to
             si = first_of(dbhost.services_used,
                           lambda x: x.service == dbservice)
@@ -82,6 +87,9 @@ class CommandPXESwitchList(BrokerCommand):
                 failed.append("{0} has no bootserver.".format(dbhost))
             else:
                 hosts_per_instance[si].append(dbhost)
+
+        # Validate ChangeManagement
+        cm.validate()
 
         if failed:
             raise ArgumentError("Invalid hosts in list:\n%s" %
@@ -110,7 +118,7 @@ class CommandPXESwitchList(BrokerCommand):
                         servers.append(srv.fqdn)
 
                 groupargs.append("--servers")
-                groupargs.append(" ".join("%s@%s" % (user, s) for s in servers))
+                groupargs.append(" ".join("%s@%s" % (install_user, s) for s in servers))
 
                 # It would be nice to connect to connect to the servers of
                 # different instances in parallel, however, we need to avoid

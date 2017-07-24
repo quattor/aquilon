@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelInterface(BrokerCommand):
@@ -28,7 +29,7 @@ class CommandDelInterface(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger, plenaries, interface, switch, mac, user,
-               **arguments):
+               justification, reason, **arguments):
         if switch:
             self.deprecated_option("switch", "Please use --network_device "
                                    "instead.", logger=logger, user=user,
@@ -40,6 +41,11 @@ class CommandDelInterface(BrokerCommand):
                                            name=interface, mac=mac, compel=True)
         if not dbhw_ent:
             dbhw_ent = dbinterface.hardware_entity
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhw_ent)
+        cm.validate()
 
         if dbinterface.vlans:
             vlans = ", ".join(sorted(iface.name for iface in

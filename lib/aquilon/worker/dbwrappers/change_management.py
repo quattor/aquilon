@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
-                                ResourceGroup, BundleResource)
+                                ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -228,13 +228,24 @@ class ChangeManagement(object):
         Returns: None
         """
         # Check if there cannot be a case when one machine can
-        # have multiple hosts assigned - vms seems to be handled separatelly
+        # have multiple hosts assigned - vms seems to be handled separately?
+        # Chassis/ChassisSlots?
         if isinstance(hwentities_or_hwentity, HardwareEntity):
-            self.validate_host(hwentities_or_hwentity.host)
+            if hwentities_or_hwentity.host:
+                self.validate_host(hwentities_or_hwentity.host)
         else:
             hwentities_or_hwentity = hwentities_or_hwentity.join(Host).options(contains_eager('host'))
             for hwentity in hwentities_or_hwentity.all():
                 self.validate_host(hwentity.host)
+
+    def validate_location(self, location):
+        session = object_session(location)
+        q = session.query(Host).join(HardwareEntity,
+                                     Host.hardware_entity_id == HardwareEntity.id).\
+            join(Location, HardwareEntity.location_id == Location.id).filter(Location.id == location.id)
+
+        for host in q.all():
+            self.validate_host(host)
 
     def validate_prod_network(self, network_or_networks):
         """
@@ -321,6 +332,17 @@ class ChangeManagement(object):
             q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
             for host in q.all():
                 self.validate_host(host)
+
+    def validate_chassis(self, chassis):
+        """
+        Validate if given chassis object has hosts in slots
+        Args:
+            chassis: single chassis object
+        Returns: None
+        """
+        for slot in chassis.slots:
+            if slot.machine.host:
+                self.validate_host(slot.machine.host)
 
     def validate_host_environment(self, host_environment):
         session = object_session(host_environment)
@@ -457,6 +479,9 @@ ChangeManagement.handlers[Infra] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Domain] = ChangeManagement.validate_default
 ChangeManagement.handlers[Host] = ChangeManagement.validate_host
 ChangeManagement.handlers[Machine] = ChangeManagement.validate_hardware_entity
-ChangeManagement.handlers[HardwareEntity] = ChangeManagement.validate_hardware_entity
+# Removing this as the HardwareEntity is too general, we have validate_hardware_entity, validate_host and validate_chassis
+#ChangeManagement.handlers[HardwareEntity] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[NetworkDevice] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[Network] = ChangeManagement.validate_prod_network
+ChangeManagement.handlers[Chassis] = ChangeManagement.validate_chassis
+ChangeManagement.handlers[Rack] = ChangeManagement.validate_location

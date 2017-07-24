@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddInterfaceNetworkDevice(BrokerCommand):
@@ -32,7 +33,7 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
                           "bus_address"]
 
     def render(self, session, logger, plenaries, interface, network_device,
-               mac, iftype, comments, **arguments):
+               mac, iftype, comments, user, justification, reason, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise ArgumentError("Cannot use argument --%s when adding an "
@@ -41,6 +42,12 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
         check_netdev_iftype(iftype)
 
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetdev)
+        cm.validate()
+
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
         get_or_create_interface(session, dbnetdev, name=interface, mac=mac,

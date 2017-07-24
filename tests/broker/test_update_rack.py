@@ -102,7 +102,7 @@ class TestUpdateRack(TestBrokerCommand):
 
 
     def test_100_prepare_CM_setup(self):
-        command = ["update", "machine", "--machine", "ut9s03p41", "--rack", "ut8"]
+        command = ["update", "machine", "--machine", "ut9s03p41", "--rack", "ut8", "--justification", "tcm=123"]
         self.noouttest(command)
         command = "search host --machine ut9s03p41"
         out = self.commandtest(command.split(" "))
@@ -198,7 +198,7 @@ class TestUpdateRack(TestBrokerCommand):
     def test_190_updateut9(self):
         self.noouttest(["update", "rack", "--rack", "ut9", "--row", "h",
                         "--column", "9", "--fullname", "My Rack",
-                        "--comments", "New rack comments"])
+                        "--comments", "New rack comments", "--justification", "tcm=123"])
 
     def test_200_defaultdns(self):
         command = ["update", "rack", "--rack", "ut9",

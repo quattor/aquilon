@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import PlenarySwitchData
 from aquilon.utils import validate_json
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateNetworkDevice(BrokerCommand):
@@ -40,8 +41,13 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
     def render(self, session, logger, plenaries, network_device, model, type, ip, vendor,
                serial, rename_to, discovered_macs, clear, discover, comments,
-               **arguments):
+               user, justification, reason, **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetdev)
+        cm.validate()
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
         plenaries.add(dbnetdev, cls=PlenarySwitchData)

@@ -23,6 +23,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host, remove_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelHost(BrokerCommand):
@@ -30,10 +31,15 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, plenaries, hostname, **_):
+    def render(self, session, logger, plenaries, hostname, user, justification, reason, **_):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhost)
+        cm.validate()
 
         if dbhost.virtual_machines:
             machines = ", ".join(sorted(m.label for m in

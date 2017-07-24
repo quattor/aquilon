@@ -49,7 +49,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon", "--buildstatus", "ready",
-                   "--personality", PPROD, "--personality_stage", "next"]
+                   "--personality", PPROD, "--personality_stage", "next", "--justification", "tcm=123"]
         self.statustest(command)
 
     def test_200_update_personality(self):
@@ -257,7 +257,8 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
-                   "--personality", QPROD, "--personality_stage", "next"]
+                   "--personality", QPROD, "--personality_stage", "next",
+                   "--justification", "tcm=123"]
         self.statustest(command)
 
     def test_405_update_personality(self):

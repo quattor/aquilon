@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             validate_branch_author)
 from aquilon.worker.templates import TemplateDomain, PlenaryHost
 from aquilon.worker.services import Chooser, ChooserCache
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 def select_personality(session, cache, dbhost, personality, personality_stage,
@@ -86,7 +87,7 @@ class CommandReconfigureList(BrokerCommand):
 
     def render(self, session, logger, plenaries, archetype, personality, personality_stage, keepbindings,
                buildstatus, osname, osversion, grn, eon_id, cleargrn, comments,
-               **arguments):
+               user, justification, reason, **arguments):
         dbhosts = self.get_hostlist(session, **arguments)
 
         if archetype:
@@ -119,7 +120,14 @@ class CommandReconfigureList(BrokerCommand):
         personality_cache = defaultdict(dict)
         os_cache = defaultdict(dict)
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+
         for dbhost in dbhosts:
+
+            # Validate ChangeManagement
+            cm.consider(dbhost)
+
             old_archetype = dbhost.archetype
             if dbarchetype:
                 target_archetype = dbarchetype
@@ -173,6 +181,9 @@ class CommandReconfigureList(BrokerCommand):
 
             if comments is not None:
                 dbhost.comments = comments
+
+        # Validate ChangeManagement
+        cm.validate()
 
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %

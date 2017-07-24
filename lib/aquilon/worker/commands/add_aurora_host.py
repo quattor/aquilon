@@ -41,7 +41,7 @@ class CommandAddAuroraHost(CommandAddHost):
     # Look for node name like <building><rack_id>c<chassis_id>n<node_num>
     nodename_re = re.compile(r'^\s*([a-zA-Z]+)(\d+)c(\d+)n(\d+)\s*$')
 
-    def render(self, session, logger, hostname, osname, osversion, **kwargs):
+    def render(self, session, logger, hostname, osname, osversion, buildstatus, **kwargs):
         # Pull relevant info out of dsdb...
         dsdb_runner = DSDBRunner(logger=logger)
         try:
@@ -49,7 +49,6 @@ class CommandAddAuroraHost(CommandAddHost):
         except ProcessException as e:
             raise ArgumentError("Could not find %s in DSDB: %s" %
                                 (hostname, e))
-
         fqdn = fields["fqdn"]
         dsdb_lookup = fields["dsdb_lookup"]
         if fields["node"]:
@@ -136,7 +135,8 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbslot.machine = dbmachine
                 session.add(dbslot)
         # FIXME: Pull this from somewhere.
-        buildstatus = 'ready'
+        if not buildstatus:
+            buildstatus = 'ready'
 
         kwargs['skip_dsdb_check'] = True
         kwargs['session'] = session

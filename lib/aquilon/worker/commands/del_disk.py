@@ -19,6 +19,7 @@
 from aquilon.aqdb.model import Disk, Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelDisk(BrokerCommand):
@@ -26,8 +27,14 @@ class CommandDelDisk(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, plenaries, disk, all, **kwargs):
+    def render(self, session, plenaries, disk, all, user, justification,
+               reason, logger, **kwargs):
         dbmachine = get_hardware(session, compel=True, **kwargs)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
 
         plenaries.add(dbmachine)
         dbcontainer = dbmachine.vm_container
