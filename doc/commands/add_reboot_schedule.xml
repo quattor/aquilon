@@ -50,21 +50,20 @@
 	    reboot schedule onto a host or a cluster.
 	</para>
 	<para>
-	    The work window must match the maintenance window defined
-	    for the personality.
-	</para>
-	<para>
-	    For the schedule to take affect the server must be bound
-	    to reboot service instance 'scheduled'.
+	    NOTE: Templates may impose policies on the allowable time of
+	    the reboot. Therefore it is important to remember to compile
+	    the host/cluster to validate the schedule as well as deploy it
+	    to the host.
 	</para>
     </refsect1>
 
     <refsect1>
 	<title>Templates</title>
 	<para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given) and the resource
-	    template for the reboot schedule itself.
+	    This command will add the reboot schedule under
+	    /system/resources/reboot_schedule for the host or
+	    cluster. Implementation of the scheduled reboot is delegated
+	    to PAN templates and Quattor configuration (NCM) components.
 	</para>
     </refsect1>
 
@@ -122,9 +121,9 @@
 		</term>
 		<listitem>
 		    <para>
-			Preferred time local to the host.  Omit this for
-			any time within the work window.  If given, the
-			time must still be in the maintenance window.
+			Preferred time local to the host. If not specified then
+            PAN templates must fill in a default value when processing
+            the resource.
 		    </para>
 		</listitem>
 	    </varlistentry>

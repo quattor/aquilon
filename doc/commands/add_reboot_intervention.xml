@@ -61,9 +61,9 @@
     <refsect1>
 	<title>Templates</title>
 	<para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given) and the resource
-	    template for the intervention itself.
+	    This command adds a resource under /system/resources/reboot_iv
+	    of the host or cluster (depending on which option was given).
+        Interpretation of this information is delegated to PAN templates.
 	</para>
     </refsect1>
 

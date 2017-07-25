@@ -50,7 +50,7 @@
     <refsect1>
 	<title>Templates</title>
 	<para>
-	    This command will modify the templates for the host or
+	    This command will modify the plenary template for the host or
 	    cluster (depending on which option was given) and remove the resource
 	    template for the reboot schedule itself.
 	</para>
