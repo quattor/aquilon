@@ -18,6 +18,7 @@
 
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from datetime import datetime, timedelta
 
 from sqlalchemy.sql.expression import asc, desc, exists
 from sqlalchemy import or_
@@ -79,7 +80,8 @@ class CommandSearchAudit(BrokerCommand):
                                     before)
             if not end.tzinfo:
                 end = end.replace(tzinfo=tzutc())
-            q = q.filter(Xtn.start_time < end)
+        else:
+            end = None
 
         if after is not None:
             try:
@@ -88,7 +90,35 @@ class CommandSearchAudit(BrokerCommand):
                 raise ArgumentError("Unable to parse date string '%s'" % after)
             if not start.tzinfo:
                 start = start.replace(tzinfo=tzutc())
-            q = q.filter(Xtn.start_time > start)
+        else:
+            start = None
+
+        # if no end-time set, and no start time set, use now;  if start-time
+        # is set (and no end), end at +1 year.
+
+        if end is None:
+            if start is None:
+                # Note: put this 1s in the future so we don't accidently miss
+                # things that were added within the last second (from zero'd
+                # microseconds).
+                end = datetime.utcnow().replace(microsecond=0) + timedelta(seconds=1)
+            else:
+                end = start + timedelta(days=366)
+
+            if not end.tzinfo:
+                end = end.replace(tzinfo=tzutc())
+
+        if start is None:
+            start = end - timedelta(days=366)
+            if not start.tzinfo:
+                start = start.replace(tzinfo=tzutc())
+
+        # sanity check: that end is after before.
+        if end < start:
+            raise ArgumentError(("Time region from after '%s' to before '%s'" +
+                                " is invalid.") % (after, before))
+
+        q = q.filter(Xtn.start_time > start, Xtn.start_time < end)
 
         if return_code is not None:
             if return_code == 0:

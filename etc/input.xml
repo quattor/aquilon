@@ -5305,21 +5305,25 @@
 	<p/>
 	Defaults:
 	<p/>
-	The default is to search for commands that create, update or delete data in DB,
-	also that involve other type of change activity on configuration (like 'compile' or 'pxeswitch' commands).
-	There are some special values for the command option to
-	provide customization to this behavior:
+	The default is to search for commands within the last year that create, update or delete data in the
+	database, and also commands that involve other types of change activity on configuration (like 'compile'
+	or 'pxeswitch' commands).  There are some special values for the command option to
+	provide customization of this behavior:
         <p/>"ro": includes just read only commands
 	<p/>"wo": includes just commands that involve create, update or delete data action to DB. Previous default behaviour.
 	<p/>"rw": includes both read and write commands except 'cat' and "show_active_*"
 	<p/>"all": includes ALL commands including the above
 	<p/>Date specifications: MM-DD-YY (midnight UTC),
-	or "MM-DD-YY HH:MM:SS+OOOO" (quotes needed).
+	"MM-DD-YY HH:MM:SS+OOOO" (quotes needed), or "now" or "today".
 	<p/>
 	Some more complex formats are capable, details can be found in
 	the "parser" section of http://niemeyer.net/python-dateutil
 	<p/>The limit option defaults to 5000 and has a maximum of 20000
 	in order to enhance performance and stability.
+	<p/>Unless both 'before' and 'after' are specified, the default
+	date range is a year prior to 'before' or a year since 'after', or
+	a year prior to now if neither is specified.  To explicitly search
+	the entire audit log, the 'forever' option can be used.
 	<optgroup mandatory="True">
 	    <option name="keyword" type="string">The value of any argument supplied to a command</option>
 	    <option name="argument" type="string">Look at the value of the specified argument only</option>
@@ -5327,6 +5331,7 @@
 	    <option name="command" type="string">The name of the command or command type (see "Defaults")</option>
 	    <option name="before" type="string">Search for transactions started before a specific date/time</option>
 	    <option name="after" type="string">Search for transactions started after a specific date/time</option>
+	    <option name="forever" type="flag">Search for transactions throughout the transaction log</option>
 	    <option name="return_code" type="int">Search by an HTTP response code (200-505)</option>
 	    <option name="limit" type="int">Limit the number of rows returned. (Default 5000/Max 20000)</option>
 	    <option name="reverse_order" type="flag">Output records in
@@ -5335,7 +5340,7 @@
 	    </option>
 	</optgroup>
 	<transport method="get" path="find/audit"/>
-	<format name="proto" >
+	<format name="proto">
 	    <message_class name="TransactionList" module="aqdaudit_pb2"/>
 	</format>
     </command>
@@ -5348,7 +5353,7 @@
 	    <option name="all" type="flag">List all schedules</option>
 	</optgroup>
 	<transport method="get" path="resource/reboot_schedule/reboot_schedule"/>
-	<format name="proto" >
+	<format name="proto">
 	    <message_class name="ResourceList" module="aqdsystems_pb2"/>
 	</format>
     </command>

@@ -45,7 +45,9 @@
 	<para>
 	    The <command>aq search audit</command> command searches through the
 	    recorded history of all commands run on the broker.  The times
-	    reported by the command are in UTC.
+	    reported by the command are in UTC.  Unless both the <option>--before</option>
+	    and <option>--after</option> options are given the search is limited to a
+	    year of audit log.
 	</para>
     </refsect1>
 
