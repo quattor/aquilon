@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ipaddress import IPv4Address
+from ipaddress import ip_address, IPv4Network
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
                                 AddressAssignment)
 from aquilon.aqdb.model.network_environment import get_net_dns_env
@@ -43,6 +43,10 @@ class CommandAddDynamicRange(BrokerCommand):
                                 "the same subnet." %
                                 (startip, startnet.network_address,
                                  endip, endnet.network_address))
+
+        if not isinstance(startnet.network, IPv4Network):
+            raise UnimplementedError("Registering dynamic DHCP ranges is not "
+                                     "supported on IPv6 networks.")
 
         if dns_domain:
             dbdns_domain = DnsDomain.get_unique(session, dns_domain,
@@ -82,7 +86,7 @@ class CommandAddDynamicRange(BrokerCommand):
         dsdb_runner = DSDBRunner(logger=logger)
         with session.no_autoflush:
             for ipint in range(int(startip), int(endip) + 1):
-                ip = IPv4Address(ipint)
+                ip = ip_address(ipint)
                 check_ip_restrictions(startnet, ip)
                 name = "%s-%s" % (prefix, str(ip).replace('.', '-'))
                 dbfqdn = Fqdn.get_or_create(session, name=name,

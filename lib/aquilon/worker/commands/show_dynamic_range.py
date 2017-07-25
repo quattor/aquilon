@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show dynamic range`."""
 
-from ipaddress import IPv4Address
+from ipaddress import ip_address
 
 from aquilon.aqdb.model import DynamicStub, DnsEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -50,4 +50,4 @@ class CommandShowDynamicRange(BrokerCommand):
         while end < int(dbnetwork.broadcast_address) and end + 1 in all_stubs:
             end = end + 1
 
-        return DynamicRange(dbnetwork, IPv4Address(start), IPv4Address(end))
+        return DynamicRange(dbnetwork, ip_address(start), ip_address(end))

@@ -181,6 +181,9 @@ def update_primary_ip(session, logger, dbhw_ent, ip):
     else:
         dns_rec = dbhw_ent.primary_name
 
+        if type(dns_rec.ip) is not type(ip):
+            raise ArgumentError("Changing the IP address type is not allowed.")
+
         q = session.query(AddressAssignment)
         q = q.filter_by(network=dns_rec.network)
         q = q.filter_by(ip=dns_rec.ip)

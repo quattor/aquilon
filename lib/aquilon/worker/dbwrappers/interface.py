@@ -23,13 +23,14 @@ To an extent, this has become a dumping ground for any common ip methods.
 from operator import attrgetter
 import re
 
-from ipaddress import IPv4Address
+from ipaddress import ip_address, IPv4Network
 
 from sqlalchemy.orm import aliased, object_session
 from sqlalchemy.sql.expression import desc, type_coerce
 from sqlalchemy.inspection import inspect
 
-from aquilon.exceptions_ import ArgumentError, InternalError, AquilonError
+from aquilon.exceptions_ import (ArgumentError, InternalError, AquilonError,
+                                 UnimplementedError)
 from aquilon.config import Config
 from aquilon.aqdb.types import NicType, MACAddress
 from aquilon.aqdb.column_types import AqMac
@@ -194,6 +195,14 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
         raise ArgumentError("Could not determine network to use for %s." %
                             dbinterface)
 
+    # The code below depends on being able to represent the set of all usable IP
+    # addresses in memory, which does not work for large IPv6 networks. Also,
+    # for IPv6, we potentially want to allocate a whole subnet per host instead
+    # of just a single IP address.
+    if not isinstance(dbnetwork.network, IPv4Network):
+        raise UnimplementedError("Automatic IP assignment is not implemented "
+                                 "for IPv6 networks.")
+
     # When there are e.g. multiple "add manager --autoip" operations going on in
     # parallel, we must ensure that they won't try to use the same IP address.
     # This query places a database lock on the network, which means IP address
@@ -208,7 +217,6 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     used_ips = used_ips.filter_by(network=dbnetwork)
     used_ips = used_ips.filter(ARecord.ip >= startip)
 
-    # FIXME: this will not work on big IPv6 networks
     full_set = set(range(int(startip), int(dbnetwork.broadcast_address)))
     used_set = set(int(item.ip) for item in used_ips)
     free_set = full_set - used_set
@@ -219,15 +227,15 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
 
     if ipalgorithm is None or ipalgorithm == 'lowest':
         # Select the lowest available address
-        ip = IPv4Address(min(free_set))
+        ip = ip_address(min(free_set))
     elif ipalgorithm == 'highest':
         # Select the highest available address
-        ip = IPv4Address(max(free_set))
+        ip = ip_address(max(free_set))
     elif ipalgorithm == 'max':
         # Return the max. used address + 1
         if not used_set:
             # Avoids ValueError being thrown when used_set is empty
-            ip = IPv4Address(min(free_set))
+            ip = ip_address(min(free_set))
         else:
             next = max(used_set)
             if (next + 1) not in free_set:
@@ -235,7 +243,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                                     "for --ipalgorithm=max.  Try an other "
                                     "algorithm as there are still some free "
                                     "addresses.")
-            ip = IPv4Address(next + 1)
+            ip = ip_address(next + 1)
     else:
         raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
 

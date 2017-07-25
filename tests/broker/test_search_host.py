@@ -165,8 +165,8 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --ip not-an-ip-address"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
-                         "Expected an IPv4 address for --ip: "
-                         "Expected 4 octets in u'not-an-ip-address'",
+                         "Expected an IP address for --ip: "
+                         "u'not-an-ip-address' does not appear to be an IPv4 or IPv6 address.",
                          command)
 
     def testnetworkipavailable(self):

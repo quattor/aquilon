@@ -17,11 +17,14 @@
 # limitations under the License.
 """Module for testing the dump_dns command."""
 
+import struct
 import unittest
 
 if __name__ == '__main__':
     import utils
     utils.import_depends()
+
+from ipaddress import IPv4Address, IPv6Address
 
 from brokertest import TestBrokerCommand
 
@@ -32,7 +35,31 @@ def inaddr_ptr(ip):
     return "%s.in-addr.arpa" % '.'.join(octets)
 
 
+def in6addr_ptr(ip):
+    octets = list(struct.unpack("B" * 16, ip.packed))
+    octets.reverse()
+    return ".".join("%x.%x" % (octet & 15, octet >> 4) for octet in octets) + ".ip6.arpa"
+
+
+def ip6(ip):
+    octets = struct.unpack("B" * 16, ip.packed)
+    return "".join("\\%03o" % octet for octet in octets)
+
+
 class TestDumpDns(TestBrokerCommand):
+
+    def test_ipv6_helper(self):
+        # Since the helpers used here are the same as the code used in the
+        # broker, they should be tested alone
+        ip = IPv6Address(u"2001:db8::1")
+        self.assertEqual(ip6(ip),
+                         "\\040\\001\\015\\270\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\000\\001")
+        self.assertEqual(in6addr_ptr(ip),
+                         "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa")
+
+    def test_ipv4_helper(self):
+        ip = IPv4Address(u"192.168.0.1")
+        self.assertEqual(inaddr_ptr(ip), "1.0.168.192.in-addr.arpa")
 
     def test_djb(self):
         command = ["dump", "dns"]
@@ -50,6 +77,15 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          "^%s:unittest20.aqd-unittest.ms.com" %
                          inaddr_ptr(self.net["zebra_eth0"].usable[0]),
+                         command)
+        # AAAA
+        self.matchoutput(out,
+                         ":ipv6test.aqd-unittest.ms.com:28:%s" %
+                         ip6(self.net["ipv6_test"].usable[1]),
+                         command)
+        self.matchoutput(out,
+                         "^%s:ipv6test.aqd-unittest.ms.com" %
+                         in6addr_ptr(self.net["ipv6_test"].usable[1]),
                          command)
         # CNAME
         self.matchoutput(out,

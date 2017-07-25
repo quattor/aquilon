@@ -186,8 +186,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Expected an IPv4 address for --ip: "
-                         "Expected 4 octets in u'not-an-ip-address'",
+                         "Expected an IP address for --ip: "
+                         "u'not-an-ip-address' does not appear to be an IPv4 or IPv6 address.",
                          command)
 
     def test_122_add_unittest16_bad_domain(self):

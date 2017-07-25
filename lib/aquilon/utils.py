@@ -32,7 +32,7 @@ from itertools import islice
 from tempfile import mkstemp
 from uuid import UUID
 
-from ipaddress import IPv4Address
+from ipaddress import IPv6Address, ip_address
 import jsonschema
 
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
@@ -92,12 +92,16 @@ def validate_template_name(label, value):
 def force_ip(label, value):
     if value is None:
         return None
-    if isinstance(value, IPv4Address):
-        return value
     try:
-        return IPv4Address(text_type(value))
+        ip = ip_address(text_type(value))
     except ValueError as e:
-        raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
+        raise ArgumentError("Expected an IP address for %s: %s." % (label, e))
+
+    # We could auto-convert mapped addresses to real IPv4 here, but that would
+    # make e.g. audit log lookups more difficult
+    if isinstance(ip, IPv6Address) and ip.ipv4_mapped:
+        raise ArgumentError("IPv6-mapped IPv4 addresses are not supported.")
+    return ip
 
 
 def force_int(label, value):

@@ -20,7 +20,8 @@
 from datetime import datetime
 import logging
 
-from ipaddress import IPv4Address, IPv4Network, ip_address, ip_network
+from ipaddress import (IPv4Address, IPv4Network, IPv6Address, IPv6Network,
+                       ip_address, ip_network)
 
 from six import text_type
 
@@ -30,7 +31,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import (relation, deferred, reconstructor, validates,
                             object_session)
 from sqlalchemy.pool import Pool
-from sqlalchemy.sql import and_, not_, func, literal_column
+from sqlalchemy.sql import and_, not_, func, literal_column, case
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import (Base, Location, NetworkEnvironment,
@@ -141,14 +142,19 @@ class Network(Base):
     router_ips = association_proxy("routers", "ip")
 
     __table_args__ = (UniqueConstraint(network_environment_id, ip),
-                      CheckConstraint(and_(cidr >= 1, cidr <= 32)),
+                      CheckConstraint(and_(cidr >= 1,
+                                           cidr <= case(
+                                               [(and_(ip >= IPv4Address(0),
+                                                      ip <= IPv4Address(0xffffffff)),
+                                                 32)],
+                                               else_=128))),
                       {'info': {'unique_fields': ['network_environment', 'ip'],
                                 'extra_search_fields': ['name', 'cidr']}})
 
     def __init__(self, network=None, network_type=None, **kw):
         # pylint: disable=W0621
-        if not isinstance(network, IPv4Network):
-            raise InternalError("Expected an IPv4Network, got: %s" %
+        if not isinstance(network, (IPv4Network, IPv6Network)):
+            raise InternalError("Expected an IP network, got: %s" %
                                 type(network))
 
         if not network_type:
@@ -197,7 +203,7 @@ class Network(Base):
     def network(self):
         if not self._network:
             # TODO: more efficient initialization? Using
-            # IPv4Network(int(self.ip)).supernet(new_prefix=self.cidr) looks
+            # ip_network(int(self.ip)).supernet(new_prefix=self.cidr) looks
             # promising at first, but unfortunately it uses the same string
             # conversion internally...
             self._network = ip_network(u"%s/%s" % (self.ip, self.cidr))
@@ -205,8 +211,8 @@ class Network(Base):
 
     @network.setter
     def network(self, value):
-        if not isinstance(value, IPv4Network):  # pragma: no cover
-            raise InternalError("Expected an IPv4Network, got: %s" %
+        if not isinstance(value, (IPv4Network, IPv6Network)):  # pragma: no cover
+            raise InternalError("Expected an IP network, got: %s" %
                                 type(value))
         self._network = value
         self.ip = value.network
@@ -286,7 +292,7 @@ class Network(Base):
         # The order matters here, we don't want to parse '1.2.3.4' as
         # IPv4Network('1.2.3.4/32')
         ip = None
-        if isinstance(args[0], IPv4Address):
+        if isinstance(args[0], (IPv4Address, IPv6Address)):
             ip = args[0]
         else:
             try:
@@ -300,7 +306,7 @@ class Network(Base):
                                                   query_options=options,
                                                   compel=compel)
         net = None
-        if isinstance(args[0], IPv4Network):
+        if isinstance(args[0], (IPv4Network, IPv6Network)):
             net = args[0]
         else:
             try:
