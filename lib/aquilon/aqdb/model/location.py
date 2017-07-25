@@ -55,6 +55,8 @@ class Location(Base):
 
     default_dns_domain = relation(DnsDomain)
 
+    uri = Column(String(255), nullable=True)
+
     __table_args__ = (UniqueConstraint(name, location_type),
                       Index("location_dns_domain_idx",
                             default_dns_domain_id),

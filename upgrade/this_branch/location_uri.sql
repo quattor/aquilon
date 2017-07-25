@@ -1,0 +1,1 @@
+ALTER TABLE location ADD uri VARCHAR(255);
