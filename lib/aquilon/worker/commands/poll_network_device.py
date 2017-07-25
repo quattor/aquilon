@@ -195,7 +195,17 @@ class CommandPollNetworkDevice(BrokerCommand):
                 if dbvi.vlan_type == "unknown":
                     continue
 
-                if not dbnetwork.port_group:
+                if dbnetwork.port_group:
+                    dbpg = dbnetwork.port_group
+                    # Update the port group definition if the network was re-tagged
+                    if dbpg.network_tag != vlan_int or dbpg.usage != dbvi.vlan_type:
+                        logger.client_info("{0}: {1:l} updated to "
+                                           "VLAN {2}, type {3}"
+                                           .format(netdev, dbnetwork, vlan_int,
+                                                   dbvi.vlan_type))
+                        dbpg.network_tag = vlan_int
+                        dbpg.usage = dbvi.vlan_type
+                else:
                     dbnetwork.port_group = PortGroup(network_tag=vlan_int,
                                                      usage=dbvi.vlan_type,
                                                      creation_date=now)

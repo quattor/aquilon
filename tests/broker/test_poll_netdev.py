@@ -42,43 +42,41 @@ class TestPollNetworkDevice(TestBrokerCommand):
         return re.sub(r"\s+", " ", "".join(out))
 
     # test_prebind_server runs too late...
-    def testbindpollhelper(self):
+    def test_100_bind_poll_helper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["bind", "server", "--service", service,
                         "--instance", "unittest",
                         "--hostname", "nyaqd1.ms.com"])
 
     # test_map_service runs too late...
-    def testmappollhelper(self):
+    def test_110_map_poll_helper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["map", "service", "--service", service,
                         "--instance", "unittest", "--building", "ut",
                         "--justification", "tcm=12345678"])
 
-    def testpollnp06bals03(self):
+    def test_200_poll_np06bals03(self):
         command = ["poll", "network_device", "--network_device", "np06bals03.ms.com"]
         err = self.statustest(command)
         self.matchoutput(err, "No jump host for np06bals03.ms.com, running "
                          "discovery from %s." % socket.gethostname(), command)
 
     # Tests re-polling np06bals03 and polls np06fals01
-    def testpollnp7(self):
+    def test_201_poll_np7(self):
         # Need to make sure that last_seen != creation_date for np06bals03
         # so sleep for 2 seconds here...
         sleep(2)
-        # Issues deprecated warning.
         self.successtest(["poll", "network_device", "--rack", "np7", "--type", "tor"])
 
-    def testrepollwithclear(self):
+    def test_202_repoll_with_clear(self):
         # Forcing there to "normally" be a difference in last_seen and
         # creation_date to test that clear is working...
         sleep(2)
-        # Issues deprecated warning.
         self.successtest(["poll_network_device", "--network_device=np06fals01.ms.com",
                           "--clear"])
 
     # FIXME: Verify the poll and that last_seen != creation_date
-    def testverifypollnp06bals03(self):
+    def test_205_verify_np06bals03(self):
         command = "show network_device --network_device np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
         r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
@@ -105,7 +103,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
             if str(port) not in port_to_mac:
                 self.searchclean(out, r"Port: %s\n" % port, command)
 
-    def testverifypollnp06fals01(self):
+    def test_205_verify_np06fals01(self):
         command = "show network_device --network_device np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out, r"Port: 49$\s+MAC: 00:15:2c:1f:40:00", command)
@@ -116,8 +114,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          "last seen '%s' in output:\n%s" %
                          (m.group(1), m.group(2), out))
 
-    def testpollut01ga2s01(self):
-        # Issues deprecated warning.
+    def test_210_poll_ut01ga2s01(self):
         command = ["poll", "network_device", "--vlan", "--network_device",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         err = self.statustest(command)
@@ -139,7 +136,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          (service),
                          command)
 
-    def testverifypollut01ga2s01(self):
+    def test_215_verify_ut01ga2s01(self):
         command = "show network_device --network_device ut01ga2s01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(1, 13):
@@ -159,11 +156,11 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
         self.matchclean(out, "VLAN 714", command)
 
-    def testpollut01ga2s02(self):
+    def test_220_poll_ut01ga2s02(self):
         self.successtest(["poll", "network_device", "--vlan",
                           "--network_device", "ut01ga2s02.aqd-unittest.ms.com"])
 
-    def testverifypollut01ga2s02(self):
+    def test_225_verify_ut01ga2s02(self):
         command = "show network_device --network_device ut01ga2s02.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(13, 25):
@@ -182,15 +179,49 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s02_v712"].ip, command)
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s02_v713"].ip, command)
 
-    def testpollut01ga2s03(self):
-        self.successtest(["poll", "network_device", "--vlan",
-                          "--network_device", "ut01ga2s03.aqd-unittest.ms.com"])
+    def test_230_poll_ut01ga2s03(self):
+        # Tell fake_vlan2net to return an alternate output
+        scratchfile = self.writescratch("vlan2net_tag", "relabel")
+        try:
+            self.statustest(["poll", "network_device", "--vlan",
+                             "--network_device", "ut01ga2s03.aqd-unittest.ms.com"])
+        finally:
+            # Don't leave the file lying around to avoid surprises
+            os.unlink(scratchfile)
 
-    def testpollut01ga2s04(self):
+    def test_231_verify_alt_tag(self):
+        command = ["show_network_device", "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "VLAN 717: %s" % self.net["ut01ga2s01_v712"].ip, command)
+        self.matchoutput(out, "VLAN 718: %s" % self.net["ut01ga2s01_v713"].ip, command)
+        self.matchclean(out, "712", command)
+        self.matchclean(out, "713", command)
+
+    def test_235_poll_ut01ga2s03_real(self):
+        # Second poll without a tag file, simulating the re-tagging of VLANs
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
+        out = self.statustest(command)
+        net = self.net["ut01ga2s01_v712"]
+        self.matchoutput(out,
+                         "ut01ga2s03.aqd-unittest.ms.com: "
+                         "network %s [%s/%s] updated to VLAN 712, type user" %
+                         (net.name, net.ip, net.prefixlen),
+                         command)
+
+    def test_236_verify_real_tag(self):
+        command = ["show_network_device", "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s01_v712"].ip, command)
+        self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
+        self.matchclean(out, "717", command)
+        self.matchclean(out, "718", command)
+
+    def test_240_poll_ut01ga2s04(self):
         self.successtest(["poll", "network_device", "--vlan",
                           "--network_device", "ut01ga2s04.aqd-unittest.ms.com"])
 
-    def testpollbor(self):
+    def test_300_poll_bor(self):
         command = ["poll", "network_device", "--vlan",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         err = self.statustest(command)
@@ -200,7 +231,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          "not a ToR network device.",
                          command)
 
-    def testpolltype(self):
+    def test_305_poll_type(self):
         # We make use of poll_switch reporting the (lack of the) jump host for
         # every switch it touches
         command = ["poll", "network_device", "--rack", "ut3", "--type", "bor"]
@@ -212,7 +243,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchclean(err, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchclean(err, "ut3gd1r06.aqd-unittest.ms.com", command)
 
-    def testtypemismatch(self):
+    def test_310_type_mismatch(self):
         command = ["poll", "network_device", "--type", "tor",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -221,12 +252,11 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          "a tor switch.",
                          command)
 
-    def testbadtype(self):
+    def test_310_bad_type(self):
         command = ["poll", "network_device", "--type", "no-such-type",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown switch type 'no-such-type'.", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPollNetworkDevice)

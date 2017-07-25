@@ -16,9 +16,11 @@
 
 DATADIR=$(dirname "$0")/dsdb.d
 
-if [ -z "$AQTEST_DSDB_COVERAGE_DIR" ]; then
+if [ -z "$AQTEST_SCRATCHDIR" ]; then
 	exit 0
 fi
+
+AQTEST_DSDB_COVERAGE_DIR="$AQTEST_SCRATCHDIR/dsdb_coverage"
 
 echo "$*" >> "${AQTEST_DSDB_COVERAGE_DIR}/issued_dsdb_cmds"
 

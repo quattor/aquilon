@@ -23,7 +23,7 @@ import sys
 import os
 
 
-def determine_output(args):
+def determine_output(args, tag):
     """ Figure out which file has the necessary contents for the request."""
     ip = None
     for i in range(len(args)):
@@ -38,13 +38,28 @@ def determine_output(args):
         sys.exit(1)
     fakedir = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                             "vlan2net.d"))
-    return os.path.join(fakedir, "vlan2net_-ip_%s.out" % ip)
+
+    if tag:
+        return os.path.join(fakedir, "vlan2net_-ip_%s_%s.out" % (ip, tag))
+    else:
+        return os.path.join(fakedir, "vlan2net_-ip_%s.out" % ip)
 
 def fake_vlan2net(args):
-    with open(determine_output(args)) as f:
+    # To be able to simulate what happens if VLAN tags change, we need a way to
+    # return different output for the same switch, as requested by the tests.
+    # Since this command is started by the broker and not directly by the tests,
+    # a file is used for communication
+    tag = None
+    scratchdir = os.environ.get("AQTEST_SCRATCHDIR", None)
+    if scratchdir:
+        tagfile = os.path.join(scratchdir, "vlan2net_tag")
+        if os.path.exists(tagfile):
+            with open(tagfile, "r") as f:
+                tag = f.readlines()[0]
+
+    with open(determine_output(args, tag)) as f:
         for line in f:
             sys.stdout.write(line)
-
 
 if __name__=='__main__':
     fake_vlan2net(sys.argv)
