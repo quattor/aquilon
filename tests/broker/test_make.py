@@ -273,6 +273,14 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: scope-network",
                          command)
 
+    def test_128_make_evh1_statuschange(self):
+        command = ["make", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Warning: requested build status was 'ready' "
+                              "but resulting status is 'almostready'.",
+                         command)
+
     def test_130_make_vm_hosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,

@@ -455,6 +455,15 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
+    def test_1090_reconfig_status_evh1(self):
+        command = ["reconfigure",
+                   "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Warning: requested build status was 'ready' "
+                              "but resulting status is 'almostready'.",
+                         command);
+
     def test_1100_remove_bindings(self):
         command = ["reconfigure",
                    "--hostname", "aquilon87.aqd-unittest.ms.com",
