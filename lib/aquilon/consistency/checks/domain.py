@@ -26,7 +26,7 @@ from aquilon.worker.processes import run_git
 
 
 class DomainChecker(ConsistencyChecker):
-    """Domain Consistancy Checker"""
+    """Domain Consistency Checker"""
 
     def check_single_domain(self, dbdomain, repair=False):
         domaindir = os.path.join(self.config.get("broker", "domainsdir"),
@@ -59,7 +59,7 @@ class DomainChecker(ConsistencyChecker):
             for dir in dirs:
                 fs_domains.add(dir)
                 fsinfo[dir] = os.path.join(root, dir)
-            # Prevent any furher recursion
+            # Prevent any further recursion
             dirs[:] = []
 
         #######################################################################
@@ -67,7 +67,7 @@ class DomainChecker(ConsistencyChecker):
         # Database (domains) == Filesystem (domains)
         #
 
-        # Branchs on fileing system but not in the database
+        # Branches on filesystem but not in the database
         for branch in fs_domains.difference(db_domains.keys()):
             if repair:
                 self.logger.info("Removing %s", fsinfo[branch])

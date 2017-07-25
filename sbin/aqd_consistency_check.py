@@ -103,7 +103,7 @@ def main():
             session.rollback()
 
     if errors:
-        print("There were failuers")
+        print("There were failures")
         raise SystemExit(1)
 
     print("All tests passed successfully")
