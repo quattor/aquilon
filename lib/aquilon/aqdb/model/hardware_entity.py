@@ -29,8 +29,11 @@ from sqlalchemy.orm.attributes import set_committed_value
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import Base, Location, Model, DnsRecord
 from aquilon.aqdb.column_types import AqStr
+from aquilon.config import Config
 
 _TN = "hardware_entity"
+
+_config = Config()
 
 
 class HardwareEntity(Base):
@@ -75,7 +78,7 @@ class HardwareEntity(Base):
                       {'info': {'unique_fields': ['label']}},)
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
-    _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
+    _label_check = re.compile(_config.get("site", "default_hardware_label_regex"))
 
     @classmethod
     def check_label(cls, label):
