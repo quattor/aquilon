@@ -93,7 +93,7 @@ def validate_uri(uri):
         try:
             run_command([validator, uri])
         except ProcessException as err:
-            raise ArgumentError("Location URI not valid: %s" % err.out)
+            raise ArgumentError("Location URI not valid: %s%s" % (err.out, err.err))
     return uri
 
 def update_location(dblocation, fullname=None, default_dns_domain=None,

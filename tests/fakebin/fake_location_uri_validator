@@ -19,6 +19,6 @@ if [ $? -eq 0 ]; then
   echo "success"
   exit 0
 else
-  echo "unknown system"
+  echo "unknown system" >&2
   exit 1
 fi
