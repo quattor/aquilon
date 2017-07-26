@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.services import Chooser
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandBindClientHostname(BrokerCommand):
@@ -27,9 +28,15 @@ class CommandBindClientHostname(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, logger, plenaries, hostname, service, instance, force=False,
-               **_):
+    def render(self, session, logger, plenaries, hostname, service, instance, user,
+               justification, reason, force=False, **_):
         dbhost = hostname_to_host(session, hostname)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhost)
+        cm.validate()
+
         dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbhost, plenaries, logger=logger, required_only=False)
         if instance:

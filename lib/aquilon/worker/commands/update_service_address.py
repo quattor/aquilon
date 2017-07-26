@@ -23,6 +23,7 @@ from aquilon.worker.dbwrappers.dns import update_address
 from aquilon.worker.dbwrappers.interface import get_interfaces
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateServiceAddress(BrokerCommand):
@@ -32,9 +33,15 @@ class CommandUpdateServiceAddress(BrokerCommand):
 
     def render(self, session, logger, plenaries, ip, name, interfaces, hostname, cluster,
                metacluster, resourcegroup, network_environment, map_to_primary,
-               comments, **_):
+               comments, user, justification, reason, **_):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(holder)
+        cm.validate()
+
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,
                                           compel=True)
 

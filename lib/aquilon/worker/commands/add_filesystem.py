@@ -28,7 +28,7 @@ class CommandAddFilesystem(CommandAddResource):
     resource_class = Filesystem
     resource_name = "filesystem"
 
-    def setup_resource(self, session, logger, dbfs, type, mountpoint,
+    def setup_resource(self, session, logger, dbfs, reason, type, mountpoint,
                        blockdevice, bootmount, dumpfreq, fsckpass, options,
                        **_):
         if dumpfreq is None:

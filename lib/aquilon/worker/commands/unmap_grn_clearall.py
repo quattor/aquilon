@@ -19,6 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Cluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
 
@@ -29,7 +30,8 @@ class CommandUnMapGrnClearAll(BrokerCommand):
     required_parameters = ["target"]
 
     def render(self, session, plenaries, target, hostname, list, membersof,
-               personality, personality_stage, archetype, **_):
+               personality, personality_stage, archetype, user, justification,
+               reason, logger, **_):
 
         target_type = "personality" if personality else "host"
 
@@ -47,7 +49,13 @@ class CommandUnMapGrnClearAll(BrokerCommand):
                                                    compel=True)
             objs = [dbpersonality.active_stage(personality_stage)]
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+
         for obj in objs:
+            # Validate ChangeManagement
+            cm.consider(obj)
+
             # INFO: Fails for archetypes other than 'aquilon', 'vmhost'
             valid_targets = self.config.get("archetype_" + obj.archetype.name,
                                             target_type + "_grn_targets")
@@ -62,6 +70,9 @@ class CommandUnMapGrnClearAll(BrokerCommand):
                 if target == grn_rec.target:
                     obj.grns.remove(grn_rec)
             plenaries.add(obj)
+
+        # Validate ChangeManagement
+        cm.validate()
 
         session.flush()
 

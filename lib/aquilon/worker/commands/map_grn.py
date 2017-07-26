@@ -68,12 +68,14 @@ class CommandMapGrn(BrokerCommand):
             objs = [dbpersonality.active_stage(personality_stage)]
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            # Why we only consider one obj?
-            cm.consider(objs[0])
-            cm.validate()
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
 
         for obj in objs:
+            # Validate ChangeManagement
+            cm.consider(obj)
+
             section = "archetype_" + obj.archetype.name
 
             if self.config.has_option(section, config_key):
@@ -91,6 +93,9 @@ class CommandMapGrn(BrokerCommand):
 
             plenaries.add(obj)
             self._update_dbobj(obj, target, dbgrn, mapcls)
+
+        # Validate ChangeManagement
+        cm.validate()
 
         session.flush()
 

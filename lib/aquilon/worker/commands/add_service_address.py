@@ -27,6 +27,7 @@ from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.search import search_next
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddServiceAddress(BrokerCommand):
@@ -37,7 +38,7 @@ class CommandAddServiceAddress(BrokerCommand):
     def render(self, session, logger, plenaries, service_address, shortname, prefix,
                dns_domain, ip, name, interfaces, hostname, cluster, metacluster,
                resourcegroup, network_environment, map_to_primary, shared,
-               comments, **kwargs):
+               comments, user, justification, reason, **kwargs):
 
         validate_nlist_key("name", name)
         audit_results = []
@@ -53,6 +54,12 @@ class CommandAddServiceAddress(BrokerCommand):
 
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=False)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(holder)
+        cm.validate()
+
         toplevel_holder = holder.toplevel_holder_object
 
         ServiceAddress.get_unique(session, name=name, holder=holder,

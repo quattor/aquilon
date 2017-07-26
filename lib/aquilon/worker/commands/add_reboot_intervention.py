@@ -25,9 +25,9 @@ class CommandAddRebootIntervention(CommandAddIntervention):
     required_parameters = ["expiry", "reason"]
     resource_class = RebootIntervention
 
-    def setup_resource(self, session, logger, dbresource, **kwargs):
+    def setup_resource(self, session, logger, dbresource, reason, **kwargs):
         return super(CommandAddRebootIntervention, self).setup_resource(
-            session, logger, dbresource, allowusers=None, allowgroups=None,
+            session, logger, dbresource, reason, allowusers=None, allowgroups=None,
             disabled_actions=None, **kwargs)
 
         # More thorough check reboot_schedule and intervention

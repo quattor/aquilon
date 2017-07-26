@@ -18,6 +18,7 @@
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddResource(BrokerCommand):
@@ -27,11 +28,11 @@ class CommandAddResource(BrokerCommand):
     resource_name = None
     allow_existing = False
 
-    def setup_resource(self, session, logger, dbresource, **kwargs):
+    def setup_resource(self, session, logger, dbresource, reason, **kwargs):
         pass
 
     def render(self, session, logger, plenaries, hostname, cluster, metacluster, comments,
-               **kwargs):
+               user, justification, reason, **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -48,6 +49,11 @@ class CommandAddResource(BrokerCommand):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=False)
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(holder)
+        cm.validate()
+
         with session.no_autoflush:
             # For container-like resources, the resource object may already
             # exist; otherwise, it must not exist
@@ -63,7 +69,7 @@ class CommandAddResource(BrokerCommand):
                 dbresource = self.resource_class(name=name, comments=comments)  # pylint: disable=E1102
                 holder.resources.append(dbresource)
 
-            self.setup_resource(session, logger, dbresource, **kwargs)
+            self.setup_resource(session, logger, dbresource, reason, **kwargs)
 
         session.flush()
 

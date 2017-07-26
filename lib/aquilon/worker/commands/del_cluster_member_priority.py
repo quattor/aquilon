@@ -19,6 +19,7 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelClusterMemberPriority(BrokerCommand):
@@ -27,9 +28,15 @@ class CommandDelClusterMemberPriority(BrokerCommand):
     resource_class = None
 
     def render(self, session, logger, plenaries, cluster, resourcegroup, member,
-               **kwargs):  # pylint: disable=W0613
+               user, justification, reason, **kwargs):  # pylint: disable=W0613
         holder = get_resource_holder(session, logger, None, cluster,
                                      None, resourcegroup, compel=False)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(holder)
+        cm.validate()
+
         dbhost = hostname_to_host(session, member)
 
         name = self.resource_class.__mapper__.polymorphic_identity
