@@ -372,7 +372,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_610_add_parameter_reason(self):
         command = ["add_parameter",
@@ -390,7 +390,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--value", "test",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_620_update_parameter_reason(self):
         command = ["update_parameter",
@@ -406,7 +406,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--path", "access/netgroup",
                    "--value", "test",
-                   "--justification", "emergency",
+                   "--justification", "emergency,tcm=123",
                    "--reason", "reason flag check"]
         self.noouttest(command)
 
@@ -424,7 +424,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--path", "access/netgroup",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_640_map_grn_reason(self):
         command = ["map_grn",
@@ -440,7 +440,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp",
-                   "--justification", "emergency",
+                   "--justification", "emergency,sn=chng123",
                    "--reason", "reason flag check"]
         self.noouttest(command)
 
@@ -458,7 +458,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp",
-                   "--justification", "emergency",
+                   "--justification", "tcm=123,emergency",
                    "--reason", "reason flag check"]
         self.noouttest(command)
 
@@ -472,7 +472,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_670_del_required_svc_reason(self):
         command = ["del_required_service", "--service=chooser1",
@@ -484,7 +484,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_675_add_required_svc_reason_os(self):
         command = ["add_required_service", "--service=chooser1",
@@ -496,7 +496,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--osname", "linux", "--osversion",
                    "5.1-x86_64", "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_676_del_required_svc_reason_os(self):
         command = ["del_required_service", "--service=chooser1",
@@ -506,7 +506,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--osname", "linux", "--osversion",
-                   "5.1-x86_64", "--justification", "emergency",
+                   "5.1-x86_64", "--justification", "tcm=123,emergency",
                    "--reason", "reason flag check"]
         self.noouttest(command)
 
@@ -523,7 +523,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_690_del_static_route_reason(self):
         gw = self.net["routing1"].usable[-1]
@@ -538,7 +538,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_700_add_service_reason(self):
         command = ["map", "service", "--organization", "ms",
@@ -552,7 +552,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_710_del_service_reason(self):
         command = ["unmap", "service", "--organization", "ms",
@@ -566,7 +566,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.noouttest(command)
+        self.emergencynojustification(command)
 
     def test_720_add_feature_reason(self):
         command = ["bind", "feature", "--feature", "testfeature",
@@ -578,7 +578,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.statustest(command)
+        self.emergencynojustification(command)
 
     def test_730_del_feature_reason(self):
         command = ["unbind", "feature", "--feature", "testfeature",
@@ -590,7 +590,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.statustest(command)
+        self.emergencynojustification(command)
 
     def test_800_bind_feature_restricted(self):
         command = ["add", "feature", "--feature", "nonpublicfeature",
@@ -652,7 +652,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = command + ['--reason', 'some reason']
-        self.statustest(command)
+        self.emergencynojustification(command)
 
     def test_890_add_parameter_definition_prod_cluster(self):
         command = ["add_parameter_definition", "--feature", "testclusterfeature",
@@ -664,7 +664,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = command + ['--reason', 'some reason']
-        self.statustest(command)
+        self.emergencynojustification(command)
 
     def test_895_del_parameter_definition_prod_cluster(self):
         command = ["del_parameter_definition", "--feature", "testclusterfeature",
@@ -675,7 +675,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = command + ['--reason', 'some reason']
-        self.statustest(command)
+        self.emergencynojustification(command)
 
     def test_896_unbind_feature_prod_cluster(self):
         command = ["unbind_feature", "--feature", "testclusterfeature",
@@ -686,7 +686,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = command + ['--reason', 'some reason']
-        self.statustest(command)
+        self.emergencynojustification(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestJustification)

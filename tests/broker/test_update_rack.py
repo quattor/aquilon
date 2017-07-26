@@ -191,7 +191,7 @@ class TestUpdateRack(TestBrokerCommand):
 
     # Was row g column 2
     def test_186_updateut8(self):
-        self.noouttest(["update", "rack", "--rack", "ut8", "--column", "8",
+        self.emergencynojustification(["update", "rack", "--rack", "ut8", "--column", "8",
                         "--justification", "emergency", "--reason", "'I need this'"])
 
     # Was row g column 3

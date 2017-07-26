@@ -193,7 +193,7 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
         self.matchoutput(out, 'Cluster Personality: hapersonality',
                          command)
         command = "make_cluster --cluster campus-test"
-        self.justificationmissingtest(command.split(" "), auth=True, msgcheck=False)
+        self.justificationmissingtest_warn(command.split(" "))
 
     def test_139_make_campus_test_justification_success(self):
         command = "make_cluster --cluster campus-test --justification tcm=123456"
