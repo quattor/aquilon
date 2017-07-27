@@ -377,11 +377,19 @@ class TestAudit(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Unable to parse date string", cmd)
 
-    def test_710_invalid_after(self):
+    def test_700_invalid_after(self):
         """ test invalid date spec in after """
         cmd = ["search_audit", "--command", "all", "--after", "XXX"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Unable to parse date string", cmd)
+
+    def test_700_invalid_forever(self):
+        """ test incompatible use of --forever """
+        cmd = ["search_audit", "--command", "all", "--after", "01-01-70",
+               "--forever"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Cannot specify 'forever' with 'before' "
+                         "or 'after'", cmd)
 
     def test_800_limit(self):
         """ test the limit option """
