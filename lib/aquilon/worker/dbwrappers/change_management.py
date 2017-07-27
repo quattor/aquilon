@@ -55,7 +55,6 @@ class ChangeManagement(object):
     handlers = {}
     lifecycle_status_edm_check = ['ready']  # Crash and burn: 'build', 'rebuild',
     # 'decommissioned', 'blind', 'install', 'reinstall', 'almostready', 'failed'
-    success_responses = ["Permitted", "Approved"]
 
     def __init__(self, session, user, justification, reason, logger, command):
         self.command = command
@@ -152,11 +151,13 @@ class ChangeManagement(object):
             out = run_command(cmd)
             out_dict = json.loads(out)
         except Exception as err:
+            self.logger.info("Change Management validation failed. Reason: {}".format(str(err)))
             raise InternalError(str(err))
 
-        if out_dict.get("Status") in self.success_responses:
-            self.logger.info("Status: {}. {}".format(out_dict.get("Status"), out_dict.get("Reason")))
-        else:
+        self.logger.info("Change Management validation finished. Status: {}. {}".format(out_dict.get("Status"), out_dict.get("Reason")))
+        if out_dict.get("Status") == 'Permitted':
+            self.logger.client_info("Approval Warning: {}".format(out_dict.get("Reason")))
+        elif out_dict.get("Status") != 'Approved':
             raise AuthorizationException(out_dict.get("Reason"))
 
     def validate_default(self, obj):

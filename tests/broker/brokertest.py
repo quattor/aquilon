@@ -37,11 +37,11 @@ DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_ERROR = "fail_expected_dsdb_error"
 DSDB_ISSUED_CMDS_FILE = "issued_dsdb_cmds"
-CM_JUSTIFICATION = "Unauthorized: Failed: Change Management failed parsing TCM or SN ticket. Change Justification not provided."
-CM_EMERGANCY = "Unauthorized: Failed: Justification of 'emergency' requires --reason to be specified."
-CM_FOMAT = "Unauthorized: Failed: Change Management failed parsing TCM or SN ticket. Failed to " \
-           "parse the justification: expected tcm=NNNNNNNNN or sn=XXXNNNNN or emergency,sn=XXXNNNNN " \
-           "or tcm=NNNNNNNN,emergency or emergency."
+CM_JUSTIFICATION = "No justification found, please supply a TCM or SN ticket."
+CM_EMERGENCY = "Use of emergency requires a reason to be supplied."
+CM_FORMAT = "Failed to parse justification, no valid TCM or SN ticket found."
+CM_EDM = "Executing an emergency change without a justification, EDM has not be called."
+CM_WARN = 'Continuing with execution; however in the future this operation will fail.'
 
 class TestBrokerCommand(unittest.TestCase):
 
@@ -421,11 +421,20 @@ class TestBrokerCommand(unittest.TestCase):
 
     def reasonmissingtest(self, command, **kwargs):
         out = self.unauthorizedtest(command, **kwargs)
-        self.matchoutput(out, CM_EMERGANCY, command)
+        self.matchoutput(out, CM_EMERGENCY, command)
 
     def justificationformattest(self, command, **kwargs):
         out = self.unauthorizedtest(command, **kwargs)
-        self.matchoutput(out, CM_FOMAT, command)
+        self.matchoutput(out, CM_FORMAT, command)
+
+    def emergencynojustification(self, command, **kwargs):
+        (out, err) = self.successtest(command, **kwargs)
+        self.matchoutput(err, CM_EDM, command)
+
+    def justificationmissingtest_warn(self, command, **kwargs):
+        (out, err) = self.successtest(command, **kwargs)
+        self.matchoutput(err, CM_JUSTIFICATION, command)
+        self.matchoutput(err, CM_WARN, command)
 
     def partialerrortest(self, command, **kwargs):
         # Currently these two cases behave the same way - same exit code
