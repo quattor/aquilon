@@ -31,6 +31,8 @@ from six import string_types
 from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611
 
+from aqdb.utils import copy_sqldb
+
 from networktest import DummyNetworks
 
 DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
@@ -128,7 +130,8 @@ class TestBrokerCommand(unittest.TestCase):
                 pass
 
     def tearDown(self):
-        pass
+        if not all(sys.exc_info()):
+            copy_sqldb(self.config, target='SNAPSHOT')
 
     def template_name(self, *template, **args):
         if args.get("sandbox", None):

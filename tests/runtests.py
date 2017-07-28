@@ -37,7 +37,7 @@ sys.path.append(os.path.join(SRCDIR, "lib"))
 from aquilon.config import Config
 from aquilon.utils import kill_from_pid_file
 from verbose_text_test import VerboseTextTestRunner
-
+from aqdb.utils import copy_sqldb
 from broker.orderedsuite import BrokerTestSuite
 from aqdb.orderedsuite import DatabaseTestSuite
 
@@ -85,6 +85,13 @@ parser.add_argument('--profile', action='store_true',
                          'logs/aqd.profile (currently broken)')
 parser.add_argument('-m', '--mirror', action='store_true',
                     help='copy source to an alternate location and re-exec')
+parser.add_argument('-s', '--start', action='store',
+                    help='Start from tests from this test method. '
+                         'Pass TestCase.testmethod which to start tests from.')
+parser.add_argument('-f', '--failfast', action='store_true',
+                    help='Add failfast=True option to TestRunner. This will stop '
+                         'unittests immediatelly if any failure.')
+
 
 opts = parser.parse_args()
 
@@ -145,6 +152,19 @@ if opts.mirror:
         args.remove('-m')
     os.execve(sys.executable, args, env)
 
+database_type = config.get('database', 'database_section')
+if opts.start:
+    dumfile = config.get('unittest', 'last_success_db_snapshot')
+    if not os.path.isfile(dumfile):
+        print("Tests cannot be started from the test {0}. "
+          "Database dumpfile - {1} does not exist.".format(opts.start, dumfile),
+              file=sys.stderr)
+        sys.exit(1)
+    if database_type != 'database_sqlite':
+        print("Database dumps only implemented for sqlite.")
+        sys.exit(1)
+    print("Will be using database dump {} to create DB. Tests will start from {}.".format(dumfile, opts.start))
+
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
 with open(makefile) as f:
@@ -172,13 +192,17 @@ except OSError:
 pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
 
-# FIXME: Need to be careful about attempting to nuke templatesdir...
-dirs = [config.get("unittest", "scratchdir")]
-if config.has_option("database", "dbfile"):
-    dirs.append(os.path.dirname(config.get("database", "dbfile")))
-for label in ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
-              "profilesdir", "plenarydir", "cfgdir", "kingdir"]:
-    dirs.append(config.get("broker", label))
+dirs = []
+broker_dir_list = ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
+                        "profilesdir", "plenarydir", "cfgdir", "kingdir"]
+
+if not opts.start:
+    # FIXME: Need to be careful about attempting to nuke templatesdir.
+    dirs = [config.get("unittest", "scratchdir")]
+    for label in broker_dir_list:
+        dirs.append(config.get("broker", label))
+    if config.has_option("database", "dbfile"):
+        dirs.append(os.path.dirname(config.get("database", "dbfile")))
 
 existing_dirs = [d for d in dirs if os.path.exists(d)]
 
@@ -205,7 +229,13 @@ os.environ["AQTEST_SCRATCHDIR"] = scratchdir
 
 suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
-suite.addTest(DatabaseTestSuite())
-suite.addTest(BrokerTestSuite())
-result = VerboseTextTestRunner(verbosity=opts.verbose).run(suite)
+if opts.start:
+    copy_sqldb(config, target='DB')
+else:
+    suite.addTest(DatabaseTestSuite())
+suite.addTest(BrokerTestSuite(opts.start))
+if opts.failfast:
+    result = VerboseTextTestRunner(config=config, verbosity=opts.verbose, failfast=True).run(suite)
+else:
+    result = VerboseTextTestRunner(config=config, verbosity=opts.verbose).run(suite)
 sys.exit(not result.wasSuccessful())
