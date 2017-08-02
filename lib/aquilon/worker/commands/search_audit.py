@@ -37,8 +37,8 @@ class CommandSearchAudit(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, keyword, argument, username, command, before,
-               after, return_code, limit, reverse_order, **_):
+    def render(self, session, logger, keyword, argument, username, command,
+               before, after, forever, return_code, limit, reverse_order, **_):
 
         q = session.query(Xtn)
 
@@ -93,32 +93,36 @@ class CommandSearchAudit(BrokerCommand):
         else:
             start = None
 
-        # if no end-time set, and no start time set, use now;  if start-time
-        # is set (and no end), end at +1 year.
+        if forever:
+            if before is not None or after is not None:
+                raise ArgumentError("Cannot specify 'forever' with 'before' or 'after'")
+        else:
+            # if no end-time set, and no start time set, use now;  if start-time
+            # if set (and no end), end at +1 year.  (unless 'forever' is given)
 
-        if end is None:
+            if end is None:
+                if start is None:
+                    # Note: put this 1s in the future so we don't accidently miss
+                    # things that were added within the last second (from zero'd
+                    # microseconds).
+                    end = datetime.utcnow().replace(microsecond=0) + timedelta(seconds=1)
+                else:
+                    end = start + timedelta(days=366)
+
+                if not end.tzinfo:
+                    end = end.replace(tzinfo=tzutc())
+
             if start is None:
-                # Note: put this 1s in the future so we don't accidently miss
-                # things that were added within the last second (from zero'd
-                # microseconds).
-                end = datetime.utcnow().replace(microsecond=0) + timedelta(seconds=1)
-            else:
-                end = start + timedelta(days=366)
+                start = end - timedelta(days=366)
+                if not start.tzinfo:
+                    start = start.replace(tzinfo=tzutc())
 
-            if not end.tzinfo:
-                end = end.replace(tzinfo=tzutc())
+            # sanity check: that end is after before.
+            if end < start:
+                raise ArgumentError(("Time region from after '%s' to before '%s'" +
+                                    " is invalid.") % (after, before))
 
-        if start is None:
-            start = end - timedelta(days=366)
-            if not start.tzinfo:
-                start = start.replace(tzinfo=tzutc())
-
-        # sanity check: that end is after before.
-        if end < start:
-            raise ArgumentError(("Time region from after '%s' to before '%s'" +
-                                " is invalid.") % (after, before))
-
-        q = q.filter(Xtn.start_time > start, Xtn.start_time < end)
+            q = q.filter(Xtn.start_time > start, Xtn.start_time < end)
 
         if return_code is not None:
             if return_code == 0:
