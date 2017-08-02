@@ -106,14 +106,14 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                           r'"harddisks/{sda}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"boot", true,\s*'
-                          r'"capacity", 68\*GB,\s*'
+                          r'"capacity", 68\*1024,\s*'
                           r'"interface", "scsi"\s*\);',
                           command)
         self.searchoutput(out,
                           r'"harddisks/{sdb}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"address", "0:0:1:0",\s*'
-                          r'"capacity", 34\*GB,\s*'
+                          r'"capacity", 34\*1024,\s*'
                           r'"interface", "scsi"\s*\);',
                           command)
 
@@ -134,7 +134,7 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                           r'"harddisks/{cciss/c0d0}" = '
                           r'create\("hardware/harddisk/generic/cciss",\s*'
                           r'"bus", "pci:0000:01:00.0",\s*'
-                          r'"capacity", 34\*GB,\s*'
+                          r'"capacity", 34\*1024,\s*'
                           r'"interface", "cciss",\s*'
                           r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
                           command)
@@ -142,7 +142,7 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                           r'"harddisks/{sda}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"boot", true,\s*'
-                          r'"capacity", 68\*GB,\s*'
+                          r'"capacity", 68\*1024,\s*'
                           r'"interface", "scsi"\s*\);',
                           command)
 

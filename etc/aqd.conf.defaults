@@ -331,6 +331,7 @@ transparent_gzip = true
 template_extension = .tpl
 # Max. time a compilation is allowed to take. The value is passed to the "timeout" command verbatim.
 timeout = 30m
+include_pan = True
 
 [site]
 # Site specific settings
