@@ -33,9 +33,11 @@ from aquilon.aqdb.column_types import AqMac, AqStr
 from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
                                 ObservedMac, Model, NetworkDevice)
 from aquilon.aqdb.model.vlan import MAX_VLANS
+from aquilon.config import Config
 
 _TN = "interface"
 LOGGER = logging.getLogger(__name__)
+_config = Config()
 
 
 class Interface(DeviceLinkMixin, Base):
@@ -49,9 +51,6 @@ class Interface(DeviceLinkMixin, Base):
 
     # Any extra fields the subclass needs over the generic interface parameters
     extra_fields = []
-
-    # Name syntax restrictions
-    name_check = None
 
     # Allows setting model/vendor
     model_allowed = False
@@ -139,6 +138,12 @@ class Interface(DeviceLinkMixin, Base):
     def qualified_name(self):
         return self.hardware_entity.printable_name + "/" + self.name
 
+    @property
+    def name_check(self):
+        if _config.has_option("interface_name_regex", self.interface_type):
+            return re.compile(_config.get("interface_name_regex", self.interface_type))
+        return None
+
     @validates('mac')
     def _validate_mac(self, key, value):
         # Due to how decorators work, we have to do a level of indirection to
@@ -152,8 +157,7 @@ class Interface(DeviceLinkMixin, Base):
 
     @validates('name')
     def validate_name(self, key, value):  # pylint: disable=W0613
-        if self.__class__.name_check and \
-                not self.__class__.name_check.match(value):
+        if self.name_check and not self.name_check.match(value):
             raise ValueError("Illegal %s interface name '%s'." %
                              (self.interface_type, value))
         return value
@@ -249,8 +253,6 @@ class PublicInterface(Interface):
 
     extra_fields = ['bootable', 'port_group_name', 'port_group']
 
-    name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
-
     model_allowed = True
 
 
@@ -260,8 +262,6 @@ class ManagementInterface(Interface):
     _class_label = "Management Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'management'}
-
-    name_check = re.compile(r"^[a-z]+\d*$")
 
     def validate_mac(self, key, value):
         if not value:
@@ -276,9 +276,6 @@ class OnboardInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'oa'}
 
-    # There are interface names like "gigabitethernet0/1", so no name checks for
-    # now.
-
 
 class VlanInterface(Interface):
     """ 802.1q VLAN interfaces """
@@ -286,8 +283,6 @@ class VlanInterface(Interface):
     _class_label = "VLAN Interface"
 
     extra_fields = ['vlan_id', 'parent']
-
-    name_check = re.compile(r"^[a-z]+\d*\.[1-9]\d*$")
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
@@ -342,9 +337,6 @@ class BondingInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'bonding'}
 
-    # Linux: ncm-networks wans "bond.*", but Netapp is more relaxed
-    name_check = re.compile(r'^[a-z]+\d+$')
-
 
 class BridgeInterface(Interface):
     """ Level 2 bridge interfaces """
@@ -352,10 +344,6 @@ class BridgeInterface(Interface):
     _class_label = "Bridge Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'bridge'}
-
-    # Bridges on Linux could have any random name, but the templates also
-    # enforce this naming
-    name_check = re.compile(r'^br\d+$')
 
     def validate_mac(self, key, value):
         if value is not None:

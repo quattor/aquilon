@@ -340,6 +340,17 @@ default_network_environment = internal
 # Space-separated list of user roles that can add and delete internal networks
 change_default_netenv_roles = aqd_admin
 
+# Interface types that require specific names should be added as key for this
+# configuration section. If an interface type is not specified here,
+# any interface name format will be allowed
+[interface_name_regex]
+# Interface model name field validation regex
+public = ^[a-z]+\d+[a-z]?$
+management = ^[a-z]+\d*$
+vlan = ^[a-z]+\d*\.[1-9]\d*$
+# Linux: ncm-networks wants "bond.*", but Netapp is more relaxed
+bonding = ^[a-z]+\d+$
+
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
 # For sqlalchemy, only INFO and DEBUG produce log messages.
