@@ -18,6 +18,7 @@
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_cluster import CommandUpdateCluster
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateMetaCluster(CommandUpdateCluster):
@@ -28,9 +29,16 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
     def render(self, session, plenaries, metacluster, personality,
                personality_stage, max_members,
                fix_location, clear_location_preference,
-               virtual_switch, comments, **arguments):
+               virtual_switch, comments, user, justification, reason,
+               logger, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmetacluster)
+        cm.validate()
+
         self.update_cluster_common(session, dbmetacluster, plenaries,
                                    personality, personality_stage, max_members,
                                    fix_location, clear_location_preference,

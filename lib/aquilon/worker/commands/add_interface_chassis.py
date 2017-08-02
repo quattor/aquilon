@@ -22,6 +22,7 @@ from aquilon.aqdb.model import Chassis
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import get_or_create_interface
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddInterfaceChassis(BrokerCommand):
@@ -31,7 +32,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
                           "bus_address"]
 
     def render(self, session, logger, interface, chassis, mac, iftype, type,
-               comments, **arguments):
+               comments,  user, justification, reason, **arguments):
         if type:
             self.deprecated_option("type", "Please use --iftype "
                                    "instead.", logger=logger, **arguments)
@@ -48,6 +49,12 @@ class CommandAddInterfaceChassis(BrokerCommand):
                                     "interface to a chassis." % arg)
 
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbchassis)
+        cm.validate()
+
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
         get_or_create_interface(session, dbchassis, name=interface, mac=mac,

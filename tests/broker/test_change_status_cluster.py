@@ -45,7 +45,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
     def test_110_PromoteCluster(self):
         command = ["change_status", "--cluster", "utecl1",
-                   "--buildstatus", "ready"]
+                   "--buildstatus", "ready", "--justification", "tcm=123"]
         err = self.statustest(command)
         # FIXME: the number of changed templates is not deterministic, we have
         # to figure out why. Until then make the check less strict to allow
@@ -66,7 +66,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
     def test_120_BindDemotion(self):
         command = ["cluster",
                    "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--cluster", "utecl2"]
+                   "--cluster", "utecl2", "--justification", "tcm=123"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Notice: changing build status of host "
                               "evh1.aqd-unittest.ms.com from 'ready' to "
@@ -80,10 +80,10 @@ class TestChangeClusterStatus(TestBrokerCommand):
         # Put the host back and confirm it can move to ready
         self.successtest(["cluster",
                           "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--cluster", "utecl1"])
+                          "--cluster", "utecl1", "--justification", "tcm=123"])
         self.successtest(["change_status",
                           "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--buildstatus", "ready"])
+                          "--buildstatus", "ready", "--justification", "tcm=123"])
 
         command = "show host --hostname evh1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
@@ -92,7 +92,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
     def test_130_DemoteCluster(self):
         command = ["change_status", "--cluster", "utecl1",
-                   "--buildstatus", "rebuild"]
+                   "--buildstatus", "rebuild", "--justification", "tcm=123"]
         err = self.statustest(command)
         # FIXME: the number of changed templates is not deterministic, we have
         # to figure out why. Until then make the check less strict to allow
@@ -116,7 +116,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
                         "--cluster", "utecl1", "--model", "utmedium"])
 
         command = ["change_status", "--cluster", "utecl1", "--buildstatus",
-                   "decommissioned"]
+                   "decommissioned", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change state to decommissioned, as "
@@ -124,7 +124,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
                          command)
 
         command = ["change_status", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--buildstatus", "decommissioned"]
+                   "--buildstatus", "decommissioned", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change state to decommissioned, as "
@@ -136,7 +136,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
 
     def test_145_DecoCluster(self):
         self.successtest(["change_status", "--cluster", "utecl1",
-                          "--buildstatus", "decommissioned"])
+                          "--buildstatus", "decommissioned", "--justification", "tcm=123"])
 
         # all vmhosts must be decoed.
         for i in range(1, 5):

@@ -22,6 +22,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.templates import TemplateDomain
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandResetAdvertisedStatusList(BrokerCommand):
@@ -30,19 +31,30 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, plenaries, list, **_):
+    def render(self, session, logger, plenaries, list, user, justification, reason, **_):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         dbbranch, dbauthor = validate_branch_author(dbhosts)
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+
         failed = []
         # Do any cross-list or dependency checks
         for dbhost in dbhosts:
+
+            # Validate ChangeManagement
+            cm.consider(dbhost)
+
             if dbhost.status.name == 'ready':
                 failed.append("{0:l} is in ready status, "
                               "advertised status can be reset only "
                               "when host is in non ready state.".format(dbhost))
+
+        # Validate ChangeManagement
+        cm.validate()
+
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))

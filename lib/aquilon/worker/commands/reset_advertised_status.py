@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates import TemplateDomain
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandResetAdvertisedStatus(BrokerCommand):
@@ -28,8 +29,14 @@ class CommandResetAdvertisedStatus(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, plenaries, hostname, **_):
+    def render(self, session, logger, plenaries, hostname, user, justification, reason, **_):
         dbhost = hostname_to_host(session, hostname)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhost)
+        cm.validate()
+
         if dbhost.status.name == 'ready':
             raise ArgumentError("{0:l} is in ready status, "
                                 "advertised status can be reset only "

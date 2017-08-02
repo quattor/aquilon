@@ -22,6 +22,7 @@ from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateDisk(BrokerCommand):
@@ -31,9 +32,16 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, plenaries, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, wwn, bus_address, iops_limit, **kwargs):
+               snapshot, rename_to, wwn, bus_address, iops_limit, user,
+               justification, reason, logger, **kwargs):
 
         dbmachine = get_hardware(session, compel=True, **kwargs)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
+
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)
 

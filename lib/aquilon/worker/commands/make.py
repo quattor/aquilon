@@ -24,6 +24,7 @@ from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandMake(BrokerCommand):
@@ -33,8 +34,14 @@ class CommandMake(BrokerCommand):
 
     def render(self, session, logger, plenaries, hostname, osname, osversion, archetype,
                personality, personality_stage, buildstatus, keepbindings, grn,
-               eon_id, cleargrn, comments, **_):
+               eon_id, cleargrn, comments, user, justification, reason, **_):
         dbhost = hostname_to_host(session, hostname)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhost)
+        cm.validate()
+
         old_archetype = dbhost.archetype
 
         if archetype:

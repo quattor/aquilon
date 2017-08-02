@@ -22,6 +22,7 @@ from aquilon.aqdb.model import (Cluster, Personality, PriorityList,
                                 MemberPriority, HostClusterMember)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUncluster(BrokerCommand):
@@ -30,9 +31,16 @@ class CommandUncluster(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, plenaries, hostname, cluster,
-               personality, personality_stage, **_):
+               personality, personality_stage, user, justification, reason, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbcluster)
+        cm.consider(dbhost)
+        cm.validate()
+
         if not dbhost.cluster:
             raise ArgumentError("{0} is not bound to a cluster.".format(dbhost))
         if dbhost.cluster != dbcluster:

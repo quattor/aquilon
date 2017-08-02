@@ -19,6 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelAllowedPersonalityCluster(BrokerCommand):
@@ -27,7 +28,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
     required_parameters = ["archetype", "personality", "cluster"]
 
     def render(self, session, plenaries, archetype, personality, cluster,
-               metacluster, **_):
+               metacluster, user, justification, reason, logger, **_):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)
         if cluster:
@@ -36,6 +37,11 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
                 raise ArgumentError("Please use --metacluster for metaclusters.")
         else:
             dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbclus)
+        cm.validate()
 
         plenaries.add(dbclus)
 

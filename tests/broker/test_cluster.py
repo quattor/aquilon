@@ -253,7 +253,7 @@ class TestCluster(TestBrokerCommand):
 
     def test_200_bad_location(self):
         command = ["cluster", "--hostname=%s.ms.com" % self.aurora_with_node,
-                   "--cluster", "utecl1"]
+                   "--cluster", "utecl1", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "is not within cluster location", command)
 

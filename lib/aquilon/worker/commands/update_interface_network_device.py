@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (rename_interface,
                                                 update_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
@@ -32,7 +33,7 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
 
     def render(self, session, logger, plenaries, interface,
                network_device, mac, comments,
-               rename_to, iftype, **arguments):
+               rename_to, iftype, user, justification, reason, **arguments):
 
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
@@ -40,6 +41,12 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
                                          "cannot use the --%s option." % arg)
 
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetdev)
+        cm.validate()
+
         dbinterface = Interface.get_unique(session, hardware_entity=dbnetdev,
                                            name=interface, compel=True)
 

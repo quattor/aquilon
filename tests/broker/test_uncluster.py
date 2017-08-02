@@ -31,7 +31,7 @@ class TestUncluster(TestBrokerCommand):
     def testfailunbindevh1(self):
         command = ["uncluster",
                    "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--cluster", "utecl1"]
+                   "--cluster", "utecl1", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Host evh1.aqd-unittest.ms.com is bound to "
@@ -42,7 +42,7 @@ class TestUncluster(TestBrokerCommand):
         command = ["uncluster",
                    "--hostname", "evh1.aqd-unittest.ms.com",
                    "--cluster", "utecl2",
-                   "--personality", "esx_server"]
+                   "--personality", "esx_server", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot switch host to personality "
@@ -53,7 +53,7 @@ class TestUncluster(TestBrokerCommand):
         command = ["uncluster",
                    "--hostname", "evh1.aqd-unittest.ms.com",
                    "--cluster", "utecl2",
-                   "--personality", "esx_standalone"]
+                   "--personality", "esx_standalone", "--justification", "tcm=123"]
         self.successtest(command)
 
     def testunbindutecl1(self):
@@ -75,7 +75,7 @@ class TestUncluster(TestBrokerCommand):
 
     def testunbindutecl2(self):
         self.noouttest(["uncluster", "--hostname", "evh5.aqd-unittest.ms.com",
-                        "--cluster", "utecl2", "--personality", "generic"])
+                        "--cluster", "utecl2", "--personality", "generic", "--justification", "tcm=123"])
 
     def testverifyunbindhosts(self):
         for i in range(1, 6):

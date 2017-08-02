@@ -156,7 +156,7 @@ class TestPxeswitch(TestBrokerCommand):
     def testconfigurelisterror2(self):
         hosts = [self.aurora_without_node + ".ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
-        command = "pxeswitch --list %s --configure" % scratchfile
+        command = "pxeswitch --list %s --configure --justification tcm=123" % scratchfile
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Invalid hosts in list:", command)
         self.matchoutput(out, "Host %s.ms.com has no bootserver." %

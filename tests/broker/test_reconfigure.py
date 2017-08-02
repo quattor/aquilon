@@ -89,7 +89,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                  "aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("grnlist", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--grn=grn:/ms/ei/aquilon/aqd"]
+                   "--grn=grn:/ms/ei/aquilon/aqd", "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_1015_reconfigurelist_grn_post(self):
@@ -126,7 +126,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
 
         command = ["reconfigure", "--hostname", "aquilon91.aqd-unittest.ms.com",
-                   "--cleargrn"]
+                   "--cleargrn", "--justification", "tcm=123"]
         out = self.successtest(command)
 
         command = "show host --hostname aquilon91.aqd-unittest.ms.com"
@@ -143,7 +143,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          command)
 
     def test_1040_reconfigure_membersof_metacluster(self):
-        command = ["reconfigure", "--membersof", "utmc1"]
+        command = ["reconfigure", "--membersof", "utmc1", "--justification",
+        "tcm=123"]
         out = self.statustest(command)
         self.matchoutput(out, "/5 template(s) being processed",
                          command)
@@ -383,7 +384,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         # Not a compileable archetype, so there should be no messages from the
         # compiler
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-                   "--personality", "desktop"]
+                   "--personality", "desktop", "--justification", "tcm=123"]
         out = self.statustest(command)
         self.matchoutput(out, "No object profiles: nothing to do.", command)
 
@@ -409,7 +410,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1074_make_noncompileable(self):
         self.statustest(["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                          "--archetype", "windows", "--personality", "desktop",
-                         "--osname", "windows", "--osversion", "nt61e"])
+                         "--osname", "windows", "--osversion", "nt61e", "--justification",
+                         "tcm=123"])
         self.assertFalse(os.path.exists(
             self.build_profile_name("unittest01.one-nyp.ms.com",
                                     domain="unittest")))
@@ -458,7 +460,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1090_reconfig_status_evh1(self):
         command = ["reconfigure",
                    "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--buildstatus", "ready"]
+                   "--buildstatus", "ready", "--justification", "tcm=123"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Warning: requested build status was 'ready' "
                               "but resulting status is 'almostready'.",
@@ -538,7 +540,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1120_reconfigure_aligned(self):
         for i in range(1, 5):
             command = ["reconfigure",
-                       "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+                       "--hostname", "evh%s.aqd-unittest.ms.com" % i, "--justification", "tcm=123"]
             self.statustest(command)
 
     def test_1125_verify_aligned(self):
@@ -564,27 +566,27 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1130_list_camelcase(self):
         hosts = ["Aquilon91.Aqd-Unittest.ms.com"]
         scratchfile = self.writescratch("camelcase", "\n".join(hosts))
-        command = ["reconfigure", "--list", scratchfile]
+        command = ["reconfigure", "--list", scratchfile, "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_1140_list_no_osversion(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosversion", "\n".join(hosts))
-        command = ["reconfigure", "--list", scratchfile, "--osname=linux"]
+        command = ["reconfigure", "--list", scratchfile, "--osname=linux", "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_1150_list_no_osname(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosname", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--osversion=%s" % self.linux_version_prev]
+                   "--osversion=%s" % self.linux_version_prev, "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_1160_list_no_os_archetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosarchetype", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--osname=linux", "--osversion=%s" % self.linux_version_prev]
+                   "--osname=linux", "--osversion=%s" % self.linux_version_prev, "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_1170_os_required_service(self):
@@ -682,7 +684,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         scratchfile = self.writescratch("missingmap", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon",
-                   "--personality", "badpersonality2"]
+                   "--personality", "badpersonality2", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
         self.matchoutput(out, "The following hosts failed service binding:",
@@ -693,7 +695,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingarchetype", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--personality=generic"]
+                   "--personality=generic", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Personality generic, archetype aquilon not found.",
@@ -704,7 +706,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         scratchfile = self.writescratch("missingpersst", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--personality", "nostage",
-                   "--personality_stage", "previous"]
+                   "--personality_stage", "previous", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Personality aquilon/nostage does not have stage "
@@ -714,7 +716,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_2000_empty_hostlist(self):
         hosts = ["#host", "#does", "", "   #not   ", "#exist"]
         scratchfile = self.writescratch("empty", "\n".join(hosts))
-        command = ["reconfigure", "--list", scratchfile]
+        command = ["reconfigure", "--list", scratchfile, "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Empty list.", command)
 
@@ -725,7 +727,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                  "host.domain-does-not-exist.ms.com"]
         scratchfile = self.writescratch("missinghost", "\n".join(hosts))
         # Use the deprecated option name here
-        command = ["reconfigure", "--hostlist", scratchfile]
+        command = ["reconfigure", "--hostlist", scratchfile, "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The --hostlist option is deprecated.", command)
         self.matchoutput(out, "Invalid hosts in list:", command)
@@ -749,7 +751,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         for i in range(1, 20):
             hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com" % i)
         scratchfile = self.writescratch("reconfigurelistlimit", "\n".join(hosts))
-        command = ["reconfigure", "--list", scratchfile, "--personality=generic"]
+        command = ["reconfigure", "--list", scratchfile, "--personality=generic", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
@@ -765,7 +767,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hosts = ["aquilon62.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("cluster_req", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--personality", "clustered"]
+                   "--personality", "clustered", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality aquilon/clustered requires cluster "
                          "membership", command)
@@ -776,7 +778,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         scratchfile = self.writescratch("promote_mixed_personality",
                                         "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--personality_stage", "next"]
+                   "--personality_stage", "next", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Promoting hosts in multiple personalities is "
                          "not supported.", command)
@@ -797,7 +799,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hosts = ["aquilon93.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingtemplate", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--archetype", "aquilon", "--personality", "badpersonality"]
+                   "--archetype", "aquilon", "--personality", "badpersonality", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot locate template named 'personality/badpersonality/espinfo'", command)
         self.assertFalse(os.path.exists(

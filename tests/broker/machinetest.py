@@ -414,7 +414,7 @@ class MachineTestMixin(EventsTestMixin):
         return show_cmd, show_out
 
     def delete_host(self, hostname, ip, machine, interfaces=None,
-                    manager_ip=None, **kwargs):
+                    manager_ip=None, justification=None, **kwargs):
         if not interfaces:
             interfaces = guess_interfaces(kwargs, eth0_default=False)
 
@@ -422,17 +422,28 @@ class MachineTestMixin(EventsTestMixin):
             nic_ip = kwargs.get(nic_name + "_ip", None)
             if nic_ip and nic_ip != ip:
                 self.dsdb_expect_delete(nic_ip)
-                self.statustest(["del_interface_address", "--machine", machine,
-                                 "--interface", nic_name, "--ip", nic_ip])
+                if justification:
+                    self.statustest(["del_interface_address", "--machine", machine,
+                                 "--interface", nic_name, "--ip", nic_ip], "--justification", justification)
+                else:
+                    self.statustest(["del_interface_address", "--machine", machine,
+                                     "--interface", nic_name, "--ip", nic_ip])
                 self.dsdb_verify()
 
         self.dsdb_expect_delete(ip)
         self.event_del_hardware(machine)
-        self.statustest(["del_host", "--hostname", hostname])
+        if justification:
+            self.statustest(["del_host", "--hostname", hostname, "--justification", justification])
+        else:
+            self.statustest(["del_host", "--hostname", hostname])
         if manager_ip:
             self.dsdb_expect_delete(manager_ip)
             short, domain = hostname.split(".", 1)
-            self.noouttest(["del_manager", "--manager", "%sr.%s" %
+            if justification:
+                self.noouttest(["del_manager", "--manager", "%sr.%s" %
+                                (short, domain), "--justification", justification])
+            else:
+                self.noouttest(["del_manager", "--manager", "%sr.%s" %
                             (short, domain)])
         self.noouttest(["del_machine", "--machine", machine])
         self.dsdb_verify()

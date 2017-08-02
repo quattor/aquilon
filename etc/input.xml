@@ -1060,6 +1060,7 @@
 	    <option name="osname" type="string">Operating system: defaults to linux, no solaris (yet)</option>
 	    <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64. Defaults to 'generic')</option>
 	    <option name="comments" type="string">Comments</option>
+		<option name="buildstatus" type="string">Build Status: defaults to ready. 'blind' and 'ready' also valid.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

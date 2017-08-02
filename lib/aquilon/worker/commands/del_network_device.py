@@ -23,6 +23,7 @@ from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 from aquilon.worker.dbwrappers.host import remove_host
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.switchdata import PlenarySwitchData
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelNetworkDevice(BrokerCommand):
@@ -30,8 +31,13 @@ class CommandDelNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, plenaries, network_device, **_):
+    def render(self, session, logger, plenaries, network_device, user, justification, reason, **_):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetdev)
+        cm.validate()
 
         check_only_primary_ip(dbnetdev)
 

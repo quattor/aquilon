@@ -79,7 +79,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
     # unittest01.one-nyp.ms.com gets deleted in test_del_windows_host.
 
     def test_120_del_aurora_with_node(self):
-        command = "del host --hostname %s.ms.com" % self.aurora_with_node
+        command = "del host --hostname %s.ms.com --justification tcm=123" % self.aurora_with_node
         err = self.statustest(command.split(" "))
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
@@ -91,7 +91,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_125_del_aurora_without_node(self):
-        command = "del host --hostname %s.ms.com" % self.aurora_without_node
+        command = "del host --hostname %s.ms.com --justification tcm=123" % self.aurora_without_node
         err = self.statustest(command.split(" "))
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
@@ -103,7 +103,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_130_del_aurora_without_rack(self):
-        command = "del host --hostname %s.ms.com" % self.aurora_without_rack
+        command = "del host --hostname %s.ms.com --justification tcm=123" % self.aurora_without_rack
         err = self.statustest(command.split(" "))
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
@@ -115,7 +115,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_140_del_nyaqd1(self):
-        command = "del host --hostname nyaqd1.ms.com"
+        command = "del host --hostname nyaqd1.ms.com --justification tcm=123"
         self.statustest(command.split(" "))
 
     def test_140_verify_del_nyaqd1(self):
@@ -280,7 +280,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             machine = "ut9s03p%d" % port
             self.delete_host(hostname, net.usable[port], machine,
-                             manager_ip=mgmt_net.usable[port])
+                             manager_ip=mgmt_net.usable[port], justification="tcm=123")
 
     def test_300_del_ut10_hosts(self):
         net = self.net["ut10_eth0"]

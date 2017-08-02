@@ -25,6 +25,7 @@ from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.services import Chooser
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandCluster(BrokerCommand):
@@ -33,12 +34,18 @@ class CommandCluster(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, plenaries, hostname, cluster, personality,
-               personality_stage, **_):
+               personality_stage, user, justification, reason, **_):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         if dbcluster.status.name == 'decommissioned':
             raise ArgumentError("Cannot add hosts to decommissioned clusters.")
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbcluster)
+        cm.consider(dbhost)
+        cm.validate()
 
         # We only support changing personality within the same
         # archetype. The archetype decides things like which OS, how

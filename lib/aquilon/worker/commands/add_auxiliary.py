@@ -25,6 +25,7 @@ from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddAuxiliary(BrokerCommand):
@@ -33,7 +34,7 @@ class CommandAddAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, plenaries, hostname, machine, auxiliary, interface,
-               mac, comments, **arguments):
+               mac, comments, user, justification, reason, **arguments):
         self.deprecated_command("Command add_auxiliary is deprecated.  Please "
                                 "use add_interface_address instead.", logger,
                                 **arguments)
@@ -46,6 +47,11 @@ class CommandAddAuxiliary(BrokerCommand):
                 raise ArgumentError("Use either --hostname or --machine to "
                                     "uniquely identify a system.")
             dbmachine = dbhost.hardware_entity
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
 
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 

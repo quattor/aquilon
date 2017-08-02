@@ -26,6 +26,7 @@ from aquilon.worker.dbwrappers.interface import (generate_ip, assign_address,
                                                  get_interfaces)
 from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 def get_boot_interface(dbmachine):
@@ -48,7 +49,8 @@ class CommandAddHost(BrokerCommand):
     required_parameters = ["hostname", "machine", "archetype"]
 
     def render(self, session, logger, plenaries, hostname, machine, archetype,
-               zebra_interfaces, skip_dsdb_check=False, **arguments):
+               zebra_interfaces, user, justification, reason,
+               skip_dsdb_check=False, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
@@ -136,6 +138,13 @@ class CommandAddHost(BrokerCommand):
             dbsrv_addr = None
 
         session.flush()
+
+        # Add Host, Windows Host or Aurora Host will allow to set buildstatus to ready
+        # Adding validation, though maybe we do not need that as the creating host, not changing
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmachine)
+        cm.validate()
 
         plenaries.add(dbmachine)
         if dbmachine.vm_container:

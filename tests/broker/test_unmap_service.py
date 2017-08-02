@@ -79,7 +79,7 @@ class TestUnmapService(TestBrokerCommand):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "scope_test",
                         "--instance", "target-dev",
-                        "--host_environment", "dev"])
+                        "--host_environment", "dev", "--justification", "tcm=12345678"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "scope_test", "--instance", "scope-building",

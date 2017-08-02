@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
-                                ResourceGroup, BundleResource)
+                                ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -175,7 +175,6 @@ class ChangeManagement(object):
             q = session.query(Cluster)
             q = q.filter_by(personality_stage=personality_stage)
             q = q.join(ClusterLifecycle)
-
         else:
             q = session.query(Host)
             q = q.filter_by(personality_stage=personality_stage)
@@ -184,9 +183,12 @@ class ChangeManagement(object):
         q = q.join(PersonalityStage, Personality, HostEnvironment)
         q = q.options(contains_eager('personality_stage.personality.host_environment'))
 
-        for target in q.all():
-            self.dict_of_impacted_envs.setdefault(
-                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+        if isinstance(q.first(), Cluster):
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+        else:
+            for host in q.all():
+                self.validate_host(host)
 
     def validate_cluster(self, cluster):
         """
@@ -202,6 +204,11 @@ class ChangeManagement(object):
         # Also validate cluster hosts
         for host in cluster.hosts:
             self.validate_host(host)
+        if hasattr(cluster, 'members'):
+            for cluster_member in cluster.members:
+                self.validate_cluster(cluster_member)
+        # To do: Do we want to check if cluster is assigned
+        # to metacluster and if yes validate metacluster and its clusters/hosts?
 
     def validate_host(self, host):
         """
@@ -221,13 +228,24 @@ class ChangeManagement(object):
         Returns: None
         """
         # Check if there cannot be a case when one machine can
-        # have multiple hosts assigned - vms seems to be handled separatelly
+        # have multiple hosts assigned - vms seems to be handled separately?
+        # Chassis/ChassisSlots?
         if isinstance(hwentities_or_hwentity, HardwareEntity):
-            self.validate_host(hwentities_or_hwentity.host)
+            if hwentities_or_hwentity.host:
+                self.validate_host(hwentities_or_hwentity.host)
         else:
             hwentities_or_hwentity = hwentities_or_hwentity.join(Host).options(contains_eager('host'))
             for hwentity in hwentities_or_hwentity.all():
                 self.validate_host(hwentity.host)
+
+    def validate_location(self, location):
+        session = object_session(location)
+        q = session.query(Host).join(HardwareEntity,
+                                     Host.hardware_entity_id == HardwareEntity.id).\
+            join(Location, HardwareEntity.location_id == Location.id).filter(Location.id == location.id)
+
+        for host in q.all():
+            self.validate_host(host)
 
     def validate_prod_network(self, network_or_networks):
         """
@@ -315,6 +333,17 @@ class ChangeManagement(object):
             for host in q.all():
                 self.validate_host(host)
 
+    def validate_chassis(self, chassis):
+        """
+        Validate if given chassis object has hosts in slots
+        Args:
+            chassis: single chassis object
+        Returns: None
+        """
+        for slot in chassis.slots:
+            if slot.machine.host:
+                self.validate_host(slot.machine.host)
+
     def validate_host_environment(self, host_environment):
         session = object_session(host_environment)
 
@@ -326,8 +355,7 @@ class ChangeManagement(object):
         q1 = q1.filter_by(host_environment=host_environment)
 
         for cluster in q1.all():
-            self.dict_of_impacted_envs.setdefault(
-                host_environment.name, []).append(cluster.status.name)
+            self.validate_cluster(cluster)
 
         q2 = session.query(Host)
         q2 = q2.join(HostLifecycle)
@@ -337,8 +365,7 @@ class ChangeManagement(object):
         q2 = q2.filter_by(host_environment=host_environment)
 
         for host in q2.all():
-            self.dict_of_impacted_envs.setdefault(
-                host_environment.name, []).append(host.status.name)
+            self.validate_host(host)
 
     def validate_prod_archetype(self, archtype):
         session = object_session(archtype)
@@ -354,9 +381,12 @@ class ChangeManagement(object):
         q = q.join(HostEnvironment)
         q = q.options(contains_eager('personality_stage.personality.host_environment'))
 
-        for target in q.all():
-            self.dict_of_impacted_envs.setdefault(
-                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+        if isinstance(q.first(), Cluster):
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+        else:
+            for host in q.all():
+                self.validate_host(host)
 
     def validate_prod_os(self, ostype):
         session = object_session(ostype)
@@ -368,9 +398,8 @@ class ChangeManagement(object):
         q = q.join(PersonalityStage, Personality, HostEnvironment)
         q = q.options(contains_eager('personality_stage.personality.host_environment'))
 
-        for target in q.all():
-            self.dict_of_impacted_envs.setdefault(
-                target.personality_stage.personality.host_environment.name, []).append(target.status.name)
+        for host in q.all():
+            self.validate_host(host)
 
     def validate_prod_service_instance(self, service_instance):
         session = object_session(service_instance)
@@ -383,8 +412,7 @@ class ChangeManagement(object):
         q1 = q1.options(contains_eager('personality_stage.personality.host_environment'))
 
         for cluster in q1.all():
-            self.dict_of_impacted_envs.setdefault(
-                cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
+            self.validate_cluster(cluster)
 
         q2 = session.query(Host)
         q2 = q2.filter(Host.services_used.contains(service_instance))
@@ -394,8 +422,7 @@ class ChangeManagement(object):
         q2 = q2.options(contains_eager('personality_stage.personality.host_environment'))
 
         for host in q2.all():
-            self.dict_of_impacted_envs.setdefault(
-                host.personality_stage.personality.host_environment.name, []).append(host.status.name)
+            self.validate_host(host)
 
     def validate_prod_feature(self, feature):
         session = object_session(feature)
@@ -417,8 +444,7 @@ class ChangeManagement(object):
         q1 = q1.options(contains_eager('personality_stage.personality.host_environment'))
 
         for cluster in q1.all():
-            self.dict_of_impacted_envs.setdefault(
-                cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
+            self.validate_cluster(cluster)
 
         q2 = session.query(Host)
         q2 = q2.join(PersonalityStage)
@@ -428,8 +454,7 @@ class ChangeManagement(object):
         q2 = q2.options(contains_eager('personality_stage.personality.host_environment'))
 
         for host in q2.all():
-            self.dict_of_impacted_envs.setdefault(
-                host.personality_stage.personality.host_environment.name, []).append(host.status.name)
+            self.validate_host(host)
 
 
 ChangeManagement.handlers[Cluster] = ChangeManagement.validate_cluster
@@ -454,6 +479,9 @@ ChangeManagement.handlers[Infra] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Domain] = ChangeManagement.validate_default
 ChangeManagement.handlers[Host] = ChangeManagement.validate_host
 ChangeManagement.handlers[Machine] = ChangeManagement.validate_hardware_entity
-ChangeManagement.handlers[HardwareEntity] = ChangeManagement.validate_hardware_entity
+# Removing this as the HardwareEntity is too general, we have validate_hardware_entity, validate_host and validate_chassis
+#ChangeManagement.handlers[HardwareEntity] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[NetworkDevice] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[Network] = ChangeManagement.validate_prod_network
+ChangeManagement.handlers[Chassis] = ChangeManagement.validate_chassis
+ChangeManagement.handlers[Rack] = ChangeManagement.validate_location

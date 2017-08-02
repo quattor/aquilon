@@ -20,6 +20,7 @@ from aquilon.aqdb.model import HostLifecycle
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates import TemplateDomain
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandChangeStatus(BrokerCommand):
@@ -27,8 +28,15 @@ class CommandChangeStatus(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, plenaries, hostname, buildstatus, **_):
+    def render(self, session, logger, plenaries, hostname, buildstatus,
+               user, justification, reason, **_):
         dbhost = hostname_to_host(session, hostname)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbhost)
+        cm.validate()
+
         dbstatus = HostLifecycle.get_instance(session, buildstatus)
         changed = dbhost.status.transition(dbhost, dbstatus)
 
