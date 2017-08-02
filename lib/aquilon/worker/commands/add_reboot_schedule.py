@@ -100,7 +100,7 @@ class CommandAddRebootSchedule(CommandAddResource):
 
         return arguments
 
-    def setup_resource(self, session, logger, dbrs, **arguments):
+    def setup_resource(self, session, logger, dbrs, reason, **arguments):
         arguments = self._validate_args(**arguments)
 
         time = arguments["time"]

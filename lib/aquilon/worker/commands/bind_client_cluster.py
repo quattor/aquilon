@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser, ChooserCache
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandBindClientCluster(BrokerCommand):
@@ -27,10 +28,16 @@ class CommandBindClientCluster(BrokerCommand):
 
     required_parameters = ["cluster", "service"]
 
-    def render(self, session, logger, plenaries, cluster, service, instance, force=False,
-               **_):
+    def render(self, session, logger, plenaries, cluster, service, instance, user,
+               justification, reason, force=False,**_):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbcluster)
+        cm.validate()
+
         dbservice = Service.get_unique(session, service, compel=True)
         if instance:
             dbinstance = ServiceInstance.get_unique(session, service=dbservice,

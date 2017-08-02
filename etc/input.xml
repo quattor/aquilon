@@ -6162,11 +6162,11 @@
 	    <optgroup>
 		<option name="personality" type="string">Name of a personality</option>
 		<option name="archetype" type="string">Archetype</option>
-		<option name="model" type="string">Name of a hardware model</option>
-		<option name="interface" type="string">Interface of a machine</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+		<option name="model" type="string">Name of a hardware model</option>
+		<option name="interface" type="string">Interface of a machine</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -6187,11 +6187,11 @@
 	    <optgroup>
 		<option name="personality" type="string">Name of a personality</option>
 		<option name="archetype" type="string">Archetype</option>
-		<option name="model" type="string">Name of a hardware model</option>
-		<option name="interface" type="string">Interface of a machine</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+		<option name="model" type="string">Name of a hardware model</option>
+		<option name="interface" type="string">Interface of a machine</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>

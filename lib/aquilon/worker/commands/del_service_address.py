@@ -22,6 +22,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelServiceAddress(BrokerCommand):
@@ -30,13 +31,18 @@ class CommandDelServiceAddress(BrokerCommand):
     required_parameters = ["name"]
 
     def render(self, session, logger, plenaries, name, hostname, cluster, metacluster,
-               resourcegroup, keep_dns, **_):
+               resourcegroup, keep_dns, user, justification, reason, **_):
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
                                 "be deleted.")
 
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=False)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(holder)
+        cm.validate()
 
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,
                                           compel=True)

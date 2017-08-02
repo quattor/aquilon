@@ -32,8 +32,8 @@ class CommandAddIntervention(CommandAddResource):
     resource_class = Intervention
     resource_name = "intervention"
 
-    def setup_resource(self, session, logger, dbiv, expiry, start_time,
-                       allowusers, allowgroups, disabled_actions, reason, **_):
+    def setup_resource(self, session, logger, dbiv, reason, expiry, start_time,
+                       allowusers, allowgroups, disabled_actions, **_):
         try:
             expire_when = parse(expiry)
         except (ValueError, TypeError) as err:

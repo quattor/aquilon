@@ -232,12 +232,13 @@ class TestBindFeature(TestBrokerCommand):
         command = ["bind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver", "--interface", "eth1"]
-        self.justificationmissingtest(command, auth=True, msgcheck=False)
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Personality and feature owners do not match and "
+                              "feature visibility is set to 'owner_only'.", command)
 
-        command = ["bind", "feature", "--feature", "src_route",
-                   "--model", "e1000", "--vendor", "intel",
-                   "--personality", "compileserver", "--interface", "eth1",
-                   "--justification", "tcm=12345678"]
+        command_tmp = ["update", "feature", "--feature", "src_route", "--type",
+                       "interface", "--visibility", "public"]
+        out = self.commandtest(command_tmp)
         err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
@@ -312,13 +313,11 @@ class TestBindFeature(TestBrokerCommand):
         self.matchclean(out, "src_route", command)
 
     def test_150_bind_interface_personality(self):
+        command = ["update", "feature", "--feature", "src_route", "--type",
+                   "interface", "--visibility", "public"]
+        out = self.commandtest(command)
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
-        self.justificationmissingtest(command, auth=True, msgcheck=False)
-
-        command = ["bind", "feature", "--feature", "src_route",
-                   "--personality", "compileserver", "--interface", "bond0",
-                   "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 2/1 templates.", command)
 
@@ -388,15 +387,6 @@ class TestBindFeature(TestBrokerCommand):
                 command.extend(["--model", "hs21-8853"])
             self.statustest(command)
 
-    def test_200_only_interface(self):
-        command = ["bind", "feature", "--feature", "src_route",
-                   "--interface", "eth0"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please specify either an archetype or a personality "
-                         "when binding a feature.",
-                         command)
-
     def test_200_bind_archetype_again(self):
         command = ["bind", "feature", "--feature", "pre_host",
                    "--archetype", "aquilon",
@@ -404,16 +394,6 @@ class TestBindFeature(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Host Feature pre_host is already bound to "
                          "archetype aquilon.", command)
-
-    def test_200_bind_model_noarch(self):
-        command = ["bind", "feature", "--feature", "bios_setup",
-                   "--model", "hs21-8853",
-                   "--justification", "tcm=12345678"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please specify either an archetype or a personality "
-                         "when binding a feature.",
-                         command)
 
     def test_200_bind_noncompilable_arch(self):
         command = ["bind", "feature", "--feature", "pre_host",

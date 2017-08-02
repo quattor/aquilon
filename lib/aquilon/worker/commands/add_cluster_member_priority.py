@@ -26,7 +26,7 @@ class CommandAddClusterMemberPriority(CommandAddResource):
     priority_parameter = None
     allow_existing = True
 
-    def setup_resource(self, session, logger, dbresource, member, **kwargs):
+    def setup_resource(self, session, logger, dbresource, reason, member, **kwargs):
         priority = kwargs.get(self.priority_parameter)
         dbhost = hostname_to_host(session, member)
         dbcluster = dbresource.holder.toplevel_holder_object

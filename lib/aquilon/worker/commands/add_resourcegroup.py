@@ -28,7 +28,7 @@ class CommandAddResourceGroup(CommandAddResource):
     resource_class = ResourceGroup
     resource_name = "resourcegroup"
 
-    def setup_resource(self, session, logger, dbrg, required_type, **_):
+    def setup_resource(self, session, logger, dbrg, reason, required_type, **_):
         if required_type is not None:
             rqtype = Resource.polymorphic_subclass(required_type,
                                                    "Unknown resource type")

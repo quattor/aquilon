@@ -28,7 +28,7 @@ class CommandAddApplication(CommandAddResource):
     resource_class = Application
     resource_name = "application"
 
-    def setup_resource(self, session, logger, dbapp, eon_id, grn, **_):
+    def setup_resource(self, session, logger, dbapp, reason, eon_id, grn, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
         dbapp.grn = dbgrn

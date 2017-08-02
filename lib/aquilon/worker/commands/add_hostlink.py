@@ -27,7 +27,7 @@ class CommandAddHostlink(CommandAddResource):
     resource_class = Hostlink
     resource_name = "hostlink"
 
-    def setup_resource(self, session, logger, dbhl, target, owner, group, mode, **_):
+    def setup_resource(self, session, logger, dbhl, reason, target, owner, group, mode, **_):
         dbhl.target = target
         dbhl.owner_user = owner
         dbhl.owner_group = group

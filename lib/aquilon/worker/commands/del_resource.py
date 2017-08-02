@@ -20,6 +20,7 @@ from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (get_resource_holder,
                                                  check_resource_dependencies)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelResource(BrokerCommand):
@@ -28,7 +29,8 @@ class CommandDelResource(BrokerCommand):
     resource_class = None
     resource_name = None
 
-    def render(self, session, logger, plenaries, hostname, cluster, metacluster, **kwargs):
+    def render(self, session, logger, plenaries, hostname, cluster, metacluster,
+               user, justification, reason, **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -43,6 +45,11 @@ class CommandDelResource(BrokerCommand):
 
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(holder)
+        cm.validate()
 
         dbresource = self.resource_class.get_unique(session, name=name,
                                                     holder=holder, compel=True)

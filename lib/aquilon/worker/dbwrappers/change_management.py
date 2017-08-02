@@ -27,7 +27,8 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
-                                ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack)
+                                ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
+                                Share)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -344,6 +345,48 @@ class ChangeManagement(object):
             if slot.machine.host:
                 self.validate_host(slot.machine.host)
 
+    def validate_resource_holder(self, resource_holder):
+        session = object_session(resource_holder)
+        CR = aliased(ClusterResource)
+        HR = aliased(HostResource)
+        RG = aliased(ResourceGroup)
+        BR = aliased(BundleResource)
+        q = None
+        q2 = None
+
+        if isinstance(resource_holder, BundleResource):
+            q = session.query(Cluster).join(CR)
+            q = q.outerjoin((RG, RG.holder_id == CR.id), (BR, BR.resourcegroup_id == RG.id))
+            q = q.filter(BR.id == resource_holder.id)
+
+            q2 = session.query(Host).join(HR)
+            q2 = q2.outerjoin((RG, RG.holder_id == HR.id), (BR, BR.resourcegroup_id == RG.id))
+            q2 = q2.filter(BR.id == resource_holder.id)
+
+        elif isinstance(resource_holder, ClusterResource):
+            q = session.query(Cluster).join(CR)
+            q = q.filter(CR.id == resource_holder.id)
+
+        elif isinstance(resource_holder, HostResource):
+            q2 = session.query(Host).join(HR)
+            q2 = q2.filter(HR.id == resource_holder.id)
+
+        # Validate Clusters
+        if q:
+            q = q.reset_joinpoint()
+            q = q.join(ClusterLifecycle).options(contains_eager('status'))
+            q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+
+        # Validate hosts
+        if q2:
+            q2 = q2.reset_joinpoint()
+            q2 = q2.join(HostLifecycle).options(contains_eager('status'))
+            q2 = q2.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            for host in q2.all():
+                self.validate_host(host)
+
     def validate_host_environment(self, host_environment):
         session = object_session(host_environment)
 
@@ -485,3 +528,6 @@ ChangeManagement.handlers[NetworkDevice] = ChangeManagement.validate_hardware_en
 ChangeManagement.handlers[Network] = ChangeManagement.validate_prod_network
 ChangeManagement.handlers[Chassis] = ChangeManagement.validate_chassis
 ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
+ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder

@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import MetaCluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser, ChooserCache
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandBindClientMetacluster(BrokerCommand):
@@ -28,8 +29,14 @@ class CommandBindClientMetacluster(BrokerCommand):
     required_parameters = ["metacluster", "service"]
 
     def render(self, session, logger, plenaries, metacluster, service, instance,
-               force=False, **_):
+               user, justification, reason, force=False, **_):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbmeta)
+        cm.validate()
+
         dbservice = Service.get_unique(session, service, compel=True)
         if instance:
             dbinstance = ServiceInstance.get_unique(session, service=dbservice,

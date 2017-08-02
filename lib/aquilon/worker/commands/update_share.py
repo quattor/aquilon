@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Share
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateShare(BrokerCommand):
@@ -28,17 +29,24 @@ class CommandUpdateShare(BrokerCommand):
     required_parameters = ["share"]
 
     def render(self, session, plenaries, share, latency_threshold,
-               comments, **_):
+               comments, user, justification, reason, logger, **_):
 
         validate_nlist_key("share", share)
 
         q = session.query(Share).filter_by(name=share)
+
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
 
         if not q.count():
             raise ArgumentError("Share %s is not used on any resource and "
                                 "cannot be modified" % share)
 
         for dbshare in q:
+            # Validate ChangeManagement
+            cm.consider(dbshare.holder)
+
             if latency_threshold:
                 dbshare.latency_threshold = latency_threshold
 
@@ -46,6 +54,9 @@ class CommandUpdateShare(BrokerCommand):
                 dbshare.comments = comments
 
             plenaries.add(dbshare)
+
+        # Validate ChangeManagement
+        cm.validate()
 
         session.flush()
         plenaries.write()

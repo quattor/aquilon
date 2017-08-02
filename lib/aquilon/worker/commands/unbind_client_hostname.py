@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates import PlenaryServiceInstanceServer
 from aquilon.utils import first_of
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUnbindClientHostname(BrokerCommand):
@@ -32,8 +33,15 @@ class CommandUnbindClientHostname(BrokerCommand):
     def get_dbobj(self, session, hostname=None, **_):
         return hostname_to_host(session, hostname)
 
-    def render(self, session, plenaries, service, **arguments):
+    def render(self, session, plenaries, service, user, justification,
+               reason, logger, **arguments):
         dbobj = self.get_dbobj(session, **arguments)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbobj)
+        cm.validate()
+
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = first_of(dbobj.services_used,
                               lambda x: x.service == dbservice)

@@ -181,11 +181,6 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["unbind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",
-                   "--interface", "eth1"]
-        self.justificationmissingtest(command, auth=True, msgcheck=False)
-        command = ["unbind", "feature", "--feature", "src_route",
-                   "--model", "e1000", "--vendor", "intel",
-                   "--personality", "compileserver",
                    "--interface", "eth1", "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flush", command)

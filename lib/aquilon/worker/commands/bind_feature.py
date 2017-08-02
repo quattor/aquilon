@@ -38,6 +38,9 @@ class CommandBindFeature(BrokerCommand):
 
         params = {}
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+
         # Step 1: define the target - either a personality or an archetype
         if personality:
             dbpersonality = Personality.get_unique(session,
@@ -47,9 +50,13 @@ class CommandBindFeature(BrokerCommand):
             dbarchetype = dbpersonality.archetype
             dbstage = dbpersonality.active_stage(personality_stage)
             params["personality_stage"] = dbstage
+            # Validate ChangeManagement
+            cm.consider(dbstage)
         elif archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             params["archetype"] = dbarchetype
+            # Validate ChangeManagement
+            cm.consider(dbarchetype)
         else:
             # It's highly unlikely that a feature template would work for
             # _any_ archetype, so disallow this case for now. As I can't
@@ -57,6 +64,9 @@ class CommandBindFeature(BrokerCommand):
             # future, the restriction is here and not in the model.
             raise ArgumentError("Please specify either an archetype or "
                                 "a personality when binding a feature.")
+
+        # Validate ChangeManagement
+        cm.validate()
 
         dbarchetype.require_compileable("feature bindings are not supported")
 
@@ -90,18 +100,10 @@ class CommandBindFeature(BrokerCommand):
 
         dbfeature = feature_cls.get_unique(session, name=feature, compel=True)
 
-        # Step 3: authorization
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        if personality:
-            if dbpersonality.owner_grn != dbfeature.owner_grn and \
-                            dbfeature.visibility == 'owner_only':
-                cm.consider(dbstage, enforce_validation=True)
-            cm.consider(dbstage)
-        elif archetype:
-            cm.consider(dbarchetype)
-        else:
-            cm.consider(dbfeature)
-        cm.validate()
+        if personality and dbpersonality.owner_grn != dbfeature.owner_grn \
+                and dbfeature.visibility == 'owner_only':
+            raise ArgumentError("Personality and feature owners do not "
+                                "match and feature visibility is set to 'owner_only'.")
 
         # Step 4: do it
         get_affected_plenaries(session, dbfeature, plenaries, **params)
