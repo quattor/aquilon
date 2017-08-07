@@ -521,6 +521,20 @@
 	</format>
     </command>
 
+    <command name="search_building">
+	Shows any information available for the matching buildings.
+	<optgroup mandatory="True">
+	    <option name="uri" type="string">URI</option>
+	</optgroup>
+	<optgroup>
+	    <option name="fullinfo" type="flag">Show full information for the matching buildings</option>
+	</optgroup>
+	<transport method="get" path="find/building"/>
+	<format name="proto" >
+	    <message_class name="HostList" module="aqdsystems_pb2"/>
+	</format>
+    </command>
+
     <command name="search_esx_cluster">
 	Shows any information available for the matching ESX clusters.
 	<p/>

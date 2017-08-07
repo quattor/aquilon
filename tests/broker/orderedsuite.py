@@ -184,6 +184,7 @@ from .test_show_campus import TestShowCampus
 from .test_show_fqdn import TestShowFqdn
 from .test_show_netdev import TestShowNetworkDevice
 from .test_show_machine import TestShowMachine
+from .test_search_building import TestSearchBuilding
 from .test_search_rack import TestSearchRack
 from .test_search_netdev import TestSearchNetworkDevice
 from .test_search_hardware import TestSearchHardware
@@ -416,6 +417,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestLocationConstraints,
                  TestDnsConstraints,
                  TestShowServiceAll, TestShowCampus, TestShowFqdn,
+                 TestSearchBuilding,
                  TestSearchRack,
                  TestShowNetworkDevice, TestSearchNetworkDevice,
                  TestSearchHardware, TestSearchMachine, TestShowMachine,
