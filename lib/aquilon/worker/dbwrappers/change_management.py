@@ -21,7 +21,7 @@ import json
 import shlex
 
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareEntity,
-                                PersonalityStage, InterfaceFeature, Domain, Machine,
+                                PersonalityStage, InterfaceFeature, Domain, Sandbox, Machine,
                                 HardwareFeature, HostFeature, ServiceInstance, NetworkDevice,
                                 OperatingSystem, ComputeCluster, StorageCluster, Network,
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
@@ -161,14 +161,17 @@ class ChangeManagement(object):
         elif out_dict.get("Status") != 'Approved':
             raise AuthorizationException(out_dict.get("Reason"))
 
-    def validate_default(self, obj):
+    def validate_branch(self, obj):
         """
         Method to be used when we do not need calculate impacted environment
-        Used with enforce_validation for some models, i.e. Domain
+        Used with enforce_validation for some models, i.e. Domain, Sandbox
+        If enforce_validation is set, do not perform extra database queries
+        to get hosts and clusters impacted
         Returns:
 
         """
-        pass
+        if obj.requires_change_manager:
+            self.enforce_validation = True
 
     def validate_prod_personality(self, personality_stage):
         session = object_session(personality_stage)
@@ -519,7 +522,7 @@ ChangeManagement.handlers[QA] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Legacy] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Production] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Infra] = ChangeManagement.validate_host_environment
-ChangeManagement.handlers[Domain] = ChangeManagement.validate_default
+ChangeManagement.handlers[Domain] = ChangeManagement.validate_branch
 ChangeManagement.handlers[Host] = ChangeManagement.validate_host
 ChangeManagement.handlers[Machine] = ChangeManagement.validate_hardware_entity
 # Removing this as the HardwareEntity is too general, we have validate_hardware_entity, validate_host and validate_chassis

@@ -21,17 +21,23 @@ from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.locks import CompileKey
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandRollback(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, logger, domain, ref, lastsync, **_):
+    def render(self, session, logger, domain, ref, lastsync, user,
+               justification, reason, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
         if not dbdomain.tracked_branch:
             # Could check dbdomain.trackers and rollback all of them...
             raise ArgumentError("Rollback requires a tracking domain.")
+
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdomain)
+        cm.validate()
 
         kingrepo = GitRepo.template_king(logger)
         domainrepo = GitRepo.domain(dbdomain.name, logger)

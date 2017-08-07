@@ -46,14 +46,14 @@ class TestConsistency(TestBrokerCommand):
         self.gitcommand(["branch", "branch-only", "prod"], cwd=kingdir)
 
     def test_030_add_domain_no_fileystem(self):
-        self.successtest(["add_domain", "--domain", "domain-no-filesystem"])
+        self.successtest(["add_domain", "--domain", "domain-no-filesystem", "--justification", "tcm=123"])
         dir = os.path.join(self.config.get("broker", "domainsdir"),
                            "domain-no-filesystem")
         rmtree(dir)
 
     def test_040_add_domain_no_template_king(self):
         kingdir = self.config.get("broker", "kingdir")
-        self.successtest(["add_domain", "--domain", "domain-no-template-king"])
+        self.successtest(["add_domain", "--domain", "domain-no-template-king", "--justification", "tcm=123"])
         self.gitcommand(["branch", "-D", "domain-no-template-king"], cwd=kingdir)
 
     def test_050_add_sandbox_no_template_king(self):

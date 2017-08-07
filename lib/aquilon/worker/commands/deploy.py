@@ -72,13 +72,15 @@ class CommandDeploy(BrokerCommand):
             raise ArgumentError("Deploying {0:l} to {1:l} was explicitly denied."
                                 .format(dbsource, dbtarget))
 
-        if dbtarget.requires_change_manager and not dryrun:
+        if not dryrun:
+            # Validate ChangeManagement
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.consider(dbtarget, enforce_validation=True)
+            cm.consider(dbtarget)
             cm.validate()
-            # if not dbreview or not dbreview.approved:
-                # logger.warning("Warning: this deployment request was not "
-                #                "approved, this will be an error in the future.")
+
+        # if not dbreview or not dbreview.approved:
+            # logger.warning("Warning: this deployment request was not "
+            #                "approved, this will be an error in the future.")
 
         if dbtarget.archived:
             raise ArgumentError("{0} is archived and cannot be changed."

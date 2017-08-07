@@ -32,6 +32,7 @@ from aquilon.worker.formats.branch import AuthoredSandbox
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.templates import TemplateDomain
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 def validate_branch_commits(dbsource, dbsource_author,
@@ -124,7 +125,8 @@ class CommandManageList(BrokerCommand):
 
         return (dbsource, dbsource_author, dbhosts)
 
-    def render(self, session, logger, plenaries, domain, sandbox, force, skip_auto_compile, **arguments):
+    def render(self, session, logger, plenaries, domain, sandbox, force,
+               skip_auto_compile, user, justification, reason, **arguments):
 
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
@@ -136,6 +138,10 @@ class CommandManageList(BrokerCommand):
         dbsource, dbsource_author, objects = self.get_objects(session,
                                                               logger=logger,
                                                               **arguments)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(objects)
+        cm.validate()
+
         auto_compile = False
         # If target is a sandbox
         if sandbox and isinstance(dbsource, Sandbox) and not skip_auto_compile:

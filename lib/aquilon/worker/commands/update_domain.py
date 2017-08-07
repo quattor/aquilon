@@ -21,6 +21,7 @@ from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import (expand_compiler,
                                               has_compileable_objects)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateDomain(BrokerCommand):
@@ -29,8 +30,12 @@ class CommandUpdateDomain(BrokerCommand):
 
     def render(self, session, domain, comments, compiler_version, auto_compile,
                autosync, change_manager, allow_manage, profile_formats,
-               archived, **_):
+               archived, user, justification, reason, logger, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
+
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdomain)
+        cm.validate()
 
         if comments is not None:
             dbdomain.comments = comments
