@@ -46,7 +46,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["bind", "server", "--service", service,
                         "--instance", "unittest",
-                        "--hostname", "nyaqd1.ms.com"])
+                        "--hostname", "nyaqd1.ms.com", "--justification", "tcm=123"])
 
     # test_map_service runs too late...
     def test_110_map_poll_helper(self):

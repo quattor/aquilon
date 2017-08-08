@@ -130,10 +130,6 @@ class CommandBindServer(BrokerCommand):
         dbinstance = ServiceInstance.get_unique(session, service=service,
                                                 name=instance, compel=True)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbinstance)
-        cm.validate()
-
         plenaries.add(dbinstance)
 
         if alias and not dbinstance.service.allow_alias_bindings:
@@ -142,6 +138,15 @@ class CommandBindServer(BrokerCommand):
 
         params = lookup_target(session, logger, plenaries, hostname, ip,
                                cluster, resourcegroup, service_address, alias)
+
+        # Validate ChangeManagement
+        # Validating service providers
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        for key in ["host", "cluster"]:
+            cm.consider(params.get(key, None))
+        if params.get("alias", None):
+            cm.consider(params["alias"], enforce_validation=True)
+        cm.validate()
 
         # TODO: someday we should verify that the target really points to the
         # host/cluster specified by the other options

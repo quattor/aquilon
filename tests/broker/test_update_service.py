@@ -69,7 +69,7 @@ class TestUpdateService(TestBrokerCommand):
                          command)
 
     def test_111_updatebootserverservice(self):
-        command = "update service --service bootserver --default"
+        command = "update service --service bootserver --default --justification tcm=123"
         self.noouttest(command.split(" "))
 
     def test_115_verifyupdatebootserverservice(self):

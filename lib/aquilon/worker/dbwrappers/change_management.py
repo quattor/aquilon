@@ -28,7 +28,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
                                 ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
-                                Share)
+                                Share, Alias)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -163,6 +163,9 @@ class ChangeManagement(object):
             self.logger.client_info("Approval Warning: {}".format(out_dict.get("Reason")))
         elif out_dict.get("Status") != 'Approved':
             raise AuthorizationException(out_dict.get("Reason"))
+
+    def validate_default(self, obj):
+        pass
 
     def validate_branch(self, obj):
         """
@@ -394,27 +397,8 @@ class ChangeManagement(object):
                 self.validate_host(host)
 
     def validate_host_environment(self, host_environment):
-        session = object_session(host_environment)
-
-        q1 = session.query(Cluster)
-        q1 = q1.join(ClusterLifecycle)
-        q1 = q1.options(contains_eager('status'))
-        q1 = q1.join(PersonalityStage)
-        q1 = q1.join(Personality)
-        q1 = q1.filter_by(host_environment=host_environment)
-
-        for cluster in q1.all():
-            self.validate_cluster(cluster)
-
-        q2 = session.query(Host)
-        q2 = q2.join(HostLifecycle)
-        q2 = q2.options(contains_eager('status'))
-        q2 = q2.join(PersonalityStage)
-        q2 = q2.join(Personality)
-        q2 = q2.filter_by(host_environment=host_environment)
-
-        for host in q2.all():
-            self.validate_host(host)
+        if host_environment.name == 'prod':
+            self.enforce_validation = True
 
     def validate_prod_archetype(self, archtype):
         session = object_session(archtype)
@@ -530,3 +514,4 @@ ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[Alias] = ChangeManagement.validate_default

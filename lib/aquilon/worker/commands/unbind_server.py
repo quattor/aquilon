@@ -48,6 +48,8 @@ class CommandUnbindServer(BrokerCommand):
             q = q.filter_by(service=dbservice)
             dbinstances = q.all()
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         if position is not None:
             params = None
         else:
@@ -56,9 +58,8 @@ class CommandUnbindServer(BrokerCommand):
                                    alias)
 
         for dbinstance in dbinstances:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            # Validate ChangeManagement
             cm.consider(dbinstance)
-            cm.validate()
 
             if position is not None:
                 if position < 0 or position >= len(dbinstance.servers):
@@ -86,6 +87,9 @@ class CommandUnbindServer(BrokerCommand):
             if dbinstance.client_count and not dbinstance.servers:
                 logger.warning("Warning: {0} was left without servers, "
                                "but it still has clients.".format(dbinstance))
+
+        #Validate ChangeManagement
+        cm.validate()
 
         session.flush()
 
