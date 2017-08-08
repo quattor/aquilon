@@ -19,13 +19,15 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.utils import validate_template_name
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, archetype, template, path, value_type,
-               schema, required, activation, default, description, **_):
+               schema, required, activation, default, description,
+               user, justification, reason, logger, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbarchetype.require_compileable("parameters are not supported")
@@ -33,6 +35,12 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         if default is not None:
             raise UnimplementedError("Archetype-wide parameter definitions "
                                      "cannot have default values.")
+
+        # Validate ChangeManagement
+        if required is not None:
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.consider(dbarchetype)
+            cm.validate()
 
         try:
             holder = dbarchetype.param_def_holders[template]

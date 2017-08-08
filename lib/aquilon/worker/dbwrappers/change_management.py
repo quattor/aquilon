@@ -91,6 +91,9 @@ class ChangeManagement(object):
             self.logger.debug('Change management is disabled. Exiting validate.')
             return
         self.logger.debug('Determine if the input object is a queryset or a single object')
+        if not target_obj:
+            self.logger.debug('Given objects is None. Nothing to validate.')
+            return
         # If given object is query use it for validation
         # to optimize validation of large amount of data
         if isinstance(target_obj, Query):
@@ -472,13 +475,6 @@ class ChangeManagement(object):
 
     def validate_prod_feature(self, feature):
         session = object_session(feature)
-
-        # validate that separately from command later
-        q = session.query(Archetype)
-        q = q.join(Archetype.features)
-        q = q.filter_by(feature=feature)
-        for dbarchetype in q:
-            self.validate_prod_archetype(dbarchetype)
 
         q1 = session.query(Cluster)
         q1 = q1.join(ClusterLifecycle)

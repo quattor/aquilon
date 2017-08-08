@@ -31,6 +31,7 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, plenaries, archetype, path, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+
         path = ParamDefinition.normalize_path(path, strict=False)
         db_paramdef, _ = lookup_paramdef(dbarchetype, path)
         param_def_holder = db_paramdef.holder

@@ -81,7 +81,8 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_200_update_archetype_default(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=foo/test_rebuild_required", "--default=default"]
+               "--path=foo/test_rebuild_required", "--default=default",
+               "--justification", "tcm=123"]
         out = self.unimplementederrortest(cmd)
         self.matchoutput(out, "Archetype-wide parameter definitions cannot "
                          "have default values.",

@@ -33,6 +33,13 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
+        # Validating always not only when default not specified?
+        # Validate ChangeManagement
+        if default is not None or required is not None:
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.consider(dbfeature)
+            cm.validate()
+
         if not dbfeature.param_def_holder:
             dbfeature.param_def_holder = FeatureParamDef()
 
@@ -43,9 +50,6 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         dbfeature.param_def_holder.check_new_path(path)
 
         if default is not None:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.consider(dbfeature)
-            cm.validate()
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         # Activation field has been skipped on purpose

@@ -21,6 +21,7 @@ from sqlalchemy.orm import contains_eager
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, PersonalityStage, Host, Cluster
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandPromote(BrokerCommand):
@@ -28,7 +29,8 @@ class CommandPromote(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, plenaries, personality, archetype, **_):
+    def render(self, session, plenaries, personality, archetype, user,
+               justification, reason, logger, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if "next" not in dbpersonality.stages:
@@ -51,6 +53,11 @@ class CommandPromote(BrokerCommand):
 
         current = dbpersonality.stages.get("current", None)
         next = dbpersonality.stages["next"]
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(current)
+        cm.validate()
 
         if current:
             plenaries.add(current)

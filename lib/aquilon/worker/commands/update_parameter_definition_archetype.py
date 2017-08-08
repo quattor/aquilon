@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (lookup_paramdef,
                                                  update_paramdef_schema)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdParameterDefintionArchetype(BrokerCommand):
@@ -27,9 +28,16 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "path"]
 
     def render(self, session, archetype, path, schema, clear_schema, required,
-               activation, default, clear_default, description, **_):
+               activation, default, clear_default, description,
+               user, justification, reason, logger, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbarchetype.require_compileable("parameters are not supported")
+
+        # Validate ChangeManagement
+        if required is not None:
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.consider(dbarchetype)
+            cm.validate()
 
         if default is not None or clear_default:
             raise UnimplementedError("Archetype-wide parameter definitions "
