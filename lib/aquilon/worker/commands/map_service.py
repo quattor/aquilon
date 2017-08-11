@@ -63,8 +63,6 @@ class CommandMapService(BrokerCommand):
         elif host_environment:
             dbenv = HostEnvironment.get_instance(session, host_environment)
             cm.consider(dbenv)
-        else:
-            cm.consider(dbinstance)
         cm.validate()
 
         q = session.query(ServiceMap)

@@ -18,10 +18,10 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ParamDefinition, Feature
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
                                                  lookup_paramdef,
                                                  add_feature_paramdef_plenaries)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelParameterDefintionFeature(BrokerCommand):

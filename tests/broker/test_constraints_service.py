@@ -82,6 +82,10 @@ class TestServiceConstraints(TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--personality", "utpers-prod", "--buildstatus", "ready"]
         self.statustest(command)
+        command = ["reconfigure", "--hostname", 'unittest20.aqd-unittest.ms.com',
+                   "--archetype", "aquilon",
+                   "--personality", "utpers-prod", "--buildstatus", "ready"]
+        self.statustest(command)
         command = ['bind_server', '--service', 'dns', '--instance', 'unittest',
                    '--hostname', 'unittest20.aqd-unittest.ms.com']
         self.justificationmissingtest(command, auth=True, msgcheck=False)
@@ -90,6 +94,10 @@ class TestServiceConstraints(TestBrokerCommand):
         command = ['unbind_server', '--service', 'dns',
                    '--instance', 'unittest', '--position', 1]
         self.justificationmissingtest(command, auth=True, msgcheck=False)
+        command = ["reconfigure", "--hostname", 'unittest20.aqd-unittest.ms.com',
+                   "--archetype", "aquilon",
+                   "--personality", "compileserver", "--justification", "tcm=123"]
+        self.statustest(command)
         command = ["reconfigure", "--hostname", 'server1.aqd-unittest.ms.com',
                    "--archetype", "aquilon",
                    "--personality", "compileserver", "--justification", "tcm=123"]

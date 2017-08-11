@@ -39,7 +39,7 @@ class TestAddDomain(TestBrokerCommand):
     def test_100_add_unittest(self):
         command = ["add_domain", "--domain=unittest", "--track=utsandbox",
                    "--comments", "aqd unit test tracking domain",
-                   "--disallow_manage"]
+                   "--disallow_manage", "--justification", "tcm=123"]
         self.successtest(command)
         self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "unittest")))
@@ -71,7 +71,7 @@ class TestAddDomain(TestBrokerCommand):
         self.assertEqual(domain.allow_manage, False)
 
     def test_110_add_utprod(self):
-        command = ["add_domain", "--domain=ut-prod", "--track=prod"]
+        command = ["add_domain", "--domain=ut-prod", "--track=prod", "--justification", "tcm=123"]
         self.successtest(command)
         self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "ut-prod")))
@@ -93,7 +93,7 @@ class TestAddDomain(TestBrokerCommand):
                            command)
 
     def test_120_add_deployable(self):
-        command = ["add_domain", "--domain=deployable", "--start=prod"]
+        command = ["add_domain", "--domain=deployable", "--start=prod", "--justification", "tcm=123"]
         self.successtest(command)
         self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
@@ -106,14 +106,15 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "Auto Compile: True", command)
 
     def test_130_add_leftbehind(self):
-        command = ["add_domain", "--domain=leftbehind", "--start=prod", "--noauto_compile"]
+        command = ["add_domain", "--domain=leftbehind", "--start=prod", "--noauto_compile",
+                   "--justification", "tcm=123"]
         out = self.commandtest(command)
         command = ["show_domain", "--domain=leftbehind"]
         out = self.commandtest(command)
         self.matchoutput(out, "Auto Compile: False", command)
 
     def test_140_add_nomanage(self):
-        command = ["add_domain", "--domain", "nomanage"]
+        command = ["add_domain", "--domain", "nomanage", "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_145_verifynomanage(self):
@@ -124,22 +125,22 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_150_add_unittest_xml(self):
         self.successtest(["add_domain", "--domain", "unittest-xml",
-                          "--track", "utsandbox", "--noauto_compile"])
+                          "--track", "utsandbox", "--noauto_compile", "--justification", "tcm=123"])
         command = ["show_domain", "--domain=unittest-xml"]
         out = self.commandtest(command)
         self.matchoutput(out, "Auto Compile: False", command)
 
     def test_150_add_unittest_json(self):
         self.successtest(["add_domain", "--domain", "unittest-json",
-                          "--track", "utsandbox"])
+                          "--track", "utsandbox", "--justification", "tcm=123"])
 
     def test_160_add_netinfra(self):
         self.successtest(["add_domain", "--domain", "netinfra",
-                          "--track", "prod"])
+                          "--track", "prod", "--justification", "tcm=123"])
 
     def test_170_add_alt_unittest(self):
         command = ["add_domain", "--domain=alt-unittest", "--track=utsandbox",
-                   "--comments", "Stuff which does not compile"]
+                   "--comments", "Stuff which does not compile", "--justification", "tcm=123"]
         self.successtest(command)
 
     def test_210_verifysearchtrack(self):
@@ -164,7 +165,7 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_300_invalidtrack(self):
         command = ["add_domain", "--domain=notvalid-prod", "--track=prod",
-                   "--change_manager"]
+                   "--change_manager", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot enforce a change manager for tracking domain",

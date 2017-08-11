@@ -30,6 +30,7 @@ class CommandUpdateServiceInstance(BrokerCommand):
         dbservice = Service.get_unique(session, name=service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=instance, compel=True)
+
         if default:
             dbsi.max_clients = None
         elif max_clients is not None:

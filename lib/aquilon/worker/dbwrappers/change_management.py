@@ -21,14 +21,14 @@ import json
 import shlex
 
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareEntity,
-                                PersonalityStage, InterfaceFeature, Domain, Machine,
+                                PersonalityStage, InterfaceFeature, Domain, Sandbox, Machine,
                                 HardwareFeature, HostFeature, ServiceInstance, NetworkDevice,
                                 OperatingSystem, ComputeCluster, StorageCluster, Network,
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
                                 ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
-                                Share)
+                                Share, Alias)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -91,6 +91,9 @@ class ChangeManagement(object):
             self.logger.debug('Change management is disabled. Exiting validate.')
             return
         self.logger.debug('Determine if the input object is a queryset or a single object')
+        if not target_obj:
+            self.logger.debug('Given objects is None. Nothing to validate.')
+            return
         # If given object is query use it for validation
         # to optimize validation of large amount of data
         if isinstance(target_obj, Query):
@@ -162,13 +165,19 @@ class ChangeManagement(object):
             raise AuthorizationException(out_dict.get("Reason"))
 
     def validate_default(self, obj):
+        pass
+
+    def validate_branch(self, obj):
         """
         Method to be used when we do not need calculate impacted environment
-        Used with enforce_validation for some models, i.e. Domain
+        Used with enforce_validation for some models, i.e. Domain, Sandbox
+        If enforce_validation is set, do not perform extra database queries
+        to get hosts and clusters impacted
         Returns:
 
         """
-        pass
+        if obj.requires_change_manager:
+            self.enforce_validation = True
 
     def validate_prod_personality(self, personality_stage):
         session = object_session(personality_stage)
@@ -388,27 +397,8 @@ class ChangeManagement(object):
                 self.validate_host(host)
 
     def validate_host_environment(self, host_environment):
-        session = object_session(host_environment)
-
-        q1 = session.query(Cluster)
-        q1 = q1.join(ClusterLifecycle)
-        q1 = q1.options(contains_eager('status'))
-        q1 = q1.join(PersonalityStage)
-        q1 = q1.join(Personality)
-        q1 = q1.filter_by(host_environment=host_environment)
-
-        for cluster in q1.all():
-            self.validate_cluster(cluster)
-
-        q2 = session.query(Host)
-        q2 = q2.join(HostLifecycle)
-        q2 = q2.options(contains_eager('status'))
-        q2 = q2.join(PersonalityStage)
-        q2 = q2.join(Personality)
-        q2 = q2.filter_by(host_environment=host_environment)
-
-        for host in q2.all():
-            self.validate_host(host)
+        if host_environment.name == 'prod':
+            self.enforce_validation = True
 
     def validate_prod_archetype(self, archtype):
         session = object_session(archtype)
@@ -470,13 +460,6 @@ class ChangeManagement(object):
     def validate_prod_feature(self, feature):
         session = object_session(feature)
 
-        # validate that separately from command later
-        q = session.query(Archetype)
-        q = q.join(Archetype.features)
-        q = q.filter_by(feature=feature)
-        for dbarchetype in q:
-            self.validate_prod_archetype(dbarchetype)
-
         q1 = session.query(Cluster)
         q1 = q1.join(ClusterLifecycle)
         q1 = q1.options(contains_eager('status'))
@@ -519,7 +502,7 @@ ChangeManagement.handlers[QA] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Legacy] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Production] = ChangeManagement.validate_host_environment
 ChangeManagement.handlers[Infra] = ChangeManagement.validate_host_environment
-ChangeManagement.handlers[Domain] = ChangeManagement.validate_default
+ChangeManagement.handlers[Domain] = ChangeManagement.validate_branch
 ChangeManagement.handlers[Host] = ChangeManagement.validate_host
 ChangeManagement.handlers[Machine] = ChangeManagement.validate_hardware_entity
 # Removing this as the HardwareEntity is too general, we have validate_hardware_entity, validate_host and validate_chassis
@@ -531,3 +514,4 @@ ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[Alias] = ChangeManagement.validate_default

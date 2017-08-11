@@ -24,6 +24,7 @@ from aquilon.utils import remove_dir
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import add_branch
 from aquilon.worker.processes import run_git, GitRepo
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddDomain(BrokerCommand):
@@ -31,7 +32,8 @@ class CommandAddDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, logger, domain, track, start, change_manager,
-               auto_compile, comments, allow_manage, **_):
+               auto_compile, comments, allow_manage, user, justification,
+               reason, **_):
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
             if getattr(dbtracked, "tracked_branch", None):
@@ -53,6 +55,9 @@ class CommandAddDomain(BrokerCommand):
                               comments=comments, allow_manage=allow_manage)
 
         session.flush()
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdomain, enforce_validation=True)
+        cm.validate()
 
         domainsdir = self.config.get("broker", "domainsdir")
         clonedir = os.path.join(domainsdir, dbdomain.name)

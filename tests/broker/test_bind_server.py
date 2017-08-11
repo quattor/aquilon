@@ -65,12 +65,14 @@ class TestBindServer(TestBrokerCommand):
     def test_141_bind_aliased_server(self):
         self.statustest(["bind_server", "--alias", "srv-alias.one-nyp.ms.com",
                          "--hostname", "unittest00.one-nyp.ms.com",
-                         "--service", "utsvc", "--instance", "utsi2"])
+                         "--service", "utsvc", "--instance", "utsi2",
+                         "--justification", "tcm=123"])
 
     def test_145_bind_alias_alone(self):
         self.noouttest(["bind_server",
                         "--alias", "srv-alias2.one-nyp.ms.com",
-                        "--service", "utsvc", "--instance", "utsi2"])
+                        "--service", "utsvc", "--instance", "utsi2",
+                        "--justification", "tcm=123"])
 
     def test_150_bind_service_address(self):
         self.noouttest(["bind_server",

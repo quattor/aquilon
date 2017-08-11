@@ -670,6 +670,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_895_del_parameter_definition_prod_cluster(self):
         command = ["del_parameter_definition", "--feature", "testclusterfeature",
                    "--type", "host", "--path=teststringcluster"]
+
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
         command = command + ['--justification', 'emergency']

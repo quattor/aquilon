@@ -36,13 +36,15 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         path = ParamDefinition.normalize_path(path)
         db_paramdef, _ = lookup_paramdef(dbfeature, path)
 
-        # Changing the default value impacts all personalities which do not
-        # override it, so more scrunity is needed
-        if default is not None or clear_default:
+        #Validate ChangeManagement
+        if default is not None or clear_default or required is not None:
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
             cm.consider(dbfeature)
             cm.validate()
 
+        # Changing the default value impacts all personalities which do not
+        # override it, so more scrunity is needed
+        if default is not None or clear_default:
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
             db_paramdef.default = default
 

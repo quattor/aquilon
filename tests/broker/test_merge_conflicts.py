@@ -38,15 +38,15 @@ class TestMergeConflicts(TestBrokerCommand):
         self.successtest(["add", "sandbox", "--sandbox", "changetest4"])
 
     def test_100_addchangetargetdomain(self):
-        self.successtest(["add", "domain", "--domain", "changetarget"])
+        self.successtest(["add", "domain", "--domain", "changetarget", "--justification", "tcm=123"])
 
     def test_110_trackchangetest4(self):
         self.commandtest(["add_domain", "--domain", "changetest4-tracker",
-                          "--track", "changetest4"])
+                          "--track", "changetest4", "--justification", "tcm=123"])
 
     def test_110_trackchangetarget(self):
         self.commandtest(["add_domain", "--domain", "changetarget-tracker",
-                          "--track", "changetarget"])
+                          "--track", "changetarget", "--justification", "tcm=123"])
 
     def test_120_makeconflictingchange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
@@ -207,13 +207,13 @@ class TestMergeConflicts(TestBrokerCommand):
 
     def test_135_rollback_no_history(self):
         command = ["rollback", "--domain", "changetarget-tracker",
-                   "--ref", "changetest5"]
+                   "--ref", "changetest5", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.searchoutput(out, "Cannot roll back to commit: "
                           "branch changetarget does not contain", command)
 
     def test_140_rollback(self):
-        command = "rollback --domain changetarget-tracker --lastsync"
+        command = "rollback --domain changetarget-tracker --lastsync --justification tcm=123"
         self.successtest(command.split(" "))
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="changetarget-tracker")
@@ -278,7 +278,7 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_200_rollback_bad_commit(self):
         # This commit ID is from the Linux kernel sources
         command = ["rollback", "--domain", "changetarget-tracker",
-                   "--ref", "2dcd0af568b0cf583645c8a317dd12e344b1c72a"]
+                   "--ref", "2dcd0af568b0cf583645c8a317dd12e344b1c72a", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Ref 2dcd0af568b0cf583645c8a317dd12e344b1c72a "
