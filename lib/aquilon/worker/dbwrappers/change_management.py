@@ -32,7 +32,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
-from aquilon.worker.dbwrappers.user_principal import get_user_principal
+from aquilon.worker.dbwrappers.user_principal import get_or_create_user_principal
 from aquilon.worker.processes import run_command
 from sqlalchemy.orm import contains_eager, load_only, aliased
 from sqlalchemy.orm.session import object_session
@@ -72,7 +72,7 @@ class ChangeManagement(object):
         if self.config.has_option("change_management", "extra_options"):
             self.extra_options = self.config.get("change_management", "extra_options")
 
-        dbuser = get_user_principal(session, user)
+        dbuser = get_or_create_user_principal(session, user, commitoncreate=True)
         self.username = dbuser.name
         self.role_name = dbuser.role.name
 
