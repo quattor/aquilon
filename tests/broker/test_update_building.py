@@ -90,17 +90,6 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
                          command)
 
-    def test_126_update_ut_uri(self):
-        command = ["update", "building", "--building", "ut",
-                   "--uri", "assetinventory://003428"]
-        self.noouttest(command)
-
-    def test_127_verify_ut_uri(self):
-        command = ["show", "building", "--building", "ut"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Location URI: assetinventory://003428",
-                         command)
-
     def test_130_update_tu_dnsdomain(self):
         command = ["update", "building", "--building", "tu",
                    "--default_dns_domain", "aqd-unittest.ms.com"]
@@ -122,6 +111,34 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Default DNS Domain", command)
         self.matchclean(out, "aqd-unittest.ms.com", command)
+
+    def test_140_update_ut_uri(self):
+        command = ["update", "building", "--building", "ut",
+                   "--uri", "assetinventory://003450"]
+        self.noouttest(command)
+
+    def test_141_verify_ut_uri(self):
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Location URI: assetinventory://003450",
+                         command)
+
+    def test_142_update_ut_uri_invalid(self):
+        command = ["update", "building", "--building", "ut",
+                   "--uri", "assetinventory://003550"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Building name and URI do not match", command)
+
+    def test_143_update_ut_uri_force(self):
+        command = ["update", "building", "--building", "ut",
+                   "--uri", "assetinventory://003550", "--force_uri"]
+        self.noouttest(command)
+
+    def test_144_verify_ut_uri_force(self):
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Location URI: assetinventory://003550",
+                         command)
 
     def test_150_set_up_prod_personality(self):
         GRN = "grn:/ms/ei/aquilon/aqd"

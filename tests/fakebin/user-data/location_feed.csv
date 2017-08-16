@@ -1,0 +1,10 @@
+#BUILDING_LOCID,BUILDING_NAME,BUILDING_CODE,LDAP_CODE,IT_CODE,SITE,STATUS,ADDRESS1,ADDRESS2,CITY_DESCRIPTION,STATE_DESCRIPTION,COUNTRY_DESCRIPTION,ARENA_DESCIRPTION
+"0","Unknown","Unknown",""," ","0","",""," ","Unknown","","Unknown",""
+"1","Cherry Hill (Voorhees) NJ","NJVORHE","NJVORHE","","RETAIL","ACTIVE","1000 Main Street Suite 201","P. O. BOX 1901","Voorhees","NEW JERSEY","United States of America","Americas"
+"2","-999","","","","0","INACTIVE","159 South Main Street, Suite 1130","","Akron","OHIO","United States of America","Americas"
+"3","The Strand Center","","","","0","INACTIVE","110 South Union St., 1st Floor","","Alexandria","VIRGINIA","United States of America","Americas"
+"4","3414 Peachtree Road Ne (Monarch Plaza)","","","","0","INACTIVE","3414 Peachtree Road Ne","","Atlanta","GEORGIA","United States of America","Americas"
+"3427","cards","","","cards","","ACTIVE","Nowhere","","ex","ex","",""
+"3428","bu","bu","","bu","","ACTIVE","12 Cherry Lane","","ny","ny","United States of America","Americas"
+"4000","nettest","","","nettest","","","Nowhere","","ny","ny","",""
+"3450","Unittest-building","","","ut","","","unittest address","","ny","ny","",""
