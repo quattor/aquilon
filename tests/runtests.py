@@ -165,6 +165,12 @@ if opts.start:
         sys.exit(1)
     print("Will be using database dump {} to create DB. Tests will start from {}.".format(dumfile, opts.start))
 
+if opts.failfast:
+    if not config.has_option("unittest", "last_success_db_snapshot") or \
+        not config.get("unittest", "last_success_db_snapshot"):
+        print("'last_success_db_snapshot' path config parameter missing.")
+        sys.exit(1)
+
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
 with open(makefile) as f:
