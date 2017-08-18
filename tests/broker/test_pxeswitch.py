@@ -124,6 +124,19 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--rescuelist", command)
 
+    def testduplist(self):
+        hosts = ["unittest00.one-nyp.ms.com",
+                 "unittest00.one-nyp.ms.com",
+                 "unittest01.one-nyp.ms.com"]
+
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s --install" % scratchfile
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "Provided list contains duplicate entry: "
+                         "unittest00.one-nyp.ms.com",
+                         command)
+
     def testconfigurelist(self):
         hosts = ["uNitTest02.one-nyp.ms.com",
                  "unittest00.One-Nyp.ms.com"]
