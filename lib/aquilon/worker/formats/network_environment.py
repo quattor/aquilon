@@ -31,4 +31,11 @@ class NetworkEnvironmentFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % netenv.comments)
         return "\n".join(details)
 
+    def fill_proto(self, netenv, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.name = netenv.name
+        self.redirect_proto(netenv.dns_environment, skeleton.dns_environment)
+        if netenv.location is not None:
+            self.redirect_proto(netenv.location, skeleton.location)
+
+
 ObjectFormatter.handlers[NetworkEnvironment] = NetworkEnvironmentFormatter()

@@ -146,8 +146,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
                     target_ip = str(srv.address_assignment.ip)
                     target_fqdn = str(srv.address_assignment.fqdns[0])
                 elif srv.service_address:
-                    srv_msg.service_address.ip = str(srv.service_address.ip)
-                    srv_msg.service_address.fqdn = str(srv.service_address.dns_record)
+                    self.redirect_proto(srv.service_address, srv_msg.service_address)
                     target_ip = str(srv.service_address.ip)
                     target_fqdn = str(srv.service_address.dns_record.fqdn)
 
