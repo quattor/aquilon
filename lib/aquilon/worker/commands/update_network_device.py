@@ -41,7 +41,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
     def render(self, session, logger, plenaries, network_device, model, type, ip, vendor,
                serial, rename_to, discovered_macs, clear, discover, comments,
-               user, justification, reason, **arguments):
+               user, justification, reason, exporter, **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         # Validate ChangeManagement
@@ -56,7 +56,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
         if discover:
             discover_network_device(session, logger, self.config,
-                                    dbnetdev, False)
+                                    dbnetdev, False, exporter)
 
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,

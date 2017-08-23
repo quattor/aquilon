@@ -38,7 +38,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
     def render(self, session, logger, plenaries, fqdn, shortname, interface, label,
                network_environment, map_to_primary, shared, priority,
-               user, justification, reason, **kwargs):
+               user, justification, reason, exporter, **kwargs):
 
         dbhw_ent = get_hardware(session, **kwargs)
 
@@ -116,7 +116,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
-                                                relaxed=relaxed, allow_shared=shared)
+                                                relaxed=relaxed, allow_shared=shared,
+                                                exporter=exporter)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
         delete_old_dsdb_entry = not newly_created and not dbdns_rec.assignments

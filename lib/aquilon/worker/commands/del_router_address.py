@@ -29,7 +29,7 @@ class CommandDelRouterAddress(BrokerCommand):
     required_parameters = []
 
     def render(self, session, plenaries, dbuser,
-               ip, fqdn, network_environment, **_):
+               ip, fqdn, network_environment, exporter, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -56,7 +56,8 @@ class CommandDelRouterAddress(BrokerCommand):
         # address were not split from assignments)
         for dns_rec in dbrouter.dns_records:
             if dns_rec.is_unused:
-                delete_dns_record(dns_rec, verify_assignments=True)
+                delete_dns_record(dns_rec, verify_assignments=True,
+                                  exporter=exporter)
 
         dbnetwork.routers.remove(dbrouter)
         session.flush()

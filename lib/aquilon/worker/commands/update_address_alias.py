@@ -28,7 +28,7 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, target, ttl, clear_ttl, comments,
                dns_environment, target_environment, grn, eon_id, clear_grn,
-               **_):
+               exporter, **_):
         if not target_environment:
             target_environment = dns_environment
 
@@ -70,6 +70,9 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
             if comments is not None:
                 dbaddr_alias.comments = comments
+
+        if exporter:
+            exporter.update(dbfqdn)
 
         session.flush()
         return

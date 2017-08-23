@@ -33,7 +33,8 @@ class CommandMergeNetwork(BrokerCommand):
     requierd_parameters = ["ip"]
 
     def render(self, session, plenaries, dbuser,
-               ip, netmask, prefixlen, network_environment, **_):
+               ip, netmask, prefixlen, network_environment,
+               exporter, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
             net = IPv4Network(u"127.0.0.0/%s" % netmask)
@@ -80,7 +81,7 @@ class CommandMergeNetwork(BrokerCommand):
             # Delete routers of the old subnets
             for dbrouter in oldnet.routers:
                 for dns_rec in dbrouter.dns_records:
-                    delete_dns_record(dns_rec)
+                    delete_dns_record(dns_rec, exporter=exporter)
             oldnet.routers = []
 
             fix_foreign_links(session, oldnet, dbsuper)

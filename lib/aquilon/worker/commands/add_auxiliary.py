@@ -34,7 +34,7 @@ class CommandAddAuxiliary(BrokerCommand):
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, plenaries, hostname, machine, auxiliary, interface,
-               mac, comments, user, justification, reason, **arguments):
+               mac, comments, user, justification, reason, exporter, **arguments):
         self.deprecated_command("Command add_auxiliary is deprecated.  Please "
                                 "use add_interface_address instead.", logger,
                                 **arguments)
@@ -73,7 +73,7 @@ class CommandAddAuxiliary(BrokerCommand):
                          audit_results=audit_results, **arguments)
 
         dbdns_rec, _ = grab_address(session, auxiliary, ip, comments=comments,
-                                    preclude=True)
+                                    preclude=True, exporter=exporter)
 
         if dbmachine.primary_name:
             # This command cannot use a non-default DNS environment, so no extra

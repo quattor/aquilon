@@ -27,7 +27,7 @@ class CommandDelSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain"]
 
     def render(self, session, service, protocol, dns_domain, target,
-               dns_environment, target_environment, **_):
+               dns_environment, target_environment, exporter, **_):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbfqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
                                  dns_environment=dns_environment)
@@ -63,7 +63,8 @@ class CommandDelSrvRecord(BrokerCommand):
                                      protocol, dns_domain, msg))
 
         for dns_rec in rrs:
-            delete_dns_record(dns_rec)
+            delete_dns_record(dns_rec, exporter=exporter)
+
         session.flush()
 
         return

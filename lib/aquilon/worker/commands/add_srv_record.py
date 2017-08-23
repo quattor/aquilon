@@ -19,7 +19,8 @@
 from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
+from aquilon.aqdb.model import (Fqdn, SrvRecord, DnsDomain, DnsEnvironment,
+                                ReservedName)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -32,7 +33,7 @@ class CommandAddSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
                weight, target, port, dns_environment, ttl, comments, grn,
-               eon_id, target_environment, **_):
+               eon_id, target_environment, exporter, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -81,6 +82,16 @@ class CommandAddSrvRecord(BrokerCommand):
                               dns_environment=dbdns_env, comments=comments,
                               owner_grn=dbgrn)
         session.add(dbsrv_rec)
+
+        if exporter:
+            if any(
+                    dr != dbsrv_rec and
+                    not isinstance(dr, ReservedName)
+                    for dr in dbsrv_rec.fqdn.dns_records):
+                exporter.update(dbsrv_rec.fqdn)
+            else:
+                exporter.create(dbsrv_rec.fqdn)
+
 
         session.flush()
 

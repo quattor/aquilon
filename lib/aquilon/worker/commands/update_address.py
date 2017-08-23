@@ -31,7 +31,7 @@ class CommandUpdateAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, reverse_ptr, dns_environment,
                network_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, **_):
+               comments, exporter, **_):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
@@ -70,6 +70,9 @@ class CommandUpdateAddress(BrokerCommand):
 
         if comments is not None:
             dbdns_rec.comments = comments
+
+        if exporter:
+            exporter.update(dbdns_rec.fqdn)
 
         session.flush()
 

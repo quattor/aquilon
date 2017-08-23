@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
-                                NetworkEnvironment)
+                                ReservedName, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
@@ -30,7 +30,8 @@ class CommandAddRouterAddress(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, plenaries, dbuser,
-               fqdn, building, ip, network_environment, comments, **_):
+               fqdn, building, ip, network_environment, comments,
+               exporter, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -52,6 +53,15 @@ class CommandAddRouterAddress(BrokerCommand):
             dbdns_rec = ARecord.get_unique(session, dbfqdn, compel=True)
             ip = dbdns_rec.ip
             dbnetwork = dbdns_rec.network
+
+        if exporter:
+            if any(
+                    dr != dbdns_rec and
+                    not isinstance(dr, ReservedName)
+                    for dr in dbfqdn.dns_records):
+                exporter.update(dbfqdn)
+            else:
+                exporter.create(dbfqdn)
 
         assert ip in dbnetwork.network, "IP %s is outside network %s" % (ip,
                                                                          dbnetwork.network_address)

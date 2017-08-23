@@ -27,7 +27,7 @@ class CommandDelAlias(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, fqdn, dns_environment, **_):
+    def render(self, session, logger, fqdn, dns_environment, exporter, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
@@ -39,7 +39,7 @@ class CommandDelAlias(BrokerCommand):
         old_target_fqdn = str(dbdns_rec.target)
         old_comments = dbdns_rec.comments
         target_is_restricted = dbdns_rec.target.dns_domain.restricted
-        delete_dns_record(dbdns_rec)
+        delete_dns_record(dbdns_rec, exporter=exporter)
 
         session.flush()
 

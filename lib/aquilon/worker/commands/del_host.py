@@ -31,7 +31,8 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, plenaries, hostname, user, justification, reason, **_):
+    def render(self, session, logger, plenaries, hostname, user,
+               justification, reason, exporter, **_):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
@@ -71,7 +72,7 @@ class CommandDelHost(BrokerCommand):
 
         dbdns_rec = dbmachine.primary_name
         dbmachine.primary_name = None
-        delete_dns_record(dbdns_rec)
+        delete_dns_record(dbdns_rec, exporter=exporter)
         session.flush()
 
         with plenaries.transaction():

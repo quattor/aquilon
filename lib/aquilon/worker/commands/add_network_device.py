@@ -38,7 +38,7 @@ class CommandAddNetworkDevice(BrokerCommand):
                            "ip", "interface", "iftype"]
 
     def render(self, session, logger, plenaries, network_device, label, model, type, ip,
-               interface, iftype, mac, vendor, serial, comments,
+               interface, iftype, mac, vendor, serial, comments, exporter,
                archetype, domain, sandbox, user, justification, reason, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
@@ -51,7 +51,8 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         dbdns_rec, _ = grab_address(session, network_device, ip,
                                     allow_restricted_domain=True,
-                                    allow_reserved=True, preclude=True)
+                                    allow_reserved=True, preclude=True,
+                                    exporter=exporter)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

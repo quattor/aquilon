@@ -31,7 +31,7 @@ class CommandUpdateAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, target,
                target_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, **_):
+               comments, exporter, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -107,6 +107,9 @@ class CommandUpdateAlias(BrokerCommand):
 
         if comments is not None:
             dbalias.comments = comments
+
+        if exporter:
+            exporter.update(dbalias.fqdn)
 
         session.flush()
 

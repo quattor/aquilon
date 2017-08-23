@@ -172,19 +172,6 @@ class Exporter(object):
         if not exc_type:
             self.publish()
 
-    def event_after_flush(self, session, flush_context):
-        """
-        The following method is called by the ORM when session.flush() is called.
-        Internally this calls create, update and delete on the modified objects
-        as required.
-        """
-        for obj in session.new:
-            self.create(obj)
-        for obj in session.dirty:
-            self.update(obj)
-        for obj in session.deleted:
-            self.delete(obj)
-
 
 def register_exporter(*class_names):
     """

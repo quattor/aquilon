@@ -32,7 +32,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 
 
-def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
+def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False, exporter=None):
     """
     Delete a DNS record
 
@@ -102,8 +102,12 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
     q = q.filter_by(fqdn=dbfqdn)
     if q.count() == 0:
         session.delete(dbfqdn)
+        if exporter:
+            exporter.delete(dbfqdn)
     else:
         session.expire(dbfqdn, ['dns_records'])
+        if exporter:
+            exporter.update(dbfqdn)
 
     # Delete the orphaned targets
     for tgt in targets:
@@ -152,7 +156,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
                  dns_environment=None, comments=None,
                  allow_restricted_domain=False, allow_multi=False,
                  allow_reserved=False, allow_shared=False, relaxed=False,
-                 preclude=False):
+                 preclude=False, exporter=None):
     """
     Take ownership of an address.
 
@@ -251,7 +255,11 @@ def grab_address(session, fqdn, ip, network_environment=None,
                                 .format(ip, dbrecords[0]))
 
         # Check if the name is used already
+        new_fqdn = True
         for dbdns_rec in dbfqdn.dns_records:
+            if not isinstance(dbdns_rec, ReservedName):
+                new_fqdn = False
+
             if isinstance(dbdns_rec, ARecord):
                 _forbid_dyndns(dbdns_rec)
                 _check_netenv_compat(dbdns_rec, network_environment)
@@ -276,6 +284,12 @@ def grab_address(session, fqdn, ip, network_environment=None,
                                       comments=comments)
             session.add(existing_record)
             newly_created = True
+
+        if exporter:
+            if new_fqdn:
+                exporter.create(dbfqdn)
+            else:
+                exporter.update(dbfqdn)
     else:
         if not dbfqdn.dns_records:
             # There's no IP, and the name did not exist before. Create a

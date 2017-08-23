@@ -31,7 +31,8 @@ class CommandDelNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, plenaries, network_device, user, justification, reason, **_):
+    def render(self, session, logger, plenaries, network_device, user,
+               justification, reason, exporter, **_):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         # Validate ChangeManagement
@@ -54,7 +55,7 @@ class CommandDelNetworkDevice(BrokerCommand):
         dbdns_rec = dbnetdev.primary_name
         session.delete(dbnetdev)
         if dbdns_rec:
-            delete_dns_record(dbdns_rec)
+            delete_dns_record(dbdns_rec, exporter=exporter)
 
         session.flush()
 
