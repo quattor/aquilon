@@ -30,7 +30,6 @@ from networktest import DummyIP
 
 class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_100_add_ut3c5n10(self):
-        self.event_add_hardware('ut3c5n10')
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
                         "--chassis", "ut3c5", "--slot", 10,
                         "--model", "hs21-8853",
@@ -38,7 +37,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                         "--cpuname", "e5-2660",
                         "--memory", "8192", "--serial", "99C5553",
                         "--comments", "Some machine comments"])
-        self.events_verify()
 
     def test_101_update_ut3c5n10_ip(self):
         command = ["update", "machine", "--machine", "ut3c5n10",
@@ -123,12 +121,10 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     # Used for filer - a fake machine for now
     def test_125_add_filer(self):
-        self.event_add_hardware('filer1')
         self.noouttest(["add", "machine", "--machine", "filer1",
                         "--rack", "ut3", "--model", "utrackmount",
                         "--cpuname", "utcpu", "--cpucount", 2,
                         "--memory", 65536])
-        self.events_verify()
 
     # Used for VPLS network tests
     def test_130_add_ut3c5n5(self):
@@ -175,14 +171,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                                  eth1_mac=self.net["routing1"].usable[0].mac)
 
     def test_143_add_ut3c1n3(self):
-        self.event_add_hardware('ut3c1n3')
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
                         "--model", "hs21-8853", "--cpucount", "2",
                         "--cpuvendor", "intel", "--cpuname", "e5-2660",
                         "--memory", "8192", "--serial", "KPDZ406",
                         "--uuid", "a4ceec7b-2b86-4c94-9dd5-cafbd612581a"])
-        self.events_verify()
 
     def test_145_show_slot(self):
         command = "search machine --slot 3 --fullinfo"
@@ -275,11 +269,9 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          command)
 
     def test_150_add_ut3c1n4(self):
-        self.event_add_hardware('ut3c1n4')
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
                         "--chassis", "ut3c1", "--slot", 4,
                         "--model", "hs21-8853", "--serial", "KPDZ407"])
-        self.events_verify()
 
     def test_155_show_ut3c1n4(self):
         command = "show machine --machine ut3c1n4"
@@ -342,17 +334,13 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          command)
 
     def test_170_add_ut3c1n9(self):
-        self.event_add_hardware('ut3c1n9')
         self.noouttest(["add", "machine", "--machine", "ut3c1n9",
                         "--model", "hs21-8853",
                         "--chassis", "ut3c1", "--slot", 9])
-        self.events_verify()
 
     def test_171_addut3s01p2(self):
-        self.event_add_hardware('ut3s01p2')
         self.noouttest(["add", "machine", "--machine", "ut3s01p2",
                         "--rack", "ut3", "--model", "r730"])
-        self.events_verify()
 
     def test_175_show_ut3s01p2(self):
         command = "show machine --machine ut3s01p2"
@@ -361,10 +349,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: rackmount", command)
 
     def test_180_add_ut3s01p1(self):
-        self.event_add_hardware('ut3s01p1')
         self.noouttest(["add", "machine", "--machine", "ut3s01p1",
                         "--rack", "ut3", "--model", "r730"])
-        self.events_verify()
 
     def test_181_show_ut3s01p1(self):
         command = "show machine --machine ut3s01p1"
@@ -384,10 +370,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_191_add_ut_no_rack(self):
         # A machine that's not in a rack
-        self.event_add_hardware('utnorack')
         self.noouttest(["add", "machine", "--machine", "utnorack",
                         "--desk", "utdesk1", "--model", "r730"])
-        self.events_verify()
 
     def test_192_show_utnorack(self):
         command = ["show_machine", "--machine", "utnorack"]

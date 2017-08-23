@@ -29,11 +29,9 @@ from eventstest import EventsTestMixin
 
 class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1000_update_ut3c1n3(self):
-        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["update", "machine", "--machine", "ut3c1n3",
                         "--slot", "10", "--serial", "USN99C5553",
                         "--uuid", "097a2277-840d-4bd5-8327-cf133aa3c9d3"])
-        self.events_verify()
 
     def test_1005_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
@@ -74,10 +72,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
                          command)
 
     def test_1006_clear_uuid(self):
-        self.event_upd_hardware('ut3c1n3')
         command = ["update_machine", "--machine", "ut3c1n3", "--clear_uuid"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_1007_verify_no_uuid(self):
         command = ["show_machine", "--machine", "ut3c1n3"]
@@ -89,12 +85,10 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchclean(out, "uuid", command)
 
     def test_1010_update_ut3c5n10(self):
-        self.event_upd_hardware('ut3c5n10')
         self.noouttest(["update", "machine",
                         "--hostname", "unittest02.one-nyp.ms.com",
                         "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "20",
                         "--comments", "New machine comments"])
-        self.events_verify()
 
     def test_1015_search_slot(self):
         command = "search machine --slot 20 --fullinfo"
@@ -143,9 +137,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"slot" = 20;', command)
 
     def test_1016_clear_comments(self):
-        self.event_upd_hardware('ut3c5n10')
         self.noouttest(["update_machine", "--machine", "ut3c5n10", "--comments", ""])
-        self.events_verify()
 
     def test_1017_verify_comments(self):
         command = ["show_machine", "--machine", "ut3c5n10"]
@@ -153,24 +145,18 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.searchclean(out, "^  Comments", command)
 
     def test_1020_update_ut3c1n4_serial(self):
-        self.event_upd_hardware('ut3c1n4')
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--serial", "USNKPDZ407"])
-        self.events_verify()
 
     def test_1021_update_ut3c1n4_cpu(self):
-        self.event_upd_hardware('ut3c1n4')
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--cpuname", "e5-2697-v3"])
-        self.events_verify()
 
     def test_1022_update_ut3c1n4_rack(self):
         # Changing the rack will change the location of the plenary, so we
         # can test if the host profile gets written
-        self.event_upd_hardware('ut3c1n4')
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--rack", "ut4"])
-        self.events_verify()
 
     def test_1025_show_ut3c1n4(self):
         command = "show machine --machine ut3c1n4"
@@ -210,16 +196,12 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "not found", command)
 
     def test_1030_clearchassis(self):
-        self.event_upd_hardware('ut9s03p1')
         command = ["update", "machine", "--machine", "ut9s03p1",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "1", "--justification", "tcm=123"]
         self.noouttest(command)
-        self.events_verify()
-        self.event_upd_hardware('ut9s03p1')
         command = ["update", "machine", "--machine", "ut9s03p1",
                    "--clearchassis", "--justification", "tcm=123"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_1031_verify_clearchassis(self):
         command = ["show", "machine", "--machine", "ut9s03p1"]
@@ -229,17 +211,13 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchclean(out, "Chassis: ", command)
 
     def test_1032_clearchassis_plus_new(self):
-        self.event_upd_hardware('ut9s03p2')
         command = ["update", "machine", "--machine", "ut9s03p2",
                    "--chassis", "ut9c5.aqd-unittest.ms.com", "--slot", "1"]
         self.noouttest(command)
-        self.events_verify()
-        self.event_upd_hardware('ut9s03p2')
         command = ["update", "machine", "--machine", "ut9s03p2",
                    "--clearchassis",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "2"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_1033_verify_clearchassis_plus_new(self):
         command = ["show", "machine", "--machine", "ut9s03p2"]
@@ -250,16 +228,12 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Slot: 2", command)
 
     def test_1034_true_chassis_update(self):
-        self.event_upd_hardware('ut9s03p3')
         command = ["update", "machine", "--machine", "ut9s03p3",
                    "--chassis", "ut9c5.aqd-unittest.ms.com", "--slot", "2"]
         self.noouttest(command)
-        self.events_verify()
-        self.event_upd_hardware('ut9s03p3')
         command = ["update", "machine", "--machine", "ut9s03p3",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "3"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_1035_verify_true_chassis_update(self):
         command = ["show", "machine", "--machine", "ut9s03p3"]
@@ -270,11 +244,9 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Slot: 3", command)
 
     def test_1040_simple_chassis_update(self):
-        self.event_upd_hardware('ut9s03p4')
         command = ["update", "machine", "--machine", "ut9s03p4",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "4"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_1041_verify_simple_chassis_update(self):
         command = ["show", "machine", "--machine", "ut9s03p4"]
@@ -287,9 +259,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1042_simple_chassis_update2(self):
         command = ["update", "machine", "--machine", "ut9s03p5",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "5"]
-        self.event_upd_hardware('ut9s03p5')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1043_verify_simple_chassis_update2(self):
         command = ["show", "machine", "--machine", "ut9s03p5"]
@@ -302,9 +272,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1044_simple_chassis_update3(self):
         command = ["update", "machine", "--machine", "ut9s03p6",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "6"]
-        self.event_upd_hardware('ut9s03p6')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1045_verify_simple_chassis_update3(self):
         command = ["show", "machine", "--machine", "ut9s03p6"]
@@ -317,14 +285,10 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1050_different_rack(self):
         command = ["update", "machine", "--machine", "ut9s03p9",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "9"]
-        self.event_upd_hardware('ut9s03p9')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p9",
                    "--rack", "ut8"]
-        self.event_upd_hardware('ut9s03p9')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1055_verify_different_rack(self):
         command = ["show", "machine", "--machine", "ut9s03p9"]
@@ -338,19 +302,13 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1060_reuse_slot(self):
         command = ["update", "machine", "--machine", "ut9s03p10",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "10"]
-        self.event_upd_hardware('ut9s03p10')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p10",
                    "--clearchassis"]
-        self.event_upd_hardware('ut9s03p10')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p10",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "10"]
-        self.event_upd_hardware('ut9s03p10')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1065_verify_reuse_slot(self):
         command = ["show", "machine", "--machine", "ut9s03p10"]
@@ -363,9 +321,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1070_taken_slot(self):
         command = ["update", "machine", "--machine", "ut9s03p11",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "11"]
-        self.event_upd_hardware('ut9s03p11')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p12",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "11"]
         out = self.badrequesttest(command)
@@ -389,20 +345,14 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1080_multislot_clear(self):
         command = ["update", "machine", "--machine", "ut9s03p13",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "13"]
-        self.event_upd_hardware('ut9s03p13')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p13",
                    "--multislot",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "14"]
-        self.event_upd_hardware('ut9s03p13')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p13",
                    "--clearchassis"]
-        self.event_upd_hardware('ut9s03p13')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1085_verify_multislot_clear(self):
         command = ["show", "machine", "--machine", "ut9s03p13"]
@@ -416,21 +366,15 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         command = ["update", "machine", "--machine", "ut9s03p15",
                    "--multislot",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "1"]
-        self.event_upd_hardware('ut9s03p15')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p15",
                    "--multislot",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "2"]
-        self.event_upd_hardware('ut9s03p15')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p15",
                    "--multislot",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "3"]
-        self.event_upd_hardware('ut9s03p15')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1095_verify_multislot_add(self):
         command = ["show", "machine", "--machine", "ut9s03p15"]
@@ -445,15 +389,11 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1100_multislot_update_fail(self):
         command = ["update", "machine", "--machine", "ut9s03p19",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "4"]
-        self.event_upd_hardware('ut9s03p19')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p19",
                    "--multislot",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "5"]
-        self.event_upd_hardware('ut9s03p19')
         self.noouttest(command)
-        self.events_verify()
         command = ["update", "machine", "--machine", "ut9s03p19",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "6"]
         out = self.badrequesttest(command)
@@ -476,10 +416,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
 
         self.check_plenary_exists(*old_path)
         self.check_plenary_gone(*new_path)
-        self.event_upd_hardware('ut14s1p2')
         self.noouttest(["update", "machine", "--machine", "ut14s1p2",
                         "--rack", "ut14"])
-        self.events_verify()
         self.check_plenary_gone(*old_path)
         self.check_plenary_exists(*new_path)
 
@@ -496,10 +434,8 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
             self.matchoutput(out, "Rack: ut14", command)
 
     def test_1120_update_ut3s01p2(self):
-        self.event_upd_hardware('ut3s01p2')
         self.noouttest(["update", "machine", "--machine", "ut3s01p2",
                         "--model", "hs21-8853", "--vendor", "ibm"])
-        self.events_verify()
 
     def test_1125_show_ut3s01p2(self):
         command = "show machine --machine ut3s01p2"
@@ -520,9 +456,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1131_update_default_nic_model(self):
         command = ["update_machine", "--machine=evm1", "--model=utlarge",
                    "--cpucount=2", "--memory=12288"]
-        self.event_upd_hardware('evm1')
         self.noouttest(command)
-        self.events_verify()
 
     def test_1132_cat_evm1(self):
         command = "cat --machine evm1"
@@ -567,11 +501,9 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
                           command)
 
     def test_1135_restore_status_quo(self):
-        self.event_upd_hardware('evm1')
         command = ["update_machine", "--machine=evm1", "--model=utmedium",
                    "--cpucount=1", "--memory=8192"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_2000_bad_cpu_vendor(self):
         self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",

@@ -33,16 +33,12 @@ class TestDelInterface(EventsTestMixin, TestBrokerCommand):
     # interfaces are removed automatically when the machine is removed.
 
     def test_100_delut3c1n3eth0(self):
-        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3"])
-        self.events_verify()
 
     def test_110_delut3c1n3eth1(self):
-        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "interface",
                         "--mac", self.net["unknown0"].usable[3].mac.upper()])
-        self.events_verify()
 
     def test_120_notamachine(self):
         command = ["del", "interface", "--interface", "xge49",

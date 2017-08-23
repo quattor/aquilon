@@ -38,34 +38,26 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                          command)
 
     def testaddut3c5n10eth0_good_mac(self):
-        self.event_upd_hardware('ut3c5n10')
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10",
                         "--mac", self.net["unknown0"].usable[0].mac.upper(),
                         "--bus_address", "pci:0000:0b:00.0"])
-        self.events_verify()
 
     def testaddut3c5n10eth1(self):
-        self.event_upd_hardware('ut3c5n10')
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c5n10",
                         "--mac", self.net["unknown0"].usable[1].mac.lower()])
-        self.events_verify()
 
     def testadd_ut8s02p3_eth2(self):
         net = self.net["routing1"].usable[13]
-        self.event_upd_hardware('ut8s02p3')
         self.noouttest(["add", "interface", "--interface", "eth2",
                         "--machine", "ut8s02p3",
                         "--mac", net.mac.lower()])
-        self.events_verify()
 
 
     def testaddut3c5n10eth1_2(self):
-        self.event_upd_hardware('ut3c5n10')
         self.noouttest(["add", "interface", "--interface", "eth1.2",
                         "--machine", "ut3c5n10"])
-        self.events_verify()
 
     def testfailvlanstacking(self):
         command = ["add", "interface", "--interface", "eth1.2.2",
@@ -204,22 +196,16 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
 
     def testaddut3c5n3bond0(self):
         # Let the broker guess the type
-        self.event_upd_hardware('ut3c5n3')
         self.noouttest(["add", "interface", "--interface", "bond0",
                         "--machine", "ut3c5n3"])
-        self.events_verify()
 
     def testenslaveut3c5n3eth0(self):
-        self.event_upd_hardware('ut3c5n3')
         self.noouttest(["update", "interface", "--machine", "ut3c5n3",
                         "--interface", "eth0", "--master", "bond0"])
-        self.events_verify()
 
     def testenslaveut3c5n3eth1(self):
-        self.event_upd_hardware('ut3c5n3')
         self.noouttest(["update", "interface", "--machine", "ut3c5n3",
                         "--interface", "eth1", "--master", "bond0"])
-        self.events_verify()
 
     def testforbidcircle(self):
         command = ["update", "interface", "--machine", "ut3c5n3",
@@ -247,22 +233,16 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
 
     def testaddut3c5n4br0(self):
         # Specify the interface type explicitely this time
-        self.event_upd_hardware('ut3c5n4')
         self.noouttest(["add", "interface", "--interface", "br0",
                         "--iftype", "bridge", "--machine", "ut3c5n4"])
-        self.events_verify()
 
     def testenslaveut3c5n4eth0(self):
-        self.event_upd_hardware('ut3c5n4')
         self.noouttest(["update", "interface", "--machine", "ut3c5n4",
                         "--interface", "eth0", "--master", "br0"])
-        self.events_verify()
 
     def testenslaveut3c5n4eth1(self):
-        self.event_upd_hardware('ut3c5n4')
         self.noouttest(["update", "interface", "--machine", "ut3c5n4",
                         "--interface", "eth1", "--master", "br0"])
-        self.events_verify()
 
     def testfailbridgemac(self):
         mac = self.net["unknown0"].usable[-1].mac
@@ -289,11 +269,9 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                           command)
 
     def testaddut3c1n3eth0(self):
-        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3",
                         "--mac", self.net["unknown0"].usable[2].mac.upper()])
-        self.events_verify()
 
     def testaddut3c1n3eth1(self):
         testmac = []
@@ -302,17 +280,13 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                 testmac.append(i[1])
             else:
                 testmac.append(i)
-        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["add", "interface", "--interface", "eth1",
                         "--machine", "ut3c1n3", "--mac", ":".join(testmac)])
-        self.events_verify()
 
     def testaddut3c1n3bmc(self):
-        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["add", "interface", "--interface", "bmc",
                         "--machine", "ut3c1n3",
                         "--mac", self.net["unknown0"].usable[4].mac.lower()])
-        self.events_verify()
 
     def testverifyaddut3c1n3interfaces(self):
         command = "show machine --machine ut3c1n3"
@@ -354,10 +328,8 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
 
     def testaddut3c1n4eth0(self):
         testmac = "".join(self.net["unknown0"].usable[5].mac.split(":"))
-        self.event_upd_hardware('ut3c1n4')
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n4", "--mac", testmac])
-        self.events_verify()
 
     def testfailaddut3c1n4eth1(self):
         command = ["add", "interface", "--interface", "eth1",
@@ -564,11 +536,9 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
         self.matchclean(out, "loop1", command)
 
     def testaddut3s01p1eth0(self):
-        self.event_upd_hardware('ut3s01p1')
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3s01p1",
                         "--mac", self.net["unknown0"].usable[7].mac])
-        self.events_verify()
 
     def testverifyaddut3s01p1eth0(self):
         command = "show machine --machine ut3s01p1"
@@ -580,10 +550,8 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
 
     def testadd_no_mac(self):
         """ if it's named eth1 it should work with no MAC address """
-        self.event_upd_hardware('ut8s02p3')
         self.noouttest(["add", "interface",
                         "--interface", "eth1", "--machine", "ut8s02p3"])
-        self.events_verify()
 
     def testverify_no_mac(self):
         command = "show_machine --machine ut8s02p3"
