@@ -28,7 +28,7 @@ except ImportError:
     pass
 else:
     ms.version.addpkg('setuptools', '0.6c11')
-    ms.version.addpkg('protobuf', '2.5.0')
+    ms.version.addpkg('protobuf', '2.6.1')
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(__file__))

@@ -24,6 +24,7 @@ from aquilon.aqdb.model import (DnsRecord, ARecord, DynamicStub, Alias,
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
+from aquilon.worker.formats.dns_record import DnsDump
 
 from sqlalchemy.orm import (contains_eager, undefer, subqueryload, lazyload,
                             aliased)
@@ -196,6 +197,15 @@ class CommandSearchDns(BrokerCommand):
                           lazyload('hardware_entity.primary_name'),
                           undefer('alias_cnt'),
                           undefer('address_alias_cnt'))
+            if style == 'proto':
+                if target_domain:
+                    dns_domains = [dbdns_domain]
+                else:
+                    # Preload DNS domains, and keep a reference to prevent
+                    # them being evicted from the session's cache
+                    dns_domains = session.query(DnsDomain).all()
+
+                return DnsDump(q.all(), dns_domains)
             return q.all()
         else:
             return StringAttributeList(q.all(), 'fqdn')

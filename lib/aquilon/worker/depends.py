@@ -29,7 +29,7 @@ except ImportError:
     pass
 else:
     ms.version.addpkg('setuptools', '0.6c11')
-    ms.version.addpkg('protobuf', '2.5.0')
+    ms.version.addpkg('protobuf', '2.6.1')
     ms.version.addpkg('zope.interface', '3.6.1')
     ms.version.addpkg('twisted', '12.0.0')
     ms.version.addpkg('coverage', '3.6')

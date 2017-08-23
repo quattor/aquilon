@@ -20,9 +20,10 @@ import struct
 
 from ipaddress import IPv4Address
 
+from aquilon.exceptions_ import ProtocolError
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import (DnsRecord, DynamicStub, ARecord, Alias,
-                                AddressAlias, ReservedName, SrvRecord)
+                                AddressAlias, ReservedName, SrvRecord, Fqdn)
 
 
 class DnsRecordFormatter(ObjectFormatter):
@@ -44,6 +45,16 @@ class ARecordFormatter(ObjectFormatter):
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                rrtype, dns_record.ip, dns_record.reverse_ptr)
 
+    def fill_proto(self, dns_record, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.rrtype = (
+            skeleton.A
+            if isinstance(dns_record.ip, IPv4Address)
+            else skeleton.AAAA
+        )
+        skeleton.target = str(dns_record.ip)
+        if dns_record.ttl is not None:
+            skeleton.ttl = dns_record.ttl
+
 
 class AliasFormatter(ObjectFormatter):
     template_raw = "alias.mako"
@@ -51,6 +62,13 @@ class AliasFormatter(ObjectFormatter):
     def csv_fields(self, dns_record):
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                'CNAME', dns_record.target)
+
+    def fill_proto(self, dns_record, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.rrtype = skeleton.CNAME
+        skeleton.target = str(dns_record.target)
+        skeleton.target_environment_name = dns_record.target.dns_environment.name
+        if dns_record.ttl is not None:
+            skeleton.ttl = dns_record.ttl
 
 
 class SrvRecordFormatter(ObjectFormatter):
@@ -60,6 +78,16 @@ class SrvRecordFormatter(ObjectFormatter):
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                'SRV', dns_record.priority, dns_record.weight,
                dns_record.target, dns_record.port)
+
+    def fill_proto(self, dns_record, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.rrtype = skeleton.SRV
+        skeleton.target = str(dns_record.target)
+        skeleton.target_environment_name = dns_record.target.dns_environment.name
+        skeleton.priority = dns_record.priority
+        skeleton.port = dns_record.port
+        skeleton.weight = dns_record.weight
+        if dns_record.ttl is not None:
+            skeleton.ttl = dns_record.ttl
 
 
 class AddressAliasFormatter(ObjectFormatter):
@@ -73,6 +101,17 @@ class AddressAliasFormatter(ObjectFormatter):
 
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                rrtype, dns_record.target_ip)
+
+    def fill_proto(self, dns_record, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.rrtype = (
+            skeleton.A
+            if isinstance(dns_record.target_ip, IPv4Address)
+            else skeleton.AAAA
+        )
+        skeleton.target = str(dns_record.target_ip)
+        if dns_record.ttl is not None:
+            skeleton.ttl = dns_record.ttl
+
 
 # The DnsRecord entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()
@@ -220,5 +259,38 @@ class DnsDumpFormatter(ObjectFormatter):
 
         return "\n".join(result)
 
+    def format_proto(self, dump, container, embedded=True, indirect_attrs=True):
+        entry = None
+        for record in dump:
+            if isinstance(record, ReservedName):
+                continue
+
+            r_fqdn = str(record.fqdn)
+            r_env = record.fqdn.dns_environment.name
+            if entry is None or \
+                    r_fqdn != entry.fqdn or \
+                    r_env != entry.environment_name:
+                entry = container.add()
+                entry.fqdn = r_fqdn
+                entry.environment_name = r_env
+
+            skeleton = entry.rdata.add()
+            self.redirect_proto(record, skeleton)
 
 ObjectFormatter.handlers[DnsDump] = DnsDumpFormatter()
+
+
+class FqdnFormatter(ObjectFormatter):
+
+    def format_proto(self, result, container, embedded=True, indirect_attrs=True):
+        skeleton = container.add()
+        skeleton.fqdn = str(result)
+        skeleton.environment_name = result.dns_environment.name
+        for record in result.dns_records:
+            if isinstance(record, ReservedName):
+                continue
+
+            r_skeleton = skeleton.rdata.add()
+            self.redirect_proto(record, r_skeleton)
+
+ObjectFormatter.handlers[Fqdn] = FqdnFormatter()

@@ -65,23 +65,32 @@ class EventsTestMixin(object):
         for jsonfile in jsonfiles:
             os.unlink(jsonfile)
 
-    def _event_append_dns(self, fqdn, action, dns_enviornment='internal'):
-        self._expected_events.append({'action': action,
-                                      'entityType': 'DNS_RECORD',
-                                      'dnsRecord': {
-                                          'environmentName': dns_enviornment,
-                                          'fqdn': fqdn
-                                      },
-                                     })
+    def _event_append_dns(self, fqdn, action, dns_environment='internal', dns_records=None):
+        dns_record_list = {
+            'fqdn': fqdn,
+            'environmentName': dns_environment,
+        }
+        if dns_records:
+            dns_record_list['rdata'] = dns_records
 
-    def event_add_dns(self, fqdn, dns_enviornment='internal'):
-        self._event_append_dns(fqdn, 'CREATE', dns_enviornment)
+        self._expected_events.append({
+            'action': action,
+            'entityType': 'DNS_RECORD',
+            'dnsRecordList': {
+                'records': [
+                    dns_record_list,
+                ],
+            },
+        })
 
-    def event_upd_dns(self, fqdn, dns_enviornment='internal'):
-        self._event_append_dns(fqdn, 'UPDATE', dns_enviornment)
+    def event_add_dns(self, fqdn, dns_records, dns_environment='internal'):
+        self._event_append_dns(fqdn, 'CREATE', dns_environment, dns_records)
 
-    def event_del_dns(self, fqdn, dns_enviornment='internal'):
-        self._event_append_dns(fqdn, 'DELETE', dns_enviornment)
+    def event_upd_dns(self, fqdn, dns_records, dns_environment='internal'):
+        self._event_append_dns(fqdn, 'UPDATE', dns_environment, dns_records)
+
+    def event_del_dns(self, fqdn, dns_environment='internal'):
+        self._event_append_dns(fqdn, 'DELETE', dns_environment)
 
     def events_verify(self, strict=False):
         """Check for all expected events"""

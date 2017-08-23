@@ -28,6 +28,7 @@ from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError
 from aquilon.worker.exporter import (ExportHandler, ExporterNotification,
                                      register_exporter)
+from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 # TODO: This should be merged with formats/formatters.py
@@ -114,8 +115,13 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
 
     def fill_fqdn(self, msg, obj):
         msg.entity_type = msg.DNS_RECORD
-        msg.dns_record.fqdn = str(obj)
-        msg.dns_record.environment_name = obj.dns_environment.name
+
+        field_name = msg.dns_record_list.DESCRIPTOR.fields[0].name
+        ObjectFormatter.redirect_proto(
+            obj,
+            getattr(msg.dns_record_list, field_name),
+            embedded=False)
+
         return True
 
     def new_notification(self, action, obj, kwargs):
