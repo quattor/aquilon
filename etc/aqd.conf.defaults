@@ -340,6 +340,15 @@ default_network_environment = internal
 # Space-separated list of user roles that can add and delete internal networks
 change_default_netenv_roles = aqd_admin
 
+[network_refresh]
+# Set precreated_compartments_only = True to only sync networks with compartments
+# already existing in Aquilon database.
+# Previously created networks with empty compartments will be deleted.
+precreated_compartments_only = False
+# Set ignore_network_compartments = ^pattern\.* to ignore networks matching the value.
+# Leave empty to sync all compartments.
+ignore_network_compartments_regex =
+
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING
 # For sqlalchemy, only INFO and DEBUG produce log messages.
