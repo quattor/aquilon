@@ -21,6 +21,7 @@ from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelRouterAddress(BrokerCommand):
@@ -28,8 +29,8 @@ class CommandDelRouterAddress(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, plenaries, dbuser,
-               ip, fqdn, network_environment, **_):
+    def render(self, session, plenaries, dbuser, ip, fqdn,
+               network_environment, user, justification, reason, logger, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -42,6 +43,12 @@ class CommandDelRouterAddress(BrokerCommand):
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetwork)
+        cm.validate()
+
         dbrouter = None
         for rtaddr in dbnetwork.routers:
             if rtaddr.ip == ip:

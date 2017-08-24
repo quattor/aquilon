@@ -28,7 +28,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
                                 ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
-                                Share, Alias)
+                                Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -515,3 +515,5 @@ ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_h
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[Alias] = ChangeManagement.validate_default
+ChangeManagement.handlers[NetworkCompartment] = ChangeManagement.validate_default
+ChangeManagement.handlers[NetworkEnvironment] = ChangeManagement.validate_default

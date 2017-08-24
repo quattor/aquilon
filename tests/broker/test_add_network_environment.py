@@ -32,7 +32,7 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         command = ["add", "network", "environment",
                    "--network_environment", "excx", "--building", "np",
                    "--dns_environment", "excx",
-                   "--comments", "Some netenv comments"]
+                   "--comments", "Some netenv comments", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_105_show_excx(self):
@@ -53,7 +53,7 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         command = ["add", "network", "environment",
                    "--network_environment", "utcolo",
                    "--dns_environment", "ut-env",
-                   "--comments", "Some other netenv comments"]
+                   "--comments", "Some other netenv comments", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_115_show_utcolo(self):
@@ -71,13 +71,13 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         command = ["add", "network", "environment",
                    "--network_environment", "cardenv",
                    "--dns_environment", "ut-env",
-                   "--comments", "Card network environment"]
+                   "--comments", "Card network environment", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_200_bad_name(self):
         command = ["add", "network", "environment",
                    "--dns_environment", "ut-env",
-                   "--network_environment", "<badname>"]
+                   "--network_environment", "<badname>", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "'<badname>' is not a valid value for network environment",
@@ -86,7 +86,7 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
     def test_200_use_internal(self):
         command = ["add", "network", "environment",
                    "--network_environment", "not-internal",
-                   "--dns_environment", "internal"]
+                   "--dns_environment", "internal", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Only the default network environment may be "
                          "associated with the default DNS environment.",

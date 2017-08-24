@@ -25,6 +25,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandMergeNetwork(BrokerCommand):
@@ -32,8 +33,8 @@ class CommandMergeNetwork(BrokerCommand):
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, plenaries, dbuser,
-               ip, netmask, prefixlen, network_environment, **_):
+    def render(self, session, plenaries, dbuser, ip, netmask, prefixlen,
+               network_environment, user, justification, reason, logger, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
             net = IPv4Network(u"127.0.0.0/%s" % netmask)
@@ -58,6 +59,11 @@ class CommandMergeNetwork(BrokerCommand):
                           Network.ip < supernet.broadcast_address))
         q = q.order_by(Network.ip)
         dbnets = q.all()
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnets)
+        cm.validate()
 
         if dbnets[0].ip == supernet.network_address:
             dbsuper = dbnets.pop(0)

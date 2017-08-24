@@ -19,6 +19,7 @@
 from aquilon.aqdb.model import NetworkEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateNetworkEnvironment(BrokerCommand):
@@ -26,7 +27,7 @@ class CommandUpdateNetworkEnvironment(BrokerCommand):
     required_parameters = ["network_environment"]
 
     def render(self, session, network_environment, clear_location, comments,
-               **arguments):
+               user, justification, reason, logger, **arguments):
         dbnet_env = NetworkEnvironment.get_unique(session, network_environment,
                                                   compel=True)
 
@@ -36,6 +37,12 @@ class CommandUpdateNetworkEnvironment(BrokerCommand):
             dbnet_env.location = location
         if clear_location:
             dbnet_env.location = None
+
+        if location or clear_location:
+            # Validate ChangeManagement
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm.consider(dbnet_env, enforce_validation=True)
+            cm.validate()
         if comments is not None:
             dbnet_env.comments = comments
         session.flush()

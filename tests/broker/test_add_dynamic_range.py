@@ -53,7 +53,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["add_dynamic_range",
                    "--startip=%s" % self.net["dyndhcp0"].usable[2],
                    "--endip=%s" % self.net["dyndhcp0"].usable[-3],
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -118,7 +118,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         hostname = self.dynname(ip)
         self.dsdb_expect_add(hostname, ip)
         command = ["add_dynamic_range", "--startip", ip, "--endip", ip,
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         err = self.statustest(command)
         self.matchoutput(err,
                          "DSDB: add_host -host_name %s -ip_address %s "
@@ -136,7 +136,7 @@ class TestAddDynamicRange(TestBrokerCommand):
             messages.append("DSDB: add_host -host_name %s -ip_address %s "
                             "-status aq" % (hostname, address))
         command = ["add_dynamic_range",
-                   "--fillnetwork", self.net["dyndhcp3"].ip]
+                   "--fillnetwork", self.net["dyndhcp3"].ip, "--justification", "tcm=123"]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -179,7 +179,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp3"]
         self.dsdb_expect_delete(net.usable[5])
         self.statustest(["del_dynamic_range", "--start", net.usable[5],
-                         "--end", net.usable[5]])
+                         "--end", net.usable[5], "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def test_126_show_net(self):
@@ -211,7 +211,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["add_dynamic_range",
                    "--startip", self.net["dyndhcp2"].usable[2],
                    "--endip", self.net["dyndhcp2"].usable[5],
-                   "--dns_domain", "aqd-unittest.ms.com"]
+                   "--dns_domain", "aqd-unittest.ms.com", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.dsdb_verify()
         self.matchoutput(out, "Could not add addresses to DSDB", command)
@@ -220,7 +220,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["add_dynamic_range",
                    "--startip=%s" % self.net["dyndhcp0"].usable[2],
                    "--endip=%s" % self.net["dyndhcp1"].usable[2],
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
@@ -228,7 +228,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["add_dynamic_range",
                    "--startip=%s" % self.net["dyndhcp0"].usable[2],
                    "--endip=%s" % self.net["dyndhcp0"].usable[-3],
-                   "--dns_domain=dns_domain_does_not_exist"]
+                   "--dns_domain=dns_domain_does_not_exist", "--justification", "tcm=123"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "DNS Domain dns_domain_does_not_exist not found",
@@ -239,7 +239,7 @@ class TestAddDynamicRange(TestBrokerCommand):
                    "--startip", self.net["tor_net_12"].usable[0],
                    "--endip", self.net["tor_net_12"].usable[1],
                    "--prefix=oops",
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following IP addresses are already in use",
                          command)
@@ -250,7 +250,7 @@ class TestAddDynamicRange(TestBrokerCommand):
                    "--startip", self.net["dyndhcp0"].usable[2],
                    "--endip", self.net["dyndhcp0"].usable[3],
                    "--prefix=oops",
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following DNS records already exist", command)
         self.matchoutput(out, "%s [%s]" %
@@ -264,7 +264,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         command = ["add_dynamic_range",
                    "--startip", self.net["dyndhcp1"].reserved[0],
                    "--endip", self.net["dyndhcp1"].reserved[1],
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The IP address %s is reserved for dynamic "
@@ -274,7 +274,7 @@ class TestAddDynamicRange(TestBrokerCommand):
                          command)
 
     def test_200_fail_no_default_dns_domain(self):
-        command = ["add_dynamic_range", "--fillnetwork", self.net["dyndhcp4"].ip]
+        command = ["add_dynamic_range", "--fillnetwork", self.net["dyndhcp4"].ip, "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "There is no default DNS domain configured for "
@@ -283,7 +283,7 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def test_200_fail_ipv6(self):
         command = ["add_dynamic_range", "--fillnetwork",
-                   self.net["ipv6_test"].network_address]
+                   self.net["ipv6_test"].network_address, "--justification", "tcm=123"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "Registering dynamic DHCP ranges is not "
                          "supported on IPv6 networks.", command)

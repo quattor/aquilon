@@ -45,12 +45,13 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.noouttest(command)
 
     def test_110_host_setup(self):
-        h = "aquilon91.aqd-unittest.ms.com"
+        host_list = ["aquilon91.aqd-unittest.ms.com", "unittest26.aqd-unittest.ms.com"]
 
-        command = ["reconfigure", "--hostname", h,
-                   "--archetype", "aquilon", "--buildstatus", "ready",
-                   "--personality", PPROD, "--personality_stage", "next", "--justification", "tcm=123"]
-        self.statustest(command)
+        for host in host_list:
+            command = ["reconfigure", "--hostname", host,
+                       "--archetype", "aquilon", "--buildstatus", "ready",
+                       "--personality", PPROD, "--personality_stage", "next", "--justification", "tcm=123"]
+            self.statustest(command)
 
     def test_200_update_personality(self):
         command = ["update_personality",
@@ -173,7 +174,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_300_del_static_route(self):
         gw = self.net["routing1"].usable[-1]
@@ -186,7 +187,15 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        self.noouttest(command)
+        self.statustest(command)
+
+    def test_305_update_host_back(self):
+        host = "unittest26.aqd-unittest.ms.com"
+
+        command = ["reconfigure", "--hostname", host,
+                   "--archetype", "aquilon", "--buildstatus", "ready",
+                   "--personality", "inventory", "--justification", "tcm=123"]
+        self.statustest(command)
 
     def test_310_map_service(self):
         command = ["map", "service", "--organization", "ms",
@@ -516,30 +525,18 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
-                   "--justification", "emergency"]
-        self.reasonmissingtest(command, auth=True, msgcheck=False)
-
-        command = ["add", "static", "route", "--gateway", gw,
-                   "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.emergencynojustification(command)
+        self.statustest(command)
 
     def test_690_del_static_route_reason(self):
         gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
-                   "--justification", "emergency"]
-        self.reasonmissingtest(command, auth=True, msgcheck=False)
-
-        command = ["del", "static", "route", "--gateway", gw,
-                   "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        self.emergencynojustification(command)
+        self.statustest(command)
 
     def test_700_add_service_reason(self):
         command = ["map", "service", "--organization", "ms",
@@ -689,6 +686,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = command + ['--reason', 'some reason']
         self.emergencynojustification(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestJustification)

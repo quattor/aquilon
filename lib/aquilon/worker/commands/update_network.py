@@ -20,13 +20,15 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateNetwork(BrokerCommand):
     requires_plenaries = True
 
     def render(self, session, plenaries, dbuser, network, ip, network_environment,
-               type, side, network_compartment, comments, **arguments):
+               type, side, network_compartment, comments, user,
+               justification, reason, logger, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -53,6 +55,11 @@ class CommandUpdateNetwork(BrokerCommand):
         networks = q.all()
         if not networks:
             raise NotFoundException("No matching network was found.")
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(q)
+        cm.validate()
 
         dblocation = get_location(session, **arguments)
 

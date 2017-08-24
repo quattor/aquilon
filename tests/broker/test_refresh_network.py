@@ -254,7 +254,7 @@ class TestRefreshNetwork(TestBrokerCommand):
                         int(IPv4Address(u"0.1.1.8")) + 1):
             self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com", "--justification", "tcm=123"]
         self.statustest(command)
         self.dsdb_verify()
 
@@ -322,7 +322,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in range(int(IPv4Address(u"0.1.1.4")),
                         int(IPv4Address(u"0.1.1.8")) + 1):
             self.dsdb_expect_delete(IPv4Address(ip))
-        command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
+        command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8", "--justification", "tcm=123"]
         self.statustest(command)
         self.dsdb_verify()
 

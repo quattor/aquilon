@@ -26,13 +26,15 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, logger, startip, endip, dns_domain, prefix, **_):
+    def render(self, session, logger, startip, endip, dns_domain,
+               prefix, user, justification, reason, **_):
         if not prefix:
             prefix = 'dynamic'
         dbnet_env, dbdns_env = get_net_dns_env(session)
@@ -47,6 +49,11 @@ class CommandAddDynamicRange(BrokerCommand):
         if not isinstance(startnet.network, IPv4Network):
             raise UnimplementedError("Registering dynamic DHCP ranges is not "
                                      "supported on IPv6 networks.")
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(startnet, enforce_validation=True)
+        cm.validate()
 
         if dns_domain:
             dbdns_domain = DnsDomain.get_unique(session, dns_domain,

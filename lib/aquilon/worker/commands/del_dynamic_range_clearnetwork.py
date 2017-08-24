@@ -22,17 +22,25 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_dynamic_range import CommandDelDynamicRange
 from aquilon.aqdb.model import DynamicStub, Network, NetworkEnvironment
 from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
 
     required_parameters = ["clearnetwork"]
 
-    def render(self, session, logger, clearnetwork, **_):
+    def render(self, session, logger, clearnetwork, user,
+               justification, reason, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         dbnetwork = Network.get_unique(session, clearnetwork,
                                        network_environment=dbnet_env,
                                        compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetwork, enforce_validation=True)
+        cm.validate()
+
         dbnetwork.lock_row()
 
         q = session.query(DynamicStub)

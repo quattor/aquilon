@@ -82,10 +82,6 @@ class CommandAddStaticRoute(BrokerCommand):
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
 
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.consider(dbstage)
-            cm.validate()
-
             if dbstage.created_implicitly:
                 plenaries.add(dbstage)
         else:
@@ -122,6 +118,12 @@ class CommandAddStaticRoute(BrokerCommand):
         q = q.join(HardwareEntity, Interface, AddressAssignment)
         q = q.filter_by(network=dbnetwork)
         q = q.options(PlenaryHost.query_options())
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(q.all())
+        cm.validate()
+
         plenaries.add(q)
 
         plenaries.write(verbose=True)

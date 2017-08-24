@@ -33,7 +33,7 @@ class TestDelDynamicRange(TestBrokerCommand):
     def test_100_del_different_networks(self):
         command = ["del_dynamic_range",
                    "--startip", self.net["dyndhcp0"].usable[2],
-                   "--endip", self.net["dyndhcp1"].usable[2]]
+                   "--endip", self.net["dyndhcp1"].usable[2], "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "must be on the same subnet", command)
 
@@ -41,14 +41,14 @@ class TestDelDynamicRange(TestBrokerCommand):
     def test_100_del_nothing_found(self):
         command = ["del_dynamic_range",
                    "--startip", self.net["dyndhcp0"].usable[-2],
-                   "--endip", self.net["dyndhcp0"].usable[-1]]
+                   "--endip", self.net["dyndhcp0"].usable[-1], "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Nothing found in range", command)
 
     def test_100_del_nos_tart(self):
         command = ["del_dynamic_range",
                    "--startip", self.net["dyndhcp0"].usable[1],
-                   "--endip", self.net["dyndhcp0"].usable[-3]]
+                   "--endip", self.net["dyndhcp0"].usable[-3], "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "No system found with IP address %s" %
@@ -58,7 +58,7 @@ class TestDelDynamicRange(TestBrokerCommand):
     def test_100_del_no_end(self):
         command = ["del_dynamic_range",
                    "--startip", self.net["dyndhcp0"].usable[2],
-                   "--endip", self.net["dyndhcp0"].usable[-2]]
+                   "--endip", self.net["dyndhcp0"].usable[-2], "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "No system found with IP address %s" %
@@ -68,7 +68,7 @@ class TestDelDynamicRange(TestBrokerCommand):
     def test_100_del_not_dynamic(self):
         command = ["del_dynamic_range",
                    "--startip", self.net["unknown0"].usable[7],
-                   "--endip", self.net["unknown0"].usable[8]]
+                   "--endip", self.net["unknown0"].usable[8], "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The range contains non-dynamic systems",
                          command)
@@ -90,7 +90,7 @@ class TestDelDynamicRange(TestBrokerCommand):
             messages.append("DSDB: delete_host -ip_address %s" % address)
         command = ["del_dynamic_range",
                    "--startip", self.net["dyndhcp0"].usable[2],
-                   "--endip", self.net["dyndhcp0"].usable[-3]]
+                   "--endip", self.net["dyndhcp0"].usable[-3], "--justification", "tcm=123"]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -99,7 +99,7 @@ class TestDelDynamicRange(TestBrokerCommand):
     def test_210_del_end_in_range(self):
         ip = self.net["dyndhcp1"].usable[-1]
         self.dsdb_expect_delete(ip)
-        command = ["del_dynamic_range", "--startip", ip, "--endip", ip]
+        command = ["del_dynamic_range", "--startip", ip, "--endip", ip, "--justification", "tcm=123"]
         err = self.statustest(command)
         self.matchoutput(err, "DSDB: delete_host -ip_address %s" % ip, command)
         self.dsdb_verify()
@@ -116,7 +116,7 @@ class TestDelDynamicRange(TestBrokerCommand):
             self.dsdb_expect_delete(address)
             messages.append("DSDB: delete_host -ip_address %s" % address)
         command = ["del_dynamic_range",
-                   "--clearnetwork", self.net["dyndhcp3"].ip]
+                   "--clearnetwork", self.net["dyndhcp3"].ip, "--justification", "tcm=123"]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -124,7 +124,7 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def test_221_clearnetwork_again(self):
         command = ["del_dynamic_range",
-                   "--clearnetwork", self.net["dyndhcp3"].ip]
+                   "--clearnetwork", self.net["dyndhcp3"].ip, "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "No dynamic stubs found on network.", command)
 

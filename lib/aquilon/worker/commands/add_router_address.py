@@ -22,6 +22,7 @@ from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddRouterAddress(BrokerCommand):
@@ -30,7 +31,8 @@ class CommandAddRouterAddress(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, plenaries, dbuser,
-               fqdn, building, ip, network_environment, comments, **_):
+               fqdn, building, ip, network_environment, comments,
+               user, justification, reason, logger, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -66,6 +68,11 @@ class CommandAddRouterAddress(BrokerCommand):
                int(ip) - int(dbnetwork.network_address) in dbnetwork.reserved_offsets:
                 raise ArgumentError("IP address {0} is not a valid router address "
                                     "on {1:l}.".format(ip, dbnetwork))
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetwork)
+        cm.validate()
 
         dbnetwork.routers.append(RouterAddress(ip=ip, location=dbbuilding,
                                                comments=comments))

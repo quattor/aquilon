@@ -305,16 +305,16 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_550_compile_personality(self):
         command = "compile --personality compileserver --archetype aquilon"
         out = self.statustest(command.split(" "))
-        self.matchoutput(out, "0/10 template(s) being processed",
+        self.matchoutput(out, "0/9 template(s) being processed",
                          command)
 
     def test_555_compile_personality_cleandeps(self):
         command = ["compile", "--personality", "compileserver",
                    "--archetype", "aquilon", "--cleandeps"]
         out = self.statustest(command)
-        self.matchoutput(out, "10/10 template(s) being processed",
+        self.matchoutput(out, "9/9 template(s) being processed",
                          command)
-        self.matchoutput(out, "10/10 compiled", command)
+        self.matchoutput(out, "9/9 compiled", command)
 
     def test_560_compile_personality_multiple_domains(self):
         self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',

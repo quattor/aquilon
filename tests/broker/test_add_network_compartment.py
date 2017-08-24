@@ -39,13 +39,13 @@ class TestAddNetworkCompartment(TestBrokerCommand):
     def test_101_add_utper(self):
         command = ["add", "network", "compartment",
                    "--network_compartment", "perimeter.ut",
-                   "--comments", "Unit-test Permiter DMZ"]
+                   "--comments", "Unit-test Permiter DMZ", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_102_add_utint(self):
         command = ["add", "network", "compartment",
                    "--network_compartment", "interior.ut",
-                   "--comments", "Unit-test Interior"]
+                   "--comments", "Unit-test Interior", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_109_add_utint_again(self):

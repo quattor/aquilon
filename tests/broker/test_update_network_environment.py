@@ -31,7 +31,7 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
     def test_100_update_location(self):
         command = ["update", "network", "environment",
                    "--network_environment", "utcolo",
-                   "--building", "ut"]
+                   "--building", "ut", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_105_verify_utcolo(self):
@@ -45,7 +45,7 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
     def test_110_clear_location(self):
         command = ["update", "network", "environment",
                    "--network_environment", "excx",
-                   "--clear_location"]
+                   "--clear_location", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_115_verify_excx(self):

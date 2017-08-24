@@ -21,6 +21,7 @@ from aquilon.aqdb.model import VirtualSwitch, Interface
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.utils import first_of
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUnbindPortGroup(BrokerCommand):
@@ -28,9 +29,16 @@ class CommandUnbindPortGroup(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, plenaries, virtual_switch, networkip, tag, **_):
+    def render(self, session, plenaries, virtual_switch, networkip,
+               tag, user, justification, reason, logger, **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        for cluster in dbvswitch.clusters:
+            cm.consider(cluster)
+        cm.validate()
+
         if networkip:
             dbnetwork = get_net_id_from_ip(session, networkip)
             if not dbnetwork.port_group:
