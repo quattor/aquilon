@@ -47,6 +47,10 @@ class CommandAddNetworkDevice(BrokerCommand):
             raise ArgumentError("This command can only be used to "
                                 "add network devices.")
 
+        if self.config.getboolean('network_device', 'require_rack') \
+                and not arguments.get('rack'):
+            raise ArgumentError("--rack must be specified when adding network devices.")
+
         dblocation = get_location(session, compel=True, **arguments)
 
         dbdns_rec, _ = grab_address(session, network_device, ip,
