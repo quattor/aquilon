@@ -17,9 +17,8 @@
 """ Routines to query information from QIP """
 
 import heapq
-
+import re
 from ipaddress import IPv4Address, IPv4Network
-
 from six import text_type
 
 from aquilon.exceptions_ import PartialError
@@ -29,6 +28,7 @@ from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
 from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.config import Config
 
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import update, and_, or_
@@ -67,6 +67,7 @@ class QIPRefresh(object):
     def __init__(self, session, logger, dbbuilding, dryrun, incremental):
         self.session = session
         self.logger = logger
+        self.config = Config()
         self.building = dbbuilding
         self.dryrun = dryrun
         self.incremental = incremental
@@ -100,6 +101,13 @@ class QIPRefresh(object):
 
         # Plenaries that need to be updated
         self.plenaries = PlenaryCollection(logger=logger)
+
+        # Network compartment restrictions
+        self.precreated_compartments_only = self.config.getboolean("network_refresh",
+                                                                   "precreated_compartments_only")
+        self.ignore_net_compartments = re.compile(
+            self.config.get("network_refresh", "ignore_network_compartments_regex")) if self.config.get(
+            "network_refresh", "ignore_network_compartments_regex") else None
 
     def error(self, msg):
         self.logger.error(msg)
@@ -215,8 +223,18 @@ class QIPRefresh(object):
 
             if "COMPARTMENT" in qipinfo["UDF"]:
                 compartment_name = qipinfo["UDF"]["COMPARTMENT"].strip().lower()
+                if self.ignore_net_compartments and \
+                        self.ignore_net_compartments.match(compartment_name):
+                    self.logger.client_info("Network compartment {} matches 'ignore_network_compartments_regex', "
+                                            "ignoring.".format(compartment_name))
+                    return None
                 if compartment_name in self.compartments:
                     compartment = self.compartments[compartment_name]
+                elif self.precreated_compartments_only:
+                    self.logger.client_info("Unknown network compartment {} and "
+                                            "precreated_compartments_only set to "
+                                            "True, ignoring.".format(compartment_name))
+                    return None
                 elif compartment_name not in self.unknown_compartments:
                     self.logger.client_info("Unknown compartment %s,"
                                             " ignoring" % compartment_name)
