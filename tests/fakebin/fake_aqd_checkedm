@@ -1,0 +1,316 @@
+#!//ms/dist/python/PROJ/core/2.7.9/bin/python
+"""
+Copyright (c) 2017 Morgan Stanley & Co. Incorporated, All Rights Reserved
+
+Unpublished copyright. All rights reserved. This material contains
+proprietary information that shall be used or copied only within Morgan
+Stanley, except with written permission of Morgan Stanley.
+"""
+import sys
+import json
+import re
+from argparse import ArgumentParser
+
+ENFORCE = 'enforce'
+WARN = 'warn'
+
+
+# TODO match DSDB re's
+TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
+SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
+EMERG_RE = re.compile("emergency")
+
+APPROVED_RESPONSE_MESSAGES = {
+    "no_impact": "Operation does not impact production.",
+    "edm_disabled": "All checks passed.  EDM callout disabled."
+}
+
+PERMITTED_RESPONSE_MESSAGES = {
+    "no_just_emergency": "Executing an emergency change without a justification, "
+                         "EDM has not be called.",
+    "emergency_edm_failed": "Overriding EDM and continuing with execution as this is an emergency.",
+    "warn_edm_failed": "Overriding EDM and continuing with execution; "
+                       "however in the future this operation will fail.",
+    "warn_general_fail": "Continuing with execution; however in the "
+                         "future this operation will fail."
+}
+
+EXCEPTION_MESSAGES = {
+    "no_reason": "Use of emergency requires a reason to be supplied.",
+    "no_just": "No justification found, please supply a TCM or SN ticket.",
+    "invalid_just": "Failed to parse justification, no "
+                    "valid TCM or SN ticket found."
+}
+
+MODE_OVERRIDE = {'update_city': 'enforce', 'update_os': 'enforce', 'del_domain': 'enforce', 'deploy': 'enforce',
+                 'add_parameter': 'enforce', 'del_parameter': 'enforce', 'update_parameter': 'enforce',
+                 'del_parameter_definition': 'enforce', 'add_parameter_definition': 'enforce',
+                 'update_parameter_definition': 'enforce',
+                 'add_required_service': 'enforce', 'del_required_service': 'enforce',
+                 'update_personality': 'enforce', 'grant_root_access': 'enforce',
+                 'update_rack': 'enforce', 'bind_feature': 'enforce', 'unbind_feature': 'enforce',
+                 'add_building_preference': 'enforce', 'del_building_preference': 'enforce',
+                 'update_building_preference': 'enforce',
+                 'add_static_route': 'enforce', 'map_grn': 'enforce', 'unmap_grn': 'enforce',
+                 'bind_server': 'enforce', 'unbind_server': 'enforce', 'update_model': 'enforce',
+                 'del_static_route': 'enforce', 'update_building': 'enforce',
+                 'map_service': 'enforce', 'unmap_service': 'enforce', 'make_cluster': 'warn'}
+
+
+def create_parser():
+    parser = ArgumentParser()
+    # Example: {"eonid": 1234, "impacted_envs": {"qa": ["almostready"], "prod": ["ready", "build"],
+    # "uat": ["failed"], "dev": ["decommissioned"]}, "ticket": "tcm=123456", "reason": None,
+    # "enforce_validation": None, "command": "make_cluster", "requestor": "aqddev", "requestor_role": None}'
+    # ticket examples: tcm=123456,emergency or sn=chng123456,emergency or sn=chng123456 or tcm=123456 or emergency
+    parser.add_argument("-e", "--metadata", action="store", required=True,
+                        help="Target metadata dict with environment dict, set of impacted lifecycles and target grn")
+    parser.add_argument("-m", "--mode", action="store", choices=[WARN, ENFORCE], default=ENFORCE,
+                        help="AQD checkedm operation mode.")
+    parser.add_argument("-M", "--disable_edm", action="store_true",
+                        help="If true, skip EDM call.")
+    parser.add_argument("-i", "--edm-instance", action="store", default="prod",
+                        help="Type of the edm instance")
+    return parser
+
+
+def stdout_and_exit(status, msg, code=0):
+    """
+    STDOUT response from given msg and status
+    :return: None
+    """
+    response = {"Status": status,
+                "Reason": msg}
+    print(json.dumps(response))
+    sys.exit(code)
+
+
+def main(args):
+    # Check if EDM call
+    emergency = False
+    try:
+        # Load metadata
+        cmd = ChangeManagementDecission(args.metadata, args.mode)
+
+        # Check if there are target environments protected by CM
+        if not cmd.in_scope_for_edm:
+            stdout_and_exit(status='Approved',
+                            msg=APPROVED_RESPONSE_MESSAGES["no_impact"])
+
+        # Check justification
+        just = cmd.get_ticket()
+        reason = cmd.get_reason()
+        if just.emergency and not reason:
+            raise ChangeManagementError(EXCEPTION_MESSAGES["no_reason"])
+        if not just.tcm and not just.sn and just.emergency:
+            stdout_and_exit(status='Permitted',
+                            msg=PERMITTED_RESPONSE_MESSAGES["no_just_emergency"])
+        if args.disable_edm:
+            stdout_and_exit(status='Approved', msg=APPROVED_RESPONSE_MESSAGES["edm_disabled"])
+
+    except ChangeManagementError as e:
+        if cmd.mode.value == CMStrategy.Warn:
+            stdout_and_exit(status='Permitted',
+                            msg="{0} {1}".format(str(e), PERMITTED_RESPONSE_MESSAGES["warn_general_fail"]))
+        else:
+            stdout_and_exit(status='Failed', msg=str(e))
+    except Exception as e:
+        stdout_and_exit(status='Failed', msg="Unexpected failure: {}".format(str(e)))
+
+
+def create_parser():
+    parser = ArgumentParser()
+    # Example: {"eonid": 1234, "impacted_envs": {"qa": ["almostready"], "prod": ["ready", "build"],
+    # "uat": ["failed"], "dev": ["decommissioned"]}, "ticket": "tcm=123456", "reason": None,
+    # "enforce_validation": None, "command": "make_cluster", "requestor": "aqddev", "requestor_role": None}'
+    # ticket examples: tcm=123456,emergency or sn=chng123456,emergency or sn=chng123456 or tcm=123456 or emergency
+    parser.add_argument("-e", "--metadata", action="store", required=True,
+                        help="Target metadata dict with environment dict, set of impacted lifecycles and target grn")
+    parser.add_argument("-m", "--mode", action="store", choices=[WARN, ENFORCE], default=ENFORCE,
+                        help="AQD checkedm operation mode.")
+    parser.add_argument("-M", "--disable_edm", action="store_true",
+                        help="If true, skip EDM call.")
+    parser.add_argument("-i", "--edm-instance", action="store", default="prod",
+                        help="Type of the edm instance")
+    return parser
+
+
+class ChangeManagementError(Exception):
+    """
+    Prepare EDM call parameters related issues
+    """
+    pass
+
+
+class CMStrategy(object):
+    """ Enumerations for change-management strategies """
+    Warn, Enforce = range(2)
+
+    def __init__(self, mode):
+        self.cmmode = mode.lower()
+        if self.cmmode == WARN:
+            self.value = CMStrategy.Warn
+        elif self.cmmode == ENFORCE:
+            self.value = CMStrategy.Enforce
+        else:
+            raise ChangeManagementError("{0} {1}.".format(EXCEPTION_MESSAGES["unknown_mode"], self.cmmode))
+
+    def __str__(self):
+        if self.value:
+            return self.cmmode
+        else:
+            return "impossible-{0}".format(self.value)
+
+    def __eq__(self, v):
+        return self.value == v.value
+
+
+class Justification(object):
+    """Parse justification and reason"""
+    def __init__(self, justification):
+        if not justification:
+            raise ChangeManagementError(EXCEPTION_MESSAGES["no_just"])
+        self.emergency = False
+        if EMERG_RE.search(justification):
+            self.emergency = True
+            justification = justification.replace('emergency,', '').replace(',emergency', '').replace('emergency', '')
+
+        self.tcm = None
+        result = TCM_RE.search(justification)
+        if result:
+            self.tcm = result.groups()[0]
+
+        self.sn = None
+        result = SN_RE.search(justification)
+        if result:
+            self.sn = result.groups()[0]
+
+        if not (self.tcm or self.sn or self.emergency):
+            raise ChangeManagementError(EXCEPTION_MESSAGES["invalid_just"])
+
+    @property
+    def id(self):
+        """
+        Property used to call EDM
+        :return: None, "123456" or "chng123456"
+        """
+        id = None
+        if self.tcm is not None:
+            id = self.tcm
+        elif self.sn is not None:
+            id = self.sn
+        return id
+
+    @property
+    def system(self):
+        """
+        Property used to call EDM
+        :return: "", "TCM2" or "Service Now"
+        """
+        system = ""
+        if self.tcm is not None:
+            system = "TCM2"
+        elif self.sn is not None:
+            system = "Service Now"
+        return system
+
+    def __str__(self):
+        ret = []
+        if self.tcm:
+            ret.append("tcm={}".format(self.tcm))
+        if self.sn:
+            ret.append("sn={}".format(self.sn))
+        if self.emergency:
+            ret.append("emergency")
+
+        return ",".join(ret)
+
+
+class ChangeManagementDecission(object):
+    """
+    Class makes decission if EDM should be called
+    based on target object environment,
+    lifecycle status, number of objects impacted,
+    command being executed and executor role
+    """
+    environment_ranking = {'prod': 6, 'infra': 5, 'uat': 4, 'qa': 2, 'legacy': 1, 'dev': 0}
+    lifecycle_status_edm_check = ['ready', 'almostready']
+    # Crash and burn envs: 'build', 'rebuild', 'decommissioned', 'blind', 'install',
+    # 'reinstall', 'failed'
+    envs_edm_check = ['prod']
+    metadata = {}
+
+    def __init__(self, metadata, _default_mode):
+        self._default_mode = _default_mode
+        try:
+            metadata = json.loads(metadata)
+            self.metadata = metadata if metadata else {}
+        except Exception as e:
+            raise ChangeManagementError(e)
+
+    def get_ticket(self):
+        ticket_input = self.metadata.get("ticket", '')
+        just = Justification(ticket_input)
+        return just
+
+    def get_reason(self):
+        reason_input = self.metadata.get("reason", '')
+        return reason_input
+
+    def _taget_environments_in_scope(self):
+        """
+        Returns filtered list of impacted environments that does contain
+        lifecycle statuses that are in scope for EDM check
+        :return:
+        """
+        environment_dict = self.metadata.get("impacted_envs", {})
+        for key in environment_dict.keys():
+            if key not in self.environment_ranking.keys():
+                raise ChangeManagementError("{0} '{1}'.".format(EXCEPTION_MESSAGES["unknown_env"], key))
+        interesting_envs_final = []
+        for env, lifecycle_status_list in environment_dict.items():
+            if any([status in lifecycle_status_list for status in self.lifecycle_status_edm_check]):
+                interesting_envs_final.append(env)
+        return interesting_envs_final
+
+    @property
+    def mode(self):
+        cmd = self.metadata.get("command", '')
+        mode_override = MODE_OVERRIDE.get(cmd, None)
+        if mode_override:
+            cm_mode = CMStrategy(mode_override)
+        else:
+            cm_mode = CMStrategy(self._default_mode)
+        return cm_mode
+
+    @property
+    def pseudo_environment(self):
+        if self.metadata.get("enforce_validation", None):
+            return sorted(self.envs_edm_check,
+                          key=lambda x: self.environment_ranking[x],
+                          reverse=True)[0]  # This fancy lambda now just return 'prod'
+        elif self._taget_environments_in_scope():
+            return sorted(self._taget_environments_in_scope(),
+                          key=lambda x: self.environment_ranking[x],
+                          reverse=True)[0]  # This return one of the impacted envs which has active
+            # lifecycle statuses and if most highest impact ranking
+        else:
+            return None
+
+    @property
+    def in_scope_for_edm(self):
+        if self.metadata.get("enforce_validation", None):
+            return True
+        return any(env in self._taget_environments_in_scope() for env in self.envs_edm_check)
+
+
+    @property
+    def eonid(self):
+        eonid = self.metadata.get("eonid", None)
+        return str(eonid) if eonid is not None else None
+
+
+if __name__ == '__main__':
+    parser = create_parser()
+    args = parser.parse_args()
+    main(args)
