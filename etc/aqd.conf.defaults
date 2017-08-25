@@ -224,6 +224,9 @@ ant_home = /ms/dist/ossjava/PROJ/ant/1.9.4
 ant_contrib_jar = /ms/dist/ossjava/PROJ/ant-contrib/1.0b3/common/lib/ant-contrib.jar
 ant = %(ant_home)s/bin/ant
 
+[network_device]
+require_rack = False
+
 [hardware_network_device]
 default_archetype = netinfra
 
