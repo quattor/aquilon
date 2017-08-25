@@ -72,7 +72,7 @@ class PlenaryMachineInfo(StructurePlenary):
 
     def body(self, lines):
         ram = [StructureTemplate("hardware/ram/generic",
-                                 {"size": PanMetric(self.dbobj.memory, "MB")})]
+                                 {"size": self.dbobj.memory})]
         cpu = StructureTemplate("hardware/cpu/%s/%s" %
                                 (self.dbobj.cpu_model.vendor.name,
                                  self.dbobj.cpu_model.name))
@@ -81,7 +81,7 @@ class PlenaryMachineInfo(StructurePlenary):
         disks = {}
         for disk in self.dbobj.disks:
             devname = disk.device_name
-            params = {"capacity": PanMetric(disk.capacity, "GB"),
+            params = {"capacity": PanMetric(disk.capacity, 1024),
                       "interface": disk.controller_type}
             if disk.bootable:
                 params["boot"] = True
