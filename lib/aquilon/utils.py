@@ -186,7 +186,21 @@ def force_list(label, value):
     if value is None:
         return None
     lines = [force_ascii(label, x.strip()) for x in value.splitlines()]
-    return [x for x in lines if x and not x.startswith("#")]
+
+    # Check that we have no duplicates in the list -- this is typically
+    # an error and will cause an audit-log PK violation.
+    seen = set()
+    items = []              # preserve the order
+    for x in lines:
+        if not x or x.startswith("#"):
+            pass
+        elif x in seen:
+            raise ArgumentError("Provided list contains duplicate "
+                                "entry: {0:s}".format(x))
+        else:
+            seen.add(x)
+            items.append(x)
+    return items
 
 
 def force_json(label, value):
