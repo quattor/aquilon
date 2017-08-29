@@ -295,7 +295,9 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Sandbox: othersandbox [orphaned]", command)
 
     def test_164_try_compile(self):
-        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com"]
+        # Also testing compile to accept justification
+        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com", "--justification",
+                   "emergency", "--reason", "Test"]
         out = self.internalerrortest(command)
         self.matchoutput(out,
                          "No author information provided for sandbox "
