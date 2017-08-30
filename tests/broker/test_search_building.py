@@ -41,6 +41,11 @@ class TestSearchBuilding(TestBrokerCommand):
         command = ["search", "building", "--uri", "invalid://123456"]
         self.noouttest(command)
 
+    def test_100_proto(self):
+        command = ["search", "building", "--uri", "assetinventory://003428", "--format", "proto"]
+        model = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(model.name, "bu")
+        self.assertEqual(model.uri, "assetinventory://003428")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchBuilding)

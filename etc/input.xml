@@ -531,7 +531,7 @@
 	</optgroup>
 	<transport method="get" path="find/building"/>
 	<format name="proto" >
-	    <message_class name="HostList" module="aqdsystems_pb2"/>
+	    <message_class name="LocationList" module="aqdlocations_pb2"/>
 	</format>
     </command>
 
