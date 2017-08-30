@@ -20,18 +20,32 @@ import os
 from time import sleep
 import json
 
-def dict_match(want, got):
-    for field, value in want.items():
-        if field not in got:
+
+def partial_match(want, got):
+    '''
+    Function to partially match what we want (first parameter) to what we
+    actually got (second parameter). It recursively calls itself to check
+    partial matches for sub dictionnaries and lists (lists must be identical
+    in size)
+    '''
+    if isinstance(want, dict):
+        if not isinstance(got, dict):
             return False
-        if isinstance(value, dict):
-            if not isinstance(got[field], dict):
+        for field, value in want.items():
+            if field not in got:
                 return False
-            if not dict_match(value, got[field]):
+            if not partial_match(value, got[field]):
                 return False
-        else:
-            if got[field] != want[field]:
+    elif isinstance(want, list):
+        if not isinstance(got, list):
+            return False
+        if len(want) != len(got):
+            return False
+        for i in range(len(want)):
+            if not partial_match(want[i], got[i]):
                 return False
+    elif want != got:
+        return False
     return True
 
 
@@ -110,7 +124,7 @@ class EventsTestMixin(object):
                     with open(jsonfile) as fh:
                         data = json.load(fh)
                         remaining[:] = [e for e in remaining
-                                        if not dict_match(e, data)]
+                                        if not partial_match(e, data)]
                     os.unlink(jsonfile)
                 except ValueError as e:
                     continue
