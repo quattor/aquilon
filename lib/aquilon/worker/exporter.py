@@ -105,6 +105,15 @@ class Exporter(object):
         self._actions = defaultdict(lambda: defaultdict(list))
         self._stash = defaultdict(dict)
         self._logger = kwargs.get('logger', LOGGER)
+        self._delayed_actions = []
+
+    # Pass through all delayed actions to process them, the object content will
+    # thus be resolved when this function is called instead of when the method
+    # was originally called
+    def _process_delayed(self):
+        while self._delayed_actions:
+            action, obj = self._delayed_actions.pop(0)
+            action(obj, delay=False)
 
     # Queue a up an action created by an ExportHandler.  Each even should be
     # None or a supported class depending on the type it will be queued up internally.
@@ -126,16 +135,28 @@ class Exporter(object):
                 action = getattr(handler, task)(obj, **self._kwargs)
                 self._queue_action(handler, action)
 
-    def create(self, obj):
+    def create(self, obj, delay=True):
         """
-        Indicate that the passed object has been created
+        Indicate that the passed object has been created.
+
+        Delayed by default.
         """
+        if delay:
+            self._delayed_actions.append((self.create, obj))
+            return
+
         self._do_create_or_delete('create', obj)
 
-    def update(self, obj):
+    def update(self, obj, delay=True):
         """
         Indicate that the passed object has been updated.
+
+        Delayed by default.
         """
+        if delay:
+            self._delayed_actions.append((self.update, obj))
+            return
+
         for oname in [c.__name__ for c in obj.__class__.__mro__]:
             if oname not in self._handlers:
                 continue
@@ -144,16 +165,23 @@ class Exporter(object):
                 action = handler.update(obj, **self._kwargs)
                 self._queue_action(handler, action)
 
-    def delete(self, obj):
+    def delete(self, obj, delay=False):
         """
         Indicate that the object has been deleted.
+
+        Immediate by default.
         """
+        if delay:
+            self._delayed_actions.append((self.delete, obj))
+            return
+
         self._do_create_or_delete('delete', obj)
 
     def publish(self):
         """
         Publish any queued notifications
         """
+        self._process_delayed()
         for handler, actions in self._actions.items():
             notificatons = actions['notifications']
             try:
