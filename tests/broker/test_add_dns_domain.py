@@ -32,14 +32,14 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.dsdb_expect("add_dns_domain -domain_name aqd-unittest.ms.com "
                          "-comments Some DNS domain comments")
         self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest.ms.com",
-                        "--comments", "Some DNS domain comments"])
+                        "--comments", "Some DNS domain comments", "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def testaddaqdunittest_ut_env_domain(self):
         self.dsdb_expect("add_dns_domain -domain_name aqd-unittest-ut-env.ms.com "
                          "-comments Some DNS domain comments")
         self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest-ut-env.ms.com",
-                        "--comments", "Some DNS domain comments"])
+                        "--comments", "Some DNS domain comments", "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def testaddcardsdomain(self):
@@ -47,14 +47,14 @@ class TestAddDnsDomain(TestBrokerCommand):
                          "-comments A pack of lies")
         self.noouttest(["add", "dns_domain",
                         "--dns_domain", "cards.example.com",
-                        "--comments", "A pack of lies"])
+                        "--comments", "A pack of lies", "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def testaddrestricteddomain(self):
         self.dsdb_expect("add_dns_domain -domain_name restrict.aqd-unittest.ms.com "
                          "-comments ")
         self.noouttest(["add", "dns_domain", "--dns_domain", "restrict.aqd-unittest.ms.com",
-                        "--restricted"])
+                        "--restricted", "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def testverifyaddaqdunittestdomain(self):
@@ -100,17 +100,17 @@ class TestAddDnsDomain(TestBrokerCommand):
         command = ['add', 'dns_domain', '--dns_domain',
                    #         1         2         3         4         5         6
                    's234567890123456789012345678901234567890123456789012345678901234' +
-                   '.ms.com']
+                   '.ms.com', "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "is more than the maximum 64 allowed.", command)
 
     def testaddtopleveldomain(self):
-        command = ['add', 'dns_domain', '--dns_domain', 'toplevel']
+        command = ['add', 'dns_domain', '--dns_domain', 'toplevel', "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Top-level DNS domains cannot be added.", command)
 
     def testaddinvaliddomain(self):
-        command = ['add', 'dns_domain', '--dns_domain', 'foo-.ms.com']
+        command = ['add', 'dns_domain', '--dns_domain', 'foo-.ms.com', "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal DNS name format 'foo-'.", command)
 
@@ -131,13 +131,13 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.dsdb_expect("add_dns_domain -domain_name excx.aqd-unittest.ms.com "
                          "-comments ")
         command = ["add", "dns", "domain",
-                   "--dns_domain", "excx.aqd-unittest.ms.com"]
+                   "--dns_domain", "excx.aqd-unittest.ms.com", "--justification", "tcm=123"]
         self.noouttest(command)
 
         self.dsdb_expect("add_dns_domain -domain_name utcolo.aqd-unittest.ms.com "
                          "-comments ")
         command = ["add", "dns", "domain",
-                   "--dns_domain", "utcolo.aqd-unittest.ms.com"]
+                   "--dns_domain", "utcolo.aqd-unittest.ms.com", "--justification", "tcm=123"]
         self.noouttest(command)
 
         self.dsdb_verify()
@@ -150,7 +150,7 @@ class TestAddDnsDomain(TestBrokerCommand):
                                    "--dns_domain", domain])
         if domain and p.returncode == 4:
             self.dsdb_expect("add_dns_domain -domain_name %s -comments " % domain)
-            command = ["add", "dns", "domain", "--dns_domain", domain]
+            command = ["add", "dns", "domain", "--dns_domain", domain, "--justification", "tcm=123"]
             self.noouttest(command)
             self.dsdb_verify()
 

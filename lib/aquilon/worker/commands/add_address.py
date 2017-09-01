@@ -23,6 +23,7 @@ from aquilon.worker.dbwrappers.dns import (grab_address,
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.interface import generate_ip
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddAddress(BrokerCommand):
@@ -30,7 +31,8 @@ class CommandAddAddress(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, logger, fqdn, dns_environment, grn, eon_id,
-               network_environment, reverse_ptr, ttl, comments, **arguments):
+               network_environment, reverse_ptr, ttl, comments, user,
+               justification, reason, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         audit_results = []
@@ -40,6 +42,11 @@ class CommandAddAddress(BrokerCommand):
         # TODO: add allow_multi=True
         dbdns_rec, _ = grab_address(session, fqdn, ip, dbnet_env, dbdns_env,
                                     comments=comments, preclude=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdns_rec, enforce_validation=True)
+        cm.validate()
 
         if reverse_ptr:
             set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)

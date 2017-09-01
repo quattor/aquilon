@@ -210,7 +210,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
             return True
         self.dsdb_expect("add_dns_domain -domain_name %s -comments " % config['domain'])
         self.noouttest(["add", "dns_domain",
-                        "--dns_domain", config['domain']])
+                        "--dns_domain", config['domain'], "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def test_100_add_6509_model(self):

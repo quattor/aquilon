@@ -25,13 +25,14 @@ from aquilon.worker.dbwrappers.dns import (set_reverse_ptr,
                                            update_address)
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, reverse_ptr, dns_environment,
                network_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, **_):
+               comments, user, justification, reason, **_):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
@@ -42,6 +43,11 @@ class CommandUpdateAddress(BrokerCommand):
             raise ArgumentError("{0} is a service address, use the "
                                 "update_service_address command to change it."
                                 .format(dbdns_rec))
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdns_rec, enforce_validation=True)
+        cm.validate()
 
         old_ip = dbdns_rec.ip
         old_comments = dbdns_rec.comments

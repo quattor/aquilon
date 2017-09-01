@@ -17,13 +17,15 @@
 
 from aquilon.aqdb.model import DnsDomain, NsRecord, ARecord
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddNsRecord(BrokerCommand):
 
     required_parameters = ["fqdn", "dns_domain"]
 
-    def render(self, session, fqdn, dns_domain, comments, **_):
+    def render(self, session, fqdn, dns_domain, comments,
+               user, justification, reason, logger, **_):
 
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
@@ -33,6 +35,11 @@ class CommandAddNsRecord(BrokerCommand):
 
         ns_record = NsRecord(a_record=dba_rec, dns_domain=dbdns_domain,
                              comments=comments)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(ns_record, enforce_validation=True)
+        cm.validate()
 
         session.add(ns_record)
 

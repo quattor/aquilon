@@ -21,17 +21,25 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelAlias(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, fqdn, dns_environment, **_):
+    def render(self, session, logger, fqdn, dns_environment,
+               user, justification, reason, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
                                      dns_environment=dbdns_env, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdns_rec.target)
+        cm.validate()
+
         domain = dbdns_rec.fqdn.dns_domain.name
 
         check_no_provided_service(dbdns_rec)

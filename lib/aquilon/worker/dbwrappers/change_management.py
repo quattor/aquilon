@@ -28,7 +28,9 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
                                 ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
-                                Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment)
+                                Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment,
+                                Fqdn, ARecord, ReservedName, AddressAlias, DnsDomain, DnsRecord, NsRecord,
+                                SrvRecord, DynamicStub)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -343,6 +345,85 @@ class ChangeManagement(object):
             for host in q.all():
                 self.validate_host(host)
 
+    def validate_fqdn(self, dbfqdn):
+        # Check full depth of fqdn aliases or address_alias!
+        def dig_to_real_target(dbfqdn):
+            fqdns_to_test = [dbfqdn]
+            fqdns_tested = list()
+            final_target = dbfqdn
+            while fqdns_to_test:
+                to_test_now = []
+                for db_fqdn in fqdns_to_test:
+                    to_test_now.extend(db_fqdn.dns_records)
+                    fqdns_tested.append(db_fqdn)
+                fqdns_to_test = []
+                for rec in to_test_now:
+                    if rec in fqdns_tested:
+                        raise Exception("There might be a loop!!! Failing fast instead.")
+                    if isinstance(rec, AddressAlias):
+                        fqdns_to_test.append(rec.target)
+                    elif isinstance(rec, Alias):
+                        fqdns_to_test.append(rec.target)
+                    else:
+                        final_target = rec.fqdn
+                    fqdns_to_test = list(set(fqdns_to_test))
+            return final_target
+
+        fqdn = dig_to_real_target(dbfqdn)
+
+        CR = aliased(ClusterResource)
+        HR = aliased(HostResource)
+        S = aliased(ServiceAddress)
+        RG = aliased(ResourceGroup)
+        BR = aliased(BundleResource)
+
+        session = object_session(fqdn)
+        ip_subquery = session.query(ARecord).filter(ARecord.fqdn_id == fqdn.id)
+        ip_subquery = [i.ip for i in ip_subquery]
+
+        # Filter Service addresses mapped to the clusters directly
+        q2 = session.query(Cluster).join(CR).join(Resource). \
+            join(ServiceAddress).join(ARecord).filter(ARecord.fqdn_id == fqdn.id)
+
+        # Filter Service addresses mapped to the cluster via resourcegroups
+        q5 = session.query(Cluster).join(CR)
+        q5 = q5.outerjoin((RG, RG.holder_id == CR.id),
+                          (BR, BR.resourcegroup_id == RG.id),
+                          (S, S.holder_id == BR.id))
+        q5 = q5.join(ARecord).filter(ARecord.fqdn_id == fqdn.id)
+
+        # Filter IP Addresses assigned to the hosts
+        q3 = session.query(Host).join(HardwareEntity).join(Interface, aliased=True). \
+            join(AddressAssignment).filter(AddressAssignment.ip.in_(ip_subquery))
+
+        # Filter Service addresses mapped to the hosts directly
+        q4 = session.query(Host).join(HardwareEntity).join(HostResource).join(Resource). \
+            join(ServiceAddress).join(ARecord).filter(ARecord.fqdn_id == fqdn.id)
+
+        # Filter Service addresses mapped to the host via resourcegroups
+        q6 = session.query(Host).join(HR)
+        q6 = q6.outerjoin((RG, RG.holder_id == HR.id),
+                          (BR, BR.resourcegroup_id == RG.id),
+                          (S, S.holder_id == BR.id))
+        q6 = q6.join(ARecord).filter(ARecord.fqdn_id == fqdn.id)
+
+        # Validate clusters
+        for q in [q2, q5]:
+            q = q.reset_joinpoint()
+            q = q.join(ClusterLifecycle).options(contains_eager('status'))
+            q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+
+        # Validate hosts
+        for q in [q3, q4, q6]:
+
+            q = q.reset_joinpoint()
+            q = q.join(HostLifecycle).options(contains_eager('status'))
+            q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            for host in q.all():
+                self.validate_host(host)
+
     def validate_chassis(self, chassis):
         """
         Validate if given chassis object has hosts in slots
@@ -517,3 +598,11 @@ ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_hol
 ChangeManagement.handlers[Alias] = ChangeManagement.validate_default
 ChangeManagement.handlers[NetworkCompartment] = ChangeManagement.validate_default
 ChangeManagement.handlers[NetworkEnvironment] = ChangeManagement.validate_default
+ChangeManagement.handlers[Fqdn] = ChangeManagement.validate_fqdn
+ChangeManagement.handlers[ARecord] = ChangeManagement.validate_default
+ChangeManagement.handlers[DynamicStub] = ChangeManagement.validate_default
+ChangeManagement.handlers[ReservedName] = ChangeManagement.validate_default
+ChangeManagement.handlers[DnsDomain] = ChangeManagement.validate_default
+ChangeManagement.handlers[DnsEnvironment] = ChangeManagement.validate_default
+ChangeManagement.handlers[NsRecord] = ChangeManagement.validate_default
+ChangeManagement.handlers[SrvRecord] = ChangeManagement.validate_default

@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Fqdn, AddressAlias
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateAddressAlias(BrokerCommand):
@@ -28,7 +29,7 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, target, ttl, clear_ttl, comments,
                dns_environment, target_environment, grn, eon_id, clear_grn,
-               **_):
+               user, justification, reason, **_):
         if not target_environment:
             target_environment = dns_environment
 
@@ -59,7 +60,11 @@ class CommandUpdateAddressAlias(BrokerCommand):
         elif clear_grn:
             update_grn = True
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dbaddr_alias in dbdns_records:
+            cm.consider(dbaddr_alias.target)
+
             if ttl is not None:
                 dbaddr_alias.ttl = ttl
             elif clear_ttl:
@@ -70,6 +75,8 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
             if comments is not None:
                 dbaddr_alias.comments = comments
+
+        cm.validate()
 
         session.flush()
         return

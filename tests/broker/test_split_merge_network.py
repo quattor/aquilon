@@ -51,10 +51,10 @@ class TestSplitMergeNetwork(TestBrokerCommand):
     def test_110_add_dns_records(self):
         self.dsdb_expect_add("merge1.aqd-unittest.ms.com", "0.2.2.200")
         self.noouttest(["add", "address", "--ip", "0.2.2.200",
-                        "--fqdn", "merge1.aqd-unittest.ms.com"])
+                        "--fqdn", "merge1.aqd-unittest.ms.com", "--justification", "tcm=123"])
         self.dsdb_expect_add("merge2.aqd-unittest.ms.com", "0.2.3.192")
         self.noouttest(["add", "address", "--ip", "0.2.3.192",
-                        "--fqdn", "merge2.aqd-unittest.ms.com"])
+                        "--fqdn", "merge2.aqd-unittest.ms.com", "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def test_120_add_routers(self):
@@ -179,10 +179,10 @@ class TestSplitMergeNetwork(TestBrokerCommand):
     def test_900_clean_dns(self):
         self.dsdb_expect_delete("0.2.2.200")
         self.noouttest(["del", "address", "--ip", "0.2.2.200",
-                        "--fqdn", "merge1.aqd-unittest.ms.com"])
+                        "--fqdn", "merge1.aqd-unittest.ms.com", "--justification", "tcm=123"])
         self.dsdb_expect_delete("0.2.3.192")
         self.noouttest(["del", "address", "--ip", "0.2.3.192",
-                        "--fqdn", "merge2.aqd-unittest.ms.com"])
+                        "--fqdn", "merge2.aqd-unittest.ms.com", "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def test_910_clean_nets(self):

@@ -19,16 +19,24 @@
 from aquilon.aqdb.model import DnsDomain
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, logger, dns_domain, restricted, comments, **_):
+    def render(self, session, logger, dns_domain, restricted, comments,
+               user, justification, reason, **_):
         DnsDomain.get_unique(session, dns_domain, preclude=True)
 
         dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbdns_domain, enforce_validation=True)
+        cm.validate()
+
         if restricted:
             dbdns_domain.restricted = True
         session.add(dbdns_domain)

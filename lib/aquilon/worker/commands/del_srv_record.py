@@ -20,6 +20,7 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import SrvRecord, Fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelSrvRecord(BrokerCommand):
@@ -27,7 +28,8 @@ class CommandDelSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain"]
 
     def render(self, session, service, protocol, dns_domain, target,
-               dns_environment, target_environment, **_):
+               dns_environment, target_environment, user, justification,
+               reason, logger, **_):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbfqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
                                  dns_environment=dns_environment)
@@ -62,8 +64,14 @@ class CommandDelSrvRecord(BrokerCommand):
                                     (SrvRecord._get_class_label(), service,
                                      protocol, dns_domain, msg))
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dns_rec in rrs:
+            cm.consider(dns_rec, enforce_validation=True)
+
             delete_dns_record(dns_rec)
+
+        cm.validate()
         session.flush()
 
         return

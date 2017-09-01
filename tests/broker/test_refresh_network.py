@@ -194,7 +194,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in ips:
             name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
             self.dsdb_expect_add(name, ip)
-            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name])
+            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name, "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def test_260_test_split_merge(self):
@@ -334,7 +334,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in ips:
             name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
             self.dsdb_expect_delete(ip)
-            self.noouttest(["del", "address", "--ip", ip, "--fqdn", name])
+            self.noouttest(["del", "address", "--ip", ip, "--fqdn", name, "--justification", "tcm=123"])
         self.dsdb_verify()
 
     def test_680_cleanup_nettest(self):

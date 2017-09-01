@@ -30,7 +30,7 @@ class TestAddDnsEnvironment(TestBrokerCommand):
 
     def test_100_add_utenv(self):
         command = ["add", "dns", "environment", "--dns_environment", "ut-env",
-                   "--comments", "Some DNS env comments"]
+                   "--comments", "Some DNS env comments", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_105_show_utenv(self):
@@ -40,16 +40,16 @@ class TestAddDnsEnvironment(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some DNS env comments", command)
 
     def test_110_add_excx(self):
-        command = ["add", "dns", "environment", "--dns_environment", "excx"]
+        command = ["add", "dns", "environment", "--dns_environment", "excx", "--justification", "tcm=123"]
         self.noouttest(command)
 
     def test_200_add_utenv_again(self):
-        command = ["add", "dns", "environment", "--dns_environment", "ut-env"]
+        command = ["add", "dns", "environment", "--dns_environment", "ut-env", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "DNS Environment ut-env already exists.", command)
 
     def test_200_add_badname(self):
-        command = ["add", "dns", "environment", "--dns_environment", "<badname>"]
+        command = ["add", "dns", "environment", "--dns_environment", "<badname>", "--justification", "tcm=123"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "'<badname>' is not a valid value for DNS environment",
