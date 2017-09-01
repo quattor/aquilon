@@ -79,7 +79,8 @@ class CommandPXESwitchList(BrokerCommand):
                               .format(dbhost))
 
             # Validate ChangeManagement
-            cm.consider(dbhost)
+            if not arguments.get("status"):
+                cm.consider(dbhost)
             # Find what "bootserver" instance we're bound to
             si = first_of(dbhost.services_used,
                           lambda x: x.service == dbservice)

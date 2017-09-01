@@ -41,7 +41,7 @@ class TestPxeswitch(TestBrokerCommand):
 
     """
 
-    def testinstallunittest00(self):
+    def test_165_installunittest00(self):
         command = "pxeswitch --hostname unittest00.one-nyp.ms.com --install"
         # This relies on the tests being configured to use /bin/echo instead
         # of the actual aii-installfe.  It would be better to have a fake
@@ -63,7 +63,7 @@ class TestPxeswitch(TestBrokerCommand):
                          "--servers %s@infra1.aqd-unittest.ms.com" % user,
                          command)
 
-    def testinstallunittest00noconf(self):
+    def test_170_installunittest00noconf(self):
         command = ["pxeswitch", "--hostname", "unittest00.one-nyp.ms.com",
                    "--install", "--noconfigure"]
         err = self.statustest(command)
@@ -82,49 +82,49 @@ class TestPxeswitch(TestBrokerCommand):
                          "--servers %s@infra1.aqd-unittest.ms.com" % user,
                          command)
 
-    def testinstallunittest02(self):
+    def test_175_installunittest02(self):
         command = ["pxeswitch", "--hostname", "unittest02.one-nyp.ms.com",
                    "--install"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "You should change the build status before "
                          "switching the PXE link to install.", command)
 
-    def testlocalbootunittest02(self):
+    def test_180_localbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
         err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--bootlist", command)
 
-    def teststatusunittest02(self):
+    def test_210_statusunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --status"
         err = self.statustest(command.split(" "))
         self.matchclean(err, "--configure", command)
         self.matchoutput(err, "--statuslist", command)
 
-    def testfirmwareunittest02(self):
+    def test_150_firmwareunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
         err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--firmwarelist", command)
 
-    def testconfigureunittest02(self):
+    def test_135_configureunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com"
         err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
 
-    def testblindbuildunittest02(self):
+    def test_115_blindbuildunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --blindbuild"
         err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--livecdlist", command)
 
-    def testrescueunittest02(self):
+    def test_195_rescueunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --rescue"
         err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--rescuelist", command)
 
-    def testduplist(self):
+    def test_140_duplist(self):
         hosts = ["unittest00.one-nyp.ms.com",
                  "unittest00.one-nyp.ms.com",
                  "unittest01.one-nyp.ms.com"]
@@ -137,7 +137,7 @@ class TestPxeswitch(TestBrokerCommand):
                          "unittest00.one-nyp.ms.com",
                          command)
 
-    def testconfigurelist(self):
+    def test_120_configurelist(self):
         hosts = ["uNitTest02.one-nyp.ms.com",
                  "unittest00.One-Nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
@@ -147,7 +147,7 @@ class TestPxeswitch(TestBrokerCommand):
         # We would like to test more of the output... we need something
         # special for aii-shellfe however...
 
-    def testconfigurelisterror1(self):
+    def test_125_configurelisterror1(self):
         hosts = ["not-an-fqdn",
                  "host-does-not-exist.ms.com",
                  "host.domain-does-not-exist.ms.com"]
@@ -166,16 +166,39 @@ class TestPxeswitch(TestBrokerCommand):
                          "DNS Domain domain-does-not-exist.ms.com not found.",
                          command)
 
-    def testconfigurelisterror2(self):
+    def test_130_configurelisterror2(self):
         hosts = [self.aurora_without_node + ".ms.com"]
-        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
-        command = "pxeswitch --list %s --configure --justification tcm=123" % scratchfile
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Invalid hosts in list:", command)
-        self.matchoutput(out, "Host %s.ms.com has no bootserver." %
+        scratchfile = self.writescratch("pxeswitchliststatus", "\n".join(hosts))
+        command = "show host --host {}".format(hosts[0])
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Build Status: ready',
+                         command)
+
+        command = "pxeswitch --list %s --status" % scratchfile
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Invalid hosts in list:", command)
+        self.matchoutput(err, "Host %s.ms.com has no bootserver." %
                          self.aurora_without_node, command)
 
-    def testinstallisterror(self):
+    def test_131_configurelisterror2(self):
+        hosts = [self.aurora_without_node + ".ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "show host --host {}".format(hosts[0])
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, 'Environment: prod',
+                         command)
+        self.matchoutput(out, 'Build Status: ready',
+                         command)
+
+        command = "pxeswitch --list %s --configure --justification tcm=123" % scratchfile
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Invalid hosts in list:", command)
+        self.matchoutput(err, "Host %s.ms.com has no bootserver." %
+                         self.aurora_without_node, command)
+
+    def test_160_installisterror(self):
         hosts = ["unittest02.one-nyp.ms.com",
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
@@ -186,7 +209,7 @@ class TestPxeswitch(TestBrokerCommand):
                          "PXE link to install.", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
-    def testblindbuildlist(self):
+    def test_110_blindbuildlist(self):
         hosts = ["unittest02.one-nyp.ms.com",
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
@@ -195,7 +218,7 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--livecdlist", command)
 
-    def testrescuelist(self):
+    def test_185_rescuelist(self):
         hosts = ["unittest02.one-nyp.ms.com",
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
@@ -204,7 +227,7 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--rescuelist", command)
 
-    def testrescuelistnoconf(self):
+    def test_190_rescuelistnoconf(self):
         hosts = ["unittest02.one-nyp.ms.com",
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
@@ -219,22 +242,22 @@ class TestPxeswitch(TestBrokerCommand):
 #                   "--status", "--configure"]
 #        self.badoptiontest(command)
 
-    def teststatusconflictinstall(self):
+    def test_200_statusconflictinstall(self):
         command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
                    "--status", "--install"]
         self.badoptiontest(command)
 
-    def teststatusconflictinstalllist(self):
+    def test_205_statusconflictinstalllist(self):
         command = ["pxeswitch", "--list=does-not-actually-exist",
                    "--status", "--install"]
         self.badoptiontest(command)
 
-    def testinstallconflictfirmware(self):
+    def test_155_installconflictfirmware(self):
         command = ["pxeswitch", "--hostname=unittest02.one-nyp.ms.com",
                    "--firmware", "--install"]
         self.badoptiontest(command)
 
-    def testallowconfigureinstall(self):
+    def test_105_allowconfigureinstall(self):
         command = ["pxeswitch", "--hostname=unittest00.one-nyp.ms.com",
                    "--configure", "--install"]
         err = self.statustest(command)
@@ -242,7 +265,7 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--installlist", command)
         self.matchclean(err, "--firmware", command)
 
-    def testallowconfigureblindbuildlist(self):
+    def test_100_allowconfigureblindbuildlist(self):
         hosts = ["unittest02.one-nyp.ms.com",
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
@@ -253,7 +276,7 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--livecdlist", command)
         self.matchclean(err, "--firmware", command)
 
-    def testfailoverpxeswitchlimitlist(self):
+    def test_145_failoverpxeswitchlimitlist(self):
         hostlimit = self.config.getint("broker", "pxeswitch_max_list_size")
         hosts = []
         for i in range(1, 20):
