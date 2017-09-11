@@ -79,7 +79,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
         q = q.join(Fqdn, (ARecord, ARecord.fqdn_id == Fqdn.id))
         q = q.filter_by(network=dbnetwork, ip=ip)
         q = q.order_by(DnsDomain.id)
-        q = q.with_lockmode("update")
+        q = q.with_for_update()
         session.execute(q)
         dbnetwork.lock_row()
 

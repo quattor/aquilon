@@ -33,7 +33,7 @@ class CommandAddUser(BrokerCommand):
         if autouid:
             # Prevent concurrent invocations
             q = session.query(User.id).order_by(User.id)
-            session.execute(q.with_lockmode('update'))
+            session.execute(q.with_for_update())
 
             last_uid = session.query(func.max(User.uid)).scalar()
             uid = last_uid + 1

@@ -44,7 +44,7 @@ class CommandDelDynamicRange(BrokerCommand):
         q = q.join(Fqdn, (ARecord, ARecord.fqdn_id == Fqdn.id))
         q = q.filter_by(network=startnet)
         q = q.order_by(DnsDomain.id)
-        q = q.with_lockmode('update')
+        q = q.with_for_update()
         session.execute(q)
         startnet.lock_row()
 
