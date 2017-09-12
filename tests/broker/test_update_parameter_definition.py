@@ -33,7 +33,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
     def test_100_update_arch_paramdef(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
                "--path=foo/testint", "--description=testint", "--required",
-               "--activation", "reboot", "--justification", "tcm=12345678"]
+               "--activation", "reboot"] + self.valid_just_tcm
         self.statustest(cmd)
 
     def test_105_verify_update(self):
@@ -51,7 +51,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
     def test_110_update_feature_paramdef(self):
         cmd = ["update_parameter_definition", "--feature", "pre_host", "--type=host",
                "--path=testint", "--description=testint",
-               "--default=100", "--required", "--justification", "tcm=12345678"]
+               "--default=100", "--required"] + self.valid_just_tcm
         self.statustest(cmd)
 
     def test_115_verify_update_feature(self):
@@ -66,7 +66,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_130_update_norequired(self):
         cmd = ["update_parameter_definition", "--feature", "pre_host", "--type=host",
-               "--path=testint", "--norequired", "--justification", "tcm=12345678"]
+               "--path=testint", "--norequired"] + self.valid_just_tcm
         self.noouttest(cmd)
 
     def test_135_verify_update_feature(self):
@@ -81,8 +81,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_200_update_archetype_default(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=foo/test_rebuild_required", "--default=default",
-               "--justification", "tcm=123"]
+               "--path=foo/test_rebuild_required", "--default=default"] + self.valid_just_tcm
         out = self.unimplementederrortest(cmd)
         self.matchoutput(out, "Archetype-wide parameter definitions cannot "
                          "have default values.",

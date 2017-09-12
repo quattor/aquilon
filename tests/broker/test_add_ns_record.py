@@ -41,7 +41,7 @@ class TestAddNSRecord(TestBrokerCommand):
 
     def test_100_add_a_record(self):
         self.dsdb_expect_add(NAME, self.IP)
-        cmd = ['add', 'address', '--fqdn', NAME, '--ip', self.IP, "--justification", "tcm=123"]
+        cmd = ['add', 'address', '--fqdn', NAME, '--ip', self.IP] + self.valid_just_tcm
         self.noouttest(cmd)
         self.dsdb_verify()
 
@@ -51,12 +51,12 @@ class TestAddNSRecord(TestBrokerCommand):
         self.matchoutput(out, "DNS Record: %s" % NAME, cmd)
 
     def test_300_add_ns_record(self):
-        cmd = "add ns_record --dns_domain %s --fqdn %s --justification tcm=123" % (DOMAIN, NAME)
-        self.noouttest(cmd.split(" "))
+        cmd = ["add_ns_record", "--dns_domain", DOMAIN, "--fqdn", NAME] + self.valid_just_tcm
+        self.noouttest(cmd)
 
     def test_305_add_ns_record_duplicate(self):
-        cmd = "add ns_record --dns_domain %s --fqdn %s --justification tcm=123" % (DOMAIN, NAME)
-        self.badrequesttest(cmd.split(" "))
+        cmd = ["add_ns_record", "--dns_domain", DOMAIN, "--fqdn", NAME] + self.valid_just_tcm
+        self.badrequesttest(cmd)
 
     def test_400_verify_ns_record(self):
         cmd = "show ns record --dns_domain %s --fqdn %s" % (DOMAIN, NAME)

@@ -32,7 +32,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "kerberos",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 88, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 88, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_110_add_kerberos2(self):
@@ -40,14 +40,14 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
                    "--port", 88, "--priority", 10, "--weight", 20,
-                   "--ttl", "3600", "--justification", "tcm=123"]
+                   "--ttl", "3600"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_120_add_kerberos2_dup(self):
         command = ["add", "srv", "record", "--service", "kerberos",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
-                   "--port", 88, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 88, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "SRV Record _kerberos._tcp.aqd-unittest.ms.com "
                          "already exists.", command)
@@ -56,7 +56,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "ldap",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
-                   "--port", 389, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_200_show_srvrec(self):
@@ -103,7 +103,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "ldap",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 0, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 0, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "The port must be between 1 and 65535.", command)
 
@@ -111,7 +111,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "ldap",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 389, "--priority", 65536, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 65536, "--weight", 20] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "The priority must be between 0 and 65535.", command)
 
@@ -119,7 +119,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "ldap",
                    "--protocol", "badproto", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 389, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown protocol badproto.", command)
 
@@ -127,7 +127,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "ldap-alias",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "alias2host.aqd-unittest.ms.com",
-                   "--port", 389, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_335_search_ldap_alias(self):
@@ -139,7 +139,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "ldap-reserved",
                    "--protocol", "udp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "nyaqd1.ms.com",
-                   "--port", 389, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_350_restricted(self):
@@ -147,7 +147,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--protocol", "badproto",
                    "--dns_domain", "restrict.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 389, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Domain restrict.aqd-unittest.ms.com is "
@@ -168,7 +168,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp",
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "ldap.restrict.aqd-unittest.ms.com",
-                   "--port", 389, "--priority", 10, "--weight", 20, "--justification", "tcm=123"]
+                   "--port", 389, "--priority", 10, "--weight", 20] + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out,
                          "WARNING: Will create a reference to "
@@ -180,7 +180,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp",
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "addralias1.aqd-unittest.ms.com",
-                   "--port", 8080, "--priority", 50, "--weight", 10, "--justification", "tcm=123"]
+                   "--port", 8080, "--priority", 50, "--weight", 10] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_420_show_addr_alias_target(self):
@@ -205,7 +205,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com",
                    "--port", 5060, "--priority", 10, "--weight", 10,
-                   "--grn", "grn:/ms/ei/aquilon/aqd", "--justification", "tcm=123"]
+                   "--grn", "grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_505_verify_grn(self):
@@ -220,7 +220,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--service", "sip", "--protocol", "tcp",
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 5060, "--priority", 10, "--weight", 10, "--justification", "tcm=123"]
+                   "--port", 5060, "--priority", 10, "--weight", 10] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_515_verify_implicit_grn(self):
@@ -237,7 +237,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord50.aqd-unittest.ms.com",
                    "--port", 5060, "--priority", 10, "--weight", 10,
-                   "--eon_id", "2", "--justification", "tcm=123"]
+                   "--eon_id", "2"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_525_verify_eonid(self):
@@ -254,7 +254,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord51.aqd-unittest.ms.com",
                    "--port", 5060, "--priority", 10, "--weight", 10,
-                   "--eon_id", "3", "--justification", "tcm=123"]
+                   "--eon_id", "3"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.searchoutput(out,
                           r"Fqdn _sip._tcp.aqd-unittest.ms.com with target "
@@ -268,7 +268,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "unittest00.one-nyp.ms.com",
                    "--port", 5060, "--priority", 5, "--weight", 20,
-                   "--grn", "grn:/ms/ei/aquilon/unittest", "--justification", "tcm=123"]
+                   "--grn", "grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "SRV Record _sip._udp.aqd-unittest.ms.com depends on "
@@ -285,7 +285,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "zebra2.aqd-unittest.ms.com",
                    "--port", 5060, "--priority", 60, "--weight", 30,
-                   "--grn", "grn:/ms/ei/aquilon/unittest", "--justification", "tcm=123"]
+                   "--grn", "grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "SRV Record _sip._udp.aqd-unittest.ms.com depends on "
@@ -302,7 +302,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "unittest20-e1.aqd-unittest.ms.com",
                    "--port", 5060, "--priority", 20, "--weight", 40,
-                   "--grn", "grn:/ms/ei/aquilon/unittest", "--justification", "tcm=123"]
+                   "--grn", "grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "SRV Record _sip._udp.aqd-unittest.ms.com depends on "
@@ -318,7 +318,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "collab",
                    "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--port", 8080, "--priority", 0, "--weight", 0, "--justification", "tcm=123"]
+                   "--port", 8080, "--priority", 0, "--weight", 0] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_610_show_tls_srvrec(self):
@@ -339,7 +339,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "addralias1.aqd-unittest-ut-env.ms.com",
                    "--port", 8080, "--priority", 0, "--weight", 0,
-                   "--dns_environment", "ut-env", "--justification", "tcm=123"]
+                   "--dns_environment", "ut-env"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_710_show_with_dns_env(self):
@@ -363,7 +363,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--target", "addralias1.aqd-unittest-ut-env.ms.com",
                    "--port", 2364, "--priority", 20, "--weight", 30,
                    "--dns_environment", "internal",
-                   "--target_environment", "ut-env", "--justification", "tcm=123"]
+                   "--target_environment", "ut-env"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_810_show_with_diff_target_dns_env(self):

@@ -200,7 +200,7 @@ class TestAddCity(TestBrokerCommand):
     def test_406_update_city_campus_just_success(self):
         # update city
         self.dsdb_expect("update_city_aq -city e4 -campus na")
-        command = ["update", "city", "--city", "e4", "--campus", "na", "--justification", "tcm=123"]
+        command = ["update", "city", "--city", "e4", "--campus", "na"] + self.valid_just_tcm
         self.ignoreoutputtest(command)
         self.dsdb_verify()
 
@@ -231,8 +231,7 @@ class TestAddCity(TestBrokerCommand):
                          "Continent na, Country us, Campus na]", command)
 
     def test_420_update_city_just_error(self):
-        command = ["update", "city", "--city", "e4", "--campus", "ta",
-                   "--justification", "emergency"]
+        command = ["update", "city", "--city", "e4", "--campus", "ta"] + self.emergency_just_without_reason
         self.reasonmissingtest(command, auth=True, msgcheck=False)
 
         command = "show city --city e4"
@@ -242,8 +241,7 @@ class TestAddCity(TestBrokerCommand):
 
     def test_425_update_city_dsdb_error(self):
         self.dsdb_expect("update_city_aq -city e4 -campus ta", fail=True)
-        command = ["update", "city", "--city", "e4", "--campus", "ta",
-                   "--justification", "emergency", "--reason", "'Some reason'"]
+        command = ["update", "city", "--city", "e4", "--campus", "ta"] + self.emergency_just_with_reason
         out = self.badrequesttest(command)
         self.dsdb_verify()
 

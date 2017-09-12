@@ -46,7 +46,7 @@ class TestRefreshUser(TestBrokerCommand):
 
     def test_110_grant_testuser4_root(self):
         command = ["grant_root_access", "--user", "testuser4",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.successtest(command)
 
     def test_111_verify_testuser4_root(self):

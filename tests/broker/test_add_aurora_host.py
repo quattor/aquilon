@@ -70,9 +70,10 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddaurorawithoutnode(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_node)
-        self.noouttest(["add", "aurora", "host",
+        command = ["add", "aurora", "host",
                         "--osname", "linux", "--osversion", self.linux_version_prev,
-                        "--hostname", self.aurora_without_node, "--justification", "tcm=123"])
+                        "--hostname", self.aurora_without_node] + self.valid_just_tcm
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyaddaurorawithoutnode(self):
@@ -103,7 +104,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.dsdb_expect("show_rack -rack_name oy605", fail=True)
         command = ["add", "aurora", "host",
                    "--hostname", self.aurora_without_rack,
-                   "--osname", "linux", "--osversion", self.linux_version_prev, "--justification", "tcm=123"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]  + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
         self.dsdb_verify()
@@ -115,9 +116,10 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddnyaqd1(self):
         self.dsdb_expect("show_host -host_name nyaqd1")
-        self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1",
+        command = ["add", "aurora", "host", "--hostname", "nyaqd1",
                         "--osname", "linux",
-                        "--osversion", self.linux_version_prev, "--justification", "tcm=123"])
+                        "--osversion", self.linux_version_prev] + self.valid_just_tcm
+        self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyaddnyaqd1(self):

@@ -196,8 +196,8 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
         self.justificationmissingtest_warn(command.split(" "))
 
     def test_139_make_campus_test_justification_success(self):
-        command = "make_cluster --cluster campus-test --justification tcm=123456"
-        self.successtest(command.split(" "))
+        command = ["make_cluster", "--cluster", "campus-test"] + self.valid_just_tcm
+        self.successtest(command)
 
     def test_140_make_utvcs1(self):
         # Ensure that --justification is not required if cluster is not in prod/ready state

@@ -36,9 +36,8 @@ archetype_required = {
 class TestAddRequiredService(TestBrokerCommand):
 
     def test_100_add_afs(self):
-        command = "add required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
+        command = ["add_required_service", "--service", "afs", "--archetype", "aquilon"] + self.valid_just_tcm
+        self.noouttest(command)
 
     def test_101_add_afs_redundant(self):
         command = ["add_required_service", "--service", "afs",
@@ -97,9 +96,9 @@ class TestAddRequiredService(TestBrokerCommand):
         # Setup required services, as expected by the templates.
         for archetype, servicelist in archetype_required.items():
             for service in servicelist:
-                self.noouttest(["add_required_service", "--service", service,
-                                "--archetype", archetype,
-                                "--justification", "tcm=12345678"])
+                command = ["add_required_service", "--service", service,
+                           "--archetype", archetype] + self.valid_just_tcm
+                self.noouttest(command)
 
     def test_115_verify_defaults(self):
         all_services = set()
@@ -274,9 +273,8 @@ class TestAddRequiredService(TestBrokerCommand):
                         "--osversion", "11.2-x86_64"])
 
     def test_200_archetype_duplicate(self):
-        command = "add required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.badrequesttest(command.split(" "))
+        command = ["add_required_service", "--service", "afs", "--archetype", "aquilon"] + self.valid_just_tcm
+        self.badrequesttest(command)
 
     def test_200_personality_duplicate(self):
         command = ["add_required_service", "--service", "chooser1",
@@ -298,8 +296,7 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def test_200_missing_service(self):
         command = ["add_required_service", "--service",
-                   "service-does-not-exist", "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "service-does-not-exist", "--archetype", "aquilon"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Service service-does-not-exist not found.",

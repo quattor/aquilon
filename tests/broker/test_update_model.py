@@ -324,9 +324,9 @@ class TestUpdateModel(TestBrokerCommand):
         self.commandtest(command.split())
 
     def test_915_justification_success(self):
-        command = "update model --model bl460cg8 --vendor hp " \
-                  "--memory 65536 --update_existing_machines --justification tcm=123"
-        self.commandtest(command.split())
+        command = ["update_model", "--model", "bl460cg8", "--vendor", "hp", "--memory",
+                   "65536", "--update_existing_machines"] + self.valid_just_tcm
+        self.commandtest(command)
 
 
 if __name__ == '__main__':

@@ -115,7 +115,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
         # Skip ready, because the cluster is not necessarily ready
         for status in ['failed', 'reinstall', 'rebuild']:
             self.successtest(["change_status", "--hostname", hostname,
-                              "--buildstatus", status, "--justification", "tcm=123"])
+                              "--buildstatus", status] + self.valid_just_tcm)
 
             # reset advertised state to build
             command = ["reset_advertised_status", "--hostname", hostname]
@@ -152,7 +152,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
         # Skip ready, because the cluster is not necessarily ready
         for status in ['failed', 'reinstall', 'rebuild']:
             self.successtest(["change_status", "--hostname", hostname,
-                              "--buildstatus", status, "--justification", "tcm=123"])
+                              "--buildstatus", status] + self.valid_just_tcm)
 
             # reset advertised state to build
             command = ["reset_advertised_status", "--list", scratchfile]

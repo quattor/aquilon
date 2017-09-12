@@ -74,7 +74,7 @@ class TestDelDnsDomain(TestBrokerCommand):
 
         test_domain = "td3.aqd-unittest.ms.com"
         self.dsdb_expect("add_dns_domain -domain_name %s -comments " % test_domain)
-        command = ["add", "dns", "domain", "--dns_domain", test_domain, "--justification", "tcm=123"]
+        command = ["add", "dns", "domain", "--dns_domain", test_domain] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
 

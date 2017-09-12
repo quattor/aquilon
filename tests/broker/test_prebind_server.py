@@ -77,8 +77,7 @@ class TestPrebindServer(TestBrokerCommand):
             for instance, servers in instances.items():
                 for server in servers:
                     command = ["bind_server", "--hostname", server,
-                               "--service", service, "--instance", instance,
-                               "--justification", "tcm=123"]
+                               "--service", service, "--instance", instance] + self.valid_just_tcm
                     out = self.statustest(command)
                     # This test runs early when none of the servers are
                     # configured yet, so bind_server will complain - but only if

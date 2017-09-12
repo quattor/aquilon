@@ -33,7 +33,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--weight", 15, "--priority", 25, "--port", "8888",
-                   "--comments", "New SRV record comments", "--justification", "tcm=123"]
+                   "--comments", "New SRV record comments"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_200_verify(self):
@@ -50,7 +50,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--weight", 15, "--priority", 25, "--port", "8888",
-                   "--comments", "New SRV record comments", "--justification", "tcm=123"]
+                   "--comments", "New SRV record comments"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "SRV Record _no-such-service._tcp.aqd-unittest.ms.com, "
@@ -61,7 +61,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
         command = ["update", "srv", "record", "--service", "kerberos",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
-                   "--ttl", 1800, "--justification", "tcm=123"]
+                   "--ttl", 1800] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_420_verify(self):
@@ -74,7 +74,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
         command = ["update", "srv", "record", "--service", "kerberos",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
-                   "--clear_ttl", "--justification", "tcm=123"]
+                   "--clear_ttl"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_520_verify(self):
@@ -86,7 +86,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
     def test_600_update_grn(self):
         command = ["update", "srv", "record", "--service", "sip",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
-                   "--grn", "grn:/ms/ei/aquilon/unittest", "--justification", "tcm=123"]
+                   "--grn", "grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_605_verify_update_grn(self):
@@ -103,7 +103,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
     def test_610_clear_grn(self):
         command = ["update", "srv", "record", "--service", "sip",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
-                   "--clear_grn", "--justification", "tcm=123"]
+                   "--clear_grn"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_615_verify_clear_grn(self):
@@ -117,7 +117,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
     def test_620_update_eon_id(self):
         command = ["update", "srv", "record", "--service", "sip",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
-                   "--eon_id", "2", "--justification", "tcm=123"]
+                   "--eon_id", "2"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_625_verify_update_grn(self):
@@ -135,7 +135,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
         command = ["update", "srv", "record", "--service", "sip",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord50.aqd-unittest.ms.com",
-                   "--grn", "grn:/ms/ei/aquilon/unittest", "--justification", "tcm=123"]
+                   "--grn", "grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm
         out = self.badoptiontest(command)
         self.matchoutput(out,
                          "Option or option group grn conflicts with target",

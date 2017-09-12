@@ -36,9 +36,8 @@ archetype_required = {
 class TestDelRequiredService(TestBrokerCommand):
 
     def test_100_del_required_afs(self):
-        command = "del required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
+        command = ["del_required_service", "--service", "afs", "--archetype", "aquilon"] + self.valid_just_tcm
+        self.noouttest(command)
 
     def test_110_del_afs_personality(self):
         self.noouttest(["del_required_service", "--service", "afs",
@@ -72,8 +71,7 @@ class TestDelRequiredService(TestBrokerCommand):
         for archetype, services in archetype_required.items():
             for service in services:
                 self.noouttest(["del_required_service", "--service", service,
-                                "--archetype", archetype,
-                                "--justification", "tcm=12345678"])
+                                "--archetype", archetype] + self.valid_just_tcm)
 
             command = ["show_archetype", "--archetype", archetype]
             out = self.commandtest(command)
@@ -149,9 +147,8 @@ class TestDelRequiredService(TestBrokerCommand):
         self.noouttest(command)
 
     def test_200_del_required_afs_again(self):
-        command = "del required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.notfoundtest(command.split(" "))
+        command = ["del_required_service", "--service", "afs", "--archetype", "aquilon"] + self.valid_just_tcm
+        self.notfoundtest(command)
 
     def test_200_del_required_personality_again(self):
         command = ["del", "required", "service", "--service", "chooser1",

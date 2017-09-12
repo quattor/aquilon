@@ -46,27 +46,27 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_210_map_personality_user(self):
         command = ["grant_root_access", "--user", "testuser1",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
         command = ["grant_root_access", "--user", "testuser2",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_220_map_personality_invaliduser(self):
         command = ["grant_root_access", "--user", "testinvaliduser",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "User testinvaliduser not found", command)
 
     def test_225_map_personality_invalidjustification(self):
         command = ["grant_root_access", "--netgroup", "netgroup1",
-                   "--personality", "metrocluster", "--justification", "foo"]
+                   "--personality", "metrocluster"] + self.invalid_justification
         self.justificationformattest(command, auth=True, msgcheck=False)
 
     def test_230_map_personality_invalidpersonality(self):
         command = ["grant_root_access", "--user", "testuser1",
-                   "--personality", "unknownpersonality", "--justification", "foo"]
+                   "--personality", "unknownpersonality"] + self.invalid_justification
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Not Found: Personality unknownpersonality not found.",
@@ -74,16 +74,16 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_240_map_personality_netgroup(self):
         command = ["grant_root_access", "--netgroup", "netgroup1",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
         command = ["grant_root_access", "--netgroup", "netgroup2",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_250_map_personality_invalidnetgroup(self):
         command = ["grant_root_access", "--netgroup", "testinvalidnetgroup",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "", command)
 
@@ -108,29 +108,29 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_310_unmap_personality_user(self):
         command = ["revoke_root_access", "--user", "testuser1",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_320_unmap_personality_invaliduser(self):
         command = ["revoke_root_access", "--user", "testinvaliduser",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "User testinvaliduser not found", command)
 
     def test_330_map_personality_invalidpersonality(self):
         command = ["revoke_root_access", "--user", "testuser2",
-                   "--personality", "invalidpersonality", "--justification", "tcm=12345678"]
+                   "--personality", "invalidpersonality"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality invalidpersonality not found", command)
 
     def test_340_unmap_personality_netgroup(self):
         command = ["revoke_root_access", "--netgroup", "netgroup1",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_350_unmap_personality_invalidnetgroup(self):
         command = ["grant_root_access", "--netgroup", "testinvalidnetgroup",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "Netgroup testinvalidnetgroup not found", command)
 
@@ -151,7 +151,7 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_370_unmap_personality_user(self):
         command = ["revoke_root_access", "--user", "testuser2",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_380_del_netgroup_stillmapped(self):
@@ -163,7 +163,7 @@ class TestRootAccess(TestBrokerCommand):
                          command)
 
         command = ["revoke_root_access", "--netgroup", "netgroup2",
-                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
         command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]

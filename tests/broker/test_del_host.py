@@ -79,8 +79,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
     # unittest01.one-nyp.ms.com gets deleted in test_del_windows_host.
 
     def test_120_del_aurora_with_node(self):
-        command = "del host --hostname %s.ms.com --justification tcm=123" % self.aurora_with_node
-        err = self.statustest(command.split(" "))
+        command = ["del_host", "--hostname", "{}.ms.com".format(self.aurora_with_node)] + self.valid_just_tcm
+        err = self.statustest(command)
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
                          "and *not* changing DSDB." % self.aurora_with_node,
@@ -91,8 +91,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_125_del_aurora_without_node(self):
-        command = "del host --hostname %s.ms.com --justification tcm=123" % self.aurora_without_node
-        err = self.statustest(command.split(" "))
+        command = ["del_host", "--hostname", "{}.ms.com".format(self.aurora_without_node)] + self.valid_just_tcm
+        err = self.statustest(command)
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
                          "and *not* changing DSDB." % self.aurora_without_node,
@@ -103,8 +103,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_130_del_aurora_without_rack(self):
-        command = "del host --hostname %s.ms.com --justification tcm=123" % self.aurora_without_rack
-        err = self.statustest(command.split(" "))
+        command = ["del_host", "--hostname", "{}.ms.com".format(self.aurora_without_rack)] + self.valid_just_tcm
+        err = self.statustest(command)
         self.matchoutput(err,
                          "WARNING: removing host %s.ms.com from AQDB "
                          "and *not* changing DSDB." % self.aurora_without_rack,
@@ -115,8 +115,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_140_del_nyaqd1(self):
-        command = "del host --hostname nyaqd1.ms.com --justification tcm=123"
-        self.statustest(command.split(" "))
+        command = ["del_host", "--hostname", "nyaqd1.ms.com"] + self.valid_just_tcm
+        self.statustest(command)
 
     def test_140_verify_del_nyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"
@@ -280,7 +280,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             machine = "ut9s03p%d" % port
             self.delete_host(hostname, net.usable[port], machine,
-                             manager_ip=mgmt_net.usable[port], justification="tcm=123")
+                             manager_ip=mgmt_net.usable[port], justification=True)
 
     def test_300_del_ut10_hosts(self):
         net = self.net["ut10_eth0"]

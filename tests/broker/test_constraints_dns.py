@@ -35,7 +35,7 @@ class TestDnsConstraints(TestBrokerCommand):
                          "records, and cannot be deleted.", command)
 
     def testdelaliasedaddress(self):
-        command = ["del", "address", "--fqdn", "arecord13.aqd-unittest.ms.com", "--justification", "tcm=123"]
+        command = ["del", "address", "--fqdn", "arecord13.aqd-unittest.ms.com"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Record arecord13.aqd-unittest.ms.com still has "
@@ -51,7 +51,7 @@ class TestDnsConstraints(TestBrokerCommand):
                          command)
 
     def testdelsrvtarget(self):
-        command = ["del", "address", "--fqdn", "arecord15.aqd-unittest.ms.com", "--justification", "tcm=123"]
+        command = ["del", "address", "--fqdn", "arecord15.aqd-unittest.ms.com"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Record arecord15.aqd-unittest.ms.com is still in "
@@ -60,7 +60,7 @@ class TestDnsConstraints(TestBrokerCommand):
 
     def testdelserviceaddress(self):
         ip = self.net["zebra_vip"].usable[1]
-        command = ["del", "address", "--fqdn", "zebra2.aqd-unittest.ms.com", "--justification", "tcm=123"]
+        command = ["del", "address", "--fqdn", "zebra2.aqd-unittest.ms.com"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Record zebra2.aqd-unittest.ms.com [%s] is used "
@@ -80,7 +80,7 @@ class TestDnsConstraints(TestBrokerCommand):
     def testdeldynamic(self):
         ip = self.net["dyndhcp0"].usable[2]
         fqdn = self.dynname(ip)
-        command = ["del_address", "--ip", ip, "--justification", "tcm=123"]
+        command = ["del_address", "--ip", ip] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Record %s [%s] is reserved for dynamic DHCP, "

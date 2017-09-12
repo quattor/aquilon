@@ -212,12 +212,12 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
     def test_1030_clearchassis(self):
         self.event_upd_hardware('ut9s03p1')
         command = ["update", "machine", "--machine", "ut9s03p1",
-                   "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "1", "--justification", "tcm=123"]
+                   "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "1"] + self.valid_just_tcm
         self.noouttest(command)
         self.events_verify()
         self.event_upd_hardware('ut9s03p1')
         command = ["update", "machine", "--machine", "ut9s03p1",
-                   "--clearchassis", "--justification", "tcm=123"]
+                   "--clearchassis"] + self.valid_just_tcm
         self.noouttest(command)
         self.events_verify()
 

@@ -34,8 +34,7 @@ class TestAddBuildingPreference(TestBrokerCommand):
 
     def test_100_add_utb12(self):
         command = ["add_building_preference", "--building_pair", "utb1,utb2",
-                   "--archetype", "hacluster", "--prefer", "utb2",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "utb2"] + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Flushed 4/8 templates.", command)
 
@@ -87,52 +86,45 @@ class TestAddBuildingPreference(TestBrokerCommand):
         # The pair is not given in lexicographical order; add some whitespace,
         # too
         command = ["add_building_preference", "--building_pair", "utb3, utb2 ",
-                   "--archetype", "hacluster", "--prefer", "utb2",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "utb2"] + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Flushed 6/10 templates.", command)
 
     def test_200_single_building(self):
         command = ["add_building_preference", "--building_pair", "ut",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "should be two building codes", command)
 
     def test_201_three_buildings(self):
         command = ["add_building_preference", "--building_pair", "ut,utb1,utb2",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "should be two building codes", command)
 
     def test_202_repeated_building(self):
         command = ["add_building_preference", "--building_pair", "ut,ut",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "two different building codes", command)
 
     def test_203_preferred_outside(self):
         command = ["add_building_preference", "--building_pair", "utb1,utb3",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Preferred building ut must be one of "
                          "utb1 and utb3.", command)
 
     def test_210_add_utb12_again(self):
         command = ["add_building_preference", "--building_pair", "utb2,utb1",
-                   "--archetype", "hacluster", "--prefer", "utb2",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "utb2"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Building pair utb1,utb2 already has a "
                          "preference for archetype hacluster.", command)
 
     def test_220_bad_archetype(self):
         command = ["add_building_preference", "--building_pair", "utb2,utb1",
-                   "--archetype", "aquilon", "--prefer", "utb2",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon", "--prefer", "utb2"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Archetype aquilon is not a cluster archetype.",
                          command)

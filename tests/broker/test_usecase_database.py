@@ -122,7 +122,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
     def test_201_add_member(self):
         command = ["cluster", "--cluster=nydb1",
-                   "--hostname=server1.aqd-unittest.ms.com", "--justification", "tcm=123"]
+                   "--hostname=server1.aqd-unittest.ms.com"] + self.valid_just_sn
         self.statustest(command)
 
     def test_205_add_fs(self):
@@ -201,7 +201,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.dsdb_verify()
 
         command = ["uncluster", "--hostname=server1.aqd-unittest.ms.com",
-                   "--cluster=nydb1", "--justification", "tcm=123"]
+                   "--cluster=nydb1"] + self.valid_just_sn
         self.statustest(command)
         command = ["del_cluster", "--cluster=nydb1"]
         self.statustest(command)

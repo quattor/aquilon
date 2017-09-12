@@ -46,14 +46,13 @@ class TestPollNetworkDevice(TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["bind", "server", "--service", service,
                         "--instance", "unittest",
-                        "--hostname", "nyaqd1.ms.com", "--justification", "tcm=123"])
+                        "--hostname", "nyaqd1.ms.com"] + self.valid_just_tcm)
 
     # test_map_service runs too late...
     def test_110_map_poll_helper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["map", "service", "--service", service,
-                        "--instance", "unittest", "--building", "ut",
-                        "--justification", "tcm=12345678"])
+                        "--instance", "unittest", "--building", "ut"] + self.valid_just_tcm)
 
     def test_200_poll_np06bals03(self):
         command = ["poll", "network_device", "--network_device", "np06bals03.ms.com"]
