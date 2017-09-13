@@ -84,7 +84,7 @@ class CommandAddSrvRecord(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbsrv_rec, enforce_validation=True)
+        cm.consider(dbsrv_rec.fqdn)
         cm.validate()
 
         session.add(dbsrv_rec)

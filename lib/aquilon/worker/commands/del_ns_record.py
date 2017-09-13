@@ -35,7 +35,7 @@ class CommandDelNsRecord(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(ns_record, enforce_validation=True)
+        cm.consider(ns_record.a_record.fqdn)
         cm.validate()
 
         session.delete(ns_record)

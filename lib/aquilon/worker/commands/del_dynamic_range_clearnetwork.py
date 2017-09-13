@@ -38,7 +38,7 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbnetwork, enforce_validation=True)
+        cm.consider(dbnetwork)
         cm.validate()
 
         dbnetwork.lock_row()

@@ -46,7 +46,7 @@ class CommandAddNetworkEnvironment(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbnet_env, enforce_validation=True)
+        cm.consider(dbnet_env)
         cm.validate()
 
         if dbdns_env.is_default != dbnet_env.is_default:

@@ -34,7 +34,7 @@ class CommandAddDnsDomain(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbdns_domain, enforce_validation=True)
+        cm.consider(dbdns_domain)
         cm.validate()
 
         if restricted:

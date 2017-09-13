@@ -133,9 +133,6 @@ class ChangeManagement(object):
         if not self.check_enabled:
             self.logger.debug('Change management is disabled. Exiting validate.')
             return
-        if not self.dict_of_impacted_envs and not self.enforce_validation:
-            self.logger.debug('No impacted environments found and CM is not enforced.')
-            return
 
         # Clean final impacted env list
         self.logger.debug('Prepare impacted envs to call EDM')
@@ -595,14 +592,8 @@ ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
-ChangeManagement.handlers[Alias] = ChangeManagement.validate_default
-ChangeManagement.handlers[NetworkCompartment] = ChangeManagement.validate_default
-ChangeManagement.handlers[NetworkEnvironment] = ChangeManagement.validate_default
 ChangeManagement.handlers[Fqdn] = ChangeManagement.validate_fqdn
-ChangeManagement.handlers[ARecord] = ChangeManagement.validate_default
-ChangeManagement.handlers[DynamicStub] = ChangeManagement.validate_default
-ChangeManagement.handlers[ReservedName] = ChangeManagement.validate_default
 ChangeManagement.handlers[DnsDomain] = ChangeManagement.validate_default
 ChangeManagement.handlers[DnsEnvironment] = ChangeManagement.validate_default
-ChangeManagement.handlers[NsRecord] = ChangeManagement.validate_default
-ChangeManagement.handlers[SrvRecord] = ChangeManagement.validate_default
+ChangeManagement.handlers[NetworkCompartment] = ChangeManagement.validate_default
+ChangeManagement.handlers[NetworkEnvironment] = ChangeManagement.validate_default

@@ -64,7 +64,7 @@ class CommandUpdateSrvRecord(BrokerCommand):
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dbsrv_rec in dbdns_records:
-            cm.consider(dbsrv_rec, enforce_validation=True)
+            cm.consider(dbsrv_rec.fqdn)
 
             if priority:
                 dbsrv_rec.priority = priority

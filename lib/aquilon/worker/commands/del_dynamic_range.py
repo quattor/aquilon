@@ -43,7 +43,7 @@ class CommandDelDynamicRange(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(startnet, enforce_validation=True)
+        cm.consider(startnet)
         cm.validate()
 
         # Lock order: DNS domain(s), network

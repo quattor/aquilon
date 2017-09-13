@@ -45,7 +45,7 @@ class CommandAddAddress(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbdns_rec, enforce_validation=True)
+        cm.consider(dbdns_rec.fqdn)
         cm.validate()
 
         if reverse_ptr:

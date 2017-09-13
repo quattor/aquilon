@@ -67,7 +67,7 @@ class CommandDelSrvRecord(BrokerCommand):
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dns_rec in rrs:
-            cm.consider(dns_rec, enforce_validation=True)
+            cm.consider(dns_rec.fqdn)
 
             delete_dns_record(dns_rec)
 

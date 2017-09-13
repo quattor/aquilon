@@ -56,7 +56,7 @@ class CommandAddDomain(BrokerCommand):
 
         session.flush()
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbdomain, enforce_validation=True)
+        cm.consider(dbdomain)
         cm.validate()
 
         domainsdir = self.config.get("broker", "domainsdir")

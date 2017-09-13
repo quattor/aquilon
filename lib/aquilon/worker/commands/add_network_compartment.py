@@ -35,7 +35,7 @@ class CommandAddNetworkCompartment(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbnet_comp, enforce_validation=True)
+        cm.consider(dbnet_comp)
         cm.validate()
 
         session.add(dbnet_comp)

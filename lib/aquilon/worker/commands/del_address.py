@@ -85,7 +85,7 @@ class CommandDelAddress(BrokerCommand):
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(dbaddress, enforce_validation=True)
+        cm.consider(dbaddress.fqdn)
         cm.validate()
 
         ip = dbaddress.ip
