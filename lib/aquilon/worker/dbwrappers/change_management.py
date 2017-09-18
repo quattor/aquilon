@@ -28,7 +28,8 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
                                 ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
-                                Share, Alias)
+                                Share, Alias, Organization, Hub, Continent, Country, Campus, City,
+                                Building, Room, Bunker, Desk)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError
@@ -55,6 +56,7 @@ class ChangeManagement(object):
     extra_options = ""
     handlers = {}
     lifecycle_status_edm_check = ['ready']  # Crash and burn: 'build', 'rebuild',
+
     # 'decommissioned', 'blind', 'install', 'reinstall', 'almostready', 'failed'
 
     def __init__(self, session, user, justification, reason, logger, command):
@@ -158,7 +160,8 @@ class ChangeManagement(object):
             self.logger.info("Change Management validation failed. Reason: {}".format(str(err)))
             raise InternalError(str(err))
 
-        self.logger.info("Change Management validation finished. Status: {}. {}".format(out_dict.get("Status"), out_dict.get("Reason")))
+        self.logger.info("Change Management validation finished. Status: {}. {}".format(out_dict.get("Status"),
+                                                                                        out_dict.get("Reason")))
         if out_dict.get("Status") == 'Permitted':
             self.logger.client_info("Approval Warning: {}".format(out_dict.get("Reason")))
         elif out_dict.get("Status") != 'Approved':
@@ -217,8 +220,8 @@ class ChangeManagement(object):
         if hasattr(cluster, 'members'):
             for cluster_member in cluster.members:
                 self.validate_cluster(cluster_member)
-        # To do: Do we want to check if cluster is assigned
-        # to metacluster and if yes validate metacluster and its clusters/hosts?
+                # To do: Do we want to check if cluster is assigned
+                # to metacluster and if yes validate metacluster and its clusters/hosts?
 
     def validate_host(self, host):
         """
@@ -250,12 +253,28 @@ class ChangeManagement(object):
 
     def validate_location(self, location):
         session = object_session(location)
+        location_children = session.query(Location).get(location.id).children
+        loc_ids = [loc.id for loc in location_children] + [location.id]
         q = session.query(Host).join(HardwareEntity,
-                                     Host.hardware_entity_id == HardwareEntity.id).\
-            join(Location, HardwareEntity.location_id == Location.id).filter(Location.id == location.id)
+                                     Host.hardware_entity_id == HardwareEntity.id). \
+            join(Location, HardwareEntity.location_id == Location.id).filter(Location.id.in_(loc_ids))
 
+        q1 = session.query(Cluster).join(Location, Cluster.location_constraint_id == Location.id). \
+            filter(Location.id.in_(loc_ids))
+
+        q = q.reset_joinpoint()
+        q = q.join(HostLifecycle).options(contains_eager('status'))
+        q = q.join(PersonalityStage, Personality).join(HostEnvironment).options(
+            contains_eager('personality_stage.personality.host_environment'))
         for host in q.all():
             self.validate_host(host)
+
+        q1 = q1.reset_joinpoint()
+        q1 = q1.join(ClusterLifecycle).options(contains_eager('status'))
+        q1 = q1.join(PersonalityStage, Personality).join(HostEnvironment).options(
+            contains_eager('personality_stage.personality.host_environment'))
+        for cluster in q1.all():
+            self.validate_cluster(cluster)
 
     def validate_prod_network(self, network_or_networks):
         """
@@ -273,51 +292,51 @@ class ChangeManagement(object):
         if isinstance(network_or_networks, Network):
             session = object_session(network_or_networks)
             # Filter Service addresses mapped to the clusters directly
-            q2 = session.query(Cluster).join(CR).join(Resource).\
-                join(ServiceAddress).join(ARecord).join(Network).filter(Network.id==network_or_networks.id)
+            q2 = session.query(Cluster).join(CR).join(Resource). \
+                join(ServiceAddress).join(ARecord).join(Network).filter(Network.id == network_or_networks.id)
 
             # Filter Service addresses mapped to the cluster via resourcegroups
             q5 = session.query(Cluster).join(CR)
             q5 = q5.outerjoin((RG, RG.holder_id == CR.id),
                               (BR, BR.resourcegroup_id == RG.id),
                               (S, S.holder_id == BR.id))
-            q5 = q5.join(ARecord).join(Network).filter(Network.id==network_or_networks.id)
+            q5 = q5.join(ARecord).join(Network).filter(Network.id == network_or_networks.id)
 
             # Filter IP Addresses assigned to the hosts
             q3 = session.query(Host).join(HardwareEntity).join(Interface, aliased=True). \
                 join(AddressAssignment, from_joinpoint=True).join(Network). \
-                filter(Network.id==network_or_networks.id)
+                filter(Network.id == network_or_networks.id)
             # Filter Service addresses mapped to the hosts directly
-            q4 = session.query(Host).join(HardwareEntity).join(HostResource).join(Resource).\
-                join(ServiceAddress).join(ARecord).join(Network).filter(Network.id==network_or_networks.id)
+            q4 = session.query(Host).join(HardwareEntity).join(HostResource).join(Resource). \
+                join(ServiceAddress).join(ARecord).join(Network).filter(Network.id == network_or_networks.id)
 
             # Filter Service addresses mapped to the host via resourcegroups
             q6 = session.query(Host).join(HR)
             q6 = q6.outerjoin((RG, RG.holder_id == HR.id),
                               (BR, BR.resourcegroup_id == RG.id),
                               (S, S.holder_id == BR.id))
-            q6 = q6.join(ARecord).join(Network).filter(Network.id==network_or_networks.id)
+            q6 = q6.join(ARecord).join(Network).filter(Network.id == network_or_networks.id)
 
         else:
             session = object_session(network_or_networks.first())
             network_sub_q = network_or_networks.options(load_only("id")).subquery()
             # Filter Service addresses mapped to the clusters directly
-            q2 = session.query(Cluster).join(ClusterResource).join(Resource).\
+            q2 = session.query(Cluster).join(ClusterResource).join(Resource). \
                 join(ServiceAddress).join(ARecord).join(Network).filter(Network.id.in_(network_sub_q))
 
             # Filter Service addresses mapped to the cluster via resourcegroups
             q5 = session.query(Cluster).join(CR)
             q5 = q5.outerjoin((RG, RG.holder_id == CR.id),
-                            (BR, BR.resourcegroup_id == RG.id),
-                            (S, S.holder_id == BR.id))
+                              (BR, BR.resourcegroup_id == RG.id),
+                              (S, S.holder_id == BR.id))
             q5 = q5.join(ARecord).join(Network).filter(Network.id.in_(network_sub_q))
 
             # Filter IP Addresses assigned to the hosts
-            q3 = session.query(Host).join(HardwareEntity).join(Interface, aliased=True).\
-                join(AddressAssignment, from_joinpoint=True).join(Network).\
+            q3 = session.query(Host).join(HardwareEntity).join(Interface, aliased=True). \
+                join(AddressAssignment, from_joinpoint=True).join(Network). \
                 filter(Network.id.in_(network_sub_q))
             # Filter Service addresses mapped to the hosts directly
-            q4 = session.query(Host).join(HardwareEntity).join(HostResource).join(Resource).\
+            q4 = session.query(Host).join(HardwareEntity).join(HostResource).join(Resource). \
                 join(ServiceAddress).join(ARecord).join(Network).filter(Network.id.in_(network_sub_q))
 
             # Filter Service addresses mapped to the host via resourcegroups
@@ -331,7 +350,8 @@ class ChangeManagement(object):
         for q in [q2, q5]:
             q = q.reset_joinpoint()
             q = q.join(ClusterLifecycle).options(contains_eager('status'))
-            q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            q = q.join(PersonalityStage, Personality).join(HostEnvironment).options(
+                contains_eager('personality_stage.personality.host_environment'))
             for cluster in q.all():
                 self.validate_cluster(cluster)
 
@@ -339,7 +359,8 @@ class ChangeManagement(object):
         for q in [q3, q4, q6]:
             q = q.reset_joinpoint()
             q = q.join(HostLifecycle).options(contains_eager('status'))
-            q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            q = q.join(PersonalityStage, Personality).join(HostEnvironment).options(
+                contains_eager('personality_stage.personality.host_environment'))
             for host in q.all():
                 self.validate_host(host)
 
@@ -384,7 +405,8 @@ class ChangeManagement(object):
         if q:
             q = q.reset_joinpoint()
             q = q.join(ClusterLifecycle).options(contains_eager('status'))
-            q = q.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            q = q.join(PersonalityStage, Personality).join(HostEnvironment).options(
+                contains_eager('personality_stage.personality.host_environment'))
             for cluster in q.all():
                 self.validate_cluster(cluster)
 
@@ -392,7 +414,8 @@ class ChangeManagement(object):
         if q2:
             q2 = q2.reset_joinpoint()
             q2 = q2.join(HostLifecycle).options(contains_eager('status'))
-            q2 = q2.join(PersonalityStage,Personality).join(HostEnvironment).options(contains_eager('personality_stage.personality.host_environment'))
+            q2 = q2.join(PersonalityStage, Personality).join(HostEnvironment).options(
+                contains_eager('personality_stage.personality.host_environment'))
             for host in q2.all():
                 self.validate_host(host)
 
@@ -506,11 +529,20 @@ ChangeManagement.handlers[Domain] = ChangeManagement.validate_branch
 ChangeManagement.handlers[Host] = ChangeManagement.validate_host
 ChangeManagement.handlers[Machine] = ChangeManagement.validate_hardware_entity
 # Removing this as the HardwareEntity is too general, we have validate_hardware_entity, validate_host and validate_chassis
-#ChangeManagement.handlers[HardwareEntity] = ChangeManagement.validate_hardware_entity
+# ChangeManagement.handlers[HardwareEntity] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[NetworkDevice] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[Network] = ChangeManagement.validate_prod_network
 ChangeManagement.handlers[Chassis] = ChangeManagement.validate_chassis
 ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
+ChangeManagement.handlers[Organization] = ChangeManagement.validate_location
+ChangeManagement.handlers[Hub] = ChangeManagement.validate_location
+ChangeManagement.handlers[Continent] = ChangeManagement.validate_location
+ChangeManagement.handlers[Campus] = ChangeManagement.validate_location
+ChangeManagement.handlers[City] = ChangeManagement.validate_location
+ChangeManagement.handlers[Building] = ChangeManagement.validate_location
+ChangeManagement.handlers[Room] = ChangeManagement.validate_location
+ChangeManagement.handlers[Bunker] = ChangeManagement.validate_location
+ChangeManagement.handlers[Desk] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder

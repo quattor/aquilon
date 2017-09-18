@@ -194,8 +194,8 @@ class TestPollNetworkDevice(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "VLAN 717: %s" % self.net["ut01ga2s01_v712"].ip, command)
         self.matchoutput(out, "VLAN 718: %s" % self.net["ut01ga2s01_v713"].ip, command)
-        self.matchclean(out, "712", command)
-        self.matchclean(out, "713", command)
+        self.matchclean(out, "VLAN 712", command)
+        self.matchclean(out, "VLAN 713", command)
 
     def test_235_poll_ut01ga2s03_real(self):
         # Second poll without a tag file, simulating the re-tagging of VLANs
