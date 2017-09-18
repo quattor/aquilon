@@ -102,7 +102,7 @@ class TestUpdateRack(TestBrokerCommand):
 
 
     def test_100_prepare_CM_setup(self):
-        command = ["update", "machine", "--machine", "ut9s03p41", "--rack", "ut8", "--justification", "tcm=123"]
+        command = ["update", "machine", "--machine", "ut9s03p41", "--rack", "ut8"] + self.valid_just_tcm
         self.noouttest(command)
         command = "search host --machine ut9s03p41"
         out = self.commandtest(command.split(" "))
@@ -120,7 +120,7 @@ class TestUpdateRack(TestBrokerCommand):
         command = ['update_rack', '--rack=ut8', '--room=utroom1']
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ['update_rack', '--rack=ut8', '--room=utroom1', '--justification', 'tcm=123']
+        command = ['update_rack', '--rack=ut8', '--room=utroom1'] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_110_verifyroom(self):
@@ -134,7 +134,7 @@ class TestUpdateRack(TestBrokerCommand):
         command = ['update_rack', '--rack=ut8', '--room=utroom2']
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ['update_rack', '--rack=ut8', '--room=utroom2', '--justification', 'tcm=123']
+        command = ['update_rack', '--rack=ut8', '--room=utroom2'] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_130_verifyroom(self):
@@ -148,7 +148,7 @@ class TestUpdateRack(TestBrokerCommand):
         command = ['update_rack', '--rack=ut8', '--bunker=bucket2.ut']
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ['update_rack', '--rack=ut8', '--bunker=bucket2.ut', '--justification', 'sn=chng123']
+        command = ['update_rack', '--rack=ut8', '--bunker=bucket2.ut'] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_145_verifybunker(self):
@@ -163,7 +163,7 @@ class TestUpdateRack(TestBrokerCommand):
         command = ['update_rack', '--rack=ut8', '--building', 'ut']
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ['update_rack', '--rack=ut8', '--building', 'ut', '--justification', 'sn=chng123']
+        command = ['update_rack', '--rack=ut8', '--building', 'ut'] + self.valid_just_sn
         self.noouttest(command)
 
     def test_160_verifyclear(self):
@@ -173,7 +173,7 @@ class TestUpdateRack(TestBrokerCommand):
         self.searchclean(out, r'Location Parents: \[.* Bunker .*\]', command)
 
     def test_170_failchangebuilding(self):
-        command = ['update_rack', '--rack=ut8', '--room=np-lab1', '--justification', 'sn=chng123']
+        command = ['update_rack', '--rack=ut8', '--room=np-lab1'] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot change buildings.  Room np-lab1 is in "
@@ -191,14 +191,13 @@ class TestUpdateRack(TestBrokerCommand):
 
     # Was row g column 2
     def test_186_updateut8(self):
-        self.emergencynojustification(["update", "rack", "--rack", "ut8", "--column", "8",
-                        "--justification", "emergency", "--reason", "'I need this'"])
+        self.emergencynojustification(["update", "rack", "--rack", "ut8", "--column", "8"] + self.emergency_just_with_reason)
 
     # Was row g column 3
     def test_190_updateut9(self):
         self.noouttest(["update", "rack", "--rack", "ut9", "--row", "h",
                         "--column", "9", "--fullname", "My Rack",
-                        "--comments", "New rack comments", "--justification", "tcm=123"])
+                        "--comments", "New rack comments"] + self.valid_just_sn)
 
     def test_200_defaultdns(self):
         command = ["update", "rack", "--rack", "ut9",

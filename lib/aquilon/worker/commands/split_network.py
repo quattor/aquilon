@@ -23,6 +23,7 @@ from aquilon.aqdb.model import (Network, NetworkEnvironment, AddressAssignment,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.network import fix_foreign_links
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandSplitNetwork(BrokerCommand):
@@ -30,8 +31,8 @@ class CommandSplitNetwork(BrokerCommand):
 
     requierd_parameters = ["ip"]
 
-    def render(self, session, plenaries, dbuser,
-               ip, netmask, prefixlen, network_environment, **_):
+    def render(self, session, plenaries, dbuser, ip, netmask, prefixlen,
+               network_environment, user, justification, reason, logger, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
             net = IPv4Network(u"127.0.0.0/%s" % netmask)
@@ -43,6 +44,11 @@ class CommandSplitNetwork(BrokerCommand):
 
         dbnetwork = get_net_id_from_ip(session, ip,
                                        network_environment=dbnet_env)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetwork)
+        cm.validate()
 
         plenaries.add(dbnetwork)
 

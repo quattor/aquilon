@@ -38,15 +38,15 @@ class TestMergeConflicts(TestBrokerCommand):
         self.successtest(["add", "sandbox", "--sandbox", "changetest4"])
 
     def test_100_addchangetargetdomain(self):
-        self.successtest(["add", "domain", "--domain", "changetarget", "--justification", "tcm=123"])
+        self.successtest(["add", "domain", "--domain", "changetarget"] + self.valid_just_tcm)
 
     def test_110_trackchangetest4(self):
         self.commandtest(["add_domain", "--domain", "changetest4-tracker",
-                          "--track", "changetest4", "--justification", "tcm=123"])
+                          "--track", "changetest4"] + self.valid_just_tcm)
 
     def test_110_trackchangetarget(self):
         self.commandtest(["add_domain", "--domain", "changetarget-tracker",
-                          "--track", "changetarget", "--justification", "tcm=123"])
+                          "--track", "changetarget"] + self.valid_just_tcm)
 
     def test_120_makeconflictingchange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
@@ -207,14 +207,14 @@ class TestMergeConflicts(TestBrokerCommand):
 
     def test_135_rollback_no_history(self):
         command = ["rollback", "--domain", "changetarget-tracker",
-                   "--ref", "changetest5", "--justification", "tcm=123"]
+                   "--ref", "changetest5"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.searchoutput(out, "Cannot roll back to commit: "
                           "branch changetarget does not contain", command)
 
     def test_140_rollback(self):
-        command = "rollback --domain changetarget-tracker --lastsync --justification tcm=123"
-        self.successtest(command.split(" "))
+        command = ["rollback", "--domain", "changetarget-tracker", "--lastsync"] + self.valid_just_tcm
+        self.successtest(command)
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="changetarget-tracker")
         with open(template) as f:
@@ -278,7 +278,7 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_200_rollback_bad_commit(self):
         # This commit ID is from the Linux kernel sources
         command = ["rollback", "--domain", "changetarget-tracker",
-                   "--ref", "2dcd0af568b0cf583645c8a317dd12e344b1c72a", "--justification", "tcm=123"]
+                   "--ref", "2dcd0af568b0cf583645c8a317dd12e344b1c72a"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Ref 2dcd0af568b0cf583645c8a317dd12e344b1c72a "
@@ -334,8 +334,8 @@ class TestMergeConflicts(TestBrokerCommand):
         self.noouttest(["update_domain", "--domain=changetarget", "--archived"])
 
     def test_845_del_changetarget(self):
-        command = "del domain --domain changetarget --justification=tcm=12345678"
-        self.noouttest(command.split(" "))
+        command = ["del_domain", "--domain", "changetarget"] + self.valid_just_tcm
+        self.noouttest(command)
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "changetest")))
 

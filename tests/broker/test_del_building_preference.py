@@ -34,8 +34,7 @@ class TestDelBuildingPreference(TestBrokerCommand):
 
     def test_100_del_utb12(self):
         command = ["del_building_preference", "--building_pair", "utb1,utb2",
-                   "--archetype", "hacluster",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster"] + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Flushed 4/8 templates", command)
 
@@ -58,29 +57,25 @@ class TestDelBuildingPreference(TestBrokerCommand):
 
     def test_200_single_building(self):
         command = ["del_building_preference", "--building_pair", "ut",
-                   "--archetype", "hacluster",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "should be two building codes", command)
 
     def test_201_three_buildings(self):
         command = ["del_building_preference", "--building_pair", "ut,utb1,utb2",
-                   "--archetype", "hacluster",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "should be two building codes", command)
 
     def test_202_repeated_building(self):
         command = ["del_building_preference", "--building_pair", "ut,ut",
-                   "--archetype", "hacluster",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "two different building codes", command)
 
     def test_210_del_utb12_again(self):
         command = ["del_building_preference", "--building_pair", "utb2,utb1",
-                   "--archetype", "hacluster",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "Building pair utb1,utb2 does not have a "
                          "preference for archetype hacluster.", command)

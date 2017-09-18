@@ -49,7 +49,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["update_cluster", "--cluster=utecl2",
                    "--max_members=97",
                    "--comments", "New ESX cluster comments",
-                   "--down_hosts_threshold=0", "--justification", "tcm=123"]
+                   "--down_hosts_threshold=0"] + self.valid_just_tcm
         out = self.noouttest(command)
 
     def test_210_verifyutecl2(self):

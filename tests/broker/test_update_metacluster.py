@@ -37,7 +37,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
         default_max = self.config.getint("archetype_metacluster",
                                          "max_members_default")
         self.noouttest(["update_metacluster", "--metacluster=utmc1",
-                        "--max_members=%s" % default_max, "--justification", "tcm=123"])
+                        "--max_members=%s" % default_max] + self.valid_just_tcm)
 
     def test_100_verifynoop(self):
         command = "show metacluster --metacluster utmc1"
@@ -71,7 +71,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
 
     def test_100_failreducemaxmembers(self):
         command = ["update_metacluster", "--metacluster=utmc1",
-                   "--max_members=1", "--justification", "tcm=123"]
+                   "--max_members=1"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Metacluster utmc1 has 3 clusters bound, "
@@ -83,7 +83,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
     def test_100_updatelocation(self):
         # moving cluster from bu: ut to city ny, a parent of it.
         command = ["update_metacluster", "--metacluster", "utmc1",
-                   "--city", "ny", "--justification", "tcm=123"]
+                   "--city", "ny"] + self.valid_just_tcm
         self.noouttest(command)
 
         command = ["show", "metacluster", "--metacluster", "utmc1"]
@@ -112,7 +112,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
     def test_100_updatepersonality(self):
         # Change metacluster personality and revert it.
         command = ["update_metacluster", "--metacluster", "utmc1",
-                   "--personality", "metacluster-test", "--justification", "tcm=123"]
+                   "--personality", "metacluster-test"] + self.valid_just_tcm
         self.noouttest(command)
 
         command = ["show", "metacluster", "--metacluster", "utmc1"]
@@ -129,7 +129,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
 
     def test_100_failupdatelocation(self):
         command = ["update_metacluster", "--metacluster", "utmc1",
-                   "--building", "cards", "--justification", "tcm=123"]
+                   "--building", "cards"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "ESX Cluster utecl1 has location Building ut.",
                          command)

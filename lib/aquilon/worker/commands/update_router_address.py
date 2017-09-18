@@ -21,13 +21,15 @@ from aquilon.aqdb.model import RouterAddress, Building, ARecord
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateRouterAddress(BrokerCommand):
     requires_plenaries = True
 
     def render(self, session, plenaries, fqdn, ip, building, clear_location,
-               network_environment, dns_environment, comments, **_):
+               network_environment, dns_environment, comments,
+               user, justification, reason, logger, **_):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         if fqdn:
@@ -39,6 +41,12 @@ class CommandUpdateRouterAddress(BrokerCommand):
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnetwork)
+        cm.validate()
+
         router = RouterAddress.get_unique(session, ip=ip, network=dbnetwork,
                                           compel=True)
 

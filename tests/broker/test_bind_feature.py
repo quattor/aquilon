@@ -37,8 +37,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_100_bind_archetype(self):
         command = ["bind", "feature", "--feature", "pre_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         err = self.statustest(command)
         self.verify_personality_flush(err, command)
         # We can't easily check the number of templates that got refreshed since
@@ -156,7 +155,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_125_bind_archetype_redundant(self):
         command = ["bind", "feature", "--feature", "post_host",
-                   "--archetype", "aquilon", "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         err = self.statustest(command)
         self.matchoutput(err,
                          "Warning: host feature post_host is bound to "
@@ -179,8 +178,7 @@ class TestBindFeature(TestBrokerCommand):
 
         command = ["bind", "feature", "--feature", "bios_setup",
                    "--model", "hs21-8853",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         err = self.statustest(command)
         # The actual number of templates written may be different, because not
         # all the hosts have services assigned, so sometimes only
@@ -389,16 +387,14 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_200_bind_archetype_again(self):
         command = ["bind", "feature", "--feature", "pre_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Host Feature pre_host is already bound to "
                          "archetype aquilon.", command)
 
     def test_200_bind_noncompilable_arch(self):
         command = ["bind", "feature", "--feature", "pre_host",
-                   "--archetype", "windows",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "windows"] + self.valid_just_tcm
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "Archetype windows is not compileable, "
                          "feature bindings are not supported.", command)
@@ -406,8 +402,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_200_bind_model_again(self):
         command = ["bind", "feature", "--feature", "bios_setup",
                    "--model", "hs21-8853",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Hardware Feature bios_setup is already bound to "

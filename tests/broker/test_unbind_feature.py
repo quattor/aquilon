@@ -58,8 +58,7 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_105_unbind_archetype(self):
         command = ["unbind", "feature", "--feature", "pre_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         err = self.statustest(command)
         self.verify_personality_flush(err, command)
 
@@ -87,8 +86,7 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_110_unbind_redundant_archetype(self):
         command = ["unbind", "feature", "--feature", "post_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         err = self.statustest(command)
         matches = re.search(r"Flushed (\d+)/(\d+) templates", err, re.M)
         # The inventory personality should not have changed
@@ -145,8 +143,7 @@ class TestUnbindFeature(TestBrokerCommand):
 
         command = ["unbind", "feature", "--feature", "bios_setup",
                    "--model", "hs21-8853",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         err = self.statustest(command)
         # The actual number of templates written may be different, because not
         # all the hosts have services assigned, so sometimes only
@@ -181,7 +178,7 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["unbind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",
-                   "--interface", "eth1", "--justification", "tcm=12345678"]
+                   "--interface", "eth1"] + self.valid_just_tcm
         err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
@@ -193,8 +190,7 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_145_unbind_nic_model_2nd_interface(self):
         command = ["unbind", "feature", "--feature", "src_route",
-                   "--personality", "compileserver", "--interface", "bond0",
-                   "--justification", "tcm=12345678"]
+                   "--personality", "compileserver", "--interface", "bond0"] + self.valid_just_tcm
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 2/1 templates.", command)
 
@@ -235,8 +231,7 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_200_unbind_archetype_again(self):
         command = ["unbind", "feature", "--feature", "pre_host",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Host Feature pre_host is not bound to "
@@ -245,8 +240,7 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_200_unbind_interface_personality_again(self):
         command = ["unbind", "feature", "--feature", "src_route",
-                   "--personality", "compileserver", "--interface", "bond0",
-                   "--justification", "tcm=12345678"]
+                   "--personality", "compileserver", "--interface", "bond0"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Interface Feature src_route is not bound to "

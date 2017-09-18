@@ -55,7 +55,7 @@ class TestClusterConstraints(TestBrokerCommand):
 
     def test_150_failrebindhost(self):
         command = ["cluster", "--cluster=utecl1",
-                   "--host=evh1.aqd-unittest.ms.com", "--justification", "tcm=123"]
+                   "--host=evh1.aqd-unittest.ms.com"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot support VMs", command)
 

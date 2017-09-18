@@ -18,18 +18,25 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkCompartment
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddNetworkCompartment(BrokerCommand):
 
     required_parameters = ["network_compartment"]
 
-    def render(self, session, network_compartment, comments, **_):
+    def render(self, session, network_compartment, comments, user,
+               justification, reason, logger, **_):
         NetworkCompartment.get_unique(session, network_compartment,
                                       preclude=True)
 
         dbnet_comp = NetworkCompartment(name=network_compartment,
                                         comments=comments)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnet_comp)
+        cm.validate()
 
         session.add(dbnet_comp)
         session.flush()

@@ -419,8 +419,9 @@ class MachineTestMixin(EventsTestMixin):
             if nic_ip and nic_ip != ip:
                 self.dsdb_expect_delete(nic_ip)
                 if justification:
-                    self.statustest(["del_interface_address", "--machine", machine,
-                                 "--interface", nic_name, "--ip", nic_ip], "--justification", justification)
+                    command = ["del_interface_address", "--machine", machine,
+                               "--interface", nic_name, "--ip", nic_ip] + self.valid_just_tcm
+                    self.statustest(command)
                 else:
                     self.statustest(["del_interface_address", "--machine", machine,
                                      "--interface", nic_name, "--ip", nic_ip])
@@ -428,15 +429,17 @@ class MachineTestMixin(EventsTestMixin):
 
         self.dsdb_expect_delete(ip)
         if justification:
-            self.statustest(["del_host", "--hostname", hostname, "--justification", justification])
+            command = ["del_host", "--hostname", hostname] + self.valid_just_tcm
+            self.statustest(command)
         else:
             self.statustest(["del_host", "--hostname", hostname])
         if manager_ip:
             self.dsdb_expect_delete(manager_ip)
             short, domain = hostname.split(".", 1)
             if justification:
-                self.noouttest(["del_manager", "--manager", "%sr.%s" %
-                                (short, domain), "--justification", justification])
+                command = ["del_manager", "--manager", "%sr.%s" %
+                          (short, domain)] + self.valid_just_tcm
+                self.noouttest(command)
             else:
                 self.noouttest(["del_manager", "--manager", "%sr.%s" %
                             (short, domain)])

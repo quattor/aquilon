@@ -87,8 +87,7 @@ class TestDeployDomain(TestBrokerCommand):
                          "Domain prod changed despite --dryrun")
 
     def test_120_deploybadjustification(self):
-        command = ["deploy", "--source", "changetest1", "--target", "prod",
-                   "--justification", "I felt like deploying changes."]
+        command = ["deploy", "--source", "changetest1", "--target", "prod"] + self.invalid_justification
         self.justificationformattest(command, auth=True, msgcheck=False)
 
     def test_123_request_review(self):
@@ -208,8 +207,7 @@ class TestDeployDomain(TestBrokerCommand):
 
     def test_130_deploynosync(self):
         command = ["deploy", "--source", "changetest1", "--target", "prod",
-                   "--nosync", "--justification", "tcm=12345678",
-                   "--reason", "Just because"]
+                   "--nosync"] + self.emergency_tcm_just_with_reason
         out = self.statustest(command)
         self.matchoutput(out, "Updating the checked out copy of domain prod...",
                          command)
@@ -222,8 +220,8 @@ class TestDeployDomain(TestBrokerCommand):
         out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "User:", command)
         self.matchoutput(out, "Request-ID:", command)
-        self.matchoutput(out, "Justification: tcm=12345678", command)
-        self.matchoutput(out, "Reason: Just because", command)
+        self.matchoutput(out, "Justification: emergency,tcm=123456789", command)
+        self.matchoutput(out, "Reason: Valid reason", command)
         self.matchoutput(out,
                          "Code-Review-URL: http://review.example.org/changes/1234",
                          command)
@@ -254,8 +252,8 @@ class TestDeployDomain(TestBrokerCommand):
         # The change must be in prod...
         command = ["show", "--no-patch", "--format=%B", "prod"]
         out, _ = self.gitcommand(command, cwd=kingdir)
-        self.matchoutput(out, "Justification: tcm=12345678", command)
-        self.matchoutput(out, "Reason: Just because", command)
+        self.matchoutput(out, "Justification: emergency,tcm=123456789", command)
+        self.matchoutput(out, "Reason: Valid reason", command)
 
         # ... but not in ut-prod
         command = ["show", "--no-patch", "--format=%B", "ut-prod"]
@@ -298,8 +296,7 @@ class TestDeployDomain(TestBrokerCommand):
 
     def test_800_deploy_utsandbox(self):
         # utsandbox contains changes needed to compile test hosts
-        command = ["deploy", "--source", "utsandbox", "--target", "prod",
-                   "--justification", "tcm=12345678"]
+        command = ["deploy", "--source", "utsandbox", "--target", "prod"] + self.valid_just_tcm
         out = self.statustest(command)
         for domain in ["prod", "ut-prod", "netinfra"]:
             self.matchoutput(out,

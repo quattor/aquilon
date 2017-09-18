@@ -46,5 +46,4 @@ class TestUpdateOS(TestBrokerCommand):
 
     def test_120_require_just_success(self):
         self.noouttest(["update_os", "--archetype", "aquilon", "--osname", "linux",
-                        "--osversion", "6.1-x86_64", "--lifecycle", "production",
-                        "--justification", "tcm=123"])
+                        "--osversion", "6.1-x86_64", "--lifecycle", "production"] + self.valid_just_tcm)

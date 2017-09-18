@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import AddressAlias, Fqdn, ReservedName
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddAddressAlias(BrokerCommand):
@@ -27,7 +28,8 @@ class CommandAddAddressAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, grn, eon_id, comments, exporter, **_):
+               target_environment, ttl, grn, eon_id, comments, exporter,
+               user, justification, reason, **_):
 
         if not target_environment:
             target_environment = dns_environment
@@ -49,6 +51,12 @@ class CommandAddAddressAlias(BrokerCommand):
         dbtarget = Fqdn.get_unique(session, fqdn=target,
                                    dns_environment=target_environment,
                                    compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbtarget)
+        cm.validate()
+
         dbgrn = None
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,

@@ -23,13 +23,15 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, logger, startip, endip, exporter, **_):
+    def render(self, session, logger, startip, endip, exporter, user,
+               justification, reason, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)
@@ -38,6 +40,11 @@ class CommandDelDynamicRange(BrokerCommand):
                                 "on the same subnet." %
                                 (startip, startnet.network_address,
                                  endip, endnet.network_address))
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(startnet)
+        cm.validate()
 
         # Lock order: DNS domain(s), network
         q = session.query(DnsDomain.id)

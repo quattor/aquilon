@@ -72,6 +72,12 @@ MODE_OVERRIDE = {'update_city': 'enforce', 'update_os': 'enforce', 'del_domain':
                  'del_static_route': 'enforce', 'update_building': 'enforce',
                  'map_service': 'enforce', 'unmap_service': 'enforce', 'make_cluster': 'warn'}
 
+ENFORCED_CONTROL_COMMAND_LIST = ['add_domain', 'del_domain', 'add_address', 'del_address', 'update_address',
+                                 'add_dns_domain', 'add_dns_environment', 'add_ns_record', 'del_ns_record',
+                                 'add_srv_record', 'del_srv_record', 'update_srv_record', 'add_network_compartment,',
+                                 'add_network_environment', 'update_network_environment', 'add_dynamic_range',
+                                 'del_dynamic_range']
+
 
 def create_parser():
     parser = ArgumentParser()
@@ -300,8 +306,18 @@ class ChangeManagementDecission(object):
         return cm_mode
 
     @property
+    def enforce_validation(self):
+        if self.metadata.get("enforce_validation"):
+            return True
+        elif self.metadata.get("command") and \
+                        self.metadata.get("command") in ENFORCED_CONTROL_COMMAND_LIST:
+            return True
+        else:
+            return False
+
+    @property
     def pseudo_environment(self):
-        if self.metadata.get("enforce_validation", None):
+        if self.enforce_validation:
             return sorted(self.envs_edm_check,
                           key=lambda x: self.environment_ranking[x],
                           reverse=True)[0]  # This fancy lambda now just return 'prod'
@@ -315,7 +331,7 @@ class ChangeManagementDecission(object):
 
     @property
     def in_scope_for_edm(self):
-        if self.metadata.get("enforce_validation", None):
+        if self.enforce_validation:
             return True
         return any(env in self._taget_environments_in_scope() for env in self.envs_edm_check)
 

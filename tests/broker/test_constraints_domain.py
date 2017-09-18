@@ -55,7 +55,7 @@ class TestDomainConstraints(TestBrokerCommand):
 
     def testupdatedomainformat(self):
         command = ["update_domain", "--domain", "unittest",
-                   "--profile_formats", "json", "--justification", "tcm=123"]
+                   "--profile_formats", "json"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Domain unittest has compileable objects, "
                          "the profile format cannot be changed.", command)

@@ -296,8 +296,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_164_try_compile(self):
         # Also testing compile to accept justification
-        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com", "--justification",
-                   "emergency", "--reason", "Test"]
+        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com"] + self.emergency_just_with_reason
         out = self.internalerrortest(command)
         self.matchoutput(out,
                          "No author information provided for sandbox "

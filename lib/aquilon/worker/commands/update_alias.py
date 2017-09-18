@@ -23,6 +23,7 @@ from aquilon.worker.dbwrappers.dns import (create_target_if_needed,
                                            delete_target_if_needed)
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateAlias(BrokerCommand):
@@ -31,7 +32,7 @@ class CommandUpdateAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, target,
                target_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, exporter, **_):
+               comments, exporter, user, justification, reason, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -43,6 +44,11 @@ class CommandUpdateAlias(BrokerCommand):
 
         dbalias = Alias.get_unique(session, fqdn=fqdn,
                                    dns_environment=dbdns_env, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbalias.target)
+        cm.validate()
 
         old_target_fqdn = str(dbalias.target.fqdn)
         old_comments = dbalias.comments

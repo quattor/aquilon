@@ -24,6 +24,7 @@ from aquilon.aqdb.model import (Fqdn, SrvRecord, DnsDomain, DnsEnvironment,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddSrvRecord(BrokerCommand):
@@ -33,7 +34,7 @@ class CommandAddSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
                weight, target, port, dns_environment, ttl, comments, grn,
-               eon_id, target_environment, exporter, **_):
+               eon_id, target_environment, exporter, user, justification, reason, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -81,6 +82,12 @@ class CommandAddSrvRecord(BrokerCommand):
                               port=port, dns_domain=dbdns_domain, ttl=ttl,
                               dns_environment=dbdns_env, comments=comments,
                               owner_grn=dbgrn)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbsrv_rec.fqdn)
+        cm.validate()
+
         session.add(dbsrv_rec)
 
         if exporter:

@@ -17,19 +17,26 @@
 
 from aquilon.aqdb.model import DnsDomain, NsRecord, ARecord
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelNsRecord(BrokerCommand):
 
     required_parameters = ["dns_domain", "fqdn"]
 
-    def render(self, session, fqdn, dns_domain, **_):
+    def render(self, session, fqdn, dns_domain, user, justification,
+               reason, logger, **_):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
 
         ns_record = NsRecord.get_unique(session, dns_domain=dbdns_domain,
                                         a_record=dba_rec, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(ns_record.a_record.fqdn)
+        cm.validate()
 
         session.delete(ns_record)
         return

@@ -145,7 +145,7 @@ class CommandBindServer(BrokerCommand):
         for key in ["host", "cluster"]:
             cm.consider(params.get(key, None))
         if params.get("alias", None):
-            cm.consider(params["alias"], enforce_validation=True)
+            cm.consider(params["alias"].target)
         cm.validate()
 
         # TODO: someday we should verify that the target really points to the

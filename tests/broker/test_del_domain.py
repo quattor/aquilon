@@ -65,8 +65,7 @@ class TestDelDomain(TestBrokerCommand):
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_123_del_deployable_archived(self):
-        command = ["del_domain", "--domain=deployable",
-                   "--justification=tcm=12345678"]
+        command = ["del_domain", "--domain=deployable"] + self.valid_just_tcm
         self.successtest(command)
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))

@@ -192,8 +192,8 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(out, 'Build Status: ready',
                          command)
 
-        command = "pxeswitch --list %s --configure --justification tcm=123" % scratchfile
-        err = self.badrequesttest(command.split(" "))
+        command = ["pxeswitch", "--list", scratchfile, "--configure"] + self.valid_just_sn
+        err = self.badrequesttest(command)
         self.matchoutput(err, "Invalid hosts in list:", command)
         self.matchoutput(err, "Host %s.ms.com has no bootserver." %
                          self.aurora_without_node, command)

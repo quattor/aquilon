@@ -22,6 +22,7 @@ from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment, DnsEnvironment
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddNetworkEnvironment(BrokerCommand):
@@ -29,7 +30,7 @@ class CommandAddNetworkEnvironment(BrokerCommand):
     required_parameters = ["network_environment"]
 
     def render(self, session, network_environment, dns_environment, comments,
-               **arguments):
+               user, justification, reason, logger, **arguments):
         validate_nlist_key("network environment", network_environment)
         NetworkEnvironment.get_unique(session, network_environment,
                                       preclude=True)
@@ -42,6 +43,11 @@ class CommandAddNetworkEnvironment(BrokerCommand):
         dbnet_env = NetworkEnvironment(name=network_environment,
                                        dns_environment=dbdns_env,
                                        location=location, comments=comments)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbnet_env)
+        cm.validate()
 
         if dbdns_env.is_default != dbnet_env.is_default:
             raise ArgumentError("Only the default network environment may be "

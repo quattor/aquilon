@@ -148,7 +148,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[10]
         fqdn = "zebra4.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn]
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -157,7 +157,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         fqdn = "zebra4.aqd-unittest.ms.com"
         self.dsdb_expect_delete(ip)
         command = ["add", "service", "address", "--cluster", "campus-test", "--service_address",
-                   fqdn, "--name", "test-cluster-service", "--justification", "tcm=123"]
+                   fqdn, "--name", "test-cluster-service"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -165,18 +165,19 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[11]
         fqdn = "zebra5.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn]
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
-        command = "add resourcegroup --resourcegroup test-resource-group --cluster campus-test --justification tcm=123"
-        self.noouttest(command.split(" "))
+        command = ["add_resourcegroup", "--resourcegroup", "test-resource-group",
+                   "--cluster", "campus-test"] + self.valid_just_sn
+        self.noouttest(command)
 
     def test_166_set_up_cluster_resourcegrou_serv_addr(self):
         ip = self.net["zebra_vip"].usable[11]
         fqdn = "zebra5.aqd-unittest.ms.com"
         self.dsdb_expect_delete(ip)
         command = ["add", "service", "address", "--resourcegroup", "test-resource-group", "--service_address",
-                   fqdn, "--name", "test-cluster-res-service", "--justification", "tcm=123"]
+                   fqdn, "--name", "test-cluster-res-service"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -184,20 +185,20 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[12]
         fqdn = "zebra6.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn]
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
-        command = "add resourcegroup --resourcegroup test-host-resgr " \
-                  "--hostname unittest20.aqd-unittest.ms.com --justification tcm=123"
-        self.noouttest(command.split(" "))
+        command = ["add_resourcegroup", "--resourcegroup", "test-host-resgr", "--hostname",
+                   "unittest20.aqd-unittest.ms.com"] + self.valid_just_sn
+        self.noouttest(command)
 
     def test_171_set_up_host_resourcegroup_serv_addr(self):
         ip = self.net["zebra_vip"].usable[12]
         fqdn = "zebra6.aqd-unittest.ms.com"
         self.dsdb_expect_delete(ip)
-        command = "add service address --resourcegroup test-host-resgr --name test-service-host " \
-                  "--service_address zebra6.aqd-unittest.ms.com --justification tcm=123"
-        self.noouttest(command.split(" "))
+        command = ["add_service_address", "--resourcegroup", "test-host-resgr", "--name", "test-service-host",
+                   "--service_address", "zebra6.aqd-unittest.ms.com"] + self.valid_just_sn
+        self.noouttest(command)
         self.dsdb_verify()
 
     def test_175_show_prod_resources(self):
@@ -259,7 +260,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
 
     def test_210_change_machines_cm_success(self):
         command = ["update", "building", "--building", "ut",
-                        "--city", "ny", "--justification", "sn=chng123"]
+                        "--city", "ny"] + self.valid_just_sn
         out = self.statustest(command)
         self.matchoutput(out, "There are 1 service(s) mapped to the old location of the (city ny), "
                               "please review and manually update mappings for the new location as needed.",
@@ -276,7 +277,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[11]
         self.dsdb_expect_delete(ip)
         command = ["del", "service", "address", "--resourcegroup", "test-resource-group",
-                   "--name", "test-cluster-res-service", "--justification", "tcm=123"]
+                   "--name", "test-cluster-res-service"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -284,7 +285,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[10]
         self.dsdb_expect_delete(ip)
         command = ["del", "service", "address", "--cluster", "campus-test", "--name",
-                   "test-cluster-service", "--justification", "tcm=123"]
+                   "test-cluster-service"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
 

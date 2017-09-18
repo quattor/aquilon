@@ -51,11 +51,9 @@ class TestMake(TestBrokerCommand):
         ip = list(self.net["netsvcmap"].subnets())[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
-                        "--justification", "tcm=12345678",
-                        "--service", "afs", "--instance", "afs-by-net"])
+                        "--service", "afs", "--instance", "afs-by-net"] + self.valid_just_tcm)
         self.noouttest(["map", "service", "--networkip", ip,
-                        "--justification", "tcm=12345678",
-                        "--service", "afs", "--instance", "afs-by-net2"])
+                        "--service", "afs", "--instance", "afs-by-net2"] + self.valid_just_tcm)
 
     def test_112_scope_verify_maps(self):
         ip = list(self.net["netsvcmap"].subnets())[0].ip
@@ -101,8 +99,7 @@ class TestMake(TestBrokerCommand):
         """Maps a location based service map just to be overridden by a location
         based personality service map"""
         self.noouttest(["map", "service", "--building", "ut",
-                        "--justification", "tcm=12345678",
-                        "--service", "scope_test", "--instance", "scope-building"])
+                        "--service", "scope_test", "--instance", "scope-building"] + self.valid_just_tcm)
 
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
         out = self.statustest(command)
@@ -121,14 +118,12 @@ class TestMake(TestBrokerCommand):
         location based personality service map"""
         self.noouttest(["map_service", "--building", "ut",
                         "--host_environment", "dev",
-                        "--justification", "tcm=12345678",
                         "--service", "scope_test",
-                        "--instance", "target-dev"])
+                        "--instance", "target-dev"] + self.valid_just_tcm)
         self.noouttest(["map_service", "--building", "ut",
                         "--host_environment", "qa",
-                        "--justification", "tcm=12345678",
                         "--service", "scope_test",
-                        "--instance", "target-qa"])
+                        "--instance", "target-qa"] + self.valid_just_tcm)
 
         command = ["show_service", "--service", "scope_test", "--instance", "target-dev"]
         out = self.commandtest(command)
@@ -284,8 +279,7 @@ class TestMake(TestBrokerCommand):
     def test_130_make_vm_hosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--osname", "esxi", "--osversion", "5.0.0", "--justification",
-                       "tcm=123"]
+                       "--osname", "esxi", "--osversion", "5.0.0"] + self.valid_just_tcm
             err = self.statustest(command)
             self.matchclean(err, "removing binding", command)
 
@@ -318,7 +312,7 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(err, "3/3 compiled", command)
 
     def test_145_make_aurora(self):
-        command = ["make", "--hostname", self.aurora_with_node + ".ms.com", "--justification", "tcm=123"]
+        command = ["make", "--hostname", self.aurora_with_node + ".ms.com"] + self.valid_just_tcm
         self.statustest(command)
 
     def test_150_make_zebra(self):

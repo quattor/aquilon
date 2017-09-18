@@ -34,8 +34,7 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
 
     def test_100_update_utb12(self):
         command = ["update_building_preference", "--building_pair", "utb1,utb2",
-                   "--archetype", "hacluster", "--prefer", "utb1",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "utb1"] + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Flushed 4/8 templates.", command)
 
@@ -81,45 +80,39 @@ class TestUpdateBuildingPreference(TestBrokerCommand):
 
     def test_200_single_building(self):
         command = ["update_building_preference", "--building_pair", "ut",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "should be two building codes", command)
 
     def test_201_three_buildings(self):
         command = ["update_building_preference", "--building_pair", "ut,utb1,utb2",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "should be two building codes", command)
 
     def test_202_repeated_building(self):
         command = ["update_building_preference", "--building_pair", "ut,ut",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "two different building codes", command)
 
     def test_203_preferred_outside(self):
         command = ["update_building_preference", "--building_pair", "utb1,utb2",
-                   "--archetype", "hacluster", "--prefer", "ut",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "ut"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Preferred building ut must be one of "
                          "utb1 and utb2.", command)
 
     def test_210_update_missing_pair(self):
         command = ["update_building_preference", "--building_pair", "utb1,utb3",
-                   "--archetype", "hacluster", "--prefer", "utb3",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "hacluster", "--prefer", "utb3"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "Building pair utb1,utb3 does not have a "
                          "preference for archetype hacluster.", command)
 
     def test_210_update_missing_archetype(self):
         command = ["update_building_preference", "--building_pair", "utb1,utb2",
-                   "--archetype", "esx_cluster", "--prefer", "utb2",
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "esx_cluster", "--prefer", "utb2"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "Building pair utb1,utb2 does not have a "
                          "preference for archetype esx_cluster.", command)

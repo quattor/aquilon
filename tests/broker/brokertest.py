@@ -45,6 +45,7 @@ CM_FORMAT = "Failed to parse justification, no valid TCM or SN ticket found."
 CM_EDM = "Executing an emergency change without a justification, EDM has not be called."
 CM_WARN = 'Continuing with execution; however in the future this operation will fail.'
 
+
 class TestBrokerCommand(unittest.TestCase):
 
     config = None
@@ -58,6 +59,14 @@ class TestBrokerCommand(unittest.TestCase):
     aurora_with_node = "oy604c2n6"
     aurora_without_node = "pissp1"
     aurora_without_rack = "oy605c2n6"
+
+    valid_just_tcm = ["--justification", "tcm=123456789"]
+    valid_just_sn = ["--justification", "sn=CHNG123456"]
+    invalid_justification = ["--justification", "foo"]
+    emergency_just_with_reason = ["--justification", "emergency", "--reason", "Valid reason"]
+    emergency_tcm_just_with_reason = ["--justification", "emergency,tcm=123456789", "--reason", "Valid reason"]
+    emergency_just_without_reason = ["--justification", "emergency"]
+    just_reason = ["--reason", "Valid reason"]
 
     @classmethod
     def setUpClass(cls):

@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import VirtualSwitch, PortGroup
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandBindPortGroup(BrokerCommand):
@@ -28,7 +29,7 @@ class CommandBindPortGroup(BrokerCommand):
     required_parameters = ["virtual_switch", "networkip"]
 
     def render(self, session, plenaries, virtual_switch, networkip, tag, type,
-               **_):
+               user, justification, reason, logger, **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         dbnetwork = get_net_id_from_ip(session, networkip)
@@ -65,6 +66,12 @@ class CommandBindPortGroup(BrokerCommand):
                     raise ArgumentError("{0} already has a port group with "
                                         "tag {1!s}.".format(dbvswitch, tag))
             dbnetwork.port_group = PortGroup(network_tag=tag, usage=type)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        for cluster in dbvswitch.clusters:
+            cm.consider(cluster)
+        cm.validate()
 
         dbnetwork.lock_row()
 

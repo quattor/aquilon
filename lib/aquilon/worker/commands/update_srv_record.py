@@ -22,6 +22,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateSrvRecord(BrokerCommand):
@@ -30,7 +31,8 @@ class CommandUpdateSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, target,
                priority, weight, port, ttl, clear_ttl, comments,
-               dns_environment, grn, eon_id, clear_grn, **_):
+               dns_environment, grn, eon_id, clear_grn, user,
+               justification, reason, **_):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
@@ -59,7 +61,11 @@ class CommandUpdateSrvRecord(BrokerCommand):
         elif clear_grn:
             update_grn = True
 
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dbsrv_rec in dbdns_records:
+            cm.consider(dbsrv_rec.fqdn)
+
             if priority:
                 dbsrv_rec.priority = priority
             if weight:
@@ -77,6 +83,8 @@ class CommandUpdateSrvRecord(BrokerCommand):
 
             if comments is not None:
                 dbsrv_rec.comments = comments
+
+        cm.validate()
 
         session.flush()
         return

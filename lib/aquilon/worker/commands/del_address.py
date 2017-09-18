@@ -26,11 +26,16 @@ from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelAddress(BrokerCommand):
     def render(self, session, logger, fqdn, ip, dns_environment,
+<<<<<<< HEAD
                network_environment, exporter, **_):
+=======
+               network_environment, user, justification, reason, **_):
+>>>>>>> remotes/origin/for_next/enable_CM_network_dns
         _, dbdns_env = get_net_dns_env(session, network_environment,
                                        dns_environment)
 
@@ -81,6 +86,11 @@ class CommandDelAddress(BrokerCommand):
             raise ArgumentError("DNS Record {0:a} is reserved for dynamic "
                                 "DHCP, use del_dynamic_range to delete it."
                                 .format(dbaddress))
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbaddress.fqdn)
+        cm.validate()
 
         ip = dbaddress.ip
         old_fqdn = str(dbaddress.fqdn)

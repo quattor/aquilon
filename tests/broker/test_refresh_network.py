@@ -194,7 +194,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in ips:
             name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
             self.dsdb_expect_add(name, ip)
-            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name])
+            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name] + self.valid_just_tcm)
         self.dsdb_verify()
 
     def test_260_test_split_merge(self):
@@ -254,7 +254,7 @@ class TestRefreshNetwork(TestBrokerCommand):
                         int(IPv4Address(u"0.1.1.8")) + 1):
             self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--dns_domain=aqd-unittest.ms.com"] + self.valid_just_tcm
         self.statustest(command)
         self.dsdb_verify()
 
@@ -322,7 +322,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in range(int(IPv4Address(u"0.1.1.4")),
                         int(IPv4Address(u"0.1.1.8")) + 1):
             self.dsdb_expect_delete(IPv4Address(ip))
-        command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
+        command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"] + self.valid_just_tcm
         self.statustest(command)
         self.dsdb_verify()
 
@@ -334,7 +334,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in ips:
             name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
             self.dsdb_expect_delete(ip)
-            self.noouttest(["del", "address", "--ip", ip, "--fqdn", name])
+            self.noouttest(["del", "address", "--ip", ip, "--fqdn", name] + self.valid_just_tcm)
         self.dsdb_verify()
 
     def test_680_cleanup_nettest(self):

@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddAlias(BrokerCommand):
@@ -29,7 +30,8 @@ class CommandAddAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, grn, eon_id, comments, exporter, **_):
+               target_environment, ttl, grn, eon_id, comments, exporter,
+               user, justification, reason, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         if target_environment:
@@ -48,6 +50,11 @@ class CommandAddAlias(BrokerCommand):
         DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
         dbtarget = create_target_if_needed(session, logger, target, dbtgt_env)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbtarget)
+        cm.validate()
 
         dbgrn = None
         if grn or eon_id:

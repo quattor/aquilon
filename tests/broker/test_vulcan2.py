@@ -78,7 +78,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
         self.noouttest(command)
 
         command = ["map", "service", "--service", "vcenter", "--instance", "ut",
-                   "--building", "ut", "--justification", "tcm=12345678"]
+                   "--building", "ut"] + self.valid_just_sn
         self.noouttest(command)
 
         self.add_utcluster("utpgcl2", "utmc8")
@@ -93,8 +93,7 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
                          command)
 
         command = ["unmap", "service", "--service", "vcenter",
-                   "--justification", "tcm=12345678",
-                   "--instance", "ut", "--building", "ut"]
+                   "--instance", "ut", "--building", "ut"] + self.valid_just_sn
         self.noouttest(command)
 
         self.statustest(["del_cluster", "--cluster=utpgcl2"])

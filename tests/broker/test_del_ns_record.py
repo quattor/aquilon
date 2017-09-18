@@ -35,18 +35,18 @@ class TestDelNSRecord(TestBrokerCommand):
         self.IP = str(self.net["ut9_chassis"].usable[0])
 
     def test_100_delete_ns_record(self):
-        cmd = "del ns_record --fqdn %s --dns_domain %s" % (NAME, DOMAIN)
-        self.noouttest(cmd.split(" "))
+        cmd = ["del_ns_record", "--fqdn", NAME, "--dns_domain", DOMAIN] + self.valid_just_tcm
+        self.noouttest(cmd)
 
     def test_105_delete_ns_record_nonexistent(self):
-        cmd = "del ns_record --fqdn %s --dns_domain %s" % (NAME, DOMAIN)
-        self.notfoundtest(cmd.split(" "))
+        cmd = ["del_ns_record", "--fqdn", NAME, "--dns_domain", DOMAIN] + self.valid_just_tcm
+        self.notfoundtest(cmd)
 
     # although this is already tested elsewhere, just for tidyness
     def test_200_delete_a_record(self):
         self.dsdb_expect_delete(self.IP)
-        cmd = "del address --fqdn %s --ip %s" % (NAME, self.IP)
-        self.noouttest(cmd.split(" "))
+        cmd = ["del_address", "--fqdn", NAME, "--ip", self.IP] + self.valid_just_tcm
+        self.noouttest(cmd)
         self.dsdb_verify()
 
 

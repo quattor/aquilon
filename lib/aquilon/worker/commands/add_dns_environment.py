@@ -19,17 +19,25 @@
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsEnvironment
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, dns_environment, comments, **_):
+    def render(self, session, dns_environment, comments,
+               user, justification, reason, logger, **_):
         validate_nlist_key("DNS environment", dns_environment)
         DnsEnvironment.get_unique(session, dns_environment, preclude=True)
 
         db_dnsenv = DnsEnvironment(name=dns_environment, comments=comments)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(db_dnsenv)
+        cm.validate()
+
         session.add(db_dnsenv)
         session.flush()
         return

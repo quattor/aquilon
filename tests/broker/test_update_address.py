@@ -34,7 +34,7 @@ class TestUpdateAddress(TestBrokerCommand):
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com",
                    "--reverse_ptr", "arecord14.aqd-unittest.ms.com",
-                   "--comments", "Some address comments"]
+                   "--comments", "Some address comments"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -61,7 +61,7 @@ class TestUpdateAddress(TestBrokerCommand):
                                 comments="")
         self.noouttest(["update_address",
                         "--fqdn", "arecord15.aqd-unittest.ms.com",
-                        "--comments", ""])
+                        "--comments", ""] + self.valid_just_tcm)
         self.dsdb_verify()
 
     def test_109_verify_comments(self):
@@ -72,7 +72,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_110_clear_ptr_override(self):
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com",
-                   "--reverse_ptr", "arecord15.aqd-unittest.ms.com"]
+                   "--reverse_ptr", "arecord15.aqd-unittest.ms.com"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
@@ -90,7 +90,7 @@ class TestUpdateAddress(TestBrokerCommand):
         ip = self.net["unknown0"].usable[-1]
         self.dsdb_expect_update("arecord15.aqd-unittest.ms.com", ip=ip)
         command = ["update", "address",
-                   "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip]
+                   "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -105,14 +105,14 @@ class TestUpdateAddress(TestBrokerCommand):
         ip = self.net["unknown0"].usable[15]
         self.dsdb_expect_update("arecord15.aqd-unittest.ms.com", ip=ip)
         command = ["update", "address",
-                   "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip]
+                   "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
 
     def test_130_update_dyndhcp_noop(self):
         ip = self.net["dyndhcp0"].usable[12]
         command = ["update", "address", "--fqdn", self.dynname(ip),
-                   "--reverse_ptr", self.dynname(ip)]
+                   "--reverse_ptr", self.dynname(ip)] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
@@ -125,7 +125,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_140_restricted_reverse(self):
         command = ["update", "address",
                    "--fqdn", "arecord17.aqd-unittest.ms.com",
-                   "--reverse_ptr", "reverse2.restrict.aqd-unittest.ms.com"]
+                   "--reverse_ptr", "reverse2.restrict.aqd-unittest.ms.com"] + self.valid_just_tcm
         err = self.statustest(command)
         self.matchoutput(err,
                          "WARNING: Will create a reference to "
@@ -152,7 +152,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test145_alias_reverse(self):
         command = ["update", "address",
                    "--fqdn", "arecord17.aqd-unittest.ms.com",
-                   "--reverse_ptr", "alias2host.aqd-unittest.ms.com"]
+                   "--reverse_ptr", "alias2host.aqd-unittest.ms.com"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test146_verify_reverse(self):
@@ -166,7 +166,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test150_address_alias_reverse(self):
         command = ["update", "address",
                    "--fqdn", "arecord17.aqd-unittest.ms.com",
-                   "--reverse_ptr", "addralias1.aqd-unittest.ms.com"]
+                   "--reverse_ptr", "addralias1.aqd-unittest.ms.com"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test151_verify_reverse(self):
@@ -181,7 +181,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_update_dyndhcp(self):
         ip = self.net["dyndhcp0"].usable[12]
         command = ["update", "address", "--fqdn", self.dynname(ip),
-                   "--reverse_ptr", "unittest20.aqd-unittest.ms.com"]
+                   "--reverse_ptr", "unittest20.aqd-unittest.ms.com"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "The reverse PTR record cannot be set for DNS "
                          "records used for dynamic DHCP.", command)
@@ -189,7 +189,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_ip_conflict(self):
         ip = self.net["unknown0"].usable[14]
         command = ["update", "address",
-                   "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip]
+                   "--fqdn", "arecord15.aqd-unittest.ms.com", "--ip", ip] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is already used by DNS record "
                          "arecord14.aqd-unittest.ms.com." % ip, command)
@@ -197,7 +197,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_update_primary(self):
         command = ["update", "address",
                    "--fqdn", "unittest00.one-nyp.ms.com",
-                   "--ip", self.net["unknown0"].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "DNS Record unittest00.one-nyp.ms.com is "
                          "a primary name, and its IP address cannot be "
@@ -206,7 +206,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_update_srvaddr(self):
         command = ["update", "address",
                    "--fqdn", "unittest20.aqd-unittest.ms.com",
-                   "--ip", self.net["unknown0"].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Record unittest20.aqd-unittest.ms.com is a "
@@ -217,7 +217,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_200_update_used(self):
         command = ["update", "address",
                    "--fqdn", "unittest20-e1.aqd-unittest.ms.com",
-                   "--ip", self.net["unknown0"].usable[-1]]
+                   "--ip", self.net["unknown0"].usable[-1]] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "DNS Record unittest20-e1.aqd-unittest.ms.com is "
                          "already used by the following interfaces, and its "
@@ -228,7 +228,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_300_update_no_ttl(self):
         command = ["update", "address",
                    "--fqdn", "arecord40.aqd-unittest.ms.com",
-                   "--clear_ttl"]
+                   "--clear_ttl"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
@@ -240,7 +240,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_330_update_new_ttl(self):
         command = ["update", "address",
                    "--fqdn", "arecord40.aqd-unittest.ms.com",
-                   "--ttl", "600"]
+                   "--ttl", "600"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
@@ -252,7 +252,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_400_clear_grn(self):
         command = ["update", "address",
                    "--fqdn", "arecord50.aqd-unittest.ms.com",
-                   "--clear_grn"]
+                   "--clear_grn"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_420_verify_clear_grn(self):
@@ -264,7 +264,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_430_update_grn(self):
         command = ["update", "address",
                    "--fqdn", "arecord50.aqd-unittest.ms.com",
-                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+                   "--grn", "grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_440_verify_update_grn(self):
@@ -276,7 +276,7 @@ class TestUpdateAddress(TestBrokerCommand):
     def test_450_update_eon_id(self):
         command = ["update", "address",
                    "--fqdn", "arecord51.aqd-unittest.ms.com",
-                   "--eon_id", "2"]
+                   "--eon_id", "2"] + self.valid_just_tcm
         self.noouttest(command)
 
     def test_460_verify_update_eon_id(self):

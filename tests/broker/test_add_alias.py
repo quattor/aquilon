@@ -399,6 +399,7 @@ class TestAddAlias(EventsTestMixin, TestBrokerCommand):
                          "be set but derived from the device.",
                          command)
 
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)

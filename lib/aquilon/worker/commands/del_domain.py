@@ -38,9 +38,8 @@ class CommandDelDomain(BrokerCommand):
                 raise ArgumentError("{0} is not archived, it cannot be deleted."
                                     .format(dbdomain))
 
-            # TO DO: for tracked branches we need to probably enforce CM as well?
             cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-            cm.consider(dbdomain, enforce_validation=True)
+            cm.consider(dbdomain)
             cm.validate()
 
             if self.config.has_option("broker", "trash_branch"):

@@ -163,10 +163,10 @@ class TestBuildClusters(MachineTestMixin, TestBrokerCommand):
             self.dsdb_verify()
 
             for service in config["map"]:
-                self.noouttest(["map_service", "--service", service,
-                                "--instance", config["map"][service],
-                                "--building", building,
-                                "--justification", "tcm=12345678"])
+                command = ["map_service", "--service", service,
+                           "--instance", config["map"][service],
+                           "--building", building] + self.valid_just_tcm
+                self.noouttest(command)
 
     def test_110_add_rack(self):
         """ Add racks needed for the use case """
