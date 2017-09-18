@@ -29,7 +29,7 @@ class CommandAddAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, grn, eon_id, comments, **_):
+               target_environment, ttl, grn, eon_id, comments, exporter, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         if target_environment:
@@ -57,6 +57,9 @@ class CommandAddAlias(BrokerCommand):
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, ttl=ttl,
                               owner_grn=dbgrn, comments=comments)
             session.add(db_record)
+
+            if exporter:
+                exporter.create(dbfqdn)
         except ValueError as err:
             raise ArgumentError(err)
 

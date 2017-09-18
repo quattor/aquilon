@@ -30,27 +30,21 @@ from eventstest import EventsTestMixin
 class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
 
     def test_100_update_ut3c1n3_sda(self):
-        self.event_upd_hardware('ut3c1n3')
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
                    "--size", "50", "--comments", "New disk comments",
                    "--controller", "sata", "--address", "0:0:0:0",
                    "--bus_address", "pci:0000:02:00.0"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_101_update_ut3c1n3_c0d0(self):
-        self.event_upd_hardware('ut3c1n3')
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "c0d0",
                    "--rename_to", "c0d1", "--boot"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_102_update_ut3c1n3_c0d0_hostname(self):
-        self.event_upd_hardware('ut3c1n3')
         command = ["update_disk", "--hostname", "unittest00.one-nyp.ms.com", "--disk", "c0d1",
                    "--rename_to", "test", "--boot"]
         self.noouttest(command)
-        self.events_verify()
         command_verify = ["show_machine", "--machine", "ut3c1n3"]
         out = self.commandtest(command_verify)
         self.searchoutput(out,
@@ -60,11 +54,9 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           command_verify)
 
     def test_103_update_ut3c1n3_c0d0_hostname_back(self):
-        self.event_upd_hardware('ut3c1n3')
         command = ["update_disk", "--hostname", "unittest00.one-nyp.ms.com", "--disk", "test",
                    "--rename_to", "c0d1", "--boot"]
         self.noouttest(command)
-        self.events_verify()
         command_verify = ["show_machine", "--machine", "ut3c1n3"]
         out = self.commandtest(command_verify)
         self.searchoutput(out,
@@ -133,12 +125,10 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                         "--bootmount"])
 
     def test_111_move_disk_to_fs(self):
-        self.event_upd_hardware('evm10')
         command = ["update_disk", "--machine", "evm10", "--disk", "sda",
                    "--filesystem", "disk_update_test", "--address", "0:1",
                    "--snapshot"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_111_update_iops(self):
         command = ["update_disk", "--machine", "evm10", "--disk", "sda",
@@ -188,12 +178,10 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
         self.matchclean(out, "utecl5_share", command)
 
     def test_113_move_disk_to_share(self):
-        self.event_upd_hardware('evm10')
         command = ["update_disk", "--machine", "evm10", "--disk", "sda",
                    "--share", "utecl5_share", "--address", "0:0",
                    "--nosnapshot"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_114_verify_utecl5_share(self):
         command = ["search_machine", "--share", "utecl5_share"]
@@ -254,11 +242,9 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
 
     def test_123_update_wwn(self):
         # Test the use of separators
-        self.event_upd_hardware('ut3c5n10')
         command = ["update_disk", "--machine", "ut3c5n10", "--disk", "sdb",
                    "--wwn", "60:05:08:b1:12:23:34:45-56:67:78:89:9a:ab:bc:cd"]
         self.noouttest(command)
-        self.events_verify()
 
     def test_124_verify_wwn_update(self):
         command = ["show_machine", "--machine", "ut3c5n10"]

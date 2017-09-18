@@ -261,9 +261,7 @@ class MachineTestMixin(EventsTestMixin):
             add_machine_args.append("--recipe")
             add_machine_args.append(json.dumps(recipe))
 
-        self.event_add_hardware(name)
         self.noouttest(["add_machine"] + add_machine_args)
-        self.events_verify()
 
         if kwargs:
             raise ValueError("Unprocessed arguments: %r" % kwargs)
@@ -364,9 +362,7 @@ class MachineTestMixin(EventsTestMixin):
                 comments = machdef.comments
             self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=comments)
 
-        self.event_upd_hardware(machine)
         self.noouttest(command)
-        self.events_verify()
 
         for nic_name, params in machdef.interfaces.items():
             if "ip" not in params:
@@ -431,7 +427,6 @@ class MachineTestMixin(EventsTestMixin):
                 self.dsdb_verify()
 
         self.dsdb_expect_delete(ip)
-        self.event_del_hardware(machine)
         if justification:
             self.statustest(["del_host", "--hostname", hostname, "--justification", justification])
         else:
@@ -447,4 +442,3 @@ class MachineTestMixin(EventsTestMixin):
                             (short, domain)])
         self.noouttest(["del_machine", "--machine", machine])
         self.dsdb_verify()
-        self.events_verify()

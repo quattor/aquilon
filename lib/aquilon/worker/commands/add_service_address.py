@@ -38,7 +38,7 @@ class CommandAddServiceAddress(BrokerCommand):
     def render(self, session, logger, plenaries, service_address, shortname, prefix,
                dns_domain, ip, name, interfaces, hostname, cluster, metacluster,
                resourcegroup, network_environment, map_to_primary, shared,
-               comments, user, justification, reason, **kwargs):
+               comments, user, justification, reason, exporter, **kwargs):
 
         validate_nlist_key("name", name)
         audit_results = []
@@ -96,7 +96,8 @@ class CommandAddServiceAddress(BrokerCommand):
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
                                                 network_environment,
-                                                allow_shared=shared)
+                                                allow_shared=shared,
+                                                exporter=exporter)
         ip = dbdns_rec.ip
 
         if map_to_primary:

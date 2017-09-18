@@ -28,7 +28,7 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
 
     required_parameters = ["clearnetwork"]
 
-    def render(self, session, logger, clearnetwork, **_):
+    def render(self, session, logger, clearnetwork, exporter, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         dbnetwork = Network.get_unique(session, clearnetwork,
                                        network_environment=dbnet_env,
@@ -41,4 +41,4 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
         existing = q.all()
         if not existing:
             raise ArgumentError("No dynamic stubs found on network.")
-        self.del_dynamic_stubs(session, logger, existing)
+        self.del_dynamic_stubs(session, logger, existing, exporter)

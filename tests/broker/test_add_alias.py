@@ -29,7 +29,17 @@ from eventstest import EventsTestMixin
 
 class TestAddAlias(EventsTestMixin, TestBrokerCommand):
     def test_100_add_alias2host(self):
-        self.event_add_dns('alias2host.aqd-unittest.ms.com')
+        self.event_add_dns(
+            fqdn='alias2host.aqd-unittest.ms.com',
+            dns_environment='internal',
+            dns_records=[
+                {
+                    'target': 'arecord13.aqd-unittest.ms.com',
+                    'targetEnvironmentName': 'internal',
+                    'rrtype': 'CNAME'
+                },
+            ],
+        )
         cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com']
         self.noouttest(cmd)
@@ -43,7 +53,17 @@ class TestAddAlias(EventsTestMixin, TestBrokerCommand):
                          "already exists.", cmd)
 
     def test_110_mscom_alias(self):
-        self.event_add_dns('alias.ms.com')
+        self.event_add_dns(
+            fqdn='alias.ms.com',
+            dns_environment='internal',
+            dns_records=[
+                {
+                    'target': 'arecord13.aqd-unittest.ms.com',
+                    'targetEnvironmentName': 'internal',
+                    'rrtype': 'CNAME'
+                },
+            ],
+        )
         cmd = ['add', 'alias', '--fqdn', 'alias.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com',
                '--comments', 'Some alias comments']
@@ -78,7 +98,17 @@ class TestAddAlias(EventsTestMixin, TestBrokerCommand):
                          cmd)
 
     def test_150_add_alias2diff_environment(self):
-        self.event_add_dns('alias2host.aqd-unittest-ut-env.ms.com', dns_enviornment='ut-env')
+        self.event_add_dns(
+            fqdn='alias2host.aqd-unittest-ut-env.ms.com',
+            dns_environment='ut-env',
+            dns_records=[
+                {
+                    'target': 'arecord13.aqd-unittest.ms.com',
+                    'targetEnvironmentName': 'internal',
+                    'rrtype': 'CNAME'
+                },
+            ],
+        )
         cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest-ut-env.ms.com',
                '--dns_environment', 'ut-env',
                '--target', 'arecord13.aqd-unittest.ms.com',

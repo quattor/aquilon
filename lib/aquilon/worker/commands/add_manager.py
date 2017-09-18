@@ -33,7 +33,7 @@ class CommandAddManager(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, plenaries, hostname, manager, interface, mac,
-               comments, user, justification, reason, **arguments):
+               comments, user, justification, reason, exporter, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Validate ChangeManagement
@@ -66,7 +66,7 @@ class CommandAddManager(BrokerCommand):
                          audit_results=audit_results, **arguments)
 
         dbdns_rec, _ = grab_address(session, manager, ip, comments=comments,
-                                    preclude=True)
+                                    preclude=True, exporter=exporter)
 
         assign_address(dbinterface, ip, dbdns_rec.network, logger=logger)
 

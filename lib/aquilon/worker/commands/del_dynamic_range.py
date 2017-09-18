@@ -29,7 +29,7 @@ class CommandDelDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, logger, startip, endip, **_):
+    def render(self, session, logger, startip, endip, exporter, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)
@@ -68,13 +68,13 @@ class CommandDelDynamicRange(BrokerCommand):
         if invalid:
             raise ArgumentError("The range contains non-dynamic systems:\n" +
                                 "\n".join(format(i, "a") for i in invalid))
-        self.del_dynamic_stubs(session, logger, existing)
+        self.del_dynamic_stubs(session, logger, existing, exporter)
 
-    def del_dynamic_stubs(self, session, logger, dbstubs):
+    def del_dynamic_stubs(self, session, logger, dbstubs, exporter):
         dsdb_runner = DSDBRunner(logger=logger)
         for stub in dbstubs:
             dsdb_runner.delete_host_details(str(stub.fqdn), stub.ip)
-            delete_dns_record(stub, locked=True)
+            delete_dns_record(stub, locked=True, exporter=exporter)
         session.flush()
 
         # This may take some time if the range is big, so be verbose

@@ -27,7 +27,7 @@ class CommandDelAddressAlias(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, fqdn, target, dns_environment, target_environment,
-               **_):
+               exporter, **_):
 
         if not target_environment:
             target_environment = dns_environment
@@ -61,7 +61,7 @@ class CommandDelAddressAlias(BrokerCommand):
                                      msg))
 
         for dns_rec in rrs:
-            delete_dns_record(dns_rec)
+            delete_dns_record(dns_rec, exporter=exporter)
 
         session.flush()
 

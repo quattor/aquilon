@@ -20,18 +20,32 @@ import os
 from time import sleep
 import json
 
-def dict_match(want, got):
-    for field, value in want.items():
-        if field not in got:
+
+def partial_match(want, got):
+    '''
+    Function to partially match what we want (first parameter) to what we
+    actually got (second parameter). It recursively calls itself to check
+    partial matches for sub dictionnaries and lists (lists must be identical
+    in size)
+    '''
+    if isinstance(want, dict):
+        if not isinstance(got, dict):
             return False
-        if isinstance(value, dict):
-            if not isinstance(got[field], dict):
+        for field, value in want.items():
+            if field not in got:
                 return False
-            if not dict_match(value, got[field]):
+            if not partial_match(value, got[field]):
                 return False
-        else:
-            if got[field] != want[field]:
+    elif isinstance(want, list):
+        if not isinstance(got, list):
+            return False
+        if len(want) != len(got):
+            return False
+        for i in range(len(want)):
+            if not partial_match(want[i], got[i]):
                 return False
+    elif want != got:
+        return False
     return True
 
 
@@ -65,40 +79,32 @@ class EventsTestMixin(object):
         for jsonfile in jsonfiles:
             os.unlink(jsonfile)
 
-    def _event_append_dns(self, fqdn, action, dns_enviornment='internal'):
-        self._expected_events.append({'action': action,
-                                      'entityType': 'DNS_RECORD',
-                                      'dnsRecord': {
-                                          'environmentName': dns_enviornment,
-                                          'fqdn': fqdn
-                                      },
-                                     })
+    def _event_append_dns(self, fqdn, action, dns_environment='internal', dns_records=None):
+        dns_record_list = {
+            'fqdn': fqdn,
+            'environmentName': dns_environment,
+        }
+        if dns_records:
+            dns_record_list['rdata'] = dns_records
 
-    def event_add_dns(self, fqdn, dns_enviornment='internal'):
-        self._event_append_dns(fqdn, 'CREATE', dns_enviornment)
+        self._expected_events.append({
+            'action': action,
+            'entityType': 'DNS_RECORD',
+            'dnsRecordList': {
+                'records': [
+                    dns_record_list,
+                ],
+            },
+        })
 
-    def event_upd_dns(self, fqdn, dns_enviornment='internal'):
-        self._event_append_dns(fqdn, 'UPDATE', dns_enviornment)
+    def event_add_dns(self, fqdn, dns_records, dns_environment='internal'):
+        self._event_append_dns(fqdn, 'CREATE', dns_environment, dns_records)
 
-    def event_del_dns(self, fqdn, dns_enviornment='internal'):
-        self._event_append_dns(fqdn, 'DELETE', dns_enviornment)
+    def event_upd_dns(self, fqdn, dns_records, dns_environment='internal'):
+        self._event_append_dns(fqdn, 'UPDATE', dns_environment, dns_records)
 
-    def _event_append_hardware(self, label, action):
-        self._expected_events.append({'action': action,
-                                      'entityType': 'HARDWARE_ENTITY',
-                                      'hardwareEntity': {
-                                          'label': label.lower(),
-                                      },
-                                     })
-
-    def event_add_hardware(self, label):
-        self._event_append_hardware(label, 'CREATE')
-
-    def event_upd_hardware(self, label):
-        self._event_append_hardware(label, 'UPDATE')
-
-    def event_del_hardware(self, label):
-        self._event_append_hardware(label, 'DELETE')
+    def event_del_dns(self, fqdn, dns_environment='internal'):
+        self._event_append_dns(fqdn, 'DELETE', dns_environment)
 
     def events_verify(self, strict=False):
         """Check for all expected events"""
@@ -118,7 +124,7 @@ class EventsTestMixin(object):
                     with open(jsonfile) as fh:
                         data = json.load(fh)
                         remaining[:] = [e for e in remaining
-                                        if not dict_match(e, data)]
+                                        if not partial_match(e, data)]
                     os.unlink(jsonfile)
                 except ValueError as e:
                     continue

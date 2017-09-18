@@ -50,7 +50,7 @@ class CommandAddHost(BrokerCommand):
 
     def render(self, session, logger, plenaries, hostname, machine, archetype,
                zebra_interfaces, user, justification, reason,
-               skip_dsdb_check=False, **arguments):
+               exporter, skip_dsdb_check=False, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
@@ -109,7 +109,8 @@ class CommandAddHost(BrokerCommand):
 
         dbdns_rec, _ = grab_address(session, hostname, ip,
                                     allow_restricted_domain=True,
-                                    allow_reserved=True, preclude=True)
+                                    allow_reserved=True, preclude=True,
+                                    exporter=exporter)
         dbmachine.primary_name = dbdns_rec
 
         # Fix up auxiliary addresses to point to the primary name by default

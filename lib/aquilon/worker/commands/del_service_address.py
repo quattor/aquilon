@@ -31,7 +31,7 @@ class CommandDelServiceAddress(BrokerCommand):
     required_parameters = ["name"]
 
     def render(self, session, logger, plenaries, name, hostname, cluster, metacluster,
-               resourcegroup, keep_dns, user, justification, reason, **_):
+               resourcegroup, keep_dns, user, justification, reason, exporter, **_):
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
                                 "be deleted.")
@@ -59,7 +59,7 @@ class CommandDelServiceAddress(BrokerCommand):
 
         holder.resources.remove(dbsrv)
         if not dbdns_rec.service_addresses and not keep_dns:
-            delete_dns_record(dbdns_rec)
+            delete_dns_record(dbdns_rec, exporter=exporter)
 
         session.flush()
 

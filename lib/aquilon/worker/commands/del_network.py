@@ -26,7 +26,8 @@ class CommandDelNetwork(BrokerCommand):
 
     required_parameters = ["ip"]
 
-    def render(self, session, plenaries, dbuser, ip, network_environment, **_):
+    def render(self, session, plenaries, dbuser, ip,
+               network_environment, exporter, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -45,7 +46,7 @@ class CommandDelNetwork(BrokerCommand):
         # Delete the routers so they don't trigger the checks below
         for dbrouter in dbnetwork.routers:
             for dns_rec in dbrouter.dns_records:
-                delete_dns_record(dns_rec, locked=True)
+                delete_dns_record(dns_rec, locked=True, exporter=exporter)
         dbnetwork.routers = []
         session.flush()
 

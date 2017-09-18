@@ -178,6 +178,9 @@
 	</optgroup>
 	<transport trigger="all" method="get" path="system"/>
 	<transport trigger="fqdn" method="get" path="system/%(fqdn)s"/>
+	<format name="proto">
+	    <message_class name="DNSRecordList" module="aqddnsdomains_pb2"/>
+	</format>
     </command>
 
     <command name="search_hardware">
@@ -5286,6 +5289,9 @@
 	    <option name="fullinfo" type="flag">Show full information for the matching records</option>
 	</optgroup>
 	<transport method="get" path="find/dns_record"/>
+	<format name="proto">
+	    <message_class name="DNSRecordList" module="aqddnsdomains_pb2"/>
+	</format>
     </command>
 
     <command name="search_rack">

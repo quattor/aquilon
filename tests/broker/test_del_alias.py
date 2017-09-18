@@ -74,7 +74,7 @@ class TestDelAlias(EventsTestMixin, TestBrokerCommand):
         self.noouttest(command)
 
     def test_235_del_alias2diff_environment(self):
-        self.event_del_dns('alias2host.aqd-unittest-ut-env.ms.com', dns_enviornment='ut-env')
+        self.event_del_dns('alias2host.aqd-unittest-ut-env.ms.com', dns_environment='ut-env')
         command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest-ut-env.ms.com",
                    "--dns_environment", "ut-env"]
         self.noouttest(command)

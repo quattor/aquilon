@@ -219,10 +219,9 @@ class BrokerCommand(object):
                 # Create an exporter to handle external events.  We stash this
                 # in the session.info dict to provide access to other users.
                 # (note that session.info is designed for this purpose)
-                # Listen to flush events and use them to tell the exporter
-                # when various objects have chnaged.
+                # We can then add calls to the exporter when changing various
+                # objects to perform the wanted actions for those objects
                 exporter = Exporter(logger=logger, requestid=requestid, user=user)
-                event.listen(session, "after_flush", exporter.event_after_flush)
                 session.info['exporter'] = exporter
 
                 # Force connecting to the DB
@@ -270,7 +269,7 @@ class BrokerCommand(object):
 
             retval = self.render(user=user, dbuser=dbuser, request=request,
                                  requestid=requestid, logger=logger,
-                                 plenaries=plenaries,
+                                 plenaries=plenaries, exporter=exporter,
                                  session=session, **kwargs)
             if self.requires_format:
                 style = kwargs.get("style", None)

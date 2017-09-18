@@ -28,4 +28,7 @@ class DnsEnvironmentFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % dns_environment.comments)
         return "\n".join(details)
 
+    def fill_proto(self, dns_environment, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.name = dns_environment.name
+
 ObjectFormatter.handlers[DnsEnvironment] = DnsEnvironmentFormatter()

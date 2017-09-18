@@ -74,7 +74,7 @@ def determine_helper_args(config):
     return ssh_args
 
 
-def discover_network_device(session, logger, config, dbnetdev, dryrun):
+def discover_network_device(session, logger, config, dbnetdev, dryrun, exporter=None):
     """
     Perform switch discovery
 
@@ -125,7 +125,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
             if comments:
                 dbnetdev.comments = comments
 
-    def del_address(iface, addr):
+    def del_address(iface, addr, exporter=None):
         """ Helper for deleting an IP address, honouring dryrun """
         if dryrun:
             aqcmd("del_interface_address", "--interface", iface.name,
@@ -141,7 +141,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
                 q = q.filter_by(network=addr.network)
                 q = q.filter_by(ip=addr.ip)
                 for dns_rec in q:
-                    delete_dns_record(dns_rec)
+                    delete_dns_record(dns_rec, exporter=exporter)
 
     def del_interface(iface):
         """ Helper for deleting an interface, honouring dryrun """
@@ -169,7 +169,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
             return get_or_create_interface(session, dbnetdev, name=ifname,
                                            interface_type=iftype)
 
-    def add_address(iface, ifname, ip, label, relaxed):
+    def add_address(iface, ifname, ip, label, relaxed, exporter=None):
         """ Helper for adding an IP address, honouring dryrun """
         if label:
             name = "%s-%s-%s" % (dbnetdev.primary_name.fqdn.name, ifname,
@@ -187,7 +187,8 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
             # Doing the DSDB update if the address existed before would be
             # tricky, so prevent that case by passing preclude=True
             dbdns_rec, _ = grab_address(session, fqdn, ip, dbnet_env,
-                                        relaxed=relaxed, preclude=True)
+                                        relaxed=relaxed, preclude=True,
+                                        exporter=exporter)
             assign_address(iface, ip, dbdns_rec.network, label=label,
                            logger=logger)
 
@@ -361,7 +362,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
             if delete_iface or addr.ip not in ip_to_iface or \
                ip_to_iface[addr.ip]["name"] != name_by_iface[iface] or \
                addr.label != ip_to_iface[addr.ip]["label"]:
-                del_address(iface, addr)
+                del_address(iface, addr, exporter)
             else:
                 addr_by_ip[addr.ip] = addr
 
@@ -406,7 +407,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
                 continue
 
             if ip not in addr_by_ip:
-                add_address(iface, ifname, ip, label, relaxed)
+                add_address(iface, ifname, ip, label, relaxed, exporter)
 
     # Check router addresses
     if "router_ips" in data:

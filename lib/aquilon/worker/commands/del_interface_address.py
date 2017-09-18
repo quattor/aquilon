@@ -34,7 +34,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, plenaries, interface, fqdn, ip, label, keep_dns,
-               network_environment, user, justification, reason, **kwargs):
+               network_environment, user, justification, reason, exporter, **kwargs):
         dbhw_ent = get_hardware(session, **kwargs)
 
         # Validate ChangeManagement
@@ -109,7 +109,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
             q = q.join(ARecord.fqdn)
             q = q.filter_by(dns_environment=dbnet_env.dns_environment)
             for dns_rec in q:
-                delete_dns_record(dns_rec, locked=True)
+                delete_dns_record(dns_rec, locked=True, exporter=exporter)
 
         session.flush()
 

@@ -19,7 +19,7 @@ from ipaddress import ip_address, IPv4Network
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
-                                AddressAssignment)
+                                ReservedName, AddressAssignment)
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
@@ -32,7 +32,8 @@ class CommandAddDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, logger, startip, endip, dns_domain, prefix, **_):
+    def render(self, session, logger, startip, endip,
+               dns_domain, prefix, exporter, **_):
         if not prefix:
             prefix = 'dynamic'
         dbnet_env, dbdns_env = get_net_dns_env(session)
@@ -95,6 +96,17 @@ class CommandAddDynamicRange(BrokerCommand):
                                             preclude=True)
                 dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip, network=startnet)
                 session.add(dbdynamic_stub)
+
+
+                if exporter:
+                    if any(
+                            dr != dbdynamic_stub and
+                            not isinstance(dr, ReservedName)
+                            for dr in dbfqdn.dns_records):
+                        exporter.update(dbfqdn)
+                    else:
+                        exporter.create(dbfqdn)
+
                 dsdb_runner.add_host_details(dbfqdn, ip)
 
         session.flush()

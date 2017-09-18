@@ -57,7 +57,17 @@ class TestUpdateAlias(EventsTestMixin, TestBrokerCommand):
                          command)
 
     def test_110_update_mscom(self):
-        self.event_upd_dns('alias.ms.com')
+        self.event_upd_dns(
+            fqdn='alias.ms.com',
+            dns_environment='internal',
+            dns_records=[
+                {
+                    'target': 'arecord14.aqd-unittest.ms.com',
+                    'targetEnvironmentName': 'internal',
+                    'rrtype': 'CNAME'
+                },
+            ],
+        )
         command = ["update", "alias", "--fqdn", "alias.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--comments", "New alias comments"]

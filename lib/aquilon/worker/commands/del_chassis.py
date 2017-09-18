@@ -30,7 +30,7 @@ class CommandDelChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
-    def render(self, session, logger, chassis, clear_slots, **_):
+    def render(self, session, logger, chassis, clear_slots, exporter, **_):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         check_only_primary_ip(dbchassis)
@@ -50,7 +50,7 @@ class CommandDelChassis(BrokerCommand):
         dbdns_rec = dbchassis.primary_name
         session.delete(dbchassis)
         if dbdns_rec:
-            delete_dns_record(dbdns_rec)
+            delete_dns_record(dbdns_rec, exporter=exporter)
 
         session.flush()
 

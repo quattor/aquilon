@@ -17,7 +17,7 @@
 """Contains the logic for `aq add address alias`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import AddressAlias, Fqdn
+from aquilon.aqdb.model import AddressAlias, Fqdn, ReservedName
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
@@ -27,7 +27,7 @@ class CommandAddAddressAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, grn, eon_id, comments, **_):
+               target_environment, ttl, grn, eon_id, comments, exporter, **_):
 
         if not target_environment:
             target_environment = dns_environment
@@ -69,6 +69,15 @@ class CommandAddAddressAlias(BrokerCommand):
         db_record = AddressAlias(fqdn=dbfqdn, target=dbtarget, ttl=ttl,
                                  owner_grn=dbgrn, comments=comments)
         session.add(db_record)
+
+        if exporter:
+            if any(
+                    dr != db_record and
+                    not isinstance(dr, ReservedName)
+                    for dr in dbfqdn.dns_records):
+                exporter.update(dbfqdn)
+            else:
+                exporter.create(dbfqdn)
 
         session.flush()
 

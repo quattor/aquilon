@@ -32,10 +32,16 @@ class ServiceAddressFormatter(ResourceFormatter):
         return details
 
     def fill_proto(self, srv, skeleton, embedded=True, indirect_attrs=True):
-        super(ServiceAddressFormatter, self).fill_proto(srv, skeleton)
-        skeleton.service_address.ip = str(srv.ip)
-        skeleton.service_address.fqdn = str(srv.dns_record)
-        skeleton.service_address.interfaces.extend(iface.name for iface in
-                                                   srv.interfaces)
+        if hasattr(skeleton, 'service_address'):
+            # When working on a Resource and not directly on a ServiceAddress
+            super(ServiceAddressFormatter, self).fill_proto(srv, skeleton)
+            skeleton = skeleton.service_address
+
+        skeleton.ip = str(srv.ip)
+        skeleton.fqdn = str(srv.dns_record)
+        skeleton.interfaces.extend(iface.name for iface in
+                                   srv.interfaces)
+        self.redirect_proto(srv.network_environment,
+                            skeleton.network_environment)
 
 ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()

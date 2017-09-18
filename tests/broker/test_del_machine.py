@@ -34,10 +34,8 @@ class TestDelMachine(EventsTestMixin, TestBrokerCommand):
     def testdelut3c5n10(self):
         self.check_plenary_exists("machine", "americas", "ut", "ut3",
                                   "ut3c5n10")
-        self.event_del_hardware('ut3c5n10')
         command = "del machine --machine ut3c5n10"
         self.noouttest(command.split(" "))
-        self.events_verify()
         self.check_plenary_gone("machine", "americas", "ut", "ut3", "ut3c5n10")
 
     def testverifydelut3c5n10(self):
@@ -47,53 +45,41 @@ class TestDelMachine(EventsTestMixin, TestBrokerCommand):
     def testdelut3c5n16(self):
         self.check_plenary_exists("machine", "americas", "ut", "ut3",
                                   "ut3c5n16")
-        self.event_del_hardware('ut3c5n16')
         command = "del machine --machine ut3c5n16"
         self.noouttest(command.split(" "))
-        self.events_verify()
         self.check_plenary_gone("machine", "americas", "ut", "ut3", "ut3c5n16")
 
     def testdelut3c1n3(self):
-        self.event_del_hardware('ut3c1n3')
         command = "del machine --machine ut3c1n3"
         self.noouttest(command.split(" "))
-        self.events_verify()
 
     def testverifydelut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         self.notfoundtest(command.split(" "))
 
     def testdelut3c1n4(self):
-        self.event_del_hardware('ut3c1n4')
         command = "del machine --machine ut3c1n4"
         self.noouttest(command.split(" "))
-        self.events_verify()
 
     def testverifydelut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         self.notfoundtest(command.split(" "))
 
     def testdelut3c1n9(self):
-        self.event_del_hardware('ut3c1n9')
         command = "del machine --machine ut3c1n9"
         self.noouttest(command.split(" "))
-        self.events_verify()
 
     def testdelut8(self):
         # The first 3 are deleted in test_del_host
         for port in range(4, 6):
             machine = "ut8s02p%d" % port
-            self.event_del_hardware(machine)
             self.noouttest(["del_machine", "--machine", machine])
             self.notfoundtest(["show_machine", "--machine", machine])
-            self.events_verify()
 
     # FIXME: Add a test for deleting a machine with only auxiliaries.
 
     def testdeljack(self):
-        self.event_del_hardware('jack')
         self.noouttest(["del", "machine", "--machine", "jack"])
-        self.events_verify()
 
     def testverifyjackplenary(self):
         # This was the only machine in the building, so the plenary directory
@@ -104,39 +90,25 @@ class TestDelMachine(EventsTestMixin, TestBrokerCommand):
                          "Plenary directory '%s' still exists" % dir)
 
     def testdelut3c5n6(self):
-        self.event_del_hardware('ut3c5n6')
         self.noouttest(["del", "machine", "--machine", "ut3c5n6"])
-        self.events_verify()
 
     def testdelutnorack(self):
-        self.event_del_hardware('utnorack')
         self.noouttest(["del", "machine", "--machine", "utnorack"])
-        self.events_verify()
 
     def testdelnyaqd1(self):
-        self.event_del_hardware('ny00l4as01')
         self.noouttest(["del_machine", "--machine", "ny00l4as01"])
-        self.events_verify()
 
     def testdelaurorawithnode(self):
-        self.event_del_hardware(self.aurora_with_node)
         self.noouttest(["del_machine", "--machine", self.aurora_with_node])
-        self.events_verify()
 
     def testdelaurorawithoutnode(self):
-        self.event_del_hardware(self.aurora_without_node)
         self.noouttest(["del_machine", "--machine", self.aurora_without_node])
-        self.events_verify()
 
     def testdelaurorawithoutrack(self):
-        self.event_del_hardware(self.aurora_without_rack)
         self.noouttest(["del_machine", "--machine", self.aurora_without_rack])
-        self.events_verify()
 
     def testaddut3s01p2(self):
-        self.event_del_hardware('ut3s01p2')
         self.noouttest(["del", "machine", "--machine", "ut3s01p2"])
-        self.events_verify()
 
     def testverifyall(self):
         self.noouttest(["show_machine", "--all"])
