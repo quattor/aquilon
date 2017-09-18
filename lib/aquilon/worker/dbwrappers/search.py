@@ -32,17 +32,43 @@ def search_next(session, cls, attr, value, start, pack, locked=False,
 
     # Doing the locking here is not the most efficient as we're potentially
     # locking a lot of rows - but if there's no better object to lock, then we
-    # don't have much choice. Also, locking here won't help if no machine with
-    # the given prefix exists yet, as there are no rows to lock.
-    if locked:
+    # don't have much choice.
+
+    if locked and q.count() == 0:
+        # Nothing to lock -- so we'll crudely pick out the first and
+        # lock that.
+        q2 = session.query(cls).order_by(attr).limit(1)
+        if q2.count() == 1:
+            attrval = q2.value(attr)
+
+            # This is not particularly pleasant: Oracle won't permit a
+            # "FOR UPDATE" query where "ORDER BY" is given (ORA-02014);
+            # constructing the allowable version of the query may not be
+            # possible with SQLAlchemy.
+
+            q2 = session.query(cls).filter(attr == attrval)
+            session.execute(q2.with_for_update())
+
+            # Re-execute the original query: only 1 will get through here
+            q = session.query(cls).filter(attr.startswith(value))
+            if filters:
+                q = q.filter_by(**filters)
+
+        # Else (q2.count == 0): the table is empty, so we'll just head
+        # forwards and accept that this may break in that fairly rare
+        # (one-off) case;  something may also have raced and removed the
+        # first row we picked.
+
+    elif locked:
         # The FOR UPDATE query needs to be executed separately, otherwise it
         # won't see allocations done in a different session
-        session.execute(q.with_lockmode("update"))
+        session.execute(q.with_for_update())
 
     if start:
         start = force_int("start", start)
     else:
         start = 1
+
     entries = set()
     for (attrvalue,) in q.values(attr):
         m = int_re.match(attrvalue[len(value):])

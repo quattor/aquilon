@@ -768,7 +768,7 @@ def generate_mac(session, config, dbmachine):
     # Prevent concurrent --automac invocations. We need a separate query for
     # the FOR UPDATE, because a blocked query won't see the value inserted
     # by the blocking query.
-    session.execute(q.with_lockmode("update"))
+    session.execute(q.with_for_update())
 
     row = q.first()
     if not row:

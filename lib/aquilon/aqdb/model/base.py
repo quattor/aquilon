@@ -326,7 +326,7 @@ class Base(object):
         for col in pk:
             q = q.filter(col == getattr(self, col.key))
 
-        q = q.with_lockmode("update")
+        q = q.with_for_update()
         session.execute(q)
 
     @staticmethod
@@ -368,7 +368,7 @@ class Base(object):
         q = session.query(col)
         q = q.filter(col.in_(values))
         q = q.order_by(col)
-        q = q.with_lockmode("update")
+        q = q.with_for_update()
         session.execute(q)
 
     @classmethod
