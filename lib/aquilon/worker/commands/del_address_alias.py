@@ -28,11 +28,7 @@ class CommandDelAddressAlias(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, fqdn, target, dns_environment, target_environment,
-<<<<<<< HEAD
-               exporter, **_):
-=======
-               user, justification, reason, logger, **_):
->>>>>>> remotes/origin/for_next/enable_CM_network_dns
+               exporter, user, justification, reason, logger, **_):
 
         if not target_environment:
             target_environment = dns_environment
@@ -68,13 +64,8 @@ class CommandDelAddressAlias(BrokerCommand):
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
         for dns_rec in rrs:
-<<<<<<< HEAD
             delete_dns_record(dns_rec, exporter=exporter)
-=======
             cm.consider(dns_rec.target)
-
-            delete_dns_record(dns_rec)
->>>>>>> remotes/origin/for_next/enable_CM_network_dns
 
         cm.validate()
         session.flush()
