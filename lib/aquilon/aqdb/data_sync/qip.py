@@ -187,8 +187,6 @@ class QIPRefresh(object):
             for addr in qipinfo["DefaultRouters"].split(","):
                 routers.append(IPv4Address(text_type(addr)))
 
-        compartment_name = None
-
         # Extract MS-specific information from the UDF field
         if "UDF" in qipinfo:
             if "LOCATION" in qipinfo["UDF"]:
@@ -225,30 +223,22 @@ class QIPRefresh(object):
 
             if "COMPARTMENT" in qipinfo["UDF"]:
                 compartment_name = qipinfo["UDF"]["COMPARTMENT"].strip().lower()
-
-        if compartment_name and self.ignore_net_compartments and \
-                self.ignore_net_compartments.match(compartment_name):
-            self.logger.client_info("Network compartment {} matches 'ignore_network_compartments_regex', "
-                                    "ignoring.".format(compartment_name))
-            return None
-
-        if self.precreated_compartments_only:
-            if not compartment_name:
-                return None
-            if compartment_name not in self.compartments:
-                if compartment_name not in self.unknown_compartments:
+                if self.ignore_net_compartments and \
+                        self.ignore_net_compartments.match(compartment_name):
+                    self.logger.client_info("Network compartment {} matches 'ignore_network_compartments_regex', "
+                                            "ignoring.".format(compartment_name))
+                    return None
+                if compartment_name in self.compartments:
+                    compartment = self.compartments[compartment_name]
+                elif self.precreated_compartments_only:
                     self.logger.client_info("Unknown network compartment {} and "
                                             "precreated_compartments_only set to "
                                             "True, ignoring.".format(compartment_name))
+                    return None
+                elif compartment_name not in self.unknown_compartments:
+                    self.logger.client_info("Unknown compartment %s,"
+                                            " ignoring" % compartment_name)
                     self.unknown_compartments.add(compartment_name)
-                return None
-
-        if compartment_name in self.compartments:
-            compartment = self.compartments[compartment_name]
-        elif compartment_name and compartment_name not in self.unknown_compartments:
-            self.logger.client_info("Unknown compartment %s,"
-                                    " ignoring" % compartment_name)
-            self.unknown_compartments.add(compartment_name)
 
         # FIXME: How to handle networks with no location? dsdb maps them to
         # sysloc "xx.ny.na", so mimic that for now
