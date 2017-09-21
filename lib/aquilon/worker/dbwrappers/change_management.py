@@ -34,7 +34,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 Building, Room, Bunker, Desk)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
-from aquilon.exceptions_ import AuthorizationException, InternalError
+from aquilon.exceptions_ import AuthorizationException, InternalError, AquilonError
 from aquilon.worker.dbwrappers.user_principal import get_or_create_user_principal
 from aquilon.worker.processes import run_command
 from sqlalchemy.orm import contains_eager, load_only, aliased
@@ -152,12 +152,11 @@ class ChangeManagement(object):
                     "enforce_validation": self.enforce_validation,
                     }
         cmd.extend(["--metadata", json.dumps(metadata)])
+        out = run_command(cmd)
         try:
-            out = run_command(cmd)
             out_dict = json.loads(out)
         except Exception as err:
-            self.logger.info("Change Management validation failed. Reason: {}".format(str(err)))
-            raise InternalError(str(err))
+            raise AquilonError("Invalid response received for the change management check. {}".format(str(err)))
 
         self.logger.info("Change Management validation finished. Status: {}. {}".format(out_dict.get("Status"),
                                                                                         out_dict.get("Reason")))

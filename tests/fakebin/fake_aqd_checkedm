@@ -127,6 +127,8 @@ def main(args):
         if not just.tcm and not just.sn and just.emergency:
             stdout_and_exit(status='Permitted',
                             msg=PERMITTED_RESPONSE_MESSAGES["no_just_emergency"])
+        if just.tcm and just.tcm == "666":
+            print('Simulating unknown error. Making json not parsable.')
         if args.disable_edm:
             stdout_and_exit(status='Approved', msg=APPROVED_RESPONSE_MESSAGES["edm_disabled"])
 

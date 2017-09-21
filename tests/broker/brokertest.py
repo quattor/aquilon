@@ -61,6 +61,7 @@ class TestBrokerCommand(unittest.TestCase):
     aurora_without_rack = "oy605c2n6"
 
     valid_just_tcm = ["--justification", "tcm=123456789"]
+    exception_trigger_just_tcm = ["--justification", "tcm=666"]
     valid_just_sn = ["--justification", "sn=CHNG123456"]
     invalid_justification = ["--justification", "foo"]
     emergency_just_with_reason = ["--justification", "emergency", "--reason", "Valid reason"]
