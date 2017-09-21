@@ -146,6 +146,8 @@ class CommandBindServer(BrokerCommand):
             cm.consider(params.get(key, None))
         if params.get("alias", None):
             cm.consider(params["alias"].target)
+        # Validate existing service clients
+        cm.consider(dbinstance)
         cm.validate()
 
         # TODO: someday we should verify that the target really points to the
