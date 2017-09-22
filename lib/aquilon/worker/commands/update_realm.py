@@ -17,14 +17,21 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Realm
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateRealm(BrokerCommand):
 
     required_parameters = ["realm"]
 
-    def render(self, session, realm, trusted, comments, **_):
+    def render(self, session, realm, trusted, comments, user,
+               justification, reason, logger, **_):
         dbrealm = Realm.get_unique(session, realm, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbrealm)
+        cm.validate()
 
         if trusted is not None:
             dbrealm.trusted = trusted

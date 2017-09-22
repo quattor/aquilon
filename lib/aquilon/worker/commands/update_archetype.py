@@ -21,6 +21,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Cluster, Host, Personality,
                                 PersonalityStage)
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateArchetype(BrokerCommand):
@@ -28,8 +29,13 @@ class CommandUpdateArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, compilable, cluster_type,
-               description, comments, **_):
+               description, comments, user, justification, reason, logger, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbarchetype)
+        cm.validate()
 
         if compilable is not None:
             if not compilable:

@@ -141,7 +141,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
 
     def test_151_enable_grn(self):
         self.noouttest(["update_grn", "--grn", "grn:/ms/ei/aquilon",
-                        "--nodisabled"])
+                        "--nodisabled"] + self.valid_just_sn)
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--target", "esp"]
@@ -149,7 +149,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
 
     def test_152_disable_again(self):
         self.noouttest(["update_grn", "--grn", "grn:/ms/ei/aquilon",
-                        "--disabled"])
+                        "--disabled"] + self.valid_just_sn)
 
     def test_153_unmap_disabled(self):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon",
@@ -194,13 +194,13 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.check_grns(out, {"esp": [self.grn_list[0]]}, command)
 
     def test_300_delete_used_byhost(self):
-        command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
+        command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "GRN grn:/ms/ei/aquilon/aqd is still used by "
                          "hosts, and cannot be deleted.", command)
 
     def test_310_delete_missing(self):
-        command = ["del", "grn", "--eon_id", "987654321"]
+        command = ["del", "grn", "--eon_id", "987654321"] + self.valid_just_sn
         out = self.notfoundtest(command)
         self.matchoutput(out, "EON ID 987654321 not found.", command)
 
@@ -238,7 +238,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.statustest(command)
 
     def test_330_delete_used_bypers(self):
-        command = ["del", "grn", "--grn", "grn:/ms/windows/desktop"]
+        command = ["del", "grn", "--grn", "grn:/ms/windows/desktop"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "GRN grn:/ms/windows/desktop is still used "
                          "by personalities, and cannot be deleted.", command)

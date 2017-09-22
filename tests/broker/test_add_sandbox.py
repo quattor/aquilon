@@ -46,7 +46,7 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_102_make_trusted(self):
         command = ["update", "realm", "--trusted",
-                   "--realm", self.realm]
+                   "--realm", self.realm] + self.valid_just_sn
         self.noouttest(command)
 
     def test_103_verify_trust(self):
@@ -57,7 +57,7 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_103_flip_untrusted(self):
         command = ["update", "realm", "--untrusted",
-                   "--realm", self.realm]
+                   "--realm", self.realm] + self.valid_just_sn
         self.noouttest(command)
 
         command = ["show", "realm", "--realm", self.realm]
@@ -65,7 +65,7 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "Trusted: False", command)
 
         command = ["update", "realm", "--trusted",
-                   "--realm", self.realm]
+                   "--realm", self.realm] + self.valid_just_sn
         self.noouttest(command)
 
     def test_110_addutsandbox(self):

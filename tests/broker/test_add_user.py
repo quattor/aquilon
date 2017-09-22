@@ -35,7 +35,7 @@ class TestAddUser(TestBrokerCommand):
         # Use artificial values for some parameters for easier testing
         self.noouttest(["add_user", "--username", pwrec[0], "--uid", 1000,
                         "--gid", 1000, "--full_name", "Current user",
-                        "--home_directory", pwrec[5]])
+                        "--home_directory", pwrec[5]] + self.valid_just_sn)
 
     def test_101_verify_current(self):
         pwrec = pwd.getpwuid(os.getuid())
@@ -50,7 +50,7 @@ class TestAddUser(TestBrokerCommand):
     def test_110_add_testuser3(self):
         self.noouttest(["add_user", "--username", "testuser3", "--uid", 2361,
                         "--gid", 654, "--full_name", "test user",
-                        "--home_directory", "/tmp"])
+                        "--home_directory", "/tmp"] + self.valid_just_sn)
 
     def test_111_verify_testuser3(self):
         command = ["show_user", "--username", "testuser3"]
@@ -64,7 +64,7 @@ class TestAddUser(TestBrokerCommand):
     def test_115_add_testuser4(self):
         self.noouttest(["add_user", "--username", "testuser4", "--autouid",
                         "--gid", 654, "--full_name", "test user",
-                        "--home_directory", "/tmp"])
+                        "--home_directory", "/tmp"] + self.valid_just_sn)
 
     def test_116_verify_testuser4(self):
         command = ["show_user", "--username", "testuser4"]
@@ -78,14 +78,14 @@ class TestAddUser(TestBrokerCommand):
     def test_200_duplicate_name(self):
         command = ["add_user", "--username", "testuser3", "--autouid",
                    "--gid", 1001, "--full_name", "Other user",
-                   "--home_directory", "/tmp"]
+                   "--home_directory", "/tmp"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "User testuser3 already exists.", command)
 
     def test_200_duplicate_uid(self):
         command = ["add_user", "--username", "another", "--uid", 2362,
                    "--gid", 1000, "--full_name", "Another user",
-                   "--home_directory", "/tmp"]
+                   "--home_directory", "/tmp"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "UID 2362 is already in use.", command)
 

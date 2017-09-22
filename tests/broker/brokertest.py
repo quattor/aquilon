@@ -842,7 +842,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def demote_current_user(self, role="nobody"):
         command = ["permission", "--role", role,
-                   "--principal", "%s@%s" % (self.user, self.realm)]
+                   "--principal", "%s@%s" % (self.user, self.realm)] + self.valid_just_sn
         self.noouttest(command)
 
     def promote_current_user(self):

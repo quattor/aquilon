@@ -76,7 +76,9 @@ ENFORCED_CONTROL_COMMAND_LIST = ['add_domain', 'del_domain', 'add_address', 'del
                                  'add_dns_domain', 'add_dns_environment', 'add_ns_record', 'del_ns_record',
                                  'add_srv_record', 'del_srv_record', 'update_srv_record', 'add_network_compartment,',
                                  'add_network_environment', 'update_network_environment', 'add_dynamic_range',
-                                 'del_dynamic_range']
+                                 'del_dynamic_range', 'add_netgroup_whitelist', 'del_netgroup_whitelist', 'add_grn',
+                                 'del_grn', 'update_grn', 'add_user', 'del_user', 'update_user',
+                                 'permission', 'update_archetype', 'update_realm']
 
 
 def create_parser():

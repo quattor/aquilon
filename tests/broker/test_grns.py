@@ -33,7 +33,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
         self.assertNotIn("grn:/ms/test1", self.grns)
         self.assertIn(1, self.eon_ids)
         command = ["add", "grn", "--grn", "grn:/ms/test1", "--eon_id", "1",
-                   "--disabled"]
+                   "--disabled"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_101_verify_test1(self):
@@ -52,7 +52,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
     def test_110_add_test2(self):
         self.assertNotIn("grn:/ms/test2", self.grns)
         command = ["add", "grn", "--grn", "grn:/ms/test2",
-                   "--eon_id", "123456789"]
+                   "--eon_id", "123456789"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_111_verify_test2(self):
@@ -64,7 +64,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_150_update(self):
         command = ["update", "grn", "--grn", "grn:/ms/test1", "--nodisabled",
-                   "--rename_to", "grn:/ms/test3"]
+                   "--rename_to", "grn:/ms/test3"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_151_verify_update(self):
@@ -105,7 +105,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "EON ID 987654321 not found.", command)
 
     def test_300_delete(self):
-        command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"]
+        command = ["del", "grn", "--grn", "grn:/ms/ei/aquilon/aqd"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_310_verify_delete_grn(self):

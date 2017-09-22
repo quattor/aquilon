@@ -36,7 +36,7 @@ class TestPermission(TestBrokerCommand):
         principal = 'testusernobody@' + self.realm
         command = ["permission", "--principal", principal,
                    "--role", "nobody", "--createuser",
-                   "--comments", "Some user comments"]
+                   "--comments", "Some user comments"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User %s did not exist, creating." % principal,
                          command)
@@ -67,7 +67,7 @@ class TestPermission(TestBrokerCommand):
 
     def testverifynohostpart(self):
         command = ["permission", "--principal", "testusernobody",
-                   "--role", "nobody", "--createuser"]
+                   "--role", "nobody", "--createuser"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "User principal 'testusernobody' is not valid.",
                          command)
@@ -75,7 +75,7 @@ class TestPermission(TestBrokerCommand):
     def testpermissionoperations(self):
         principal = 'testuseroperations@' + self.realm
         command = ["permission", "--principal", principal, "--role=operations",
-                   "--createuser"]
+                   "--createuser"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User %s did not exist, creating." % principal,
                          command)
@@ -99,7 +99,7 @@ class TestPermission(TestBrokerCommand):
     def testpermissionengineering(self):
         principal = 'testuserengineering@' + self.realm
         command = ["permission", "--principal", principal,
-                   "--role=engineering", "--createuser"]
+                   "--role=engineering", "--createuser"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User %s did not exist, creating." % principal,
                          command)
@@ -115,7 +115,7 @@ class TestPermission(TestBrokerCommand):
     def testpermissionaqd_admin(self):
         principal = 'testuseraqd_admin@' + self.realm
         command = ["permission", "--principal", principal, "--role=aqd_admin",
-                   "--createuser"]
+                   "--createuser"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User %s did not exist, creating." % principal,
                          command)
@@ -130,7 +130,7 @@ class TestPermission(TestBrokerCommand):
 
     def testpermissionforeignrealm(self):
         command = ["permission", "--principal", "foreign@foreign",
-                   "--role", "operations", "--createuser", "--createrealm"]
+                   "--role", "operations", "--createuser", "--createrealm"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User foreign@foreign did not exist, creating.",
                          command)
@@ -150,12 +150,12 @@ class TestPermission(TestBrokerCommand):
     def testpromote(self):
         principal = 'testuserpromote@' + self.realm
         command = ["permission", "--principal", principal, "--role=nobody",
-                   "--createuser"]
+                   "--createuser"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User %s did not exist, creating." % principal,
                          command)
         command = ["permission", "--principal", principal,
-                   "--role=engineering"]
+                   "--role=engineering"] + self.valid_just_sn
         self.noouttest(command)
 
     def testverifypromote(self):
@@ -169,11 +169,11 @@ class TestPermission(TestBrokerCommand):
     def testdemote(self):
         principal = 'testuserdemote@' + self.realm
         command = ["permission", "--principal", principal, "--role=operations",
-                   "--createuser"]
+                   "--createuser"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "User %s did not exist, creating." % principal,
                          command)
-        command = ["permission", "--principal", principal, "--role=nobody"]
+        command = ["permission", "--principal", principal, "--role=nobody"] + self.valid_just_sn
         self.noouttest(command)
 
     def testverifydemote(self):
@@ -185,27 +185,27 @@ class TestPermission(TestBrokerCommand):
 
     def testmissinguser(self):
         command = ["permission", "--principal", "@" + self.realm,
-                   "--role", "operations", "--createuser"]
+                   "--role", "operations", "--createuser"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "User principal '@%s' is not valid." % self.realm,
                          command)
 
     def testmissingrealm(self):
         command = ["permission", "--principal", "testuser",
-                   "--role", "operations", "--createuser"]
+                   "--role", "operations", "--createuser"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "User principal 'testuser' is not valid.",
                          command)
 
     def testmissinghostname(self):
         command = ["permission", "--principal", "host/@%s" % self.realm,
-                   "--role", "operations", "--createuser"]
+                   "--role", "operations", "--createuser"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "No fully qualified name specified.", command)
 
     def testmissingdomain(self):
         command = ["permission", "--principal", "host/no-domain@%s" % self.realm,
-                   "--role", "operations", "--createuser"]
+                   "--role", "operations", "--createuser"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "FQDN 'no-domain' is not valid, it does not "
@@ -215,7 +215,7 @@ class TestPermission(TestBrokerCommand):
     def testunknownhost(self):
         principal = "host/no-such-host.aqd-unittest.ms.com@" + self.realm
         command = ["permission", "--role", "operations", "--createuser",
-                   "--principal", principal]
+                   "--principal", principal] + self.valid_just_sn
         out = self.notfoundtest(command)
         # Ideally we would test for a "Host not found", but the DNS domains
         # aren't set up yet.
@@ -225,7 +225,7 @@ class TestPermission(TestBrokerCommand):
 
     def testcreaterealm(self):
         command = ["permission", "--principal", "somebody@realm-does-not-exist",
-                   "--role", "operations", "--createuser"]
+                   "--role", "operations", "--createuser"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Could not find realm realm-does-not-exist to create "
@@ -237,7 +237,8 @@ class TestPermission(TestBrokerCommand):
         self.demote_current_user()
 
     def test_autherror_200(self):
-        command = ["permission", "--role=aqd_admin", "--principal", self.principal]
+        command = ["permission", "--role=aqd_admin", "--principal", self.principal] + \
+                  self.valid_just_sn
         err = self.unauthorizedtest(command, auth=True)
         message = self.config.get("broker", "authorization_error")
         self.matchoutput(err,
@@ -254,7 +255,7 @@ class TestPermission(TestBrokerCommand):
         # Add second principe for the current user with role nobody,
         # so that authentication would be properly tested
         command = ["permission", "--principal", "{}@some.test.realm".format(self.user),
-                   "--role", "nobody", "--createrealm", "--createuser"]
+                   "--role", "nobody", "--createrealm", "--createuser"] + self.valid_just_sn
         err = self.statustest(command)
         self.matchoutput(err, "Realm some.test.realm did not exist, creating.", command)
         self.matchoutput(err, "User {}@some.test.realm did not exist, creating.".format(self.user),

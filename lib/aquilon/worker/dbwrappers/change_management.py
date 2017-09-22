@@ -31,7 +31,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment,
                                 Fqdn, ARecord, ReservedName, AddressAlias, DnsDomain, DnsRecord, NsRecord,
                                 SrvRecord, DynamicStub, Organization, Hub, Continent, Country, Campus, City,
-                                Building, Room, Bunker, Desk)
+                                Building, Room, Bunker, Desk, NetGroupWhiteList, Grn, User, Realm, Role)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError, AquilonError
@@ -628,3 +628,8 @@ ChangeManagement.handlers[DnsDomain] = ChangeManagement.validate_default
 ChangeManagement.handlers[DnsEnvironment] = ChangeManagement.validate_default
 ChangeManagement.handlers[NetworkCompartment] = ChangeManagement.validate_default
 ChangeManagement.handlers[NetworkEnvironment] = ChangeManagement.validate_default
+ChangeManagement.handlers[NetGroupWhiteList] = ChangeManagement.validate_default
+ChangeManagement.handlers[Grn] = ChangeManagement.validate_default
+ChangeManagement.handlers[User] = ChangeManagement.validate_default
+ChangeManagement.handlers[Realm] = ChangeManagement.validate_default
+ChangeManagement.handlers[Role] = ChangeManagement.validate_default

@@ -19,15 +19,22 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetGroupWhiteList, Personality
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelNetgroupWhitelist(BrokerCommand):
 
     required_parameters = ["netgroup"]
 
-    def render(self, session, netgroup, **_):
+    def render(self, session, netgroup, user, justification,
+               reason, logger, **_):
         dbng = NetGroupWhiteList.get_unique(session, name=netgroup,
                                             compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbng)
+        cm.validate()
 
         q = session.query(Personality)
         q = q.filter(Personality.root_netgroups.contains(dbng))

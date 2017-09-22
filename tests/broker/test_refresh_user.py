@@ -110,7 +110,7 @@ class TestRefreshUser(TestBrokerCommand):
         self.noouttest(["update_user", "--username", "testuser3",
                         "--uid", "1237", "--gid", "123",
                         "--full_name", "Some other name",
-                        "--home_directory", "/tmp"])
+                        "--home_directory", "/tmp"] + self.valid_just_sn)
 
     def test_301_verify_testuser3_before_sync(self):
         command = ["show_user", "--username", "testuser3"]
@@ -170,7 +170,7 @@ class TestRefreshUser(TestBrokerCommand):
             uid = i + 5000
             self.noouttest(["add_user", "--username", name, "--uid", uid,
                             "--gid", 1000, "--full_name", "Delete test",
-                            "--home_directory", "/tmp"])
+                            "--home_directory", "/tmp"] + self.valid_just_tcm)
 
     def test_321_refresh_refuse(self):
         limit = self.config.getint("broker", "user_delete_limit")
