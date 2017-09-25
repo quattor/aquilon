@@ -40,15 +40,14 @@ class CommandUpdateModel(BrokerCommand):
                        'disksize': 'disk_capacity',
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
-    def render(self, session, plenaries, model, vendor, newmodel, newvendor,
+    def render(self, session, plenaries, model, vendor, newvendor,
                comments, update_existing_machines, user, justification, reason,
                logger, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows
             # for simple equality checks below and removes the need to
             # call refresh().
-            if arg in ['newmodel', 'newvendor',
-                       'cpuname', 'cpuvendor', 'disktype', 'diskcontroller',
+            if arg in ['newvendor', 'cpuname', 'cpuvendor', 'disktype', 'diskcontroller',
                        'nicmodel', 'nicvendor']:
                 if value is not None:
                     arguments[arg] = value.lower().strip()
@@ -56,8 +55,8 @@ class CommandUpdateModel(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
-        if not update_existing_machines and (newmodel or newvendor):
-            raise ArgumentError("Cannot update model name or vendor without "
+        if not update_existing_machines and newvendor:
+            raise ArgumentError("Cannot update vendor without "
                                 "updating any existing machines.")
 
         if update_existing_machines:
@@ -74,20 +73,10 @@ class CommandUpdateModel(BrokerCommand):
         # setting a new vendor, a new name, or both.
         if newvendor:
             dbnewvendor = Vendor.get_unique(session, newvendor, compel=True)
-            if newmodel:
-                Model.get_unique(session, name=newmodel, vendor=dbnewvendor,
-                                 preclude=True)
-            else:
-                Model.get_unique(session, name=dbmodel.name,
-                                 vendor=dbnewvendor, preclude=True)
+            Model.get_unique(session, name=dbmodel.name,
+                             vendor=dbnewvendor, preclude=True)
             dbmodel.vendor = dbnewvendor
-        if newmodel:
-            if not newvendor:
-                Model.get_unique(session, name=newmodel, vendor=dbmodel.vendor,
-                                 preclude=True)
-            dbmodel.name = newmodel
-        if newvendor or newmodel:
-            q = session.query(Machine).filter_by(model=dbmodel)
+            q = session.query(HardwareEntity).filter_by(model=dbmodel)
             dbmachines.update(q)
 
         # For now, can't update model_type.  There are too many spots
