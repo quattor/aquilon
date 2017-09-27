@@ -24,6 +24,7 @@ from aquilon.worker.dbwrappers.host import hostname_to_host, remove_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.aqdb.model import Machine
 
 
 class CommandDelHost(BrokerCommand):
@@ -36,6 +37,10 @@ class CommandDelHost(BrokerCommand):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
+
+        if not isinstance(dbmachine, Machine):
+            raise ArgumentError("Command del_host should only be used for machines, "
+                                "but {0} is a {1:cl}.".format(hostname, dbmachine))
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)

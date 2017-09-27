@@ -325,6 +325,14 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                          self.net["ut14_net"].usable[3], "ut14s1p3",
                          manager_ip=self.net["ut14_oob"].usable[3])
 
+    def test_310_del_network_device(self):
+        command = ["del", "host", "--hostname", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Command del_host should only be used for machines, "
+                              "but ut3gd1r04.aqd-unittest.ms.com is a switch.",
+                         command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)
     unittest.TextTestRunner(verbosity=2).run(suite)
