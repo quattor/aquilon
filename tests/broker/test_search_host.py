@@ -30,8 +30,8 @@ class TestSearchHost(TestBrokerCommand):
     def testorphaned(self):
         command = "manage --hostname unittest02.one-nyp.ms.com --sandbox orphantestuser/orphantestsandbox --force --skip_auto_compile"
         self.statustest(command.split(" "))
-        command = "del user --username orphantestuser"
-        self.noouttest(command.split(" "))
+        command = ["del", "user", "--username", "orphantestuser"] + self.valid_just_sn
+        self.noouttest(command)
         command = "search host --orphaned"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)

@@ -17,6 +17,7 @@
 
 from aquilon.aqdb.model import User
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateUser(BrokerCommand):
@@ -24,8 +25,13 @@ class CommandUpdateUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, gid, full_name, home_directory,
-               **_):
+               user, justification, reason, logger, **_):
         dbuser = User.get_unique(session, username, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbuser)
+        cm.validate()
 
         # 0 is a valid value for uid
         if uid is not None:

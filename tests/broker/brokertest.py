@@ -61,6 +61,7 @@ class TestBrokerCommand(unittest.TestCase):
     aurora_without_rack = "oy605c2n6"
 
     valid_just_tcm = ["--justification", "tcm=123456789"]
+    exception_trigger_just_tcm = ["--justification", "tcm=666"]
     valid_just_sn = ["--justification", "sn=CHNG123456"]
     invalid_justification = ["--justification", "foo"]
     emergency_just_with_reason = ["--justification", "emergency", "--reason", "Valid reason"]
@@ -841,7 +842,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def demote_current_user(self, role="nobody"):
         command = ["permission", "--role", role,
-                   "--principal", "%s@%s" % (self.user, self.realm)]
+                   "--principal", "%s@%s" % (self.user, self.realm)] + self.valid_just_sn
         self.noouttest(command)
 
     def promote_current_user(self):

@@ -34,9 +34,9 @@ class TestDelRole(TestBrokerCommand):
 
     def test_101_demote_user(self):
         self.noouttest(["permission", "--principal", "testuserengineering@" + self.realm,
-                        "--role", "nobody"])
+                        "--role", "nobody"] + self.valid_just_sn)
         self.noouttest(["permission", "--principal", "testuserpromote@" + self.realm,
-                        "--role", "nobody"])
+                        "--role", "nobody"] + self.valid_just_sn)
 
     def test_102_del_engineering(self):
         self.noouttest(["del_role", "--role", "engineering"])

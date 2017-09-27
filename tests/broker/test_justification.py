@@ -647,6 +647,15 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         self.matchclean(out, "Aliases: aliasjustreq.aqd-unittest.ms.com, "
                              "aliasjustreq2.aqd-unittest.ms.com", cmd)
 
+    def test_910_aqd_checkedm_unknownerror(self):
+        command = ["update_domain", "--domain", "deployable", "--archived"]
+        out = self.commandtest(command)
+        command = ["del_domain", "--domain", "deployable"] + self.exception_trigger_just_tcm
+        err = self.internalerrortest(command)
+        self.matchoutput(err, "Invalid response received for the change management check. No JSON object could be decoded", command)
+        command = ["update_domain", "--domain", "deployable", "--noarchived"]
+        out = self.commandtest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestJustification)

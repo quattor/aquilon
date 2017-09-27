@@ -159,7 +159,7 @@ class TestUnbindServer(TestBrokerCommand):
     def test_130_unbind_pollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.statustest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
-                         "--service", service, "--instance", "unittest"])
+                         "--service", service, "--instance", "unittest"] + self.valid_just_tcm)
 
     def test_140_verify_pre_unbind(self):
         command = ["show_service", "--service", "dns", "--instance", "unittest"]

@@ -287,7 +287,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
                           "--sandbox", "otheruser/othersandbox", "--force", "--skip_auto_compile"])
 
     def test_162_del_otheruser(self):
-        self.noouttest(["del_user", "--username", "otheruser"])
+        self.noouttest(["del_user", "--username", "otheruser"] + self.valid_just_sn)
 
     def test_163_verify_host(self):
         command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]

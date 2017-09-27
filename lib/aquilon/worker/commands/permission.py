@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Role
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.user_principal import (
     get_or_create_user_principal)
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandPermission(BrokerCommand):
@@ -27,11 +28,16 @@ class CommandPermission(BrokerCommand):
     required_parameters = ["principal", "role"]
 
     def render(self, session, logger, principal, role, createuser, createrealm,
-               comments, **_):
+               comments, user, justification, reason, **_):
         dbrole = Role.get_unique(session, role, compel=True)
         dbuser = get_or_create_user_principal(session, principal, createuser,
                                               createrealm, comments=comments,
                                               logger=logger)
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbrole)
+        cm.validate()
+
         dbuser.role = dbrole
         session.flush()
         return

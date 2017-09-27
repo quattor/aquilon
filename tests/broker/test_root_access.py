@@ -28,10 +28,10 @@ from brokertest import TestBrokerCommand
 
 class TestRootAccess(TestBrokerCommand):
     def test_100_add_netgroup(self):
-        command = ["add", "netgroup_whitelist", "--netgroup", "netgroup1"]
+        command = ["add", "netgroup_whitelist", "--netgroup", "netgroup1"] + self.valid_just_sn
         self.noouttest(command)
 
-        command = ["add", "netgroup_whitelist", "--netgroup", "netgroup2"]
+        command = ["add", "netgroup_whitelist", "--netgroup", "netgroup2"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_110_verify_add_netgroup(self):
@@ -155,7 +155,7 @@ class TestRootAccess(TestBrokerCommand):
         self.noouttest(command)
 
     def test_380_del_netgroup_stillmapped(self):
-        command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]
+        command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Netgroup netgroup2 used by following and cannot be "
@@ -166,7 +166,7 @@ class TestRootAccess(TestBrokerCommand):
                    "--personality", "utunused/dev"] + self.valid_just_tcm
         self.noouttest(command)
 
-        command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]
+        command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_390_verify_personality(self):
@@ -185,7 +185,7 @@ class TestRootAccess(TestBrokerCommand):
         self.matchclean(out, "netgroup2", command)
 
     def test_410_del_netgroup(self):
-        command = ["del", "netgroup_whitelist", "--netgroup", "netgroup1"]
+        command = ["del", "netgroup_whitelist", "--netgroup", "netgroup1"] + self.valid_just_sn
         self.noouttest(command)
 
     def test_420_verify_del_netgroup(self):
@@ -195,7 +195,7 @@ class TestRootAccess(TestBrokerCommand):
         self.matchclean(out, "netgroup2", command)
 
     def test_430_del_netgroup_notfound(self):
-        command = ["del", "netgroup_whitelist", "--netgroup", "notfound"]
+        command = ["del", "netgroup_whitelist", "--netgroup", "notfound"] + self.valid_just_sn
         out = self.notfoundtest(command)
         self.matchoutput(out, "Netgroup notfound not found", command)
 

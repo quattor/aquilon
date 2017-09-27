@@ -31,10 +31,10 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment,
                                 Fqdn, ARecord, ReservedName, AddressAlias, DnsDomain, DnsRecord, NsRecord,
                                 SrvRecord, DynamicStub, Organization, Hub, Continent, Country, Campus, City,
-                                Building, Room, Bunker, Desk)
+                                Building, Room, Bunker, Desk, NetGroupWhiteList, Grn, User, Realm, Role)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
-from aquilon.exceptions_ import AuthorizationException, InternalError
+from aquilon.exceptions_ import AuthorizationException, InternalError, AquilonError
 from aquilon.worker.dbwrappers.user_principal import get_or_create_user_principal
 from aquilon.worker.processes import run_command
 from sqlalchemy.orm import contains_eager, load_only, aliased
@@ -152,12 +152,11 @@ class ChangeManagement(object):
                     "enforce_validation": self.enforce_validation,
                     }
         cmd.extend(["--metadata", json.dumps(metadata)])
+        out = run_command(cmd)
         try:
-            out = run_command(cmd)
             out_dict = json.loads(out)
         except Exception as err:
-            self.logger.info("Change Management validation failed. Reason: {}".format(str(err)))
-            raise InternalError(str(err))
+            raise AquilonError("Invalid response received for the change management check. {}".format(str(err)))
 
         self.logger.info("Change Management validation finished. Status: {}. {}".format(out_dict.get("Status"),
                                                                                         out_dict.get("Reason")))
@@ -629,3 +628,8 @@ ChangeManagement.handlers[DnsDomain] = ChangeManagement.validate_default
 ChangeManagement.handlers[DnsEnvironment] = ChangeManagement.validate_default
 ChangeManagement.handlers[NetworkCompartment] = ChangeManagement.validate_default
 ChangeManagement.handlers[NetworkEnvironment] = ChangeManagement.validate_default
+ChangeManagement.handlers[NetGroupWhiteList] = ChangeManagement.validate_default
+ChangeManagement.handlers[Grn] = ChangeManagement.validate_default
+ChangeManagement.handlers[User] = ChangeManagement.validate_default
+ChangeManagement.handlers[Realm] = ChangeManagement.validate_default
+ChangeManagement.handlers[Role] = ChangeManagement.validate_default

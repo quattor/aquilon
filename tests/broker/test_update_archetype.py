@@ -37,11 +37,11 @@ class TestUpdateArchetype(TestBrokerCommand):
 
     def test_101_make_compilable(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype1",
-                        "--compilable"])
+                        "--compilable"] + self.valid_just_sn)
 
     def test_101_set_comments(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype1",
-                        "--comments", "New archetype comments"])
+                        "--comments", "New archetype comments"] + self.valid_just_sn)
 
     def test_105_verify_compilable(self):
         command = "show archetype --archetype utarchetype1"
@@ -51,11 +51,11 @@ class TestUpdateArchetype(TestBrokerCommand):
 
     def test_110_reset_compilable(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype1",
-                        "--nocompilable"])
+                        "--nocompilable"] + self.valid_just_sn)
 
     def test_110_reset_comments(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype1",
-                        "--comments", ""])
+                        "--comments", ""] + self.valid_just_sn)
 
     def test_115_verify_updates(self):
         command = "show archetype --archetype utarchetype1"
@@ -71,7 +71,7 @@ class TestUpdateArchetype(TestBrokerCommand):
 
     def test_121_convert_to_cluster(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype2",
-                        "--cluster_type=compute"])
+                        "--cluster_type=compute"] + self.valid_just_sn)
 
     def test_125_verify_cluster(self):
         command = "show archetype --archetype utarchetype2"
@@ -80,7 +80,7 @@ class TestUpdateArchetype(TestBrokerCommand):
 
     def test_130_convert_to_host(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype2",
-                        "--cluster_type="])
+                        "--cluster_type="] + self.valid_just_sn)
 
     def test_135_verify_nocluster(self):
         command = "show archetype --archetype utarchetype2"
@@ -89,21 +89,21 @@ class TestUpdateArchetype(TestBrokerCommand):
 
     def test_200_convert_to_cluster_fail(self):
         command = ["update_archetype", "--archetype=aquilon",
-                   "--cluster_type=compute"]
+                   "--cluster_type=compute"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "Archetype aquilon is currently in use",
                          command)
 
     def test_200_convert_to_host_fail(self):
         command = ["update_archetype", "--archetype=esx_cluster",
-                   "--cluster_type="]
+                   "--cluster_type="] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out, "Archetype esx_cluster is currently in use",
                          command)
 
     def test_200_wrong_cluster_type(self):
         command = ["update_archetype", "--archetype=esx_cluster",
-                   "--cluster_type=no-such-cluster-type"]
+                   "--cluster_type=no-such-cluster-type"] + self.valid_just_sn
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Unknown cluster type 'no-such-cluster-type'. "

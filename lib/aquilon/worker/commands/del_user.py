@@ -17,14 +17,22 @@
 
 from aquilon.aqdb.model import User
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelUser(BrokerCommand):
 
     required_parameters = ["username"]
 
-    def render(self, session, username, **_):
+    def render(self, session, username, user, justification,
+               reason, logger, **_):
         dbuser = User.get_unique(session, username, compel=True)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbuser)
+        cm.validate()
+
         session.delete(dbuser)
         session.flush()
         return

@@ -58,7 +58,7 @@ class CommandUnbindServer(BrokerCommand):
                                    alias)
 
         for dbinstance in dbinstances:
-            # Validate ChangeManagement
+            # Validate existing service clients
             cm.consider(dbinstance)
 
             if position is not None:
@@ -79,9 +79,16 @@ class CommandUnbindServer(BrokerCommand):
             plenaries.add(dbinstance)
 
             if dbsrv.host:
+                # Validating service providers
+                cm.consider(dbsrv.host)
                 session.expire(dbsrv.host, ['services_provided'])
             if dbsrv.cluster:
+                # Validating service providers
+                cm.consider(dbsrv.cluster)
                 session.expire(dbsrv.cluster, ['services_provided'])
+            if dbsrv.alias:
+                # Validating service providers
+                cm.consider(dbsrv.alias.target)
             dbinstance.servers.remove(dbsrv)
 
             if dbinstance.client_count and not dbinstance.servers:

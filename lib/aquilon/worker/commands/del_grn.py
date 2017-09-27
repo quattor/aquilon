@@ -20,13 +20,19 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Host, Personality, HostGrnMap, PersonalityGrnMap
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelGrn(BrokerCommand):
 
-    def render(self, session, logger, grn, eon_id, **_):
+    def render(self, session, logger, grn, eon_id, user,
+               justification, reason, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config, usable_only=False)
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbgrn)
+        cm.validate()
 
         q1 = session.query(Host.hardware_entity_id)
         q1 = q1.filter_by(owner_eon_id=dbgrn.eon_id)

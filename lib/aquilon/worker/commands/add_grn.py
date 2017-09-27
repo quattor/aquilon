@@ -18,19 +18,27 @@
 
 from aquilon.aqdb.model import Grn
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddGrn(BrokerCommand):
 
     required_parameters = ["grn", "eon_id"]
 
-    def render(self, session, grn, eon_id, disabled, **_):
+    def render(self, session, grn, eon_id, disabled, user,
+               justification, reason, logger, **_):
         Grn.get_unique(session, grn=grn, preclude=True)
         Grn.get_unique(session, eon_id=eon_id, preclude=True)
 
         if disabled is None:
             disabled = False
         dbgrn = Grn(grn=grn, eon_id=eon_id, disabled=disabled)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbgrn)
+        cm.validate()
+
         session.add(dbgrn)
 
         session.flush()

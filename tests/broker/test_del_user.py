@@ -32,7 +32,7 @@ from brokertest import TestBrokerCommand
 class TestDelUser(TestBrokerCommand):
     def test_100_del_current_user(self):
         pwrec = pwd.getpwuid(os.getuid())
-        self.noouttest(["del_user", "--username", pwrec[0]])
+        self.noouttest(["del_user", "--username", pwrec[0]] + self.valid_just_sn)
 
     def test_105_verify_gone(self):
         pwrec = pwd.getpwuid(os.getuid())
@@ -42,7 +42,7 @@ class TestDelUser(TestBrokerCommand):
 
     def test_110_del_current_user_again(self):
         pwrec = pwd.getpwuid(os.getuid())
-        command = ["del_user", "--username", pwrec[0]]
+        command = ["del_user", "--username", pwrec[0]] + self.valid_just_sn
         out = self.notfoundtest(command)
         self.matchoutput(out, "User %s not found." % pwrec[0], command)
 

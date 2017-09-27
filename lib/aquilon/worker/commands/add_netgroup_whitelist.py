@@ -18,15 +18,23 @@
 
 from aquilon.aqdb.model import NetGroupWhiteList
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddNetgroupWhitelist(BrokerCommand):
 
     required_parameters = ["netgroup"]
 
-    def render(self, session, netgroup, **_):
+    def render(self, session, netgroup, user, justification,
+               reason, logger, **_):
         NetGroupWhiteList.get_unique(session, name=netgroup, preclude=True)
         dbng = NetGroupWhiteList(name=netgroup)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbng)
+        cm.validate()
+
         session.add(dbng)
 
         session.flush()

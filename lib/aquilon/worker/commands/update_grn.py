@@ -19,13 +19,21 @@
 from aquilon.aqdb.model import Grn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandUpdateGrn(BrokerCommand):
 
-    def render(self, session, logger, grn, eon_id, rename_to, disabled, **_):
+    def render(self, session, logger, grn, eon_id, rename_to, disabled,
+               user, justification, reason, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config, usable_only=False)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbgrn)
+        cm.validate()
+
         if rename_to:
             Grn.get_unique(session, rename_to, preclude=True)
             dbgrn.grn = rename_to

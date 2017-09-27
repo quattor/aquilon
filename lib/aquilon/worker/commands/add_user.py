@@ -20,6 +20,7 @@ from sqlalchemy.sql import func
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import User
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddUser(BrokerCommand):
@@ -27,7 +28,7 @@ class CommandAddUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, autouid, gid, full_name,
-               home_directory, **_):
+               home_directory, user, justification, reason, logger, **_):
         User.get_unique(session, username, preclude=True)
 
         if autouid:
@@ -45,6 +46,12 @@ class CommandAddUser(BrokerCommand):
 
         dbuser = User(name=username, uid=uid, gid=gid, full_name=full_name,
                       home_dir=home_directory)
+
+        # Validate ChangeManagement
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm.consider(dbuser)
+        cm.validate()
+
         session.add(dbuser)
 
         session.flush()
