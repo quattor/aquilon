@@ -187,6 +187,13 @@ class QIPRefresh(object):
             for addr in qipinfo["DefaultRouters"].split(","):
                 routers.append(IPv4Address(text_type(addr)))
 
+        if self.precreated_compartments_only and ("UDF" not in qipinfo or "COMPARTMENT" not in qipinfo["UDF"]):
+            self.logger.client_info("Missing network compartment info and "
+                                    "precreated_compartments_only set to "
+                                    "True, ignoring {}.".format(address))
+            return None
+
+
         # Extract MS-specific information from the UDF field
         if "UDF" in qipinfo:
             if "LOCATION" in qipinfo["UDF"]:
@@ -233,7 +240,7 @@ class QIPRefresh(object):
                 elif self.precreated_compartments_only:
                     self.logger.client_info("Unknown network compartment {} and "
                                             "precreated_compartments_only set to "
-                                            "True, ignoring.".format(compartment_name))
+                                            "True, ignoring {}.".format(compartment_name, address))
                     return None
                 elif compartment_name not in self.unknown_compartments:
                     self.logger.client_info("Unknown compartment %s,"
