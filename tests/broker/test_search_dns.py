@@ -27,6 +27,27 @@ from brokertest import TestBrokerCommand
 
 
 class TestSearchDns(TestBrokerCommand):
+    def flatten_proto_dns_records(self, dns_records):
+        records = []
+        for record in dns_records:
+            record_list = []
+            for rdata in record.rdata:
+                rdetails = [
+                    rdata.DNSRecordType.Name(rdata.rrtype),
+                ]
+                for field in ['target', 'ttl', 'weight', 'port', 'priority']:
+                    if rdata.HasField(field):
+                        rdetails.append(getattr(rdata, field))
+                record_list.append(tuple(rdetails))
+
+            records.append((
+                record.fqdn,
+                record.environment_name,
+                tuple(sorted(record_list))
+            ))
+
+        return tuple(sorted(records))
+
     def testbyip(self):
         net = self.net["unknown0"]
         ip = net.usable[2]
@@ -183,6 +204,23 @@ class TestSearchDns(TestBrokerCommand):
                          "addralias1.aqd-unittest.ms.com,internal,A,%s" %
                          self.net["unknown0"].usable[15], command)
         self.matchclean(out, "utcolo", command)
+
+    def testproto(self):
+        command = ["search", "dns", "--ip",
+                   self.net["unknown0"].usable[2], "--fullinfo"]
+        dns_records = self.protobuftest(
+            command + ['--format', 'proto'], expect=2)
+        flatten_dns_records = self.flatten_proto_dns_records(dns_records)
+        expected_dns_records = (
+            (u'7.1.2.4.in-addr.arpa', u'internal', (
+                ('PTR', u'unittest00.one-nyp.ms.com'),
+             )),
+            (u'unittest00.one-nyp.ms.com', u'internal', (
+                ('A', u'4.2.1.7'),
+             )),
+        )
+        self.assertTupleEqual(
+            flatten_dns_records, expected_dns_records)
 
     def testused(self):
         command = ["search", "dns", "--used"]

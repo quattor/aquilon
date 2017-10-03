@@ -80,20 +80,41 @@ class EventsTestMixin(object):
             os.unlink(jsonfile)
 
     def _event_append_dns(self, fqdn, action, dns_environment='internal', dns_records=None):
-        dns_record_list = {
-            'fqdn': fqdn,
-            'environmentName': dns_environment,
-        }
-        if dns_records:
-            dns_record_list['rdata'] = dns_records
+        dns_record_list = []
+
+        # Prepare the elements to be read as lists
+        if not isinstance(fqdn, list):
+            fqdn = [fqdn, ]
+            if dns_records is not None:
+                dns_records = [dns_records, ]
+            dns_environment = [dns_environment, ]
+        elif not isinstance(dns_environment, list):
+            dns_environment = [dns_environment, ] * len(fqdn)
+
+        # Create records for each element of the list
+        for i in range(len(fqdn)):
+            _fqdn = fqdn[i]
+            _dns_records = (
+                None
+                if dns_records is None or i > len(dns_records)
+                else dns_records[i]
+            )
+            _dns_environment = dns_environment[i]
+
+            dns_record = {
+                'fqdn': _fqdn,
+                'environmentName': _dns_environment,
+            }
+            if _dns_records:
+                dns_record['rdata'] = _dns_records
+
+            dns_record_list.append(dns_record)
 
         self._expected_events.append({
             'action': action,
             'entityType': 'DNS_RECORD',
             'dnsRecordList': {
-                'records': [
-                    dns_record_list,
-                ],
+                'records': dns_record_list,
             },
         })
 

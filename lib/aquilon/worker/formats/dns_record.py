@@ -158,6 +158,35 @@ def ip6(ip):
     return "\\" + "\\".join(format(octet, "03o") for octet in octets)
 
 
+def process_reverse_ptr(container, record):
+    # If this is not an A record, nothing to do
+    if not isinstance(record, ARecord):
+        return
+
+    # If there is a specific reverse to be used, use it,
+    # or else fall back on the record FQDN
+    target = record.reverse_ptr
+    if target is None:
+        target = record.fqdn
+
+    # Prepare the record for which the FQDN will be the
+    # arpa representation of the IP address
+    reverse = container.add()
+    reverse.fqdn = (
+        inaddr_ptr(record.ip)
+        if isinstance(record.ip, IPv4Address)
+        else in6addr_ptr(record.ip)
+    )
+    reverse.environment_name = target.dns_environment.name
+
+    # Then add the PTR record to the reverse
+    ptr_record = reverse.rdata.add()
+    ptr_record.rrtype = ptr_record.PTR
+    ptr_record.target = str(target)
+    if record.ttl is not None:
+        ptr_record.ttl = record.ttl
+
+
 class DnsDump(list):
     def __init__(self, records, dns_domains):
         # Store a reference to the DNS domains to prevent them being evicted
@@ -277,6 +306,8 @@ class DnsDumpFormatter(ObjectFormatter):
             skeleton = entry.rdata.add()
             self.redirect_proto(record, skeleton)
 
+            process_reverse_ptr(container, record)
+
 ObjectFormatter.handlers[DnsDump] = DnsDumpFormatter()
 
 
@@ -292,5 +323,7 @@ class FqdnFormatter(ObjectFormatter):
 
             r_skeleton = skeleton.rdata.add()
             self.redirect_proto(record, r_skeleton)
+
+            process_reverse_ptr(container, record)
 
 ObjectFormatter.handlers[Fqdn] = FqdnFormatter()
