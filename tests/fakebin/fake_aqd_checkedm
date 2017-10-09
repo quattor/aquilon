@@ -32,9 +32,9 @@ WARN = 'warn'
 
 
 # TODO match DSDB re's
-TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
-SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
-EMERG_RE = re.compile("emergency")
+TCM_RE = re.compile(r"^(tcm=?)?([\d]{9})$", re.IGNORECASE)
+SN_RE = re.compile(r"^(sn(ow)?=)?([a-z]+[\d]+)$", re.IGNORECASE)
+EMERG_RE = re.compile(r"^(cmrs=)?emergency$", re.IGNORECASE)
 
 APPROVED_RESPONSE_MESSAGES = {
     "no_impact": "Operation does not impact production.",
@@ -131,7 +131,7 @@ def main(args):
         if not just.tcm and not just.sn and just.emergency:
             stdout_and_exit(status='Permitted',
                             msg=PERMITTED_RESPONSE_MESSAGES["no_just_emergency"])
-        if just.tcm and just.tcm == "666":
+        if just.tcm and just.tcm == "666666666":
             print('Simulating unknown error. Making json not parsable.')
         if args.disable_edm:
             stdout_and_exit(status='Approved', msg=APPROVED_RESPONSE_MESSAGES["edm_disabled"])
@@ -198,20 +198,25 @@ class Justification(object):
     def __init__(self, justification):
         if not justification:
             raise ChangeManagementError(EXCEPTION_MESSAGES["no_just"])
+
         self.emergency = False
-        if EMERG_RE.search(justification):
-            self.emergency = True
-            justification = justification.replace('emergency,', '').replace(',emergency', '').replace('emergency', '')
-
         self.tcm = None
-        result = TCM_RE.search(justification)
-        if result:
-            self.tcm = result.groups()[0]
-
         self.sn = None
-        result = SN_RE.search(justification)
-        if result:
-            self.sn = result.groups()[0]
+
+        for just in justification.split(','):
+            if EMERG_RE.search(just):
+                self.emergency = True
+
+            result = TCM_RE.search(just)
+            if result:
+                self.tcm = result.groups()[1]
+
+            result = SN_RE.search(just)
+            if result:
+                self.sn = result.groups()[2]
+
+        if self.tcm and self.sn and not self.emergency:
+            raise ChangeManagementError(EXCEPTION_MESSAGES["invalid_just"])
 
         if not (self.tcm or self.sn or self.emergency):
             raise ChangeManagementError(EXCEPTION_MESSAGES["invalid_just"])
@@ -270,11 +275,8 @@ class ChangeManagementDecission(object):
 
     def __init__(self, metadata, _default_mode):
         self._default_mode = _default_mode
-        try:
-            metadata = json.loads(metadata)
-            self.metadata = metadata if metadata else {}
-        except Exception as e:
-            raise ChangeManagementError(e)
+        metadata = json.loads(metadata)
+        self.metadata = metadata if metadata else {}
         self.test_eonid()
 
     def test_eonid(self):
@@ -334,11 +336,11 @@ class ChangeManagementDecission(object):
         if self.enforce_validation:
             return sorted(self.envs_edm_check,
                           key=lambda x: self.environment_ranking[x],
-                          reverse=True)[0]  # This fancy lambda now just return 'prod'
+                          reverse=True)[0].upper()  # This fancy lambda now just return 'prod'
         elif self._taget_environments_in_scope():
             return sorted(self._taget_environments_in_scope(),
                           key=lambda x: self.environment_ranking[x],
-                          reverse=True)[0]  # This return one of the impacted envs which has active
+                          reverse=True)[0].upper()  # This return one of the impacted envs which has active
             # lifecycle statuses and if most highest impact ranking
         else:
             return None

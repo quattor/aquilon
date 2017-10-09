@@ -199,9 +199,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "utsvc", "--instance", "utsi2"]
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ["map", "service", "--organization", "ms",
-                   "--service", "utsvc", "--instance", "utsi2",
-                   "--justification", "tcm=12345678"]
+        command += self.valid_just_tcm
         self.noouttest(command)
 
     def test_360_unmap_service(self):
@@ -209,9 +207,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "utsvc", "--instance", "utsi2"]
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ["unmap", "service", "--organization", "ms",
-                   "--service", "utsvc", "--instance", "utsi2",
-                   "--justification", "tcm=12345678"]
+        command += self.valid_just_tcm
         self.noouttest(command)
 
     def test_370_map_service(self):
@@ -219,9 +215,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "vmseasoning", "--instance", "pepper"]
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ["map", "service", "--organization", "ms",
-                   "--service", "vmseasoning", "--instance", "pepper",
-                   "--justification", "tcm=12345678"]
+        command += self.valid_just_tcm
         self.noouttest(command)
 
     def test_380_unmap_service(self):
@@ -229,9 +223,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "vmseasoning", "--instance", "pepper"]
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
-        command = ["unmap", "service", "--organization", "ms",
-                   "--service", "vmseasoning", "--instance", "pepper",
-                   "--justification", "tcm=12345678"]
+        command += self.valid_just_tcm
         self.noouttest(command)
 
     def test_400_host_setup(self):
