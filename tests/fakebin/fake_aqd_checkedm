@@ -80,6 +80,8 @@ ENFORCED_CONTROL_COMMAND_LIST = ['add_domain', 'del_domain', 'add_address', 'del
                                  'del_grn', 'update_grn', 'add_user', 'del_user', 'update_user',
                                  'permission', 'update_archetype', 'update_realm']
 
+TEMPLATE_COMMANDS = ['add_domain', 'del_domain', 'update_domain', 'deploy', 'rollback'] # manage command will not have eonid set
+
 
 def create_parser():
     parser = ArgumentParser()
@@ -273,6 +275,14 @@ class ChangeManagementDecission(object):
             self.metadata = metadata if metadata else {}
         except Exception as e:
             raise ChangeManagementError(e)
+        self.test_eonid()
+
+    def test_eonid(self):
+        command = self.metadata['command']
+        if command in TEMPLATE_COMMANDS and not self.eonid:
+            raise Exception('Template commands should have eonid set')
+        if command not in TEMPLATE_COMMANDS and self.eonid:
+            raise Exception('Not Template related commands should not have eonid set')
 
     def get_ticket(self):
         ticket_input = self.metadata.get("ticket", '')
