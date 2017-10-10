@@ -68,7 +68,7 @@ class ChangeManagement(object):
         self.logger = logger
 
         self.dict_of_impacted_envs = {}
-        self.eonid = 6980  # to be calculated for each target
+        self.eonid = None  # to be calculated for each target
         self.enforce_validation = False
 
         if self.config.has_option("change_management", "enable"):
@@ -177,6 +177,7 @@ class ChangeManagement(object):
         Returns:
 
         """
+        self.eonid = 6980
         if obj.requires_change_manager:
             self.enforce_validation = True
 
