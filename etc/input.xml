@@ -4517,6 +4517,9 @@
 	    <option name="dns_environment" type="string">The name of the environment (defaults to 'internal')</option>
 	</optgroup>
 	<transport method="get" path="command/dump_dns"/>
+	<format name="proto">
+	    <message_class name="DNSRecordList" module="aqddnsdomains_pb2"/>
+	</format>
     </command>
 
     <command name="add_metacluster">
