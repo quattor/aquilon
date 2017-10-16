@@ -87,6 +87,8 @@ class QIPRefresh(object):
         # Used to limit the number of warnings
         self.unknown_syslocs = set()
         self.unknown_compartments = set()
+        self.ignored_compartments = set()
+        self.missing_compartments = False
 
         # Load existing networks. We have to load all, otherwise we won't be
         # able to fix networks with wrong location
@@ -188,9 +190,11 @@ class QIPRefresh(object):
                 routers.append(IPv4Address(text_type(addr)))
 
         if self.precreated_compartments_only and ("UDF" not in qipinfo or "COMPARTMENT" not in qipinfo["UDF"]):
-            self.logger.client_info("Missing network compartment info and "
+            if not self.missing_compartments:
+                self.logger.client_info("Missing network compartment info and "
                                     "precreated_compartments_only set to "
-                                    "True, ignoring {}.".format(address))
+                                    "True, skipping these networks.")
+                self.missing_compartments = True
             return None
 
 
@@ -232,15 +236,19 @@ class QIPRefresh(object):
                 compartment_name = qipinfo["UDF"]["COMPARTMENT"].strip().lower()
                 if self.ignore_net_compartments and \
                         self.ignore_net_compartments.match(compartment_name):
-                    self.logger.client_info("Network compartment {} matches 'ignore_network_compartments_regex', "
-                                            "ignoring.".format(compartment_name))
+                    if compartment_name not in self.ignored_compartments:
+                        self.logger.client_info("Network compartment {} matches 'ignore_network_compartments_regex', "
+                                            "skipping these networks.".format(compartment_name))
+                        self.ignored_compartments.add(compartment_name)
                     return None
                 if compartment_name in self.compartments:
                     compartment = self.compartments[compartment_name]
                 elif self.precreated_compartments_only:
-                    self.logger.client_info("Unknown network compartment {} and "
+                    if compartment_name not in self.unknown_compartments:
+                        self.logger.client_info("Unknown network compartment {} and "
                                             "precreated_compartments_only set to "
-                                            "True, ignoring {}.".format(compartment_name, address))
+                                            "True, skipping these networks.".format(compartment_name))
+                        self.unknown_compartments.add(compartment_name)
                     return None
                 elif compartment_name not in self.unknown_compartments:
                     self.logger.client_info("Unknown compartment %s,"
