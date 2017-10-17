@@ -191,7 +191,6 @@ unmap_grn_max_list_size =
 user_delete_limit = 1000
 
 default_network_type = unknown
-vlan_types = storage, vmotion, user, unknown, vulcan-mgmt, transit
 
 auto_mac_start = 00:50:56:01:20:00
 auto_mac_end = 00:50:56:3f:ff:ff

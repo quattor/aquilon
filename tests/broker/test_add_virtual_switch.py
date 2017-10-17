@@ -38,6 +38,18 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "system/virtual_switch/port_groups", command)
 
+    def test_106_bind_custom_type(self):
+        net = self.net["autopg1"]
+        command = ["bind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip, "--type", "customtype", "--tag", "710"]
+        self.noouttest(command)
+
+    def test_107_unbind_custom_type(self):
+        net = self.net["autopg1"]
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip]
+        self.noouttest(command)
+
     def test_110_bind_portgroup(self):
         net = self.net["autopg1"]
         command = ["bind_port_group", "--virtual_switch", "utvswitch",
@@ -200,14 +212,6 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.matchoutput(out,
                          "Virtual Switch utvswitch already has a port group "
                          "with tag 710.",
-                         command)
-
-    def test_200_bind_bad_type(self):
-        net = self.net["autopg1"]
-        command = ["bind_port_group", "--virtual_switch", "utvswitch2",
-                   "--networkip", net.ip, "--type", "vcs", "--tag", "710"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown VLAN type 'vcs'. Valid values are: ",
                          command)
 
     def test_300_update_utvswitch2(self):

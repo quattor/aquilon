@@ -302,15 +302,6 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
             raise ArgumentError("{0} is full for {1:l}.".format(selected_pg,
                                                                 allocator))
     else:
-        config = Config()
-        vlan_types = [vlan.strip()
-                      for vlan in config.get("broker", "vlan_types").split(",")
-                      if vlan.strip()]
-        if port_group_name not in vlan_types:
-            raise ArgumentError("Port group %s does not match either a "
-                                "registered port group name, or a port "
-                                "group type." % port_group_name)
-
         # If the current port group matches the requirements, then we're done.
         if dbinterface.port_group in allocator.port_groups and \
            dbinterface.port_group.name == port_group_name:

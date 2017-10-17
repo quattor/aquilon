@@ -34,13 +34,6 @@ class CommandBindPortGroup(BrokerCommand):
                                              compel=True)
         dbnetwork = get_net_id_from_ip(session, networkip)
 
-        vlan_types = [vlan.strip()
-                      for vlan in self.config.get("broker", "vlan_types").split(",")
-                      if vlan.strip()]
-        if type not in vlan_types:
-            raise ArgumentError("Unknown VLAN type '%s'. Valid values are: %s."
-                                % (type, ", ".join(sorted(vlan_types))))
-
         # The tag and usage cannot be changed if the PortGroup object already
         # exists
         if dbnetwork.port_group:
