@@ -18,7 +18,7 @@
 
 import re
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
 from aquilon.aqdb.types import CpuType
@@ -351,11 +351,17 @@ class CommandUpdateMachine(BrokerCommand):
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
-
         with plenaries.transaction():
             dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbmachine, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
+            if dbmachine.host and dbmachine.host.archetype.name == 'aurora':
+                try:
+                    dsdb_runner.show_host(dbmachine.fqdn)
+                except ProcessException as e:
+                    raise ArgumentError("Could not find host in DSDB: "
+                                        "%s" % e)
+            else:
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
 
         return
 

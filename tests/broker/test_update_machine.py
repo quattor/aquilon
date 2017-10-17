@@ -571,6 +571,32 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "URI:", command)
 
+    def test_2040_check_aurora_host_machine(self):
+        ip = self.net["tor_net_0"].usable[4]
+        command = ["show", "host", "--hostname", "test-aurora-default-os.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: test-aurora-default-os.ms.com [{}]".format(ip), command)
+
+    def test_2045_update_aurora_host_machine(self):
+        new_ip = self.net["tor_net_0"].usable[7]
+        self.dsdb_expect("show_host -host_name test-aurora-default-os")
+        command = ["update", "machine", "--hostname", "test-aurora-default-os.ms.com", "--ip", new_ip] + self.valid_just_sn
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_2050_verify_aurora_host_machine(self):
+        ip = self.net["tor_net_0"].usable[7]
+        command = ["show", "host", "--hostname", "test-aurora-default-os.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: test-aurora-default-os.ms.com [{}]".format(ip), command)
+
+    def test_2055_update_aurora_host_machine_back(self):
+        ip = self.net["tor_net_0"].usable[4]
+        self.dsdb_expect("show_host -host_name test-aurora-default-os")
+        command = ["update", "machine", "--hostname", "test-aurora-default-os.ms.com", "--ip", ip] + self.valid_just_sn
+        self.noouttest(command)
+        self.dsdb_verify()
+
     # These tests would be nice, but twisted just ignores the permission
     # on the files since we're still the owner.  Which is good, but means
     # the recovery routines can't be easily tested.
