@@ -140,58 +140,43 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_301_leavevendor(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
-                   "--newmodel=utmedium-v1"]
+                   "--newvendor=virtual"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot update model name or vendor without "
-                         "updating any existing machines",
-                         command)
-
-    def test_302_dupename(self):
-        command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
-                   "--newmodel=utmedium", "--newvendor=utvendor",
-                   "--update_existing_machines"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Model utmedium, vendor utvendor already exists.",
+                         "Cannot update vendor without "
+                         "updating any existing machines.",
                          command)
 
     def test_310_updatename(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--newmodel=utmedium-v1", "--update_existing_machines"]
-        self.noouttest(command)
+        err = self.badoptiontest(command)
+        self.matchoutput(err, "no such option: --newmodel", command)
 
     def test_311_verifyname(self):
         command = ["show_model", "--model=utmedium-v1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Vendor: utvendor Model: utmedium-v1", command)
-
-    def test_312_verifycat(self):
-        command = ["cat", "--machine=evm1"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         'include { "hardware/machine/utvendor/utmedium-v1" }',
-                         command)
+        out = self.notfoundtest(command)
 
     def test_320_updatevendor(self):
-        command = ["update_model", "--model=utmedium-v1", "--vendor=utvendor",
+        command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--newvendor=virtual", "--update_existing_machines"]
         self.noouttest(command)
 
     def test_321_verifyvendor(self):
-        command = ["show_model", "--model=utmedium-v1"]
+        command = ["show_model", "--model=utmedium"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Vendor: virtual Model: utmedium-v1", command)
+        self.matchoutput(out, "Vendor: virtual Model: utmedium", command)
 
     def test_322_verifycat(self):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         'include { "hardware/machine/virtual/utmedium-v1" }',
+                         'include { "hardware/machine/virtual/utmedium" }',
                          command)
 
     def test_330_restore(self):
-        command = ["update_model", "--model=utmedium-v1", "--vendor=virtual",
-                   "--newvendor=utvendor", "--newmodel=utmedium",
+        command = ["update_model", "--model=utmedium", "--vendor=virtual",
+                   "--newvendor=utvendor",
                    "--update_existing_machines"]
         self.noouttest(command)
 
