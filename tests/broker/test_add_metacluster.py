@@ -53,6 +53,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                 Building: ut
                   Fullname: Unittest-building
                   Address: unittest address
+                  Network Devices Require Racks: True
                   Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: %s
               Build Status: build
@@ -95,6 +96,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                 Building: ut
                   Fullname: Unittest-building
                   Address: unittest address
+                  Network Devices Require Racks: True
                   Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: 99
               Build Status: build

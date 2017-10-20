@@ -45,6 +45,7 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
               Building: np
                 Fullname: one-nyp
                 Address: 1 NY Plaza
+                Network Devices Require Racks: False
                 Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Comments: Some netenv comments
             """, command)

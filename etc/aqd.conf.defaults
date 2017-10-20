@@ -241,7 +241,6 @@ building_feed = /v/campus/ny/appl/aquilon/aqd/data/manhattan_ingress/Building_IT
 
 [hardware_network_device]
 default_archetype = netinfra
-restrict_building = False
 
 [archetype_aquilon]
 default_personality = inventory

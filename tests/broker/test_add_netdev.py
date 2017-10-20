@@ -120,7 +120,35 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
                           ip=ip, interface="xge49")
 
-    def test_125_add_switch_in_building(self):
+    def test_125_add_switch_in_building_fail(self):
+        # By default all buildings are restricted to use  racks
+        ip = self.net["ut_net_mgmt"].usable[3]
+        command = ["add", "network_device", "--type", "bor",
+                          "--network_device", "switchinbuilding.aqd-unittest.ms.com",
+                          "--ip", ip, "--interface", "xge49",
+                          "--iftype", "physical",
+                          "--building", "ut", "--model", "temp_switch"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err,
+                         "This building is restricted to use racks as location: "
+                         "--rack must be specified when adding new network devices.",
+                         command)
+
+    def test_126_allow_add_switch_in_building(self):
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Network Devices Require Racks: True",
+                         command)
+        command = ["update", "building", "--building", "ut", "--nonetdev_require_rack"]
+        self.successtest(command)
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Network Devices Require Racks: False",
+                         command)
+
+    def test_127_add_switch_in_building(self):
         # Located in a building, not in a rack
         ip = self.net["ut_net_mgmt"].usable[3]
         self.dsdb_expect_add("switchinbuilding.aqd-unittest.ms.com", ip, "xge49")

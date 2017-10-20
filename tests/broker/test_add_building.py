@@ -58,7 +58,7 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_addr 1 NY Plaza")
         self.dsdb_expect_add_campus_building("ny", "np")
         command = ["add_building", "--building", "np", "--city", "ny",
-                   "--fullname", "one-nyp", "--address", "1 NY Plaza"]
+                   "--fullname", "one-nyp", "--address", "1 NY Plaza", "--nonetdev_require_rack"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -113,6 +113,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: bu
               Fullname: bu
               Address: 12 Cherry Lane
+              Network Devices Require Racks: True
               Location URI: assetinventory://003428
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
@@ -134,6 +135,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: fo
               Fullname: fo
               Address: 64 Force Lane
+              Network Devices Require Racks: True
               Location URI: assetinventory://003430
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
@@ -178,6 +180,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: cards
               Fullname: cards
               Address: Nowhere
+              Network Devices Require Racks: True
               Location URI: assetinventory://003427
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ta, City ex]
             """, command)
@@ -222,6 +225,7 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.internalerrortest(command)
         self.matchoutput(out, "Value for parameter address is not valid UTF-8",
                          command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)

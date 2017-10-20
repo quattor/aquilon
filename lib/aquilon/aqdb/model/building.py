@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Building is a subclass of Location """
 
-from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy import Column, ForeignKey, String, Boolean
 
 from aquilon.aqdb.model import Location, City, Campus
 
@@ -33,5 +33,7 @@ class Building(Location):
     id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
     address = Column(String(255), nullable=False)
+
+    netdev_rack = Column(Boolean, nullable=False, default=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)

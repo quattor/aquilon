@@ -3048,6 +3048,7 @@
 	<optgroup>
 	    <option name="fullname" type="string">Full, descriptive name</option>
 	    <option name="uri" type="string">Reference to a unique identifier in another system.</option>
+	    <option name="netdev_require_rack" type="boolean">Restrict this building to require racks as location for network devices rather than building (Default: True)</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -3067,6 +3068,7 @@
 	    <option name="fullname" type="string">Full, descriptive name</option>
 	    <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
 	    <option name="uri" type="string">Reference to a unique identifier in another system.</option>
+	    <option name="netdev_require_rack" type="boolean">Restrict this building to require racks as location for network devices rather than building</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>

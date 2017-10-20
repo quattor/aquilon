@@ -35,6 +35,8 @@ class LocationFormatter(ObjectFormatter):
             details.append(indent + "  Column: %s" % location.rack_column)
         elif isinstance(location, Building):
             details.append(indent + "  Address: %s" % location.address)
+            details.append(indent + "  Network Devices Require "
+                                    "Racks: %s" % location.netdev_rack)
             if location.uri:
                 details.append(indent + "  Location URI: %s" % location.uri)
         if location.comments:

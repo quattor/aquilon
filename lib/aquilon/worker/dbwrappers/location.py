@@ -105,7 +105,7 @@ def validate_uri(uri, clsname, name, force, logger):
     return uri
 
 def update_location(dblocation, fullname=None, default_dns_domain=None,
-                    comments=None, uri=None, force_uri=None, logger=None):
+                    comments=None, uri=None, netdev_require_rack=None, force_uri=None, logger=None):
     """ Update common location attributes """
 
     if fullname is not None:
@@ -114,6 +114,9 @@ def update_location(dblocation, fullname=None, default_dns_domain=None,
     if uri is not None:
         dblocation.uri = validate_uri(uri, dblocation.__class__.__name__,
                                       dblocation.name, force_uri, logger)
+
+    if netdev_require_rack is not None:
+        dblocation.netdev_rack = netdev_require_rack
 
     if default_dns_domain is not None:
         if default_dns_domain:
