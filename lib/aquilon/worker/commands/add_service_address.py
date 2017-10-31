@@ -18,11 +18,11 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import ServiceAddress, Host, Fqdn, DnsDomain
+from aquilon.aqdb.model import ServiceAddress, Host, Fqdn, DnsDomain, Bunker
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.interface import get_interfaces
+from aquilon.worker.dbwrappers.interface import get_interfaces, generate_ip
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.search import search_next
@@ -36,7 +36,7 @@ class CommandAddServiceAddress(BrokerCommand):
     required_parameters = ["name"]
 
     def render(self, session, logger, plenaries, service_address, shortname, prefix,
-               dns_domain, ip, name, interfaces, hostname, cluster, metacluster,
+               dns_domain, ip, ipfromtype, name, interfaces, hostname, cluster, metacluster,
                resourcegroup, network_environment, map_to_primary, shared,
                comments, user, justification, reason, exporter, **kwargs):
 
@@ -65,6 +65,25 @@ class CommandAddServiceAddress(BrokerCommand):
         ServiceAddress.get_unique(session, name=name, holder=holder,
                                   preclude=True)
 
+        net_location_set = None
+
+        if ipfromtype is not None:
+            if not self.config.getboolean("site", "ipfromtype"):
+                raise ArgumentError("--ipfromtype option is not allowed to be "
+                                    "used in this Aquilon broker instance.")
+            # We only care about Bunker locations to filter Networks assigned correct locations
+            # ipfromtype only works for bunkerized networks
+            if isinstance(toplevel_holder, Host):
+                net_location_set = set([toplevel_holder.hardware_entity.location.bunker]) \
+                    if toplevel_holder.hardware_entity.location.bunker else None
+            elif hasattr(toplevel_holder, 'members'):
+                # Metacluster
+                net_location_set = toplevel_holder.member_hosts_locations(location_class=Bunker)
+            elif hasattr(toplevel_holder, 'hosts'):
+                # Cluster
+                net_location_set = toplevel_holder.member_locations(location_class=Bunker)
+            if not net_location_set:
+                raise ArgumentError('Host(s) location is not inside a Bunker, --ipfromtype cannot be used.')
         if shared:
             if not isinstance(toplevel_holder, Host):
                 raise ArgumentError("The --shared option works only "
@@ -92,6 +111,8 @@ class CommandAddServiceAddress(BrokerCommand):
             logger.info("Selected FQDN {0!s} for {1:l}."
                         .format(service_address, toplevel_holder))
             audit_results.append(('service_address', service_address))
+
+        ip = generate_ip(session, logger, None, net_location_set, ip=ip, ipfromtype=ipfromtype)
 
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, service_address, ip,

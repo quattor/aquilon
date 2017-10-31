@@ -30,7 +30,22 @@ from machinetest import MachineTestMixin
 
 class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
-    def test_100_add_unittest02(self):
+    def test_100_add_unittest02_fail_ipfromtype(self):
+        # Test fail to use --ipfromtype for hosts not in bunker
+        osver = self.config.get("unittest", "linux_version_prev")
+        command = ["add", "host",
+                   "--hostname", "unittest02.one-nyp.ms.com", "--ipfromtype", "localvip",
+                   "--machine", "ut3c5n10", "--domain", "unittest",
+                   "--buildstatus", "build", "--archetype", "aquilon",
+                   "--osname", "linux", "--osversion", osver,
+                   "--personality", "compileserver",
+                   "--comments", "Some host comments"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Host location is not "
+                              "inside a bunker, --ipfromtype cannot be used.",
+                         command)
+
+    def test_101_add_unittest02(self):
         ip = self.net["unknown0"].usable[0]
         # DSDB sync uses the machine comments, not the host comments
         self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac,
@@ -850,6 +865,36 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Slot #16: ut3c5n16 (no hostname)
             """ % (ip, ip.mac, ip, hostname),
             command)
+
+    def test_805_ipfromtype_host_setup(self):
+        # Reuse host in bunker bucket2.ut
+        command = ["show", "host", "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        self.dsdb_expect_delete(self.net["hp_eth0"].usable[17])
+        self.statustest(["del_host", "--hostname", "aquilon67.aqd-unittest.ms.com"])
+        command = ["search", "network", "--type", "localvip", "--exact_location", "--bunker", "bucket2.ut", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        self.matchoutput(out, "Network: ut_bucket2_localvip", command)
+        self.dsdb_verify()
+
+    def test_810_ipfromtype_host(self):
+        # Reuse host in bunker bucket2.ut
+        ip = self.net["ut_bucket2_localvip"].usable[0]
+        mac = self.net["hp_eth0"].usable[17].mac
+        self.dsdb_expect_add("aquilon67.aqd-unittest.ms.com",
+                             ip, "eth0",
+                             mac)
+        self.noouttest(["add_host", "--hostname", "aquilon67.aqd-unittest.ms.com",
+                        "--archetype", "aquilon",
+                        "--machine", "ut9s03p17",
+                        "--ipfromtype", "localvip", "--sandbox", "%s/utsandbox" % self.user])
+        self.dsdb_verify()
+        command = ["show", "host", "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Provides: aquilon67.aqd-unittest.ms.com [{}]".format(ip), command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

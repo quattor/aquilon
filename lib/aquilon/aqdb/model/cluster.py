@@ -129,11 +129,10 @@ class Cluster(CompileableMixin, Base):
         def filter(dblocation, attr):
             if attr is None:
                 return dblocation
-            # TODO: This may return None. Do we care?
             return getattr(dblocation, attr)
 
-        return set(filter(host.hardware_entity.location, attr)
-                   for host in self.hosts)
+        return set([filter(host.hardware_entity.location, attr)
+                   for host in self.hosts if filter(host.hardware_entity.location, attr)])
 
     @property
     def minimum_location(self):

@@ -279,7 +279,10 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             machine = "ut9s03p%d" % port
-            self.delete_host(hostname, net.usable[port], machine,
+            ip = net.usable[port]
+            if hostname == 'aquilon67.aqd-unittest.ms.com':
+                ip = self.net["ut_bucket2_localvip"].usable[0]
+            self.delete_host(hostname, ip, machine,
                              manager_ip=mgmt_net.usable[port], justification=True)
 
     def test_300_del_ut10_hosts(self):

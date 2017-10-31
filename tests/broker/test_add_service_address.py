@@ -227,6 +227,93 @@ class TestAddServiceAddress(TestBrokerCommand):
         # External IP service addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
+    def test_620_add_service_address_ipfromtype_vip_setup(self):
+        ip = self.net["np_bucket2_vip"].network_address
+        command = ["show", "host", "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        command = ["search", "network", "--type", "vip", "--exact_location", "--bunker", "bucket2.ut", "--fullinfo"]
+        self.noouttest(command)
+        command = ["search", "network", "--type", "vip", "--exact_location", "--bunker", "bucket2.np", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.np", command)
+        self.matchoutput(out, "IP: {}".format(ip), command)
+        self.matchoutput(out, "Network: np_bucket2_vip", command)
+        self.matchoutput(out, "Network Type: vip", command)
+
+    def test_625_add_service_address_ipfromtype_vip(self):
+        # Test nextip generation for VIP serviceaddreses
+        ip = self.net["np_bucket2_vip"].usable[0]
+        service_addr = "testaddress.ms.com"
+        self.dsdb_expect_add(service_addr, ip)
+        command = ["add", "service", "address", "--hostname", "aquilon67.aqd-unittest.ms.com",
+                   "--service_address", service_addr, "--name", "test", "--ipfromtype", "vip"]
+        self.successtest(command)
+        command = ["show", "service", "address", "--name", "test",
+                   "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service Address: test", command)
+        self.matchoutput(out, "Bound to: Host aquilon67.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Address: testaddress.ms.com [{}]".format(ip),
+                         command)
+        self.dsdb_verify()
+
+    def test_630_add_service_address_ipfromtype_localvip_setup(self):
+        ip1 = self.net["ut_bucket2_localvip"].network_address
+        ip2 = self.net["np_bucket2_localvip"].network_address
+        command = ["search", "network", "--type", "localvip", "--exact_location", "--bunker", "bucket2.ut", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        self.matchoutput(out, "IP: {}".format(ip1), command)
+        self.matchoutput(out, "Network: ut_bucket2_localvip", command)
+
+        command = ["search", "network", "--type", "localvip", "--exact_location", "--bunker", "bucket2.np", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.np", command)
+        self.matchoutput(out, "IP: {}".format(ip2), command)
+        self.matchoutput(out, "Network: np_bucket2_localvip", command)
+
+    def test_635_add_service_address_ipfromtype_localvip(self):
+        # Test nextip generation for localvip serviceaddreses
+        ip = self.net["ut_bucket2_localvip"].usable[1]
+        service_addr = "testlocalvipaddress.ms.com"
+        self.dsdb_expect_add(service_addr, ip)
+        command = ["add", "service", "address", "--hostname", "aquilon67.aqd-unittest.ms.com",
+                   "--service_address", service_addr, "--name", "test2", "--ipfromtype", "localvip"]
+        self.successtest(command)
+        command = ["show", "service", "address", "--name", "test2",
+                   "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service Address: test2", command)
+        self.matchoutput(out, "Bound to: Host aquilon67.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Address: testlocalvipaddress.ms.com [{}]".format(ip),
+                         command)
+
+    def test_640_add_service_address_ipfromtype_not_bunker(self):
+        # Test nextip generation limited to bunkers only
+        command = ["add", "service", "address", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--service_address", "dummy.ms.com", "--name", "test3", "--ipfromtype", "localvip"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Host(s) location is not "
+                              "inside a Bunker, --ipfromtype cannot be used.", command)
+
+    def test_645_test_del_ipfromtype_test(self):
+        ip1 = self.net["np_bucket2_vip"].usable[0]
+        ip2 = self.net["ut_bucket2_localvip"].usable[1]
+        self.dsdb_expect_delete(ip1)
+        command = ["del", "service", "address", "--hostname", "aquilon67.aqd-unittest.ms.com",
+                   "--name", "test"]
+        self.successtest(command)
+        self.dsdb_verify()
+        self.dsdb_expect_delete(ip2)
+        command = ["del", "service", "address", "--hostname", "aquilon67.aqd-unittest.ms.com",
+                   "--name", "test2"]
+        self.successtest(command)
+        self.dsdb_verify()
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddServiceAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -45,3 +45,6 @@ mean = %(srcdir)s/tests/fakebin/fake_mean
 # (syntax checking will still be performed)
 enable = True
 extra_options = --mode enforce --disable_edm --edm-instance qa
+
+[site]
+ipfromtype = True

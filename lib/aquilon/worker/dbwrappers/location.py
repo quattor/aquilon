@@ -24,6 +24,7 @@ from aquilon.utils import validate_nlist_key
 from aquilon.config import Config
 from aquilon.worker.processes import run_command
 
+
 def get_location(session, query_options=None, compel=False, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
     # Extract location-specific options from kwargs

@@ -69,6 +69,10 @@ class MetaCluster(Cluster):
             for dbobj in dbcls.all_objects():
                 yield dbobj
 
+    def member_hosts_locations(self, location_class=None):
+        return set.union(*[cluster.member_locations(location_class=location_class)
+                           for cluster in self.members])
+
     def validate(self):
         """ Validate metacluster constraints """
         if self.max_clusters is not None and len(self.members) > self.max_clusters:

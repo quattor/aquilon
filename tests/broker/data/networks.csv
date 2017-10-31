@@ -3,6 +3,8 @@
 # This file contains the pre-defined networks for the unit tests.
 #
 name,cidr,type,autocreate,loc_type,loc_name,side,comments
+np_bucket2_vip,4.0.0.0/26,vip,True,bunker,bucket2.np,a,,
+np_bucket2_localvip,4.0.0.64/26,localvip,True,bunker,bucket2.np,a,,
 netuc_netmgmt_1a,4.1.0.0/26,management,False,building,np,a,
 netuc_netmgmt_1b,4.1.0.64/26,management,False,building,np,b,
 netuc_transit_1a,4.1.1.0/26,transit,False,building,np,a,
@@ -68,4 +70,5 @@ ut10_oob,4.2.30.64/26,management,True,building,ut,a,,
 ut11_oob,4.2.30.128/26,management,True,building,ut,a,,
 ut12_oob,4.2.30.192/26,management,True,building,ut,a,,
 ut14_oob,4.2.31.0/26,management,True,building,ut,a,,
+ut_bucket2_localvip,4.2.31.64/26,localvip,True,bunker,bucket2.ut,a,,
 ipv6_test,2001:DB8::/96,unknown,True,building,ut,a,,

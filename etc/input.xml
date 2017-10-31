@@ -1003,6 +1003,7 @@
 		<option name="ip" type="ip">IP address</option>
 		<option name="ipfromip" type="ip">Choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">Choose IP address in subnet of system</option>
+		<option name="ipfromtype" type="string">Generate next IP based on type ('vip' or 'localvip') and host location</option>
 		<option name="autoip" type="flag">Choose IP address based on MAC/switch</option>
 	    </optgroup>
 	</optgroup>
@@ -5837,7 +5838,10 @@
 	</optgroup>
 	<optgroup>
 	    <option name="interfaces" type="string">Comma separated list of interfaces</option>
-	    <option name="ip" type="ip">IP address</option>
+	    <optgroup fields="one">
+		<option name="ip" type="ip">IP address</option>
+		<option name="ipfromtype" type="string">Generate next IP based on type ('vip' or 'localvip') and resource location</option>
+	    </optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="dns_domain" type="string" requires="prefix">Override the default DNS domain for --prefix</option>
 	    <option name="comments" type="string">Comments</option>
