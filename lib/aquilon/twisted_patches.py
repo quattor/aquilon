@@ -200,6 +200,7 @@ def integrate_logging(config, logging_conf=None):
 
     if os.path.exists(logging_conf):
         logging.notifydlogfile = config.get("broker", "aq_notifyd_logfile")
+        logging.cmlogfile = config.get("broker", "cmlogfile")
         logging.BridgeLogHandler = BridgeLogHandler
         logging.config.fileConfig(logging_conf, disable_existing_loggers=False)
     else:
