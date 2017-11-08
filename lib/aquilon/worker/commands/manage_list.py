@@ -142,6 +142,12 @@ class CommandManageList(BrokerCommand):
         cm.consider(objects)
         cm.validate()
 
+        if isinstance(dbsource, Sandbox) and not dbsource_author and not force:
+            raise ArgumentError("Unable to determine location of sandbox due to "
+                                "missing user record. Please manually verify "
+                                "there are no uncommitted and unpublished "
+                                "changes and then re-run using --force.")
+
         auto_compile = False
         # If target is a sandbox
         if sandbox and isinstance(dbsource, Sandbox) and not skip_auto_compile:

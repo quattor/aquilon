@@ -35,6 +35,12 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --orphaned"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
+        command = "manage --hostname unittest02.one-nyp.ms.com --domain unittest"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Unable to determine location of sandbox due to "
+                              "missing user record. Please manually verify "
+                              "there are no uncommitted and unpublished "
+                              "changes and then re-run using --force.", command)
         command = "manage --hostname unittest02.one-nyp.ms.com --domain unittest --force"
         self.statustest(command.split(" "))
         command = "reconfigure --hostname unittest02.one-nyp.ms.com"
