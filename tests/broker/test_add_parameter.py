@@ -135,13 +135,15 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         self.searchoutput(out,
                           r'Following required parameters have not been specified:\s*'
                           r'Parameter Definition: windows \[required\]\s*'
-                          r'Type: json\s*'
+                          r'Archetype: aquilon\s*'
+                          r'Value Type: json\s*'
                           r'Schema: {\s*'
                           r'(^    .*\n)+\s*'
                           r'Template: windows\s*'
                           r'Activation: dispatch\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*'
+                          r'Archetype: aquilon\s*'
+                          r'Value Type: string\s*'
                           r'Template: foo',
                           command)
 

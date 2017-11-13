@@ -315,7 +315,9 @@ class TestAddParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'Feature Binding: pre_host\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*',
+                          r'Feature: pre_host\s*'
+                          r'Type: host\s*'
+                          r'Value Type: string\s*',
                           command)
 
     def test_135_verify_diff(self):
@@ -421,12 +423,16 @@ class TestAddParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'Feature Binding: bios_setup\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*',
+                          r'Feature: bios_setup\s*'
+                          r'Type: hardware\s*'
+                          r'Value Type: string\s*',
                           command)
         self.searchoutput(out,
                           r'Feature Binding: src_route\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*',
+                          r'Feature: src_route\s*'
+                          r'Type: interface\s*'
+                          r'Value Type: string\s*',
                           command)
 
     def test_310_search_parameter(self):

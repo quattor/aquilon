@@ -133,7 +133,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.output_equals(out, """
             Parameter Definition: testrequired [required]
-              Type: string
+              Archetype: aquilon
+              Value Type: string
               Template: foo
               Activation: dispatch
             """, cmd)
@@ -186,7 +187,9 @@ class TestAddParameterDefinition(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.output_equals(out, """
             Parameter Definition: testrequired [required]
-              Type: string
+              Feature: pre_host
+                Type: host
+              Value Type: string
             """, cmd)
 
     def test_220_clean_path(self):
@@ -390,12 +393,13 @@ class TestAddParameterDefinition(TestBrokerCommand):
             if params.get("required", False):
                 pattern += r' \[required\]'
             pattern += r"\s*"
+            pattern += r'Archetype: aquilon\s+'
             if "type" in params:
-                pattern += "Type: " + params["type"] + r"\s*"
+                pattern += "Value Type: " + params["type"] + r"\s*"
                 if params["type"] == "json" and "schema" in params:
                     pattern += r"Schema: \{\n(^            .*\n)+\s*\}\s*"
             else:
-                pattern += r"Type: string\s*"
+                pattern += r"Value Type: string\s*"
             pattern += r"Template: foo\s*"
             if "activation" in params:
                 pattern += "Activation: " + params["activation"] + r"\s*"
@@ -429,6 +433,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
             self.assertEqual(paramdef.default, "")
             self.assertEqual(paramdef.is_required,
                              params.get("required", False))
+            self.assertEqual(paramdef.archetype, "aquilon")
             if "activation" in params:
                 val = self.activation_type.values_by_name[params["activation"].upper()]
                 self.assertEqual(paramdef.activation, val.number)
@@ -446,13 +451,14 @@ class TestAddParameterDefinition(TestBrokerCommand):
             pattern = "Parameter Definition: " + path
             if params.get("required", False):
                 pattern += r' \[required\]'
-            pattern += r"\s*"
+            pattern += r'\s*Feature: pre_host\s*'
+            pattern += r'Type: host\s*'
             if "type" in params:
-                pattern += "Type: " + params["type"] + r"\s*"
+                pattern += "Value Type: " + params["type"] + r"\s*"
                 if params["type"] == "json" and "schema" in params:
                     pattern += r"Schema: \{\n(^            .*\n)+\s*\}\s*"
             else:
-                pattern += r"Type: string\s*"
+                pattern += r"Value Type: string\s*"
             if "default" in params:
                 pattern += "Default: " + re.escape(params["default"]) + r"\s*"
 
@@ -481,6 +487,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 self.assertEqual(param_defs[path].default, "")
             self.assertEqual(param_defs[path].is_required,
                              params.get("required", False))
+            self.assertEqual(param_defs[path].feature, "pre_host")
+            self.assertEqual(param_defs[path].type, "host")
             #self.assertEqual(param_defs[path].activation, self.proto.NONE)
 
 if __name__ == '__main__':

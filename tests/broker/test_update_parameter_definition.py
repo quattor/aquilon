@@ -42,7 +42,8 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint \[required\]\s*'
-                          r'Type: int\s*'
+                          r'Archetype: aquilon\s*'
+                          r'Value Type: int\s*'
                           r'Template: foo\s*'
                           r'Activation: reboot\s*'
                           r'Description: testint\s*',
@@ -59,8 +60,30 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint \[required\]\s*'
-                          r'Type: int\s*'
+                          r'Feature: pre_host\s*'
+                          r'Type: host\s*'
+                          r'Value Type: int\s*'
                           r'Default: 100\s*'
+                          r'Description: testint\s*',
+                          cmd)
+
+    def test_120_verify_show_all(self):
+        cmd = ["show_parameter_definition", "--all"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint \[required\]\s*'
+                          r'Feature: pre_host\s*'
+                          r'Type: host\s*'
+                          r'Value Type: int\s*'
+                          r'Default: 100\s*'
+                          r'Description: testint\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint \[required\]\s*'
+                          r'Archetype: aquilon\s*'
+                          r'Value Type: int\s*'
+                          r'Template: foo\s*'
+                          r'Activation: reboot\s*'
                           r'Description: testint\s*',
                           cmd)
 
@@ -74,7 +97,9 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint\s*'
-                          r'Type: int\s*'
+                          r'Feature: pre_host\s*'
+                          r'Type: host\s*'
+                          r'Value Type: int\s*'
                           r'Default: 100\s*'
                           r'Description: testint\s*',
                           cmd)

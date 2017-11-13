@@ -16,7 +16,7 @@
 # limitations under the License.
 """Parameter Definition formatter."""
 
-from aquilon.aqdb.model import ParamDefinition
+from aquilon.aqdb.model import ParamDefinition, ArchetypeParamDef, FeatureParamDef, HardwareFeature, InterfaceFeature, HostFeature
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.parameter import indented_value
 
@@ -31,7 +31,20 @@ class ParamDefinitionFormatter(ObjectFormatter):
             reqstr = ""
 
         details.append(indent + "{0:c}: {0!s}{1}".format(paramdef, reqstr))
-        details.append(indent + "  Type: %s" % paramdef.value_type)
+
+        if isinstance(paramdef.holder, ArchetypeParamDef):
+            details.append(indent + "  Archetype: %s" % paramdef.holder.holder_name)
+        elif isinstance(paramdef.holder, FeatureParamDef):
+            details.append(indent + "  Feature: %s" % paramdef.holder.holder_name)
+            if isinstance(paramdef.holder.holder_object, HardwareFeature):
+                details.append(indent + "    Type: hardware")
+            elif isinstance(paramdef.holder.holder_object, InterfaceFeature):
+                details.append(indent + "    Type: interface")
+            elif isinstance(paramdef.holder.holder_object, HostFeature):
+                details.append(indent + "    Type: host")
+
+        details.append(indent + "  Value Type: %s" % paramdef.value_type)
+
         if paramdef.schema:
             details.extend(indented_value(indent + "  ", "Schema", paramdef.schema))
         if hasattr(paramdef.holder, 'template'):
@@ -63,6 +76,17 @@ class ParamDefinitionFormatter(ObjectFormatter):
         if paramdef.activation:
             act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
             skeleton.activation = act_type.values_by_name[paramdef.activation.upper()].number
+
+        if isinstance(paramdef.holder, ArchetypeParamDef):
+            skeleton.archetype = paramdef.holder.holder_name
+        elif isinstance(paramdef.holder, FeatureParamDef):
+            skeleton.feature = paramdef.holder.holder_name
+            if isinstance(paramdef.holder.holder_object, HardwareFeature):
+                skeleton.type = 'hardware'
+            elif isinstance(paramdef.holder.holder_object, InterfaceFeature):
+                skeleton.type = 'interface'
+            elif isinstance(paramdef.holder.holder_object, HostFeature):
+                skeleton.type = 'host'
 
     def csv_fields(self, paramdef):
         yield (paramdef.holder.holder_name,
