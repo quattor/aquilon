@@ -77,6 +77,7 @@ class TestUpdateAlias(EventsTestMixin, TestBrokerCommand):
                          "-new_comments New alias comments")
         self.noouttest(command)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_200_missing_target(self):
         command = ["update", "alias",
