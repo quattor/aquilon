@@ -17,7 +17,6 @@
 # limitations under the License.
 """Module for testing the add address command."""
 
-import struct
 import unittest
 
 if __name__ == "__main__":
@@ -28,23 +27,7 @@ from ipaddress import IPv6Address, ip_address
 
 from broker.brokertest import TestBrokerCommand
 from eventstest import EventsTestMixin
-
-
-# Taken from lib/aquilon/worker/formats/dns_record.py
-def inaddr_ptr(ip):
-    octets = str(ip).split('.')
-    octets.reverse()
-    return "%s.in-addr.arpa" % '.'.join(octets)
-
-
-# Taken from lib/aquilon/worker/formats/dns_record.py
-def in6addr_ptr(ip):
-    octets = list(struct.unpack("B" * 16, ip.packed))
-    octets.reverse()
-    # This may not look intuitive, but this was the fastest variant I could come
-    # up with - improvements are welcome :-)
-    return "".join(format((octet & 0xf) << 4 | (octet >> 4), "02x")
-                   for octet in octets).replace("", ".")[1:-1] + ".ip6.arpa"
+from dnstest import inaddr_ptr, in6addr_ptr
 
 
 class TestAddAddress(EventsTestMixin, TestBrokerCommand):

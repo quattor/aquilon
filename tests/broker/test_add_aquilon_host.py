@@ -23,12 +23,14 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+from eventstest import EventsTestMixin
 from brokertest import TestBrokerCommand
+from dnstest import inaddr_ptr
 
 # TODO: this file should be merged into test_add_host.py
 
 
-class TestAddAquilonHost(TestBrokerCommand):
+class TestAddAquilonHost(EventsTestMixin, TestBrokerCommand):
     def test_100_add_unittest00(self):
         ip = self.net["unknown0"].usable[2]
         self.dsdb_expect_add("unittest00.one-nyp.ms.com", ip, "eth0", ip.mac)
@@ -145,16 +147,62 @@ class TestAddAquilonHost(TestBrokerCommand):
     def test_132_add_unittest20_good(self):
         ip = self.net["zebra_vip"].usable[2]
         eth1_ip = self.net["zebra_eth1"].usable[0]
-        self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "vip")
+        fqdn = 'unittest20.aqd-unittest.ms.com'
+        eth1_fqdn = 'unittest20-e1.aqd-unittest.ms.com'
+
+        self.event_add_dns(
+            fqdn=[
+                fqdn,
+                inaddr_ptr(ip),
+            ],
+            dns_environment='internal',
+            dns_records=[
+                [
+                    {
+                        'target': str(ip),
+                        'rrtype': 'A',
+                    },
+                ],
+                [
+                    {
+                        'target': fqdn,
+                        'rrtype': 'PTR',
+                    },
+                ],
+            ],
+        )
+        self.event_upd_dns(
+            fqdn=[
+                eth1_fqdn,
+                inaddr_ptr(eth1_ip),
+            ],
+            dns_environment='internal',
+            dns_records=[
+                [
+                    {
+                        'target': str(eth1_ip),
+                        'rrtype': 'A',
+                    },
+                ],
+                [
+                    {
+                        'target': fqdn,
+                        'rrtype': 'PTR',
+                    },
+                ],
+            ],
+        )
+        self.dsdb_expect_add(fqdn, ip, "vip")
         self.dsdb_expect_delete(eth1_ip)
-        self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", eth1_ip, "eth1",
-                             eth1_ip.mac, primary="unittest20.aqd-unittest.ms.com")
+        self.dsdb_expect_add(eth1_fqdn, eth1_ip, "eth1",
+                             eth1_ip.mac, primary=fqdn)
         self.noouttest(["add", "host", "--archetype", "aquilon",
-                        "--hostname", "unittest20.aqd-unittest.ms.com",
+                        "--hostname", fqdn,
                         "--ip", ip, "--zebra_interfaces", "eth0,eth1",
                         "--machine", "ut3c5n2", "--domain", "unittest",
                         "--personality", "compileserver"])
         self.dsdb_verify()
+        self.events_verify()
 
     def test_135_show_unittest20(self):
         ip = self.net["zebra_vip"].usable[2]

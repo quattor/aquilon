@@ -72,6 +72,13 @@ class CommandDelHost(BrokerCommand):
         # In case of Zebra, the IP may be configured on multiple interfaces
         ip = dbmachine.primary_ip
         for iface in dbmachine.interfaces:
+            if exporter:
+                for addr in iface.assignments:
+                    if addr.label:
+                        continue
+                    for dnr in addr.dns_records:
+                        if dnr.reverse_ptr == dbmachine.primary_name.fqdn:
+                            exporter.update(dnr.fqdn)
             if ip in iface.addresses:
                 iface.addresses.remove(ip)
 
