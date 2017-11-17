@@ -349,7 +349,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_360_addut3gd1r04vlan110(self):
-        ip = self.net["tor_net_12"].usable[1]
+        ip = self.net["unknown1"].usable[44]
         self.dsdb_expect_add("ut3gd1r04-vlan110.aqd-unittest.ms.com", ip,
                              "vlan110", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
@@ -370,7 +370,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          command)
 
     def test_380_addut3gd1r04vlan110hsrp(self):
-        ip = self.net["tor_net_12"].usable[2]
+        ip = self.net["unknown1"].usable[42]
         self.dsdb_expect_add("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com", ip,
                              "vlan110_hsrp", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
@@ -384,7 +384,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
 
     def test_390_addut3gd1r04loop0(self):
         # Use the network address
-        ip = self.net["autopg1"][0]
+        ip = self.net["unknown1"][0]
         self.dsdb_expect_add("ut3gd1r04-loop0.aqd-unittest.ms.com", ip,
                              "loop0", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
@@ -423,15 +423,15 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan110.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command)
         self.searchoutput(out,
                           r"Interface: loop0 \(no MAC addr\)$"
                           r"\s+Type: loopback$"
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-loop0.aqd-unittest.ms.com \[%s\]$"
-                          % self.net["autopg1"][0],
+                          % self.net["unknown1"][0],
                           command)
 
     def test_430_addauroraextraip(self):

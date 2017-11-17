@@ -34,11 +34,20 @@ class TestAddBunker(TestBrokerCommand):
         self.noouttest(command)
 
     def test_100_addutbunker2(self):
-        command = ['add_bunker', '--bunker=bucket2.ut', '--room=utroom2']
+        command = ['add_bunker', '--bunker=zebrabucket.ut', '--room=utroom1',
+                   '--fullname=UT zebrabucket']
         self.noouttest(command)
 
     def test_100_addutbunker3(self):
+        command = ['add_bunker', '--bunker=bucket2.ut', '--room=utroom2']
+        self.noouttest(command)
+
+    def test_100_addutbunker4(self):
         command = ['add_bunker', '--bunker=bucket2.np', '--building', 'np']
+        self.noouttest(command)
+
+    def test_100_addutbunker5(self):
+        command = ['add_bunker', '--bunker=zebrabucket.np', '--building', 'np']
         self.noouttest(command)
 
     def test_100_addnyb10(self):

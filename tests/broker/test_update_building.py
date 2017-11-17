@@ -204,7 +204,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
     def test_175_show_prod_resources(self):
         command = "show network --network zebra_vip"
         out = self.commandtest(command.split())
-        self.matchoutput(out, 'Building: ut',
+        self.matchoutput(out, 'Building ut',
                          command)
 
         command = "show cluster --cluster campus-test"

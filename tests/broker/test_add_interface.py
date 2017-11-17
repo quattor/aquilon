@@ -515,7 +515,7 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
         command = ["add", "interface", "--interface", "loop1",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--iftype", "loopback",
-                   "--mac", self.net["autopg1"][0].mac]
+                   "--mac", self.net["unknown1"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)

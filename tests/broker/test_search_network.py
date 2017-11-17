@@ -95,7 +95,7 @@ class TestSearchNetwork(TestBrokerCommand):
             if not net.autocreate:
                 continue
             if ((net.loc_type == "building" and net.loc_name == "ut") or
-                    (net.loc_type == "bunker" and net.loc_name == "bucket2.ut")):
+                    (net.loc_type == "bunker" and net.loc_name in ["bucket2.ut", "zebrabucket.ut"])):
                 self.matchoutput(out, str(net), command)
             else:
                 self.matchclean(out, str(net.ip), command)

@@ -124,7 +124,7 @@ class TestDelAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelzebra3(self):
-        ip = self.net["zebra_vip"].usable[0]
+        ip = self.net["zebra_vip"].usable[13]
         self.dsdb_expect_delete(ip)
         command = ["del", "address", "--ip", ip,
                    "--fqdn", "zebra3.aqd-unittest.ms.com"] + self.valid_just_tcm

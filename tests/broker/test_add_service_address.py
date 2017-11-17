@@ -43,7 +43,7 @@ class TestAddServiceAddress(TestBrokerCommand):
     def test_200_addzebra2(self):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
-        ip = self.net["zebra_vip"].usable[1]
+        ip = self.net["zebra_vip"].usable[14]
         self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip)
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -58,7 +58,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_210_verifyzebra2(self):
-        ip = self.net["zebra_vip"].usable[1]
+        ip = self.net["zebra_vip"].usable[14]
         command = ["show", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -70,7 +70,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
     def test_220_verifyzebra2proto(self):
-        ip = self.net["zebra_vip"].usable[1]
+        ip = self.net["zebra_vip"].usable[14]
         command = ["show", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
@@ -96,7 +96,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.matchclean(out, "Reverse", command)
 
     def test_300_addzebra3(self):
-        zebra3_ip = self.net["zebra_vip"].usable[0]
+        zebra3_ip = self.net["zebra_vip"].usable[13]
         self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip,
                              comments="Some service address comments")
         command = ["add", "service", "address",
@@ -127,8 +127,8 @@ class TestAddServiceAddress(TestBrokerCommand):
 
     def test_400_verifyunittest20(self):
         ip = self.net["zebra_vip"].usable[2]
-        zebra2_ip = self.net["zebra_vip"].usable[1]
-        zebra3_ip = self.net["zebra_vip"].usable[0]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
+        zebra3_ip = self.net["zebra_vip"].usable[13]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -293,7 +293,7 @@ class TestAddServiceAddress(TestBrokerCommand):
 
     def test_640_add_service_address_ipfromtype_not_bunker(self):
         # Test nextip generation limited to bunkers only
-        command = ["add", "service", "address", "--hostname", "unittest20.aqd-unittest.ms.com",
+        command = ["add", "service", "address", "--hostname", "unittest15.aqd-unittest.ms.com",
                    "--service_address", "dummy.ms.com", "--name", "test3", "--ipfromtype", "localvip"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Host(s) location is not "

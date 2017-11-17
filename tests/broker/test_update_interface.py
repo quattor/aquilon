@@ -546,8 +546,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command)
         self.matchclean(out, "vlan110", command)
 
@@ -563,8 +563,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='physical', clean='virtual')
@@ -581,8 +581,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='"cards/nic/vlan220" = nlist(\n  "type", "oa"\n);')
@@ -600,8 +600,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='virtual', clean='oa')
@@ -619,8 +619,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='oa', clean='virtual')
@@ -638,8 +638,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='loop', clean='oa')
@@ -657,8 +657,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='"cards/nic/vlan220" = nlist(\n  "type", "virtual"\n);')
@@ -676,8 +676,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='loop', clean='virtual')
@@ -694,8 +694,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='"cards/nic/vlan220" = nlist(\n  "type", "oa"\n);')
@@ -712,8 +712,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='physical', clean='oa')
@@ -730,8 +730,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='"cards/nic/vlan220" = nlist(\n  "type", "loopback"\n);')
@@ -748,8 +748,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='"cards/nic/vlan220" = nlist(\n  "type", "physical"\n);')
@@ -766,8 +766,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"
-                          % (self.net["tor_net_12"].usable[1],
-                             self.net["tor_net_12"].usable[2]),
+                          % (self.net["unknown1"].usable[44],
+                             self.net["unknown1"].usable[42]),
                           command_show)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='"cards/nic/vlan220" = nlist(\n  "type", "virtual"\n);')
@@ -785,10 +785,10 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
         self.badoptiontest(command)
 
     def test_430_update_iftype_netdev_prior_loopback_fail(self):
-        ip = self.net["autopg1"][0]
+        ip = self.net["unknown1"][0]
         command = ["update", "interface", "--network_device", "ut3gd1r04", "--interface", "loop0", "--iftype", "oa"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: IP address %s is the address of network autopg1." % ip,
+        self.matchoutput(err, "Bad Request: IP address %s is the address of network unknown1." % ip,
                          command)
         self.matchoutput(err, str(ip), command)
 

@@ -70,7 +70,7 @@ class TestUpdateRack(TestBrokerCommand):
     def testverifyshowallcsv(self):
         command = "show rack --all --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "rack,ut3,room,utroom1,b,3", command)
+        self.matchoutput(out, "rack,ut3,bunker,zebrabucket.ut,b,3,,ut3", command)
         self.matchoutput(out, "rack,ut8,building,ut,g,8", command)
         self.matchoutput(out, "rack,ut9,bunker,bucket2.ut,h,9", command)
         self.matchoutput(out, "rack,np997,building,np,xx,77", command)

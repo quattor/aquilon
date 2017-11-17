@@ -124,7 +124,7 @@ class TestPrebindServer(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'"server_ips" = list\(\s*"%s",\s*"%s"\s*\);' %
-                          (self.net["zebra_vip"].usable[3],
+                          (self.net["zebra_vip"].usable[0],
                            self.net["aurora2"].usable[244]),
                           command)
 

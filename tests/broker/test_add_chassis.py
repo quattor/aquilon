@@ -53,7 +53,7 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
 
     def test_120_add_ut9_chassis(self):
-        for i in range(1, 6):
+        for i in range(1, 8):
             ip = self.net["ut9_chassis"].usable[i]
             self.dsdb_expect_add("ut9c%d.aqd-unittest.ms.com" % i,
                                  ip, "oa", ip.mac)

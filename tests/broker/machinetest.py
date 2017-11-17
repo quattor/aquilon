@@ -322,7 +322,7 @@ class MachineTestMixin(EventsTestMixin):
     def create_host(self, hostname, ip, machine,
                     interfaces=None, zebra=False, model=None,
                     manager_iface=None, manager_ip=None,
-                    archetype="aquilon", **orig_kwargs):
+                    archetype="aquilon", ipfromtype=None, **orig_kwargs):
         kwargs = orig_kwargs.copy()
 
         # Separate the host-specific arguments
@@ -344,7 +344,7 @@ class MachineTestMixin(EventsTestMixin):
 
         machdef = self.create_machine(machine, model, interfaces, **kwargs)
 
-        command = ["add_host", "--hostname", hostname, "--ip", ip,
+        command = ["add_host", "--hostname", hostname,
                    "--machine", machine, "--archetype", archetype]
         for arg, value in host_kwargs.items():
             if value is None:
@@ -353,7 +353,10 @@ class MachineTestMixin(EventsTestMixin):
 
         if zebra:
             self.dsdb_expect_add(hostname, ip, "vip", comments=machdef.comments)
-            command.extend(["--zebra_interfaces", ",".join(interfaces)])
+            if ipfromtype is not None:
+                command.extend(["--zebra_interfaces", ",".join(interfaces), "--ipfromtype", ipfromtype])
+            else:
+                command.extend(["--zebra_interfaces", ",".join(interfaces), "--ip", ip])
         else:
             # FIXME: do not hardcode eth0?
             if "eth0_comments" in orig_kwargs:
@@ -361,6 +364,7 @@ class MachineTestMixin(EventsTestMixin):
             else:
                 comments = machdef.comments
             self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=comments)
+            command.extend(["--ip", ip])
 
         self.noouttest(command)
 

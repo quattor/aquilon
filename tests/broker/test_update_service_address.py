@@ -104,7 +104,7 @@ class TestUpdateServiceAddress(TestBrokerCommand):
 
     def test_111_verify_unittest20(self):
         ip = self.net["zebra_vip"].usable[2]
-        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
         zebra3_ip = self.net["zebra_vip"].usable[6]
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -132,7 +132,7 @@ class TestUpdateServiceAddress(TestBrokerCommand):
         self.matchclean(out, "Reverse", command)
 
     def test_115_reset_zebra3(self):
-        new_ip = self.net["zebra_vip"].usable[0]
+        new_ip = self.net["zebra_vip"].usable[13]
         self.dsdb_expect_update("zebra3.aqd-unittest.ms.com", ip=new_ip)
         self.noouttest(["update_service_address",
                         "--hostname", "unittest20.aqd-unittest.ms.com",
