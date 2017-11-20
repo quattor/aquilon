@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
+#
+# Copyright (C) 2017  Contributor
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sys
+import csv
+import re
+import argparse
+
+URI_RE = re.compile("^\S+://[0-9]+$", re.IGNORECASE)
+BUILDING_RE = re.compile("^assetinventory://[0-9]+$", re.IGNORECASE)
+
+def validate_uri():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--uri', required=True)
+    parser.add_argument('--location-type', required=True)
+    parser.add_argument('--location', required=True)
+    parser.add_argument('--location-feed', required=True)
+
+    args = parser.parse_args()
+
+    uri = args.uri
+    clsname = args.location_type.lower()
+    name = args.location
+    loc_feed = args.location_feed
+
+    if URI_RE.search(uri):
+        try:
+            feed = open(loc_feed, "r")
+            reader = csv.DictReader(feed)
+        except Exception as e:
+            sys.exit("Could not open '{0:s}': {1:s}".format(loc_feed, e))
+
+        if clsname == "building":
+            if BUILDING_RE.search(uri):
+                found = False
+
+                # Parse digits from URI and remove leading zeros
+                uri_digits = uri[uri.find(":")+3:].lstrip("0")
+
+                # Check if uri exists in feed with given building name
+                try:
+                    for line in reader:
+                        if (uri_digits == line["#BUILDING_LOCID"] and name == line["IT_CODE"]):
+                            found = True
+                            break
+                except Exception as e:
+                    sys.exit("Could not read '{0:s}': {1:s}".format(loc_feed, e))
+
+                if found:
+                    sys.exit(0)
+                else:
+                    sys.exit("Building name and URI do not match")
+            else:
+                sys.exit("Building code '{0:s}' does not match '{1:s}'"
+                         .format(uri, BUILDING_RE.pattern))
+        else:
+            sys.exit(0)
+    else:
+        sys.exit("URI '{0:s}' is not formatted correctly".format(uri))
+
+if __name__=="__main__":
+    validate_uri()

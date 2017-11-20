@@ -3117,6 +3117,7 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	    <option name="force_uri" type="flag">Bypass URI validation</option>
 	</optgroup>
 	<transport method="put" path="location/building/%(building)s"/>
     </command>
@@ -3135,6 +3136,7 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	    <option name="force_uri" type="flag">Bypass URI Validation</option>
 	</optgroup>
 	<transport method="post" path="location/building/%(building)s"/>
     </command>

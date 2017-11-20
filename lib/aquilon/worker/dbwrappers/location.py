@@ -63,10 +63,11 @@ def get_location_list(session, compel=False, **kwargs):
             for name in names.split(",")]
 
 
-def add_location(session, cls, name, parent, **kwargs):
+def add_location(session, cls, name, parent, force_uri=None, **kwargs):
     validate_nlist_key(cls.__name__, name)
     if 'uri' in kwargs and kwargs['uri'] is not None:
-        validate_uri(kwargs['uri'])
+        validate_uri(kwargs['uri'], cls.__name__, name, force_uri)
+
     cls.get_unique(session, name, preclude=True)
     dbloc = cls(name=name, parent=parent, **kwargs)
     session.add(dbloc)
@@ -86,25 +87,31 @@ def get_default_dns_domain(dblocation):
                             "{0:l}.  Please specify --dns_domain."
                             .format(dblocation))
 
-def validate_uri(uri):
+def validate_uri(uri, clsname, name, force):
     config = Config()
     validator = config.lookup_tool("location_uri_validator")
-    if validator is not None:
+    if config.has_section("location_feeds"):
+        location_feed = config.get("location_feeds", clsname + "_feed")
+
+    if force is None and validator is not None:
         try:
-            run_command([validator, uri])
+            run_command([validator, "--uri", uri, "--location-type", clsname,
+                    "--location", name, "--location-feed", location_feed])
         except ProcessException as err:
             raise ArgumentError("Location URI not valid: %s%s" % (err.out, err.err))
+
     return uri
 
 def update_location(dblocation, fullname=None, default_dns_domain=None,
-                    comments=None, uri=None):
+                    comments=None, uri=None, force_uri=None):
     """ Update common location attributes """
 
     if fullname is not None:
         dblocation.fullname = fullname
 
     if uri is not None:
-      dblocation.uri = validate_uri(uri)
+        dblocation.uri = validate_uri(uri, dblocation.__class__.__name__, dblocation.name,
+                                      force_uri)
 
     if default_dns_domain is not None:
         if default_dns_domain:

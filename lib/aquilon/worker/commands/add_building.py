@@ -27,10 +27,11 @@ class CommandAddBuilding(BrokerCommand):
     required_parameters = ["building", "city", "address"]
 
     def render(self, session, logger, building, city, fullname, uri, comments,
-               address, **_):
+               address, force_uri, **kwargs):
         dbcity = City.get_unique(session, city, compel=True)
         add_location(session, Building, building, dbcity, uri=uri,
-                     fullname=fullname, address=address, comments=comments)
+                     fullname=fullname, address=address, comments=comments,
+                     force_uri=force_uri)
 
         session.flush()
 

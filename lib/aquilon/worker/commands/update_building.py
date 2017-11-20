@@ -34,7 +34,7 @@ class CommandUpdateBuilding(BrokerCommand):
 
     def render(self, session, logger, plenaries, building, city, address,
                fullname, uri, default_dns_domain, comments, user,
-               justification, reason, **_):
+               justification, reason, force_uri, **kwargs):
         dbbuilding = Building.get_unique(session, building, compel=True)
 
         old_city = dbbuilding.city
@@ -48,7 +48,8 @@ class CommandUpdateBuilding(BrokerCommand):
                                         old_address)
 
         update_location(dbbuilding, fullname=fullname, comments=comments,
-                        uri=uri, default_dns_domain=default_dns_domain)
+                        uri=uri, default_dns_domain=default_dns_domain,
+                        force_uri=force_uri)
 
         if city:
             dbcity = City.get_unique(session, city, compel=True)

@@ -28,7 +28,76 @@ from brokertest import TestBrokerCommand
 
 class TestAddBuilding(TestBrokerCommand):
 
-    def testaddbu(self):
+    def test_100_addtu(self):
+        self.dsdb_expect("add_building_aq -building_name tu -city ny "
+                         "-building_addr 14 Test Lane")
+        self.dsdb_expect_add_campus_building("ny", "tu")
+        command = ["add", "building", "--building", "tu", "--city", "ny",
+                   "--address", "14 Test Lane"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_101_verifyaddtu(self):
+        command = "show building --building tu"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Building: tu", command)
+        self.matchoutput(out, "Address: 14 Test Lane", command)
+
+    def test_102_addhq(self):
+        self.dsdb_expect("add_building_aq -building_name hq -city ny "
+                         "-building_addr 1585 Broadway, NY, NY 10036")
+        self.dsdb_expect_add_campus_building("ny", "hq")
+        command = ["add_building", "--building", "hq", "--city", "ny",
+                   "--fullname", "seven-fifty",
+                   "--address", "1585 Broadway, NY, NY 10036"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_103_addnp(self):
+        self.dsdb_expect("add_building_aq -building_name np -city ny "
+                         "-building_addr 1 NY Plaza")
+        self.dsdb_expect_add_campus_building("ny", "np")
+        command = ["add_building", "--building", "np", "--city", "ny",
+                   "--fullname", "one-nyp", "--address", "1 NY Plaza"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_104_addoy(self):
+        self.dsdb_expect("add_building_aq -building_name oy -city ln "
+                         "-building_addr Hounslow, Middlesex")
+        self.dsdb_expect_add_campus_building("ln", "oy")
+        command = ["add_building", "--building", "oy", "--city", "ln",
+                   "--fullname", "heathrow", "--address", "Hounslow, Middlesex"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_105_addpi(self):
+        self.dsdb_expect("add_building_aq -building_name pi -city ny "
+                         "-building_addr 1 Pierrepont Plaza")
+        self.dsdb_expect_add_campus_building("ny", "pi")
+        command = ["add_building", "--building", "pi", "--city", "ny",
+                   "--fullname", "pierrepont",
+                   "--address", "1 Pierrepont Plaza"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_106_addut(self):
+        self.dsdb_expect("add_building_aq -building_name ut -city ny "
+                         "-building_addr unittest address")
+        self.dsdb_expect_add_campus_building("ny", "ut")
+        command = ["add_building", "--building", "ut", "--city", "ny",
+                   "--fullname", "Unittest-building",
+                   "--address", "unittest address"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_110_addbuinvalid(self):
+        command = ["add", "building", "--building", "bu", "--city", "ny",
+                   "--address", "12 Cherry Lane", "--uri", "assetinventory://003427"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Location URI not valid: Building name and URI do not match", command)
+
+    def test_111_addbu(self):
         self.dsdb_expect("add_building_aq -building_name bu -city ny "
                          "-building_addr 12 Cherry Lane")
         self.dsdb_expect_add_campus_building("ny", "bu")
@@ -37,7 +106,7 @@ class TestAddBuilding(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyaddbu(self):
+    def test_112_verifyaddbu(self):
         command = "show building --building bu"
         out = self.commandtest(command.split(" "))
         self.output_equals(out, """
@@ -48,13 +117,42 @@ class TestAddBuilding(TestBrokerCommand):
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
 
-    def testaddinvalid(self):
+    def test_113_addbuforce(self):
+        self.dsdb_expect("add_building_aq -building_name fo -city ny "
+                         "-building_addr 64 Force Lane")
+        self.dsdb_expect_add_campus_building("ny", "fo")
+        command = ["add", "building", "--building", "fo", "--city", "ny",
+                   "--address", "64 Force Lane", "--uri", "assetinventory://003430",
+                   "--force_uri"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_114_verifyaddbuforce(self):
+        command = "show building --building fo"
+        out = self.commandtest(command.split(" "))
+        self.output_equals(out, """
+            Building: fo
+              Fullname: fo
+              Address: 64 Force Lane
+              Location URI: assetinventory://003430
+              Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+            """, command)
+
+    def test_115_addbuinvaliduri(self):
         command = ["add", "building", "--building", "plaza", "--city", "ex",
                    "--address", "Nowhere", "--uri", "invalid://003427"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Location URI not valid: unknown system", command)
+        self.matchoutput(out, "Location URI not valid: Building code 'invalid://003427' "
+                              "does not match '^assetinventory://[0-9]+$'", command)
 
-    def testaddbucards(self):
+    def test_116_addinvaliduri(self):
+        command = ["add", "building", "--building", "plaza", "--city", "ex",
+                   "--address", "Nowhere", "--uri", "fakeuri=003427"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Location URI not valid: URI 'fakeuri=003427' "
+                              "is not formatted correctly", command)
+
+    def test_120_addbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
                          "-building_addr Nowhere")
         self.dsdb_expect_add_campus_building("ta", "cards")
@@ -63,7 +161,7 @@ class TestAddBuilding(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyaddbucards(self):
+    def test_121_verifyaddbucards(self):
         command = "show building --building cards"
         out = self.commandtest(command.split(" "))
         self.output_equals(out, """
@@ -74,24 +172,24 @@ class TestAddBuilding(TestBrokerCommand):
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ta, City ex]
             """, command)
 
-    def testverifyaddbuproto(self):
+    def test_130_verifyaddbuproto(self):
         command = "show building --building bu --format proto"
         loc = self.protobuftest(command.split(" "), expect=1)[0]
         self.matchoutput(loc.name, "bu", command)
         self.matchoutput(loc.uri, "assetinventory://003428", command)
         self.matchoutput(loc.location_type, "building", command)
 
-    def testverifybuildingall(self):
+    def test_131_verifybuildingall(self):
         command = ["show", "building", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Building: ut", command)
 
-    def testverifyshowcsv(self):
+    def test_132_verifyshowcsv(self):
         command = "show building --building bu --format=csv"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "building,bu,city,ny", command)
 
-    def testaddnettest(self):
+    def test_133_addnettest(self):
         self.dsdb_expect("add_building_aq -building_name nettest -city ny "
                          "-building_addr Nowhere")
         self.dsdb_expect_add_campus_building("ny", "nettest")
@@ -100,7 +198,7 @@ class TestAddBuilding(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testnonscii(self):
+    def test_134_nonscii(self):
         # Valid UTF-8: a with acute, u with double acute, greek phi
         command = ["add", "building", "--building", "nonascii", "--city", "ny",
                    "--address", "\xc3\xa1\xc5\xb1\xcf\x86"]
@@ -108,76 +206,12 @@ class TestAddBuilding(TestBrokerCommand):
         self.matchoutput(out, "Only ASCII characters are allowed for --address.",
                          command)
 
-    def testnonutf8(self):
+    def test_135_nonutf8(self):
         command = ["add", "building", "--building", "nonascii", "--city", "ny",
                    "--address", "\xe1\xe9\xed\xf3\xfa"]
         out = self.internalerrortest(command)
         self.matchoutput(out, "Value for parameter address is not valid UTF-8",
                          command)
-
-    def test_addtu(self):
-        self.dsdb_expect("add_building_aq -building_name tu -city ny "
-                         "-building_addr 14 Test Lane")
-        self.dsdb_expect_add_campus_building("ny", "tu")
-        command = ["add", "building", "--building", "tu", "--city", "ny",
-                   "--address", "14 Test Lane"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def test_verifyaddtu(self):
-        command = "show building --building tu"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Building: tu", command)
-        self.matchoutput(out, "Address: 14 Test Lane", command)
-
-    def test_addhq(self):
-        self.dsdb_expect("add_building_aq -building_name hq -city ny "
-                         "-building_addr 1585 Broadway, NY, NY 10036")
-        self.dsdb_expect_add_campus_building("ny", "hq")
-        command = ["add_building", "--building", "hq", "--city", "ny",
-                   "--fullname", "seven-fifty",
-                   "--address", "1585 Broadway, NY, NY 10036"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def test_addnp(self):
-        self.dsdb_expect("add_building_aq -building_name np -city ny "
-                         "-building_addr 1 NY Plaza")
-        self.dsdb_expect_add_campus_building("ny", "np")
-        command = ["add_building", "--building", "np", "--city", "ny",
-                   "--fullname", "one-nyp", "--address", "1 NY Plaza"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def test_addoy(self):
-        self.dsdb_expect("add_building_aq -building_name oy -city ln "
-                         "-building_addr Hounslow, Middlesex")
-        self.dsdb_expect_add_campus_building("ln", "oy")
-        command = ["add_building", "--building", "oy", "--city", "ln",
-                   "--fullname", "heathrow", "--address", "Hounslow, Middlesex"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def test_addpi(self):
-        self.dsdb_expect("add_building_aq -building_name pi -city ny "
-                         "-building_addr 1 Pierrepont Plaza")
-        self.dsdb_expect_add_campus_building("ny", "pi")
-        command = ["add_building", "--building", "pi", "--city", "ny",
-                   "--fullname", "pierrepont",
-                   "--address", "1 Pierrepont Plaza"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def test_addut(self):
-        self.dsdb_expect("add_building_aq -building_name ut -city ny "
-                         "-building_addr unittest address")
-        self.dsdb_expect_add_campus_building("ny", "ut")
-        command = ["add_building", "--building", "ut", "--city", "ny",
-                   "--fullname", "Unittest-building",
-                   "--address", "unittest address"]
-        self.noouttest(command)
-        self.dsdb_verify()
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)
