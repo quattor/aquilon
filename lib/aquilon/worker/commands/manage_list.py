@@ -20,7 +20,7 @@ from collections import defaultdict
 import os.path
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Domain, Sandbox
+from aquilon.aqdb.model import Domain, Sandbox, Host
 from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -138,8 +138,11 @@ class CommandManageList(BrokerCommand):
         dbsource, dbsource_author, objects = self.get_objects(session,
                                                               logger=logger,
                                                               **arguments)
+
         cm = ChangeManagement(session, user, justification, reason, logger, self.command)
-        cm.consider(objects)
+        for obj in objects:
+            if isinstance(obj, Host):
+                cm.consider(obj)
         cm.validate()
 
         if isinstance(dbsource, Sandbox) and not dbsource_author and not force:

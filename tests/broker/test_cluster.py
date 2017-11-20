@@ -35,19 +35,44 @@ class TestCluster(TestBrokerCommand):
                               "--personality=vulcan-10g-server-prod",
                               "--cluster", "utecl1"])
 
-    def test_105_verify_utecl1(self):
+    def test_101_verify_utecl1(self):
         for i in range(1, 5):
             command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Primary Name: evh%s.aqd-unittest.ms.com" % i,
                              command)
             self.matchoutput(out, "Member of ESX Cluster: utecl1", command)
+            self.matchclean(out, "Build Status: ready", command)
         command = "show esx cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         for i in range(1, 5):
             self.matchoutput(out, "Member: evh%d.aqd-unittest.ms.com "
                              "[node_index: %d]" % (i, i - 1), command)
+
+    def test_102_utecl1_manage_setup(self):
+        command = ["change_status", "--cluster", "utecl1", "--buildstatus", "ready"]
+        self.successtest(command)
+        command = "show esx cluster --cluster utecl1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
+        self.matchoutput(out, "Metacluster: utmc1", command)
+        self.matchoutput(out, "Environment: prod", command)
+        self.matchoutput(out, "Build Status: ready", command)
+
+    def test_103_utecl1_manage_no_justification(self):
+        # Manage command only checks hosts prod impact
+        command = ["manage", "--metacluster", "utmc1",
+                   "--sandbox", "%s/utsandbox" % self.user, "--force"]
+        self.successtest(command)
+
+    def test_104_utecl1_manage_no_justification_back(self):
+        # Manage command only checks hosts prod impact
+        command = ["manage", "--metacluster", "utmc1",
+                   "--domain", "unittest", "--skip_auto_compile", "--force"]
+        self.successtest(command)
+        command = ["change_status", "--cluster", "utecl1", "--buildstatus", "rebuild"] + self.valid_just_tcm
+        self.successtest(command)
 
     def test_105_show_evh1_proto(self):
         command = ["show_host", "--hostname", "evh1.aqd-unittest.ms.com",
