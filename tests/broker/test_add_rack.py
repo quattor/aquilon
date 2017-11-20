@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestAddRack(TestBrokerCommand):
 
     def testaddut3(self):
-        command = "add rack --rackid 3 --room utroom1 --row a --column 3"
+        command = "add rack --rackid 3 --bunker zebrabucket.ut --row a --column 3"
         self.noouttest(command.split(" "))
 
     def testaddut3again(self):
@@ -45,7 +45,7 @@ class TestAddRack(TestBrokerCommand):
               Fullname: ut3
               Row: a
               Column: 3
-              Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny, Building ut, Room utroom1]
+              Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny, Building ut, Room utroom1, Bunker zebrabucket.ut]
             """, command)
 
     def testverifyaddut3proto(self):
@@ -68,7 +68,7 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Column: 1", command)
 
     def testaddnp3(self):
-        command = "add rack --rackid 3 --building np --row a --column 3"
+        command = "add rack --rackid 3 --bunker zebrabucket.np --row a --column 3"
         self.noouttest(command.split(" "))
 
     def testaddut4(self):
@@ -97,7 +97,7 @@ class TestAddRack(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testaddut11(self):
-        command = "add rack --rackid 11 --building ut --row k --column 1"
+        command = "add rack --rackid 11 --bunker zebrabucket.ut --row k --column 1"
         self.noouttest(command.split(" "))
 
     def testaddut12(self):
@@ -129,7 +129,7 @@ class TestAddRack(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testaddut14(self):
-        command = "add rack --rackid 14 --room utroom1 --row k --column 4"
+        command = "add rack --rackid 14 --bunker zebrabucket.ut --row k --column 4"
         self.noouttest(command.split(" "))
 
     def testverifyaddnp997(self):
@@ -153,7 +153,8 @@ class TestAddRack(TestBrokerCommand):
     def testverifyshowallcsv(self):
         command = "show rack --all --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "rack,ut3,room,utroom1,a,3", command)
+        self.matchoutput(out, "rack,ut3,bunker,zebrabucket.ut,a,3", command)
+        self.matchoutput(out, "rack,ut4,room,utroom1,a,4", command)
         self.matchoutput(out, "rack,np997,building,np,zz,99", command)
         self.matchoutput(out, "rack,np909,building,np,99,zz", command)
 

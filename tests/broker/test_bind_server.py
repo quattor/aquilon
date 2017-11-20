@@ -174,7 +174,7 @@ class TestBindServer(TestBrokerCommand):
                           command)
         unittest00_ip = self.net["unknown0"].usable[2]
         unittest00_e1_ip = self.net["unknown0"].usable[3]
-        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
         self.searchoutput(out,
                           r'"server_ips" = list\(\s*'
                           r'"%s",\s*'
@@ -186,7 +186,7 @@ class TestBindServer(TestBrokerCommand):
     def test_300_show_utsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
-        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
         unittest00_e1_ip = self.net["unknown0"].usable[3]
         self.searchoutput(out,
                           r'Server Binding: unittest00.one-nyp.ms.com\n\s*'
@@ -199,7 +199,7 @@ class TestBindServer(TestBrokerCommand):
 
     def test_300_show_utsi2_proto(self):
         unittest20_ip = self.net["zebra_vip"].usable[2]
-        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
         unittest00_ip = self.net["unknown0"].usable[2]
         unittest00_e1_ip = self.net["unknown0"].usable[3]
 
@@ -334,7 +334,7 @@ class TestBindServer(TestBrokerCommand):
                          command)
 
     def test_300_show_unittest20(self):
-        zebra2_ip = self.net["zebra_vip"].usable[1]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
         command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Provides Service: utsvc Instance: utsi2",

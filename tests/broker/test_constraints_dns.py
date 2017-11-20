@@ -59,7 +59,7 @@ class TestDnsConstraints(TestBrokerCommand):
                          command)
 
     def testdelserviceaddress(self):
-        ip = self.net["zebra_vip"].usable[1]
+        ip = self.net["zebra_vip"].usable[14]
         command = ["del", "address", "--fqdn", "zebra2.aqd-unittest.ms.com"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,

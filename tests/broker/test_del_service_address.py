@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestDelServiceAddress(TestBrokerCommand):
 
     def test_100_delzebra2(self):
-        ip = self.net["zebra_vip"].usable[1]
+        ip = self.net["zebra_vip"].usable[14]
         self.dsdb_expect_delete(ip)
         command = ["del", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -60,7 +60,7 @@ class TestDelServiceAddress(TestBrokerCommand):
         self.dsdb_verify(empty=True)
 
     def test_140_verifyzebra3(self):
-        ip = self.net["zebra_vip"].usable[0]
+        ip = self.net["zebra_vip"].usable[13]
         command = ["show", "address", "--fqdn", "zebra3.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: zebra3.aqd-unittest.ms.com", command)

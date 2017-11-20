@@ -189,6 +189,57 @@ class TestCluster(TestBrokerCommand):
                    "--personality=vulcan-10g-server-prod"]
         self.successtest(command)
 
+    def test_131_ipfromtype_setup(self):
+        # Setup resource group in a cluster, which has host in a bucket
+        # This is for --ipfromtype testing
+        ip = self.net["np_bucket2_vip"].network_address
+        command = ["show", "cluster", "--cluster", "utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Member: aquilon61.aqd-unittest.ms.com",
+                         command)
+        command = ["show", "host", "--host", "aquilon61.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        command = ["add", "resourcegroup", "--cluster", "utecl1", "--resourcegroup", "testnextip"]
+        self.successtest(command)
+        command = ["search", "network", "--type", "vip", "--exact_location", "--bunker", "bucket2.ut", "--fullinfo"]
+        self.noouttest(command)
+        command = ["search", "network", "--type", "vip", "--exact_location", "--bunker", "bucket2.np", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.np", command)
+        self.matchoutput(out, "IP: {}".format(ip), command)
+        self.matchoutput(out, "Network: np_bucket2_vip", command)
+        self.matchoutput(out, "Network Type: vip", command)
+
+    def test_132_ipfromtype_resourcegroup_test(self):
+        ip = self.net["np_bucket2_vip"].usable[0]
+        service_addr = "testresgr.ms.com"
+        command = ["add", "service", "address", "--resourcegroup", "testnextip", "--service_address",
+                   service_addr, "--name", "test", "--ipfromtype", "vip"]
+        self.dsdb_expect_add(service_addr, ip)
+        self.successtest(command)
+        command = ["show", "service", "address", "--name", "test",
+                   "--resourcegroup", "testnextip"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service Address: test", command)
+        self.matchoutput(out, "Resource Group testnextip",
+                         command)
+        self.matchoutput(out, "Address: {} [{}]".format(service_addr, ip),
+                         command)
+        self.dsdb_verify()
+
+    def test_133_ipfromtype_resourcegroup_restore(self):
+        ip1 = self.net["np_bucket2_vip"].usable[0]
+        self.dsdb_expect_delete(ip1)
+        command = ["del", "service", "address", "--name", "test",
+                   "--resourcegroup", "testnextip"]
+        self.successtest(command)
+        self.dsdb_verify()
+        command = ["del", "resourcegroup", "--resourcegroup", "testnextip", "--cluster", "utecl1"]
+        self.successtest(command)
+
+    def test_135_switching_archetype_restore(self):
         # Restore the host.  Need to move to a more permissive cluster first.
         command = ["cluster", "--cluster=utecl2",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]

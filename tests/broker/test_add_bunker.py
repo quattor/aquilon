@@ -28,37 +28,55 @@ from brokertest import TestBrokerCommand
 
 class TestAddBunker(TestBrokerCommand):
 
-    def testaddutbunker1(self):
+    def test_100_addutbunker1(self):
         command = ['add_bunker', '--bunker=bucket1.ut', '--building=ut',
                    '--fullname=UT b1']
         self.noouttest(command)
 
-    def testverifyaddutbunker1(self):
+    def test_100_addutbunker2(self):
+        command = ['add_bunker', '--bunker=zebrabucket.ut', '--room=utroom1',
+                   '--fullname=UT zebrabucket']
+        self.noouttest(command)
+
+    def test_100_addutbunker3(self):
+        command = ['add_bunker', '--bunker=bucket2.ut', '--room=utroom2']
+        self.noouttest(command)
+
+    def test_100_addutbunker4(self):
+        command = ['add_bunker', '--bunker=bucket2.np', '--building', 'np']
+        self.noouttest(command)
+
+    def test_100_addutbunker5(self):
+        command = ['add_bunker', '--bunker=zebrabucket.np', '--building', 'np']
+        self.noouttest(command)
+
+    def test_100_addnyb10(self):
+        self.noouttest(["add_bunker", "--bunker", "nyb10.np",
+                        "--building", "np"])
+
+    def test_105_verifyaddutbunker1(self):
         command = "show bunker --bunker bucket1.ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Bunker: bucket1.ut", command)
         self.matchoutput(out, "Fullname: UT b1", command)
 
-    def testaddutbunker2(self):
-        command = ['add_bunker', '--bunker=bucket2.ut', '--room=utroom2']
-        self.noouttest(command)
-
-    def testaddnyb10(self):
-        self.noouttest(["add_bunker", "--bunker", "nyb10.np",
-                        "--building", "np"])
-
-    def testverifyutbunker2(self):
+    def test_105_verifyutbunker2(self):
         command = "show bunker --bunker bucket2.ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Bunker: bucket2.ut", command)
         self.matchoutput(out, "Fullname: bucket2.ut", command)
 
-    def testverifyshowcsv(self):
+    def test_105_verifyshowcsv(self):
         command = "show bunker --all --format=csv"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "bunker,bucket1.ut,building,ut", command)
         self.matchoutput(out, "bunker,bucket2.ut,room,utroom2", command)
 
+    def test_105_verifybunker3(self):
+        command = "show bunker --bunker bucket2.np"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Bunker: bucket2.np", command)
+        self.matchoutput(out, "Fullname: bucket2.np", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBunker)

@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource,
-                                Archetype)
+                                Archetype, Bunker, Building)
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -100,11 +100,23 @@ class CommandAddHost(BrokerCommand):
         else:
             dbinterface = get_boot_interface(dbmachine)
 
+        # New logic to get the Network location of the machine
+        net_location_set = None
+        if arguments.get('ipfromtype') is not None:
+            if not self.config.getboolean("site", "ipfromtype"):
+                raise ArgumentError("--ipfromtype option is not allowed to be "
+                                    "used in this Aquilon broker instance.")
+            # We only care about Bunker locations to filter Networks assigned correct locations
+            # ipfromtype only works for bunkerized networks
+            net_location_set = set([dbmachine.location.bunker]) if dbmachine.location.bunker else None
+            if not net_location_set:
+                raise ArgumentError('Host location is not inside a bunker, --ipfromtype cannot be used.')
+
         # This method is allowed to return None. This can only happen
         # (currently) using add_aurora_host, add_windows_host, or possibly by
         # bypassing the aq client and posting a request directly.
         audit_results = []
-        ip = generate_ip(session, logger, dbinterface,
+        ip = generate_ip(session, logger, dbinterface, net_location_set=net_location_set,
                          audit_results=audit_results, **arguments)
 
         dbdns_rec, _ = grab_address(session, hostname, ip,

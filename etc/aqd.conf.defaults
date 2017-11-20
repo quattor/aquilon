@@ -344,6 +344,9 @@ default_dns_environment = internal
 default_network_environment = internal
 # Space-separated list of user roles that can add and delete internal networks
 change_default_netenv_roles = aqd_admin
+# Allow Aquilon broker generate nextip for vip/localvip type
+# Temporary option until we can vary API by Aquilon broker instance
+ipfromtype = False
 
 # Interface types that require specific names should be added as key for this
 # configuration section. If an interface type is not specified here,

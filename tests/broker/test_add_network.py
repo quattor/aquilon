@@ -136,7 +136,7 @@ class TestAddNetwork(TestBrokerCommand):
         subnet = list(net.subnets())[0]
         command = ["add", "network", "--network", "netsvcmap",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
-                   "--building", "ut", "--type", net.nettype]
+                   "--bunker", "zebrabucket.ut", "--type", net.nettype]
         self.noouttest(command)
 
     def test_320_addnetperssvcmap(self):
@@ -144,7 +144,7 @@ class TestAddNetwork(TestBrokerCommand):
         subnet = list(net.subnets())[0]
         command = ["add", "network", "--network", "netperssvcmap",
                    "--ip", subnet.ip, "--netmask", subnet.netmask,
-                   "--building", "ut", "--type", net.nettype]
+                   "--bunker", "zebrabucket.ut", "--type", net.nettype]
         self.noouttest(command)
 
     def test_330_addutcolo(self):
@@ -198,7 +198,7 @@ class TestAddNetwork(TestBrokerCommand):
                 continue
 
             if ((network.loc_type == "building" and network.loc_name == "ut") or
-                    (network.loc_type == "bunker" and network.loc_name == "bucket2.ut")):
+                    (network.loc_type == "bunker" and network.loc_name in ["bucket2.ut", "zebrabucket.ut"])):
                 self.matchoutput(out, str(network.ip), command)
             else:
                 self.matchclean(out, str(network.ip), command)

@@ -51,6 +51,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.output_equals(out, """
             Machine: ut3c5n10
               Building: ut
+              Bunker: zebrabucket.ut
               Campus: ny
               City: ny
               Continent: na
@@ -152,9 +153,10 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
 
     # Used for testing notifications
-    def test_140_add_ut3c5n6(self):
-        self.create_machine_hs21("ut3c5n6", chassis="ut3c5", slot=6,
-                                 eth0_mac=self.net["unknown0"].usable[19].mac)
+    def test_140_add_ut8s02p6(self):
+        net = self.net["tor_net_0"]
+        self.create_machine("ut8s02p6", "dl360g9", rack="ut8",
+                            eth0_mac=net.usable[8].mac)
 
     # Network environment testing
     def test_141_add_ut3c5n7(self):
@@ -196,6 +198,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.output_equals(out, """
             Machine: ut3c1n3
               Building: ut
+              Bunker: zebrabucket.ut
               Campus: ny
               City: ny
               Continent: na
@@ -241,7 +244,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"rack/name" = "ut3";', command)
         self.matchoutput(out, '"rack/row" = "a";', command)
         self.matchoutput(out, '"rack/column" = "3";', command)
-        self.matchoutput(out, '"sysloc/room" = "utroom1";', command)
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
         self.matchoutput(out, '"sysloc/country" = "us";', command)

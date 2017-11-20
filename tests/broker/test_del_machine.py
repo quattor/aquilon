@@ -89,8 +89,8 @@ class TestDelMachine(EventsTestMixin, TestBrokerCommand):
         self.assertFalse(os.path.exists(dir),
                          "Plenary directory '%s' still exists" % dir)
 
-    def testdelut3c5n6(self):
-        self.noouttest(["del", "machine", "--machine", "ut3c5n6"])
+    def testdelut8s02p6(self):
+        self.noouttest(["del", "machine", "--machine", "ut8s02p6"])
 
     def testdelutnorack(self):
         self.noouttest(["del", "machine", "--machine", "utnorack"])

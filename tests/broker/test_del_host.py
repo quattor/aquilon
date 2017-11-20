@@ -143,7 +143,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         self.notfoundtest(command.split(" "))
 
     def test_160_del_jack(self):
-        self.dsdb_expect_delete(self.net["unknown0"].usable[17])
+        ip = self.net["tor_net_0"].usable[9]
+        self.dsdb_expect_delete(ip)
         command = "del host --hostname jack.cards.example.com"
         self.statustest(command.split(" "))
         self.dsdb_verify()
@@ -242,28 +243,28 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
     def test_300_del_utinfra1(self):
         eth0_ip = self.net["unknown0"].usable[33]
         eth1_ip = self.net["unknown1"].usable[34]
-        ip = self.net["zebra_vip"].usable[3]
+        ip = self.net["zebra_vip"].usable[0]
         self.delete_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_utinfra2(self):
         eth0_ip = self.net["unknown0"].usable[38]
         eth1_ip = self.net["unknown1"].usable[37]
-        ip = self.net["zebra_vip"].usable[7]
+        ip = self.net["zebra_vip"].usable[1]
         self.delete_host("infra2.aqd-unittest.ms.com", ip, "ut3c5n14",
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_npinfra1(self):
         eth0_ip = self.net["unknown0"].usable[35]
         eth1_ip = self.net["unknown1"].usable[36]
-        ip = self.net["zebra_vip"].usable[4]
+        ip = self.net["zebra_vip2"].usable[0]
         self.delete_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_npinfra2(self):
         eth0_ip = self.net["unknown0"].usable[43]
         eth1_ip = self.net["unknown1"].usable[39]
-        ip = self.net["zebra_vip"].usable[9]
+        ip = self.net["zebra_vip2"].usable[1]
         self.delete_host("infra2.one-nyp.ms.com", ip, "np3c5n14",
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
@@ -279,7 +280,10 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             machine = "ut9s03p%d" % port
-            self.delete_host(hostname, net.usable[port], machine,
+            ip = net.usable[port]
+            if hostname == 'aquilon67.aqd-unittest.ms.com':
+                ip = self.net["ut_bucket2_localvip"].usable[0]
+            self.delete_host(hostname, ip, machine,
                              manager_ip=mgmt_net.usable[port], justification=True)
 
     def test_300_del_ut10_hosts(self):

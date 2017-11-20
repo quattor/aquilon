@@ -29,8 +29,20 @@ from machinetest import MachineTestMixin
 
 
 class TestAddHost(MachineTestMixin, TestBrokerCommand):
+    def test_100_add_unittest16_fail_ipfromtype(self):
+        # Test fail to use --ipfromtype for hosts not in bunker
+        command = ["add", "host",
+                   "--hostname", "unittest16.aqd-unittest.ms.com",
+                   "--ipfromtype", "localvip", "--ipalgorithm", "lowest",
+                   "--machine", "ut8s02p2", "--domain", "unittest",
+                   "--archetype", "aquilon",
+                   "--personality", "compileserver"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Host location is not "
+                              "inside a bunker, --ipfromtype cannot be used.",
+                         command)
 
-    def test_100_add_unittest02(self):
+    def test_101_add_unittest02(self):
         ip = self.net["unknown0"].usable[0]
         # DSDB sync uses the machine comments, not the host comments
         self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac,
@@ -649,10 +661,10 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         hostname = self.config.get("unittest", "hostname")
         # We _could_ also look up the real address of the host...
         self.dsdb_expect_add(hostname, "127.0.0.1", "eth0",
-                             self.net["unknown0"].usable[19].mac)
+                             self.net["tor_net_0"].usable[8].mac)
         self.noouttest(["add", "host",
                         "--hostname", hostname,
-                        "--ip", "127.0.0.1", "--machine", "ut3c5n6",
+                        "--ip", "127.0.0.1", "--machine", "ut8s02p6",
                         "--domain", "unittest", "--buildstatus", "ready",
                         "--archetype", "aquilon",
                         "--personality", "compileserver"])
@@ -679,7 +691,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_430_add_utinfra1(self):
         eth0_ip = self.net["unknown0"].usable[33]
         eth1_ip = self.net["unknown1"].usable[34]
-        ip = self.net["zebra_vip"].usable[3]
+        ip = self.net["zebra_vip"].usable[0]
         self.create_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
                          model="utrackmount", chassis="ut3c5", slot=13,
                          cpuname="utcpu", cpucount=2, memory=65536,
@@ -688,12 +700,12 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="utpers-prod")
+                         zebra=True, ipfromtype='localvip', personality="utpers-prod")
 
     def test_431_add_utinfra2(self):
         eth0_ip = self.net["unknown0"].usable[38]
         eth1_ip = self.net["unknown1"].usable[37]
-        ip = self.net["zebra_vip"].usable[7]
+        ip = self.net["zebra_vip"].usable[1]
         self.create_host("infra2.aqd-unittest.ms.com", ip, "ut3c5n14",
                          model="utrackmount", chassis="ut3c5", slot=14,
                          cpuname="utcpu", cpucount=2, memory=65536,
@@ -702,13 +714,13 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra2-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra2-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="utpers-prod")
+                         zebra=True, ipfromtype='localvip', personality="utpers-prod")
 
     def test_435_add_npinfra1(self):
         # FIXME: use networks from np
         eth0_ip = self.net["unknown0"].usable[35]
         eth1_ip = self.net["unknown1"].usable[36]
-        ip = self.net["zebra_vip"].usable[4]
+        ip = self.net["zebra_vip2"].usable[0]
         self.create_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
                          model="utrackmount", chassis="np3c5", slot=13,
                          cpuname="utcpu", cpucount=2, memory=65536,
@@ -717,13 +729,13 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.one-nyp.ms.com",
-                         zebra=True, personality="utpers-prod")
+                         zebra=True, ipfromtype='vip', personality="utpers-prod")
 
     def test_436_add_npinfra2(self):
         # FIXME: use networks from np
         eth0_ip = self.net["unknown0"].usable[43]
         eth1_ip = self.net["unknown1"].usable[39]
-        ip = self.net["zebra_vip"].usable[9]
+        ip = self.net["zebra_vip2"].usable[1]
         self.create_host("infra2.one-nyp.ms.com", ip, "np3c5n14",
                          model="utrackmount", chassis="np3c5", slot=14,
                          cpuname="utcpu", cpucount=2, memory=65536,
@@ -732,10 +744,10 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra2-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra2-e1.one-nyp.ms.com",
-                         zebra=True, personality="utpers-prod")
+                         zebra=True, ipfromtype='vip', personality="utpers-prod")
 
     def test_440_add_jack_host(self):
-        ip = self.net["unknown0"].usable[17]
+        ip = self.net["tor_net_0"].usable[9]
         self.create_host("jack.cards.example.com", ip, "jack",
                          model="utrackmount", rack="cards1",
                          cpuname="utcpu", cpucount=2, memory=65536,
@@ -751,7 +763,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Used by GRN: grn:/example/cards", command)
 
     def test_445_verify_show_host_jack_grns(self):
-        ip = self.net["unknown0"].usable[17]
+        ip = self.net["tor_net_0"].usable[9]
         command = ["show_host", "--grns", "--hostname=jack.cards.example.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Primary Name: jack.cards.example.com [%s]" % ip,
@@ -817,6 +829,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             Chassis: ut3c5
               Primary Name: ut3c5.aqd-unittest.ms.com [%s]
               Building: ut
+              Bunker: zebrabucket.ut
               Campus: ny
               City: ny
               Continent: na
@@ -839,7 +852,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Slot #3: ut3c5n3 (unittest21.aqd-unittest.ms.com)
               Slot #4: ut3c5n4 (unittest22.aqd-unittest.ms.com)
               Slot #5: ut3c5n5 (unittest23.aqd-unittest.ms.com)
-              Slot #6: ut3c5n6 (%s)
               Slot #7: ut3c5n7 (unittest25.aqd-unittest.ms.com)
               Slot #8: ut3c5n8 (unittest26.aqd-unittest.ms.com)
               Slot #10: ut3c5n10 (unittest02.one-nyp.ms.com)
@@ -848,8 +860,44 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Slot #13: ut3c5n13 (infra1.aqd-unittest.ms.com)
               Slot #14: ut3c5n14 (infra2.aqd-unittest.ms.com)
               Slot #16: ut3c5n16 (no hostname)
-            """ % (ip, ip.mac, ip, hostname),
+            """ % (ip, ip.mac, ip),
             command)
+
+    def test_801_show_ut8s02p6(self):
+        hostname = self.config.get("unittest", "hostname")
+        command = ["show_machine", "--machine", "ut8s02p6"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Provides: %s [127.0.0.1]" % hostname, command)
+
+    def test_805_ipfromtype_host_setup(self):
+        # Reuse host in bunker bucket2.ut
+        command = ["show", "host", "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        self.dsdb_expect_delete(self.net["hp_eth0"].usable[17])
+        self.statustest(["del_host", "--hostname", "aquilon67.aqd-unittest.ms.com"])
+        command = ["search", "network", "--type", "localvip", "--exact_location", "--bunker", "bucket2.ut", "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Bunker: bucket2.ut", command)
+        self.matchoutput(out, "Network: ut_bucket2_localvip", command)
+        self.dsdb_verify()
+
+    def test_810_ipfromtype_host(self):
+        # Reuse host in bunker bucket2.ut
+        ip = self.net["ut_bucket2_localvip"].usable[0]
+        mac = self.net["hp_eth0"].usable[17].mac
+        self.dsdb_expect_add("aquilon67.aqd-unittest.ms.com",
+                             ip, "eth0",
+                             mac)
+        self.noouttest(["add_host", "--hostname", "aquilon67.aqd-unittest.ms.com",
+                        "--archetype", "aquilon",
+                        "--machine", "ut9s03p17",
+                        "--ipfromtype", "localvip", "--sandbox", "%s/utsandbox" % self.user])
+        self.dsdb_verify()
+        command = ["show", "host", "--hostname", "aquilon67.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Provides: aquilon67.aqd-unittest.ms.com [{}]".format(ip), command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

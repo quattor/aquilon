@@ -22,6 +22,7 @@ To an extent, this has become a dumping ground for any common ip methods.
 
 from operator import attrgetter
 import re
+import os
 
 from ipaddress import ip_address, IPv4Network
 
@@ -44,6 +45,31 @@ from aquilon.utils import first_of
 
 
 _vlan_re = re.compile(r'^(.*)\.(\d+)$')
+
+
+def get_networks_bylocation(session, dblocation_set, network_type):
+    """
+    Get Network by given network location list and network type
+    Have extra business logic for Bunker+vip combination
+    :param session:
+    :param dblocation: Building or Bunker or else
+    :param network_type: localvip or vip or else
+    :return:
+    """
+    loc_ids = []
+    for dblocation in dblocation_set:
+        if isinstance(dblocation, Bunker) and network_type == 'vip':
+            # Special business logic for getting networks of the same Bucket
+            bucket = dblocation.name.split('.')[0]
+            location_by_bucket = session.query(Location).filter(Location.name.startswith('{}.'.format(bucket)))
+            loc_ids.extend([loc.id for loc in location_by_bucket])
+        else:
+            loc_ids.append(dblocation.id)
+    loc_ids = list(set(loc_ids))
+    q = session.query(Network).filter(Network.network_type == network_type). \
+        join(Location, Network.location_id == Location.id). \
+        filter(Location.id.in_(loc_ids))
+    return q.all()
 
 
 def check_ip_restrictions(dbnetwork, ip, relaxed=False):
@@ -118,17 +144,17 @@ def get_vm_pg_allocator(dbmachine):
         return get_cluster_pg_allocator(holder)
 
 
-def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
-                ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
+def generate_ip(session, logger, dbinterface, net_location_set=None, ip=None, ipfromip=None,
+                ipfromsystem=None, ipfromtype=None, autoip=None, ipalgorithm=None, compel=False,
                 network_environment=None, audit_results=None, **_):
-    ip_options = [ip, ipfromip, ipfromsystem, autoip]
+    ip_options = [ip, ipfromip, ipfromsystem, autoip, ipfromtype]
     numopts = sum(1 if opt else 0 for opt in ip_options)
     if numopts > 1:
-        raise ArgumentError("Only one of --ip, --ipfromip, --ipfromsystem "
+        raise ArgumentError("Only one of --ip, --ipfromip, --ipfromsystem, --ipfromtype "
                             "and --autoip can be specified.")
     elif numopts == 0:
         if compel:
-            raise ArgumentError("Please specify one of the --ip, --ipfromip, "
+            raise ArgumentError("Please specify one of the --ip, --ipfromip, --ipfromtype, "
                                 "--ipfromsystem, and --autoip parameters.")
         return None
 
@@ -191,18 +217,54 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
         # determine network
         dbnetwork = get_net_id_from_ip(session, ipfromip, network_environment)
 
-    if not dbnetwork:  # pragma: no cover
-        raise ArgumentError("Could not determine network to use for %s." %
-                            dbinterface)
+    net_list = [dbnetwork]
 
-    # The code below depends on being able to represent the set of all usable IP
-    # addresses in memory, which does not work for large IPv6 networks. Also,
-    # for IPv6, we potentially want to allocate a whole subnet per host instead
-    # of just a single IP address.
-    if not isinstance(dbnetwork.network, IPv4Network):
-        raise UnimplementedError("Automatic IP assignment is not implemented "
-                                 "for IPv6 networks.")
+    # Get next IP based on the type localvip or vip and network locations
+    if ipfromtype:
+        if not net_location_set:
+            raise ArgumentError('Network locations not specified, --ipfromtype cannot be used.')
 
+        net_list = get_networks_bylocation(session, net_location_set, ipfromtype)
+
+    if not net_list:  # pragma: no cover
+        raise ArgumentError("Could not determine network to use.")
+
+    for dbnetwork in net_list:
+        # The code below depends on being able to represent the set of all usable IP
+        # addresses in memory, which does not work for large IPv6 networks. Also,
+        # for IPv6, we potentially want to allocate a whole subnet per host instead
+        # of just a single IP address.
+        if not isinstance(dbnetwork.network, IPv4Network):
+            raise UnimplementedError("Automatic IP assignment is not implemented "
+                                     "for IPv6 networks.")
+        exception = None
+        try:
+            ip = next_ip(session, dbnetwork, ipalgorithm)
+            break
+        except ValueError as exception:
+            # Cannot rollback to release network row lock
+            # As it would roll back other previous changes together
+            # Will be roll released on commit or rollback when command is done
+            # session.rollback()
+            continue
+
+    if not ip:
+        if len(net_list) == 1:
+            raise ArgumentError(str(exception))
+        raise ArgumentError("No available IP addresses found in "
+                            "networks {}".format([str(network.network) for network in net_list]))
+
+    if audit_results is not None:
+        if dbinterface:
+            logger.info("Selected IP address {0!s} for {1:l}."
+                        .format(ip, dbinterface))
+        else:
+            logger.info("Selected IP address %s." % ip)
+        audit_results.append(('ip', ip))
+    return ip
+
+
+def next_ip(session, dbnetwork, ipalgorithm):
     # When there are e.g. multiple "add manager --autoip" operations going on in
     # parallel, we must ensure that they won't try to use the same IP address.
     # This query places a database lock on the network, which means IP address
@@ -216,46 +278,55 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     used_ips = session.query(ARecord.ip)
     used_ips = used_ips.filter_by(network=dbnetwork)
     used_ips = used_ips.filter(ARecord.ip >= startip)
-
     full_set = set(range(int(startip), int(dbnetwork.broadcast_address)))
     used_set = set(int(item.ip) for item in used_ips)
     free_set = full_set - used_set
 
     if not free_set:
-        raise ArgumentError("No available IP addresses found on "
+        raise ValueError("No available IP addresses found on "
                             "network %s." % str(dbnetwork.network))
-
-    if ipalgorithm is None or ipalgorithm == 'lowest':
-        # Select the lowest available address
-        ip = ip_address(min(free_set))
-    elif ipalgorithm == 'highest':
-        # Select the highest available address
-        ip = ip_address(max(free_set))
-    elif ipalgorithm == 'max':
-        # Return the max. used address + 1
-        if not used_set:
-            # Avoids ValueError being thrown when used_set is empty
+    ip = None
+    while free_set:
+        # We do not want to return 'pingable' IPs
+        if ipalgorithm is None or ipalgorithm == 'lowest':
+            # Select the lowest available address
             ip = ip_address(min(free_set))
+        elif ipalgorithm == 'highest':
+            # Select the highest available address
+            ip = ip_address(max(free_set))
+        elif ipalgorithm == 'max':
+            # Return the max. used address + 1
+            if not used_set:
+                # Avoids ValueError being thrown when used_set is empty
+                ip = ip_address(min(free_set))
+            else:
+                next = max(used_set)
+                if (next + 1) not in free_set:
+                    raise ValueError("Failed to find an IP that is suitable "
+                                        "for --ipalgorithm=max.  Try an other "
+                                        "algorithm as there are still some free "
+                                        "addresses.")
+                ip = ip_address(next + 1)
         else:
-            next = max(used_set)
-            if (next + 1) not in free_set:
-                raise ArgumentError("Failed to find an IP that is suitable "
-                                    "for --ipalgorithm=max.  Try an other "
-                                    "algorithm as there are still some free "
-                                    "addresses.")
-            ip = ip_address(next + 1)
-    else:
-        raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
-
-    if audit_results is not None:
-        if dbinterface:
-            logger.info("Selected IP address {0!s} for {1:l}."
-                        .format(ip, dbinterface))
+            raise ArgumentError("Unknown algorithm %s." % ipalgorithm)
+        # Test IP address ping - we want ip to be now used - not pingable
+        ping_response = test_ping(ip)
+        if ping_response == 0:
+            free_set = free_set - set([int(ip)])
         else:
-            logger.info("Selected IP address %s." % ip)
-        audit_results.append(('ip', ip))
-
+            break
     return ip
+
+
+def test_ping(ip):
+    """
+    Helper function to test ping for give IP address
+    In case IP is used however not registered in the DB
+    :param ip: ip address
+    :return:
+    """
+    response_code = os.system("ping -c 1 {}".format(ip))
+    return response_code
 
 
 def set_port_group_phys(session, dbinterface, port_group_name):

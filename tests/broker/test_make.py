@@ -333,8 +333,8 @@ class TestMake(TestBrokerCommand):
         eth1_1_ip = self.net["zebra_eth1"].usable[3]
 
         hostname_ip = self.net["zebra_vip"].usable[2]
-        zebra2_ip = self.net["zebra_vip"].usable[1]
-        zebra3_ip = self.net["zebra_vip"].usable[0]
+        zebra2_ip = self.net["zebra_vip"].usable[14]
+        zebra3_ip = self.net["zebra_vip"].usable[13]
 
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--data"]

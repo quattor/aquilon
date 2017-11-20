@@ -54,7 +54,7 @@ class TestDelChassis(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_120_del_ut9_chassis(self):
-        for i in range(1, 6):
+        for i in range(1, 8):
             self.dsdb_expect_delete(self.net["ut9_chassis"].usable[i])
             command = "del chassis --chassis ut9c%d.aqd-unittest.ms.com" % i
             self.noouttest(command.split(" "))
