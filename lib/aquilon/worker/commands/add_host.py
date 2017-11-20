@@ -133,14 +133,18 @@ class CommandAddHost(BrokerCommand):
                 if addr.interface.interface_type == "management":
                     continue
                 for rec in addr.dns_records:
-                    if rec.fqdn.dns_environment == dns_env:
+                    if rec.fqdn.dns_environment == dns_env and \
+                            rec.reverse_ptr != dbdns_rec.fqdn:
                         rec.reverse_ptr = dbdns_rec.fqdn
+                        if exporter:
+                            exporter.update(rec.fqdn)
 
         if zebra_interfaces:
             if not ip:
                 raise ArgumentError("Zebra configuration requires an IP address.")
             dbsrv_addr = self.assign_zebra_address(session, dbmachine, dbdns_rec,
-                                                   zebra_interfaces)
+                                                   zebra_interfaces,
+                                                   exporter=exporter)
         else:
             if ip:
                 if not dbinterface:
@@ -175,7 +179,7 @@ class CommandAddHost(BrokerCommand):
         return
 
     def assign_zebra_address(self, session, dbmachine, dbdns_rec,
-                             zebra_interfaces):
+                             zebra_interfaces, exporter=None):
         """ Assign a Zebra-managed address to multiple interfaces """
 
         # Reset the routing configuration
@@ -192,7 +196,10 @@ class CommandAddHost(BrokerCommand):
                 if addr.label:
                     continue
                 for dnr in addr.dns_records:
-                    dnr.reverse_ptr = dbdns_rec.fqdn
+                    if dnr.reverse_ptr != dbdns_rec.fqdn:
+                        dnr.reverse_ptr = dbdns_rec.fqdn
+                        if exporter:
+                            exporter.update(dnr.fqdn)
 
             # Transits should be providers of the default route
             dbinterface.default_route = True

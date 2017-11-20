@@ -111,7 +111,7 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False, exporte
 
     # Delete the orphaned targets
     for tgt in targets:
-        delete_target_if_needed(session, tgt)
+        delete_target_if_needed(session, tgt, exporter=exporter)
 
 
 def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
@@ -423,7 +423,7 @@ def create_target_if_needed(session, logger, target, dbdns_env):
     return dbtarget
 
 
-def delete_target_if_needed(session, dbtarget):
+def delete_target_if_needed(session, dbtarget, exporter=None):
     session.flush()
 
     # If there's a ReservedName pointing to this FQDN and we're in a restricted
@@ -452,6 +452,8 @@ def delete_target_if_needed(session, dbtarget):
     if not q.count():
         for dbdns_rec in dbtarget.dns_records:
             session.delete(dbdns_rec)
+            if exporter:
+                exporter.delete(dbdns_rec.fqdn)
         session.delete(dbtarget)
     else:
         session.expire(dbtarget, ['dns_records'])

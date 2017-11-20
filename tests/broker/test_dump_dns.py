@@ -17,7 +17,6 @@
 # limitations under the License.
 """Module for testing the dump_dns command."""
 
-import struct
 import unittest
 
 if __name__ == '__main__':
@@ -27,23 +26,7 @@ if __name__ == '__main__':
 from ipaddress import IPv4Address, IPv6Address
 
 from brokertest import TestBrokerCommand
-
-
-def inaddr_ptr(ip):
-    octets = str(ip).split('.')
-    octets.reverse()
-    return "%s.in-addr.arpa" % '.'.join(octets)
-
-
-def in6addr_ptr(ip):
-    octets = list(struct.unpack("B" * 16, ip.packed))
-    octets.reverse()
-    return ".".join("%x.%x" % (octet & 15, octet >> 4) for octet in octets) + ".ip6.arpa"
-
-
-def ip6(ip):
-    octets = struct.unpack("B" * 16, ip.packed)
-    return "".join("\\%03o" % octet for octet in octets)
+from dnstest import inaddr_ptr, in6addr_ptr, ip6
 
 
 class TestDumpDns(TestBrokerCommand):
