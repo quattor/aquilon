@@ -291,6 +291,57 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.matchoutput(out, "Address: testlocalvipaddress.ms.com [{}]".format(ip),
                          command)
 
+    def test_636_add_service_address_aliases(self):
+        command = [
+            'add', 'alias',
+            '--fqdn', 'testlocalvipaddress-alias1.aqd-unittest.ms.com',
+            '--target', 'testlocalvipaddress.ms.com',
+        ]
+        self.successtest(command)
+        command = [
+            'add', 'alias',
+            '--fqdn', 'testlocalvipaddress-alias2.aqd-unittest.ms.com',
+            '--target', 'testlocalvipaddress.ms.com',
+        ]
+        self.successtest(command)
+
+    def test_637_verify_service_address_aliases(self):
+        command = ['show', 'service', 'address', '--name', 'test2',
+                   '--hostname', 'aquilon67.aqd-unittest.ms.com',
+                   '--format', 'proto']
+
+        # Get the resource object from the command
+        resource = self.protobuftest(command, expect=1)[0]
+
+        # Check the resource information
+        self.assertEqual(resource.type, 'service_address')
+        self.assertEqual(resource.name, 'test2')
+
+        # Get the service address object from the resource object
+        service_address = resource.service_address
+
+        # Check the service address information
+        self.assertEqual(service_address.fqdn, 'testlocalvipaddress.ms.com')
+        self.assertListEqual(
+            list(service_address.aliases),
+            [
+                u'testlocalvipaddress-alias1.aqd-unittest.ms.com',
+                u'testlocalvipaddress-alias2.aqd-unittest.ms.com',
+            ],
+        )
+
+    def test_638_del_service_address_aliases(self):
+        command = [
+            'del', 'alias',
+            '--fqdn', 'testlocalvipaddress-alias1.aqd-unittest.ms.com',
+        ]
+        self.successtest(command)
+        command = [
+            'del', 'alias',
+            '--fqdn', 'testlocalvipaddress-alias2.aqd-unittest.ms.com',
+        ]
+        self.successtest(command)
+
     def test_640_add_service_address_ipfromtype_not_bunker(self):
         # Test nextip generation limited to bunkers only
         command = ["add", "service", "address", "--hostname", "unittest15.aqd-unittest.ms.com",
