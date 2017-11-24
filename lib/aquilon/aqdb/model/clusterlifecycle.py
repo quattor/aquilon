@@ -100,8 +100,7 @@ class Decommissioned(ClusterLifecycle):
         section = "archetype_" + archetype.name
         opt = "allow_cascaded_deco"
 
-        if dbcluster.hosts and (not config.has_option(section, opt) or
-                                not config.getboolean(section, opt)):
+        if dbcluster.hosts and not config.getboolean(section, opt):
             raise ArgumentError("Cascaded decommissioning is not enabled for "
                                 "{0:l}, please remove all members first."
                                 .format(archetype))

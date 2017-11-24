@@ -1,0 +1,104 @@
+# This config file is for running the broker outside of MS where no afs available.
+# Modify tool_locations and other configuration sections to provide appropriate values
+# before moving config to /etc/aqd.conf (or other location defined as AQDCONF env variable).
+
+###############################################################################
+
+[broker]
+# Default Organization model name value
+default_organization = AquilonOrg
+
+# Database file containing info about shares
+sharedata =
+
+# Used by refresh_grns
+grn_to_eonid_map_location =
+
+# Could be repaced with /etc/passwd, used by refresh_user
+user_list_location =
+
+###############################################################################
+
+[tool_locations]
+# If option is set to empty value
+# tool will default to binary available in PATH
+
+# Not Applicable outside MS
+dsdb = /bin/true
+
+# default to binary available in PATH
+ssh =
+
+# Network related tools
+switch_discover =
+# Raw Network data used by refresh_network command
+qip_dump_subnetdata =
+# Used in poll_net_device command, path to binary
+vlan2net =
+
+# default to binary available in PATH
+# Used by poll network device command
+get_camtable =
+
+# Used by pxeswitch command
+aii_installfe =
+
+# Used by get command
+mean = %(srcdir)s/tests/fakebin/fake_mean
+
+# Git config
+# default to binary available in PATH
+git =
+git_daemon = /usr/libexec/git-core/git-daemon
+
+# default to binary available in PATH
+knc =
+
+# Kerberos config
+# default to binary available in PATH
+krb5_keytab =
+klist =
+
+# Path to Authorisation service
+aqd_checkedm = /bin/true
+
+# Java config
+# default to binary available in PATH
+java_home =
+ant_home =
+ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
+ant =
+
+location_uri_validator = /bin/true
+
+###############################################################################
+
+[panc]
+
+# The update_domain command expects to be able to read this value
+# in raw mode and set the version variable itself.
+pan_compiler = /usr/lib/panc.jar
+
+###############################################################################
+
+[site]
+# Site specific settings
+default_hardware_label_regex = ^[a-z][a-z0-9]{,62}$
+
+###############################################################################
+
+# Interface types that require specific names should be added as key for this
+# configuration section. If an interface type is not specified here,
+# any interface name format will be allowed
+[interface_name_regex]
+# Interface model name field validation regex
+public = ^[a-z]+\d+[a-z]?$
+management = ^[a-z]+\d*$
+vlan = ^[a-z]+\d*\.[1-9]\d*$
+# Linux: ncm-networks wants "bond.*", but Netapp is more relaxed
+bonding = ^[a-z]+\d+$
+
+###############################################################################
+
+[protocols]
+directory = /usr/local/lib/aquilon/protocols/lib/python

@@ -64,27 +64,25 @@ class TestBrokerStart(unittest.TestCase):
         args = [sys.executable, aqd,
                 "--pidfile", pidfile, "--logfile", logfile]
 
-        if self.config.has_option("unittest", "profile"):
-            if self.config.getboolean("unittest", "profile"):
-                args.append("--profile")
-                args.append(os.path.join(self.config.get("broker", "logdir"),
-                                         "aqd.profile"))
-                args.append("--profiler=cProfile")
-                args.append("--savestats")
+        if self.config.getboolean("unittest", "profile"):
+            args.append("--profile")
+            args.append(os.path.join(self.config.get("broker", "logdir"),
+                                     "aqd.profile"))
+            args.append("--profiler=cProfile")
+            args.append("--savestats")
 
         # And then aqd and options...
         args.extend(["aqd", "--config", self.config.baseconfig])
 
-        if self.config.has_option("unittest", "coverage"):
-            if self.config.getboolean("unittest", "coverage"):
-                args.append("--coveragedir")
-                dir = os.path.join(self.config.get("broker", "logdir"), "coverage")
-                args.append(dir)
+        if self.config.getboolean("unittest", "coverage"):
+            args.append("--coveragedir")
+            dir = os.path.join(self.config.get("broker", "logdir"), "coverage")
+            args.append(dir)
 
-                coveragerc = os.path.join(self.config.get("broker", "srcdir"),
-                                          "tests", "coverage.rc")
-                args.append("--coveragerc")
-                args.append(coveragerc)
+            coveragerc = os.path.join(self.config.get("broker", "srcdir"),
+                                      "tests", "coverage.rc")
+            args.append("--coveragerc")
+            args.append(coveragerc)
 
         self.run_command(args)
 

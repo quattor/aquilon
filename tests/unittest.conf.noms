@@ -1,0 +1,147 @@
+# This file provides the default for the unittests.  To test against
+# an oracle database (or otherwise change the parameters), copy this
+# file and modify as needed.
+#
+# The config file etc/aqd.conf.defaults always gets read first, and the
+# values below override those.  To nullify a value from the defaults,
+# it must be explicitly set to an empty value here.
+
+[DEFAULT]
+basedir = /var/tmp/%(user)s/aqtest
+quattordir = %(basedir)s/quattor
+
+# By default takes the sqlite section from aqd.conf.defaults.
+[database]
+database_section = database_sqlite
+
+[database_sqlite]
+# We do not really care if the host crashes during the unittest...
+disable_fsync = yes
+
+[broker]
+servername = %(hostname)s
+umask = 0022
+kncport = 6902
+openport = 6903
+git_port = 9419
+# Testing the case when bind_address is set is more interesting than when it's not...
+# It would be better to use localhost (to make sure nothing goes out to the wire), but that would make Kerberos unhappy
+bind_address = %(hostname)s
+run_git_daemon = True
+git_author_name = %(user)s
+git_author_email = %(user)s@%(hostname)s
+git_committer_name = %(user)s
+git_committer_email = %(user)s@%(hostname)s
+trash_branch = unittest_trash
+dsdb_use_testdb = 1
+server_notifications = utnotify
+client_notifications = False
+sharedata = %(srcdir)s/tests/fakebin/nasobjects/testnasobjects.cdb
+run_knc = True
+grn_to_eonid_map_location = %(srcdir)s/tests/fakebin/eon-data
+esx_cluster_allow_cascaded_deco = True
+default_max_list_size = 1000
+reconfigure_max_list_size = 15
+pxeswitch_max_list_size = 15
+manage_max_list_size = 15
+reset_advertised_status_max_list_size = 15
+map_grn_max_list_size = 15
+unmap_grn_max_list_size = 15
+user_list_location = %(srcdir)s/tests/fakebin/user-data/passwd.byname
+user_delete_limit = 10
+
+[change_management]
+# The contents of --justification will not be validated externally
+# (syntax checking will still be performed)
+enable = True
+extra_options = --mode warn --disable_edm --edm-instance qa
+
+[tool_locations]
+dsdb = %(srcdir)s/tests/fakebin/fake_dsdb
+aii_installfe = /bin/echo
+vlan2net = %(srcdir)s/tests/fakebin/fake_vlan2net
+mean = %(srcdir)s/tests/fakebin/fake_mean
+qip_dump_subnetdata = %(srcdir)s/tests/fakebin/fake_qip_dump_subnetdata
+ssh = %(srcdir)s/tests/fakebin/fake_ssh
+switch_discover = %(srcdir)s/tests/fakebin/fake_switchdata
+get_camtable = %(srcdir)s/tests/fakebin/fake_macdata
+checkedm = %(srcdir)s/tests/fakebin/fake_checkedm
+aqd_checkedm = %(srcdir)s/tests/fakebin/fake_aqd_checkedm
+location_uri_validator = %(srcdir)s/tests/fakebin/location_uri_validator
+
+# Alternative tool locations outside MS
+git_daemon = /usr/libexec/git-core/git-daemon
+ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
+
+[location_feeds]
+building_feed = %(srcdir)s/tests/fakebin/user-data/location_feed.csv
+
+[unittest]
+last_success_db_snapshot =
+# To be used with --failfast option
+#last_success_db_snapshot = %(quattordir)s/aquilondb/aquilon_last_success_snapshot.db
+scratchdir = %(basedir)s/scratch
+mirrordir = %(basedir)s/mirror
+
+# Update the template_king_host value
+template_king_host = localhost
+template_base = git://%(template_king_host)s/quattor/template-king
+
+template_alternate_prod =
+fake_hosts_location = %(srcdir)s/tests/fakebin/dsdb.d/show_host_-host_name_
+datadir = %(srcdir)s/tests/broker/data
+
+# Alternative tool locations outside MS
+real_panc_location = /usr/lib/panc.jar
+
+# Versions for the Linux models. These are used both for Aquilon and Aurora.
+linux_version_curr = 6.1-x86_64
+linux_version_prev = 5.1-x86_64
+
+[archetype_aquilon]
+default_grn_target = esp
+default_osversion = 6.1-x86_64
+default_osname = linux
+host_grn_targets = esp,hlmplus,atarget
+personality_grn_targets = esp,hlmplus,atarget
+
+[archetype_aurora]
+default_domain = unittest
+
+[archetype_f5]
+default_personality = generic
+
+[archetype_filer]
+default_personality = generic
+
+[archetype_metacluster]
+default_domain = unittest
+
+[archetype_hacluster]
+allow_cascaded_deco = False
+max_priority_order = 99
+min_priority_order = 1
+
+[archetype_netinfra]
+# Network devices should be compileable, but we're not quite there yet.
+# Stash them awain in a separate domain for now to avoid compilation
+# errors.
+default_domain = netinfra
+
+[archetype_windows]
+default_domain = ut-prod
+
+[panc]
+pan_compiler = %(basedir)s/panc-links/panc-%(version)s.jar
+include_pan = True
+
+[site]
+# Site specific settings
+default_hardware_label_regex = ^[a-z][a-z0-9]{,62}$
+# Allow Aquilon broker generate nextip for vip/localvip type
+# Temporary option until we can vary API by Aquilon broker instance
+ipfromtype = True
+
+[protocols]
+# Alternative tool locations outside MS
+directory = /usr/local/lib/aquilon/protocols/lib/python

@@ -222,10 +222,8 @@ class DbFactory(object):
 
     def create_engine(self, config, dsn, **pool_options):
         engine = create_engine(dsn, **pool_options)
-        show_plan = config.has_option("database", "log_query_plans") and \
-            config.getboolean("database", "log_query_plans")
-        if config.has_option("database", "log_unique_plans_only") and \
-           config.getboolean("database", "log_unique_plans_only"):
+        show_plan = config.getboolean("database", "log_query_plans")
+        if config.getboolean("database", "log_unique_plans_only"):
             global query_hashes
             query_hashes = set()
 
@@ -240,8 +238,7 @@ class DbFactory(object):
                 event.listen(engine, "after_cursor_execute", oracle_show_plan)
         elif engine.dialect.name == "sqlite":
             event.listen(engine, "connect", sqlite_foreign_keys)
-            if config.has_option("database", "disable_fsync") and \
-               config.getboolean("database", "disable_fsync"):
+            if config.getboolean("database", "disable_fsync"):
                 event.listen(engine, "connect", sqlite_no_fsync)
                 log = logging.getLogger(__name__)
                 log.info("SQLite is operating in unsafe mode!")
@@ -256,8 +253,7 @@ class DbFactory(object):
         if self.verbose:
             engine.echo = True
 
-        if config.has_option("database", "log_query_times") and \
-           config.getboolean("database", "log_query_times"):
+        if config.getboolean("database", "log_query_times"):
             event.listen(engine, "before_cursor_execute", timer_start)
             event.listen(engine, "after_cursor_execute", timer_stop)
 

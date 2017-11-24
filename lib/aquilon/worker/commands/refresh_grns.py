@@ -25,7 +25,7 @@ from aquilon.worker.locks import SyncKey
 class CommandRefreshGrns(BrokerCommand):
 
     def render(self, session, logger, **_):
-        if not self.config.has_option("broker", "grn_to_eonid_map_location"):  # pragma: no cover
+        if not self.config.has_value("broker", "grn_to_eonid_map_location"):  # pragma: no cover
             raise ArgumentError("GRN synchronization is disabled.")
         datadir = self.config.get("broker", "grn_to_eonid_map_location")
 

@@ -42,7 +42,7 @@ class UserSync(object):
         self.deleted = 0
         self.updated = 0
 
-        if not config.get("broker", "user_list_location"):
+        if not config.has_value("broker", "user_list_location"):
             raise ArgumentError("User synchronization is disabled.")
 
         self.fname = config.get("broker", "user_list_location")
