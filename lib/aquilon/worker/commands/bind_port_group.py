@@ -29,10 +29,10 @@ class CommandBindPortGroup(BrokerCommand):
     required_parameters = ["virtual_switch", "networkip"]
 
     def render(self, session, plenaries, virtual_switch, networkip, tag, type,
-               user, justification, reason, logger, **_):
+               network_environment, user, justification, reason, logger, **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
-        dbnetwork = get_net_id_from_ip(session, networkip)
+        dbnetwork = get_net_id_from_ip(session, networkip, network_environment=network_environment)
 
         # The tag and usage cannot be changed if the PortGroup object already
         # exists

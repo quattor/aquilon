@@ -50,13 +50,34 @@ class TestAddVirtualSwitch(TestBrokerCommand):
                    "--networkip", net.ip]
         self.noouttest(command)
 
-    def test_110_bind_portgroup(self):
+    def test_108_bind_network_env(self):
+        net = self.net["unknown1"]
+        command = ["bind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip, "--network_environment", "utcolo",
+                   "--type", "test", "--tag", "710"]
+        self.noouttest(command)
+
+    def test_109_unbind_network_env_fail(self):
+        net = self.net["unknown1"]
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Network unknown1 [{}] is not "
+                              "assigned to a port group.".format(net), command)
+
+    def test_110_unbind_network_env(self):
+        net = self.net["unknown1"]
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch",
+                   "--network_environment", "utcolo", "--networkip", net.ip]
+        self.noouttest(command)
+
+    def test_111_bind_portgroup(self):
         net = self.net["autopg1"]
         command = ["bind_port_group", "--virtual_switch", "utvswitch",
                    "--networkip", net.ip, "--type", "user", "--tag", "710"]
         self.noouttest(command)
 
-    def test_111_bind_unregistered_tag(self):
+    def test_114_bind_unregistered_tag(self):
         # Make sure the VLAN number is not registered
         self.noouttest(["show_vlan", "--vlan", "800"])
 

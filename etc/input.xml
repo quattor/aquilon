@@ -6706,6 +6706,7 @@
 	    <option name="networkip" type="ip">IP address of the network</option>
 	</optgroup>
 	<optgroup>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="tag" type="int">VLAN/VxLAN/etc. tag used for the network</option>
 	    <option name="type" type="string">Type of the port group</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -6724,6 +6725,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
