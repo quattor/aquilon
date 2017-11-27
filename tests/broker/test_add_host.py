@@ -544,9 +544,9 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
     def test_321_auxiliary_no_host(self):
         # Test port group based IP address allocation when there is no host yet
-        command = ["add_auxiliary", "--machine", "ut11s01p1",
+        command = ["add_interface_address", "--machine", "ut11s01p1",
                    "--interface", "eth1", "--autoip",
-                   "--auxiliary", "evh51-e1.aqd-unittest.ms.com"]
+                   "--fqdn", "evh51-e1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Machine ut11s01p1 does not have a host, assigning an "

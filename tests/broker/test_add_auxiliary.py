@@ -32,8 +32,8 @@ class TestAddAuxiliary(TestBrokerCommand):
         ip = self.net["unknown0"].usable[3]
         self.dsdb_expect_add("unittest00-e1.one-nyp.ms.com", ip, "eth1", ip.mac,
                              "unittest00.one-nyp.ms.com")
-        self.statustest(["add", "auxiliary", "--ip", ip,
-                         "--auxiliary", "unittest00-e1.one-nyp.ms.com",
+        self.statustest(["add_interface_address", "--ip", ip,
+                         "--fqdn", "unittest00-e1.one-nyp.ms.com",
                          "--machine", "ut3c1n3", "--interface", "eth1"])
         self.dsdb_verify()
 
@@ -52,15 +52,15 @@ class TestAddAuxiliary(TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
 
     def test_200_reject_multiple_address(self):
-        command = ["add", "auxiliary", "--ip", self.net["unknown0"].usable[-1],
-                   "--auxiliary", "unittest00-e2.one-nyp.ms.com",
+        command = ["add_interface_address", "--ip", self.net["unknown0"].usable[-1],
+                   "--fqdn", "unittest00-e2.one-nyp.ms.com",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--interface", "eth1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Interface eth1 of machine unittest00.one-nyp.ms.com "
-                         "already has the following addresses: "
-                         "eth1 [%s]" % self.net["unknown0"].usable[3],
+                         "Public Interface eth1 of "
+                         "machine unittest00.one-nyp.ms.com "
+                         "already has an IP address.",
                          command)
 
     # TODO: can't check this with the aq client since it detects the conflict
@@ -77,58 +77,59 @@ class TestAddAuxiliary(TestBrokerCommand):
     def test_200_reject_ut3c1n4_eth1(self):
         # This is an IP address outside of the Firm.  It should not appear
         # in the network table and thus should trigger a bad request here.
-        command = ["add", "auxiliary",
-                   "--auxiliary", "unittest01-e1.one-nyp.ms.com",
+        command = ["add_interface_address",
+                   "--fqdn", "unittest01-e1.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--mac", "02:02:c7:62:10:04",
                    "--interface", "eth1", "--ip", "199.98.16.4"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Could not determine network", command)
+        self.matchoutput(out, "Machine 02:02:c7:62:10:04 not found.", command)
 
     def test_200_reject_sixth_ip(self):
         # This tests that the sixth ip offset on a tor_switch network
         # gets rejected.
-        command = ["add", "auxiliary",
-                   "--auxiliary", "unittest01-e1.one-nyp.ms.com",
+        command = ["add_interface_address",
+                   "--fqdn", "unittest01-e1.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--interface", "eth2",
                    "--mac", self.net["tor_net_0"].reserved[0].mac,
                    "--ip", self.net["tor_net_0"].reserved[0]]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "reserved for dynamic DHCP", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Machine {} not "
+                              "found.".format(self.net["tor_net_0"].reserved[0].mac), command)
 
     def test_200_reject_seventh_ip(self):
         # This tests that the seventh ip offset on a tor_switch network
         # gets rejected.
-        command = ["add", "auxiliary",
-                   "--auxiliary", "unittest01-e1.one-nyp.ms.com",
+        command = ["add_interface_address",
+                   "--fqdn", "unittest01-e1.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--interface", "eth3",
                    "--mac", self.net["tor_net_0"].reserved[1].mac,
                    "--ip", self.net["tor_net_0"].reserved[1]]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "reserved for dynamic DHCP", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Machine {} not "
+                              "found.".format(self.net["tor_net_0"].reserved[1].mac), command)
 
     def test_200_reject_mac_in_use(self):
-        command = ["add", "auxiliary",
-                   "--auxiliary", "unittest01-e4.one-nyp.ms.com",
+        command = ["add_interface_address",
+                   "--fqdn", "unittest01-e4.one-nyp.ms.com",
                    "--machine", "ut3c1n4", "--interface", "eth4",
                    "--mac", self.net["tor_net_0"].usable[0].mac,
                    "--ip", self.net["tor_net_0"].usable[0]]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "MAC address %s is already used by" %
-                         self.net["tor_net_0"].usable[0].mac,
+                         "Machine {} not "
+                         "found".format(self.net["tor_net_0"].usable[0].mac),
                          command)
 
     def test_200_autoip_bad_iface(self):
+        mac = self.net["unknown0"].usable[5].mac
         # There is no e4 interface so it will be auto-created
-        command = ["add", "auxiliary", "--autoip",
-                   "--auxiliary", "unittest01-e4.one-nyp.ms.com",
-                   "--machine", "ut3c1n4", "--interface", "e4"]
+        command = ["add_interface_address", "--autoip",
+                   "--fqdn", "unittest01-e4.one-nyp.ms.com",
+                   "--machine", "ut3c1n4", "--interface", "eth0"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Interface e4 of machine unittest01.one-nyp.ms.com "
-                         "has neither a MAC address nor port group information, "
-                         "it is not possible to generate an IP address "
-                         "automatically.",
+                         "No switch found in the discovery "
+                         "table for MAC address {}.".format(mac),
                          command)
 
     def test_300_verify_ut3c1n4(self):
