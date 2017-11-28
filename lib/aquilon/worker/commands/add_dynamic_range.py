@@ -34,7 +34,7 @@ class CommandAddDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, dns_domain,
-               prefix, exporter, user, justification, reason, **_):
+               prefix, exporter, user, justification, reason, range_class, **_):
         if not prefix:
             prefix = 'dynamic'
         dbnet_env, dbdns_env = get_net_dns_env(session)
@@ -100,7 +100,8 @@ class CommandAddDynamicRange(BrokerCommand):
                                             dns_domain=dbdns_domain,
                                             dns_environment=dbdns_env,
                                             preclude=True)
-                dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip, network=startnet)
+                dbdynamic_stub = DynamicStub(fqdn=dbfqdn, ip=ip,
+                                             network=startnet, range_class=range_class)
                 session.add(dbdynamic_stub)
 
 

@@ -21,10 +21,11 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class DynamicRange(object):
-    def __init__(self, network, start, end):
+    def __init__(self, network, start, end, range_class):
         self.network = network
         self.start = start
         self.end = end
+        self.range_class = range_class
 
 
 class DynamicRangeFormatter(ObjectFormatter):
@@ -34,6 +35,8 @@ class DynamicRangeFormatter(ObjectFormatter):
         details.append(indent + "  Size: %d" %
                        (int(range.end) - int(range.start) + 1))
         details.append(indent + "  Network: %s" % range.network)
+        if range.range_class:
+            details.append(indent + "  Range Class: %s" % range.range_class)
         return "\n".join(details)
 
 
