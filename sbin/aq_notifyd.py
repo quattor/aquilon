@@ -46,6 +46,7 @@ from twisted.internet import reactor
 import aquilon.aqdb.depends  # pylint: disable=W0611
 
 from aquilon.config import Config
+from aquilon.twisted_patches import integrate_logging
 
 worker_thread = None
 worker_notify = Condition()
@@ -169,38 +170,20 @@ def main():
     if config.has_option("broker", "umask"):
         os.umask(int(config.get("broker", "umask"), 8))
 
+    # Logging setup
+    logdir = config.get("broker", "logdir")
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    integrate_logging(config, logging_conf=config.get("broker", "aq_notifyd_logging_conf"))
+
+    # If debug is True send logs to stderr
     if opts.debug:
+        # Remove all handlers associated with the root logger object.
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
         level = logging.DEBUG
         logging.basicConfig(level=level, stream=sys.stderr,
                             format='%(asctime)s [%(levelname)s] %(message)s')
-    else:
-        level = logging.INFO
-
-        logdir = config.get("broker", "logdir")
-        if not os.path.exists(logdir):
-            os.makedirs(logdir)
-
-        logfile = os.path.join(logdir, "aq_notifyd.log")
-
-        handler = WatchedFileHandler(logfile)
-        handler.setLevel(level)
-
-        formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-        handler.setFormatter(formatter)
-
-        rootlog = logging.getLogger()
-        rootlog.addHandler(handler)
-        rootlog.setLevel(level)
-
-    # Apply configured log settings
-    defaults = config.defaults()
-    for logname, level in config.items("logging"):
-        if logname in defaults:
-            continue
-        try:
-            logging.getLogger(logname).setLevel(level)
-        except ValueError:
-            pass
 
     logger = logging.getLogger("aq_notifyd")
 

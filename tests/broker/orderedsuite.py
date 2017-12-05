@@ -35,6 +35,7 @@ from aquilon.config import Config
 from .test_start import TestBrokerStart
 from .test_ping import TestPing
 from .test_status import TestStatus
+from .test_cm_logger import TestCMLogger
 from .test_show_active_commands import TestShowActiveCommands
 from .test_add_role import TestAddRole
 from .test_del_role import TestDelRole
@@ -335,6 +336,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestAddDnsDomain, TestAddDnsEnvironment,
                  TestAddUser,
                  TestAddSandbox, TestAddDomain, TestUpdateBranch,
+                 TestCMLogger,
                  TestGet, TestPublishSandbox, TestDeployDomain,
                  TestSyncDomain,
                  TestMergeConflicts,

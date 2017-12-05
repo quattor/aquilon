@@ -222,6 +222,19 @@ class TestBrokerCommand(unittest.TestCase):
                             "profiles", *template)
         return base + self.template_extension
 
+    def tail_file(self, file):
+        """
+        Get last line from given file
+        Assert that line is not empty
+        :param file:
+        :return:
+        """
+        with open(file, "r") as f:
+            for line in f:
+                pass
+        self.assertTrue(bool(line.strip()), "Last line is empty")
+        return line
+
     msversion_dev_re = re.compile(r'WARNING:msversion:Loading \S* from dev\n')
 
     def runcommand(self, command, auth=True, **kwargs):

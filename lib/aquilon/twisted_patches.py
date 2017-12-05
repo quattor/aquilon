@@ -22,13 +22,17 @@ thus the code here cannot use super().
 """
 
 import sys
+import os
 import logging
+import logging.config
 import errno
 from fcntl import fcntl, F_GETFD, F_SETFD, FD_CLOEXEC
 
 from twisted.python import log, syslog, logfile
 from twisted.internet import reactor, error
 from twisted.runner.procmon import ProcessMonitor
+
+from aquilon.config import lookup_file_path
 
 
 class GracefulProcessMonitor(ProcessMonitor):
@@ -182,19 +186,22 @@ def updated_application_run(self):
     self.logger.stop()
 
 
-def integrate_logging(config):
-    """Use a BridgeLogHandler to tie python's logging to twisted.python.log."""
-    rootlog = logging.getLogger()
-    rootlog.addHandler(BridgeLogHandler())
-    rootlog.setLevel(logging.NOTSET)
+def integrate_logging(config, logging_conf=None):
+    """
+    Customize application logging
+     Appy root logging and module logging config
+    :param config:
+    :return:
+    """
+    if not logging_conf:
+        logging_conf = lookup_file_path(config.get("broker", "aqd_logging_conf"))
+    else:
+        logging_conf = lookup_file_path(logging_conf)
 
-    defaults = config.defaults()
-    for logname, level in config.items("logging"):
-        # We don't want the defaults merged here
-        if logname in defaults:
-            continue
-        try:
-            logging.getLogger(logname).setLevel(level)
-        except ValueError:
-            rootlog.error("Error: [logging] contains an invalid level (%s) "
-                          "for %s.", level, logname)
+    if os.path.exists(logging_conf):
+        logging.notifydlogfile = config.get("broker", "aq_notifyd_logfile")
+        logging.cmlogfile = config.get("broker", "cmlogfile")
+        logging.BridgeLogHandler = BridgeLogHandler
+        logging.config.fileConfig(logging_conf, disable_existing_loggers=False)
+    else:
+        raise ValueError('Logging configuration file not found: {}'.format(logging_conf))

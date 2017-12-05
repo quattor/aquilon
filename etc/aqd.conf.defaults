@@ -143,6 +143,8 @@ rundir = %(quattordir)s/run
 sockdir = %(rundir)s/sockets
 logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
+aq_notifyd_logfile = %(logdir)s/aq_notifyd.log
+cmlogfile = %(logdir)s/aqd_cm.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
 plenarydir = %(cfgdir)s/plenary
 #git_author_name =
@@ -160,6 +162,12 @@ client_notifications = yes
 sharedata = /ms/dist/storage/etc/nasobjects.cdb
 default_domain_start = prod
 trash_branch = trash
+
+# Path to aqd logging configuration
+aqd_logging_conf = aqd.logging.conf
+# Path to aq_notifyd logging configuration
+aq_notifyd_logging_conf = aq_notifyd.logging.conf
+
 authorization_rules = aqd-authorization.conf
 authorization_error = Please contact an administrator for access.
 # See comments in aquilon.worker.resources.set_thread_pool_size
@@ -367,15 +375,6 @@ precreated_compartments_only = False
 # Set ignore_network_compartments = ^pattern\.* to ignore networks matching the value.
 # Leave empty to sync all compartments.
 ignore_network_compartments_regex =
-
-# This can be used for any components that use python logging
-# Valid values are INFO, DEBUG, and WARNING
-# For sqlalchemy, only INFO and DEBUG produce log messages.
-[logging]
-sqlalchemy.engine = WARNING
-sqlalchemy.pool   = WARNING
-sqlalchemy.orm    = WARNING
-aquilon = INFO
 
 [protocols]
 directory = /ms/dist/aquilon/PROJ/protocols/1.37/common/lib/python

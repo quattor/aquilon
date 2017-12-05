@@ -17,7 +17,9 @@
 """ Helper functions for change management """
 
 import collections
+from datetime import datetime
 import json
+import logging
 import shlex
 
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareEntity,
@@ -40,6 +42,9 @@ from aquilon.worker.processes import run_command
 from sqlalchemy.orm import contains_eager, load_only, aliased
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.orm.query import Query
+
+
+cm_logger = logging.getLogger('change_management')
 
 
 class ChangeManagement(object):
@@ -139,7 +144,8 @@ class ChangeManagement(object):
         for env, build_status_list in self.dict_of_impacted_envs.items():
             self.dict_of_impacted_envs[env] = list(set(build_status_list))
         # Prepare aqd_checkedm input dict
-        cmd = ["aqd_checkedm"] + shlex.split(self.extra_options)
+        cm_extra_options = shlex.split(self.extra_options)
+        cmd = ["aqd_checkedm"] + cm_extra_options
         metadata = {"ticket": self.justification,
                     "reason": self.reason,
                     "requestor": self.username,
@@ -154,14 +160,44 @@ class ChangeManagement(object):
         try:
             out_dict = json.loads(out)
         except Exception as err:
-            raise AquilonError("Invalid response received for the change management check. {}".format(str(err)))
+            raise AquilonError("Invalid response received for the "
+                               "change management check. {}".format(str(err)))
 
-        self.logger.info("Change Management validation finished. Status: {}. {}".format(out_dict.get("Status"),
-                                                                                        out_dict.get("Reason")))
+        # Log Change Management validation results
+        self.log_change_management_validation(metadata, cm_extra_options, out_dict)
+
+        self.logger.info("Change Management validation "
+                         "finished. Status: {}. {}".format(out_dict.get("Status"),
+                                                           out_dict.get("Reason")))
         if out_dict.get("Status") == 'Permitted':
-            self.logger.client_info("Approval Warning: {}".format(out_dict.get("Reason")))
+            self.logger.client_info("Approval Warning: "
+                                    "{}".format(out_dict.get("Reason")))
         elif out_dict.get("Status") != 'Approved':
             raise AuthorizationException(out_dict.get("Reason"))
+
+    def log_change_management_validation(self, metadata, cm_extra_options, out_dict):
+        if '--edm-instance' in cm_extra_options:
+            edm_ins = cm_extra_options[cm_extra_options.index('--edm-instance') + 1]
+        else:
+            edm_ins = 'prod'
+        if '--mode' in cm_extra_options:
+            mode = cm_extra_options[cm_extra_options.index('--mode') + 1]
+        else:
+            mode = 'enforce'
+        if '--disable_edm' in cm_extra_options:
+            disable_edm = 'Yes'
+        else:
+            disable_edm = 'No'
+        log_dict = {"edm_instance": edm_ins, "mode": mode, "disable_edm": disable_edm}
+        date_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S +0000')
+        log_dict['timestamp'] = date_time
+        log_dict.update(metadata)
+        log_dict.update(out_dict)
+        if log_dict['impacted_envs'].get('prod') and 'ready' in log_dict['impacted_envs'].get('prod'):
+            log_dict['prod_ready_env_impact'] = 'Yes'
+        else:
+            log_dict['prod_ready_env_impact'] = 'No'
+        cm_logger.info(json.dumps(log_dict))
 
     def validate_default(self, obj):
         pass
