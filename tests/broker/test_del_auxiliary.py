@@ -30,7 +30,8 @@ class TestDelAuxiliary(TestBrokerCommand):
 
     def testdelunittest00e1(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[3])
-        command = "del auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
+        command = "del_interface_address --machine ut3c1n3 " \
+                  "--fqdn unittest00-e1.one-nyp.ms.com --interface eth1"
         self.statustest(command.split(" "))
         self.dsdb_verify()
 

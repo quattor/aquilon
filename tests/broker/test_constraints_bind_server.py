@@ -95,8 +95,9 @@ class TestBindServerConstraints(TestBrokerCommand):
         self.badrequesttest(command.split(" "))
 
     def testrejectdelserverauxiliary(self):
-        command = ["del_auxiliary", "--auxiliary", "unittest00-e1.one-nyp.ms.com"]
-        out = self.badrequesttest(command)
+        command = "del_interface_address --machine ut3c1n3 " \
+                  "--fqdn unittest00-e1.one-nyp.ms.com --interface eth1"
+        out = self.badrequesttest(command.split(" "))
         # TODO: the error message should be improved
         self.matchoutput(out, "AddressAssignment instance still "
                          "provides the following services, and cannot be "
