@@ -54,7 +54,7 @@ class StormapParser(object):
         config = Config()
         self.header_defs = []
 
-        if not _has_cdb or not config.has_option("broker", "sharedata"):
+        if not _has_cdb or not config.has_value("broker", "sharedata"):
             self.cdb_file = {}
             return
 

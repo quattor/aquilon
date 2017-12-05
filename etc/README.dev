@@ -1,32 +1,28 @@
-The quickstart for setting up a development broker can now be found on the wiki:
-
-http://wiki-eu.ms.com/twiki/cgi-bin/view/Aurora/AquilonHowTo#How_do_I_run_a_test_broker
-
 Below are notes about the various options available, originally provided
 for the aqd wrapper script.
 
 To start aqd:
-./aqd aqd
+./sbin/aqd.py aqd
 
 This will create a aqd.log in the current directory and daemonize the
 process.  Run ./aqd with no args or ./aqd aqd --help (different)
 for more options.
 
 To start aqd but keep it in the foreground with logs going to stdout:
-./aqd -no -l - aqd
+./sbin/aqd.py -no -l - aqd
 
 Ditto, but without expecting to talk to knc:
-./aqd -no -l - aqd --noauth
+./sbin/aqd.py -no -l - aqd --noauth
 
-If running as cdb, make sure you have a keytab set up:
-/ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
+Setup keytab before running aqd to run as system user (i.e. cdb)
+krb5_keytab
 
 And then, assuming you are in a directory owned by your normal user id,
 so cdb won't be able to write to ./aqd.pid:
-./aqd -no -l - --pidfile=/var/tmp/cdb/aqd.pid aqd
+./sbin/aqd.py -no -l - --pidfile=/var/tmp/cdb/aqd.pid aqd
 
 Or as a daemon:
-./aqd --pidfile=/var/tmp/cdb/aqd.pid --logfile=/var/tmp/cdb/aqd.log aqd
+./sbin/aqd.py --pidfile=/var/tmp/cdb/aqd.pid --logfile=/var/tmp/cdb/aqd.log aqd
 
 Adding --spew gives much twisted debug output.
 
@@ -35,8 +31,8 @@ If running with -no (foreground), ctrl-c will bring the server down
 gracefully.  Otherwise, kill -TERM `cat aqd.pid` works as well.
 
 To run aq:
-./aq.py [commands]
+./bin/aq.py [commands]
 
 To run aq without knc:
-./aq.py --noauth --aqport=6901 [commands]
+./bin/aq.py --noauth --aqport=6901 --aqservice=cdb [commands]
 

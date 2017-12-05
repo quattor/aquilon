@@ -375,7 +375,7 @@ class PlenaryHostObject(ObjectPlenary):
         provides.sort()
 
         # This is required to be able to override LOADPATH
-        if not self.config.has_option("panc", "include_pan") or self.config.getboolean("panc", "include_pan"):
+        if self.config.getboolean("panc", "include_pan"):
             pan_include(lines, ["pan/units", "pan/functions"])
             lines.append("")
 

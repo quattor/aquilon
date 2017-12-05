@@ -64,7 +64,7 @@ def lookup_grn(session, grn=None, eon_id=None, usable_only=True, logger=None,
                config=None, autoupdate=True):
     dbgrn = Grn.get_unique(session, grn=grn, eon_id=eon_id)
     if not dbgrn and autoupdate and _has_cdb:
-        if not config.has_option("broker", "grn_to_eonid_map_location"):
+        if not config.has_value("broker", "grn_to_eonid_map_location"):
             return None
 
         datadir = config.get("broker", "grn_to_eonid_map_location")

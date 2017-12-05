@@ -85,7 +85,11 @@ global_defaults = {
 }
 
 
-class Config(SafeConfigParser):
+class NewStyleClassSafeConfigParser(object, SafeConfigParser):
+    pass
+
+
+class Config(NewStyleClassSafeConfigParser):
     """ Supplies configuration to the broker and database engines
         Set up as a borg/singleton class (can only be instanced once) """
 
@@ -127,7 +131,19 @@ class Config(SafeConfigParser):
 
     def lookup_tool(self, prog):
         key = prog.replace('-', '_')
-        if self.has_option("tool_locations", key):
+        if self.has_value("tool_locations", key):
             return self.get("tool_locations", key)
         # If no override was specified, we rely on $PATH lookup
         return prog
+
+    def has_value(self, section, key):
+        if self.has_option(section, key) and self.get(section, key):
+            return True
+        return False
+
+    def getboolean(self, section, option, default=False):
+        if not self.has_section(section):
+            return default
+        if not self.has_value(section, option):
+            return default
+        return super(Config, self).getboolean(section, option)

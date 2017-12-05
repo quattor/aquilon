@@ -54,7 +54,6 @@ class ChangeManagement(object):
     Call aqd_checkedm
     """
     config = Config()
-    check_enabled = False
     extra_options = ""
     handlers = {}
     lifecycle_status_edm_check = ['ready']  # Crash and burn: 'build', 'rebuild',
@@ -71,8 +70,7 @@ class ChangeManagement(object):
         self.eonid = 6980  # to be calculated for each target
         self.enforce_validation = False
 
-        if self.config.has_option("change_management", "enable"):
-            self.check_enabled = self.config.getboolean("change_management", "enable")
+        self.check_enabled = self.config.getboolean("change_management", "enable")
         if self.config.has_option("change_management", "extra_options"):
             self.extra_options = self.config.get("change_management", "extra_options")
 

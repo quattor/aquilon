@@ -152,19 +152,19 @@ class TemplateDomain(object):
 
         panc_env = {"PATH": os.environ.get("PATH", "")}
 
-        if config.has_option("tool_locations", "java_home"):
+        if config.has_value("tool_locations", "java_home"):
             java_home = config.get("tool_locations", "java_home")
             panc_env["PATH"] = "%s/bin:%s" % (java_home, panc_env["PATH"])
             panc_env["JAVA_HOME"] = java_home
 
-        if config.has_option("tool_locations", "ant_home"):
+        if config.has_value("tool_locations", "ant_home"):
             ant_home = config.get("tool_locations", "ant_home")
             panc_env["PATH"] = "%s/bin:%s" % (ant_home, panc_env["PATH"])
             # The ant wrapper is silly and it may pick up the wrong set of .jars
             # if ANT_HOME is not set
             panc_env["ANT_HOME"] = ant_home
 
-        if config.has_option("broker", "ant_options"):
+        if config.has_value("broker", "ant_options"):
             panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
         if config.getboolean('panc', 'gzip_output'):
@@ -190,7 +190,7 @@ class TemplateDomain(object):
 
         formats.append("dep")
 
-        if config.has_option("panc", "timeout"):
+        if config.has_value("panc", "timeout"):
             args = ["timeout", config.get("panc", "timeout")]
             args.append(config.lookup_tool("ant"))
         else:
