@@ -30,7 +30,7 @@ class CommandUnbindPortGroup(BrokerCommand):
     required_parameters = ["virtual_switch"]
 
     def render(self, session, plenaries, virtual_switch, networkip,
-               tag, user, justification, reason, logger, **_):
+               network_environment, tag, user, justification, reason, logger, **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         # Validate ChangeManagement
@@ -40,7 +40,7 @@ class CommandUnbindPortGroup(BrokerCommand):
         cm.validate()
 
         if networkip:
-            dbnetwork = get_net_id_from_ip(session, networkip)
+            dbnetwork = get_net_id_from_ip(session, networkip, network_environment=network_environment)
             if not dbnetwork.port_group:
                 raise ArgumentError("{0} is not assigned to a port group."
                                     .format(dbnetwork))
