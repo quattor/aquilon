@@ -41,6 +41,11 @@ class ServiceAddressFormatter(ResourceFormatter):
         skeleton.fqdn = str(srv.dns_record)
         skeleton.interfaces.extend(iface.name for iface in
                                    srv.interfaces)
+
+        if srv.dns_record.alias_cnt:
+            skeleton.aliases.extend(str(a.fqdn) for a in
+                                    srv.dns_record.all_aliases)
+
         self.redirect_proto(srv.network_environment,
                             skeleton.network_environment)
 
