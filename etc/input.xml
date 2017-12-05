@@ -6335,18 +6335,22 @@
 	<p/>
 	The 'csv' format contains the following fields, in this order:
 	Definition Holder name, path, value type, default value, description, template, is_required
-	<optgroup mandatory="True" fields="all">
-	    <optgroup fields="one">
-		<option name="archetype" type="string">Archetype</option>
-		<optgroup fields="all">
-		    <option name="feature" type="string">Feature</option>
-		    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+	<optgroup mandatory="True" fields="one">
+	    <option name="all" type="flag">All</option>
+	    <optgroup fields="all">
+		<optgroup fields="one">
+		    <option name="archetype" type="string">Archetype</option>
+		    <optgroup fields="all">
+			<option name="feature" type="string">Feature</option>
+			<option name="type" type="string">Type of the feature: host, hardware or interface</option>
+		    </optgroup>
 		</optgroup>
+		<option name="path" type="string">Path of the parameter</option>
 	    </optgroup>
-	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
 	<transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
 	<transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+	<transport method="get" trigger="all" path="parameter_definitions"/>
 	<format name="proto" >
 	    <message_class name="ParamDefinitionList" module="aqdparamdefinitions_pb2"/>
 	</format>
