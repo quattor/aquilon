@@ -392,6 +392,16 @@ class Network(Base):
 
         return cnt
 
+    @property
+    def service_addresses(self):
+        from aquilon.aqdb.model import ServiceAddress, ARecord
+
+        session = object_session(self)
+
+        q = session.query(ServiceAddress).join(ARecord).join(Network).\
+            filter(Network.id == self.id)
+        return q.all()
+
 
 def get_net_id_from_ip(session, ip, network_environment=None):
     """Requires a session, and will return the Network for a given ip."""
