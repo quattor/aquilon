@@ -215,6 +215,15 @@ class TestUnbindServer(TestBrokerCommand):
                 for server in servers:
                     self.matchclean(out, server, command)
 
+    def test_155_unbind_to_network_device(self):
+        command = ['unbind_server', '--service', 'test_network_dev', '--instance', 'test',
+                   '--hostname', 'switchinbuilding.aqd-unittest.ms.com']
+        self.noouttest(command)
+        command = ['del_service', '--service', 'test_network_dev', '--instance', 'test']
+        self.noouttest(command)
+        command = ['del_service', '--service', 'test_network_dev']
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindServer)
