@@ -160,6 +160,7 @@ class TestAudit(TestBrokerCommand):
                             (tran_start_time, start_time))
             self.assertEqual(tran.username, self.principal)
             self.assertTrue(tran.is_readonly)
+            self.assertTrue(tran.request_id)
             self.assertEqual(tran.command, 'search_audit')
             if tran.return_code:
                 self.assertTrue(tran.return_code >= 200)
@@ -192,6 +193,7 @@ class TestAudit(TestBrokerCommand):
         self.assertTrue(tran_start_time >= start_time)
         self.assertTrue(tran_start_time <= end_time)
         self.assertEqual(tran.username, 'nobody')
+        self.assertTrue(tran.request_id)
         self.assertFalse(tran.is_readonly)
         # Make sure a value is filled in...
         self.assertTrue(tran.command)
