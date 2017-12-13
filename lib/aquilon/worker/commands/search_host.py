@@ -50,7 +50,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.host import preload_machine_data
+from aquilon.worker.dbwrappers.host import preload_hw_data
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -340,7 +340,7 @@ class CommandSearchHost(BrokerCommand):
                           joinedload('hardware_entity.location'),
                           subqueryload('hardware_entity.location.parents'))
             dbhosts = q.all()
-            preload_machine_data(session, dbhosts)
+            preload_hw_data(session, dbhosts)
             return dbhosts
 
         return StringAttributeList(q.all(), "fqdn")

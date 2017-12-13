@@ -16,11 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq del chassis`."""
 
-from sqlalchemy.sql import null
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Chassis, ChassisSlot
+from aquilon.aqdb.model import Chassis
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
@@ -35,15 +33,10 @@ class CommandDelChassis(BrokerCommand):
 
         check_only_primary_ip(dbchassis)
 
-        q = session.query(ChassisSlot)
-        q = q.filter_by(chassis=dbchassis)
-        q = q.filter(ChassisSlot.machine_id != null())
-
-        machine_count = q.count()
-        if machine_count and not clear_slots:
-            raise ArgumentError("{0} is still in use by {1} machines. Use "
+        if dbchassis.not_empty_slots and not clear_slots:
+            raise ArgumentError("{0} is still in use by {1} machines or network devices. Use "
                                 "--clear_slots if you really want to delete "
-                                "it.".format(dbchassis, machine_count))
+                                "it.".format(dbchassis, len(dbchassis.not_empty_slots)))
 
         # Order matters here
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)

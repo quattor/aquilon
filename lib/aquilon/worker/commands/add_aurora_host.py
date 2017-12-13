@@ -24,7 +24,7 @@ from ipaddress import IPv4Address
 from six import text_type
 
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.aqdb.model import (Building, Rack, Chassis, ChassisSlot, Model,
+from aquilon.aqdb.model import (Building, Rack, Chassis, MachineChassisSlot, Model,
                                 Machine, DnsDomain, ReservedName, Fqdn)
 from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -106,13 +106,13 @@ class CommandAddAuroraHost(CommandAddHost):
                     dbdns_rec = ReservedName(fqdn=dbfqdn)
                     session.add(dbdns_rec)
                     dbchassis.primary_name = dbdns_rec
-                dbslot = session.query(ChassisSlot).filter_by(
+                dbslot = session.query(MachineChassisSlot).filter_by(
                     chassis=dbchassis, slot_number=nodenum).first()
                 # Note: Could be even more persnickity here and check that
                 # the slot is currently empty.  Seems like overkill.
                 if not dbslot:
-                    dbslot = ChassisSlot(chassis=dbchassis,
-                                         slot_number=nodenum)
+                    dbslot = MachineChassisSlot(chassis=dbchassis,
+                                                slot_number=nodenum)
                     session.add(dbslot)
             else:
                 dbnet_env = NetworkEnvironment.get_unique_or_default(session)

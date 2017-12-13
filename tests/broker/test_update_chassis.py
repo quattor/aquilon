@@ -74,6 +74,7 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                          "is not a chassis.",
                          command)
 
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)

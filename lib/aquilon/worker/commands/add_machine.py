@@ -19,7 +19,7 @@
 from sqlalchemy.orm import subqueryload
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Chassis, ChassisSlot, Model, Machine
+from aquilon.aqdb.model import Chassis, MachineChassisSlot, Model, Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
@@ -96,14 +96,14 @@ class CommandAddMachine(BrokerCommand):
 
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
-            dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,
-                                                          slot_number=slot).first()
+            dbslot = session.query(MachineChassisSlot).filter_by(chassis=dbchassis,
+                                                                 slot_number=slot).first()
             if dbslot and dbslot.machine:
                 raise ArgumentError("{0} slot {1} already has machine "
                                     "{2}.".format(dbchassis, slot,
                                                   dbslot.machine.label))
             if not dbslot:
-                dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
+                dbslot = MachineChassisSlot(chassis=dbchassis, slot_number=slot)
             dbslot.machine = dbmachine
             session.add(dbslot)
 

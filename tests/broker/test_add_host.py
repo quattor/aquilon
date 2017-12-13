@@ -848,18 +848,18 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                 Type: oa
                 Network Environment: internal
                 Provides: ut3c5.aqd-unittest.ms.com [%s]
-              Slot #2: ut3c5n2 (unittest20.aqd-unittest.ms.com)
-              Slot #3: ut3c5n3 (unittest21.aqd-unittest.ms.com)
-              Slot #4: ut3c5n4 (unittest22.aqd-unittest.ms.com)
-              Slot #5: ut3c5n5 (unittest23.aqd-unittest.ms.com)
-              Slot #7: ut3c5n7 (unittest25.aqd-unittest.ms.com)
-              Slot #8: ut3c5n8 (unittest26.aqd-unittest.ms.com)
-              Slot #10: ut3c5n10 (unittest02.one-nyp.ms.com)
-              Slot #11: ut3c5n11 (afs-by-net.aqd-unittest.ms.com)
-              Slot #12: ut3c5n12 (netmap-pers.aqd-unittest.ms.com)
-              Slot #13: ut3c5n13 (infra1.aqd-unittest.ms.com)
-              Slot #14: ut3c5n14 (infra2.aqd-unittest.ms.com)
-              Slot #16: ut3c5n16 (no hostname)
+              Slot #2 (type: machine): ut3c5n2 (unittest20.aqd-unittest.ms.com)
+              Slot #3 (type: machine): ut3c5n3 (unittest21.aqd-unittest.ms.com)
+              Slot #4 (type: machine): ut3c5n4 (unittest22.aqd-unittest.ms.com)
+              Slot #5 (type: machine): ut3c5n5 (unittest23.aqd-unittest.ms.com)
+              Slot #7 (type: machine): ut3c5n7 (unittest25.aqd-unittest.ms.com)
+              Slot #8 (type: machine): ut3c5n8 (unittest26.aqd-unittest.ms.com)
+              Slot #10 (type: machine): ut3c5n10 (unittest02.one-nyp.ms.com)
+              Slot #11 (type: machine): ut3c5n11 (afs-by-net.aqd-unittest.ms.com)
+              Slot #12 (type: machine): ut3c5n12 (netmap-pers.aqd-unittest.ms.com)
+              Slot #13 (type: machine): ut3c5n13 (infra1.aqd-unittest.ms.com)
+              Slot #14 (type: machine): ut3c5n14 (infra2.aqd-unittest.ms.com)
+              Slot #16 (type: machine): ut3c5n16 (no hostname)
             """ % (ip, ip.mac, ip),
             command)
 

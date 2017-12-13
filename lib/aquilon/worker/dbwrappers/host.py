@@ -30,7 +30,8 @@ from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain, Fqdn,
                                 DnsRecord, ARecord, ReservedName, Sandbox, Host,
                                 HostGrnMap, OperatingSystem, HostLifecycle,
                                 Personality, Domain, Machine, NetworkDevice,
-                                Disk, ChassisSlot, VirtualMachine)
+                                Disk, MachineChassisSlot, NetworkDeviceChassisSlot,
+                                VirtualMachine)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -263,14 +264,35 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
     return dbhosts
 
 
-def preload_machine_data(session, dbhosts):
+def preload_hw_data(session, dbhosts):
     hw_by_id = {dbhost.hardware_entity.id: dbhost.hardware_entity
                 for dbhost in dbhosts}
+    machines = []
+    netdevs = []
+    for dbhost in dbhosts:
+        if dbhost.hardware_entity.model.model_type.isMachineType():
+            machines.append(dbhost.hardware_entity.id)
+        elif dbhost.hardware_entity.model.model_type.isNetworkDeviceType():
+            netdevs.append(dbhost.hardware_entity.id)
+
+    # If host are network devices get load netdev specific attributes
+    preload_netdev_data(session, hw_by_id, netdevs)
 
     # Not all hosts are bound to machines, so load the machine-specific
     # attributes separately
-    machines = [dbhost.hardware_entity.id for dbhost in dbhosts if
-                dbhost.hardware_entity.model.model_type.isMachineType()]
+    preload_machine_data(session, hw_by_id, machines)
+
+
+def preload_machine_data(session, hw_by_id, machines):
+    """
+    Preload additional Machine attributes to optimize
+    Hosts details load from database
+    :param session:
+    :param hw_by_id:
+    :param machines:
+    :return:
+    """
+
     for machine_chunk in chunk(machines, 1000):
         disks_by_hw = defaultdict(list)
         q = session.query(Disk)
@@ -288,9 +310,9 @@ def preload_machine_data(session, dbhosts):
             else:
                 set_committed_value(dbhw, "disks", [])
 
+        q = session.query(MachineChassisSlot)
+        q = q.filter(MachineChassisSlot.machine_id.in_(machine_chunk))
         slots_by_hw = defaultdict(list)
-        q = session.query(ChassisSlot)
-        q = q.filter(ChassisSlot.machine_id.in_(machine_chunk))
         for dbslot in q:
             dbhw = hw_by_id[dbslot.machine_id]
             set_committed_value(dbslot, "machine", dbhw)
@@ -316,6 +338,30 @@ def preload_machine_data(session, dbhosts):
             dbhw = hw_by_id[hw_id]
             set_committed_value(dbhw, "vm_container", None)
 
+def preload_netdev_data(session, hw_by_id, netdevs):
+    """
+    Preload additional NetworkDevice attributes to optimize
+    Hosts details load from database
+    :param session:
+    :param hw_by_id:
+    :param netdevs:
+    :return:
+    """
+    for netdev_chunk in chunk(netdevs, 1000):
+        slots_by_hw = defaultdict(list)
+        q = session.query(NetworkDeviceChassisSlot)
+        q = q.filter(NetworkDeviceChassisSlot.network_device_id.in_(netdev_chunk))
+        for dbslot in q:
+            dbhw = hw_by_id[dbslot.network_device_id]
+            set_committed_value(dbslot, "network_device", dbhw)
+            slots_by_hw[dbslot.network_device_id].append(dbslot)
+
+        for hw_id in netdev_chunk:
+            dbhw = hw_by_id[hw_id]
+            if hw_id in slots_by_hw:
+                set_committed_value(dbhw, "chassis_slot", slots_by_hw[hw_id])
+            else:
+                set_committed_value(dbhw, "chassis_slot", [])
 
 def check_hostlist_size(command, config, hostlist):
 

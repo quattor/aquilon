@@ -29,7 +29,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
-                                ResourceGroup, BundleResource, Chassis, ChassisSlot, Location, Rack,
+                                ResourceGroup, BundleResource, Chassis, Location, Rack,
                                 Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment,
                                 Fqdn, ARecord, ReservedName, AddressAlias, DnsDomain, DnsRecord, NsRecord,
                                 SrvRecord, DynamicStub, Organization, Hub, Continent, Country, Campus, City,
@@ -274,7 +274,6 @@ class ChangeManagement(object):
         """
         # Check if there cannot be a case when one machine can
         # have multiple hosts assigned - vms seems to be handled separately?
-        # Chassis/ChassisSlots?
         if isinstance(hwentities_or_hwentity, HardwareEntity):
             if hwentities_or_hwentity.host:
                 self.validate_host(hwentities_or_hwentity.host)
@@ -482,9 +481,13 @@ class ChangeManagement(object):
             chassis: single chassis object
         Returns: None
         """
-        for slot in chassis.slots:
-            if slot.machine.host:
+        for slot in chassis.machine_slots:
+            if slot.machine and slot.machine.host:
                 self.validate_host(slot.machine.host)
+
+        for slot in chassis.network_device_slots:
+            if slot.network_device and slot.network_device.host:
+                self.validate_host(slot.network_device.host)
 
     def validate_resource_holder(self, resource_holder):
         session = object_session(resource_holder)

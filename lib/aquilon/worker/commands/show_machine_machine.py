@@ -43,7 +43,7 @@ class CommandShowMachineMachine(BrokerCommand):
                    joinedload('interfaces.model.vendor'),
                    joinedload('cpu_model'),
                    joinedload('chassis_slot'),
-                   joinedload('chassis_slot.chassis'),
+                   subqueryload('chassis_slot.chassis'),
                    subqueryload('disks'),
                    undefer('disks.comments'),
                    joinedload('host'),

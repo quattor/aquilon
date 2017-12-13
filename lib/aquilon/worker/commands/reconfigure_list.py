@@ -26,7 +26,7 @@ from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
-                                            preload_machine_data,
+                                            preload_hw_data,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.templates import TemplateDomain, PlenaryHost
@@ -82,7 +82,7 @@ class CommandReconfigureList(BrokerCommand):
                    subqueryload('_cluster.cluster')]
         options += PlenaryHost.query_options()
         dbhosts = hostlist_to_hosts(session, list, options)
-        preload_machine_data(session, dbhosts)
+        preload_hw_data(session, dbhosts)
         return dbhosts
 
     def render(self, session, logger, plenaries, archetype, personality, personality_stage, keepbindings,
