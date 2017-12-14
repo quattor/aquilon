@@ -94,6 +94,62 @@ class TestAddAddressAlias(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some address alias comments", command)
         self.matchoutput(out, "Comments: Some other address alias comments", command)
 
+    def test_260_verify_dump_dns(self):
+        # Dump all DNS
+        command = ["dump", "dns", "--format", "proto"]
+        records_list = self.protobuftest(command)
+
+        # Isolate the records that are related to
+        # addralias1.aqd-unittest.ms.com
+        addralias = [
+            r for r in records_list
+            if r.fqdn == 'addralias1.aqd-unittest.ms.com'
+        ]
+
+        # We should only have one object for that FQDN even
+        # if there is multiple records: 1 FQDN objects with
+        # multiple entries in rdata
+        self.assertTrue(
+            len(addralias) == 1,
+            'More than one DNSRecord object for the '
+            'FQDN addralias1.aqd-unittest.ms.com')
+
+        # Check that we have all requested rdata for that
+        # FQDN object
+        self.assertTrue(
+            len(addralias[0].rdata) == 3,
+            'There should be 3 records for the '
+            'FQDN addralias1.aqd-unittest.ms.com')
+
+        # And that all the rdata we got are matching what
+        # we expected to get
+        expected_records = [
+            {
+                'type': 'A',
+                'target': str(self.net["unknown0"].usable[13]),
+            },
+            {
+                'type': 'A',
+                'target': str(self.net["unknown0"].usable[14]),
+            },
+            {
+                'type': 'A',
+                'target': str(self.net["unknown0"].usable[15]),
+            },
+        ]
+        got_records = sorted(
+            [
+                {
+                    'type': r.DNSRecordType.Name(r.rrtype),
+                    'target': str(r.target),
+                }
+                for r in addralias[0].rdata
+            ],
+            key=lambda x: (x['target'], x['type'])
+        )
+        for i in range(len(expected_records)):
+            self.assertDictEqual(expected_records[i], got_records[i])
+
     def test_300_add_restricted(self):
         command = ["add", "address", "alias",
                    "--fqdn", "addralias1.restrict.aqd-unittest.ms.com",

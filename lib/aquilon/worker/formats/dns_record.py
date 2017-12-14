@@ -290,7 +290,10 @@ class DnsDumpFormatter(ObjectFormatter):
 
     def format_proto(self, dump, container, embedded=True, indirect_attrs=True):
         entry = None
-        for record in dump:
+        for record in sorted(
+            dump,
+            key=lambda r: (str(r.fqdn), r.fqdn.dns_environment.name)
+        ):
             if isinstance(record, ReservedName):
                 continue
 
