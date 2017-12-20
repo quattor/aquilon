@@ -20,11 +20,14 @@ from datetime import datetime
 from sqlalchemy import Column, ForeignKey, DateTime
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity, Building
 from aquilon.aqdb.column_types import Enum
+from aquilon.config import Config
 
 SWITCH_TYPES = ('tor', 'bor', 'agg', 'misc')
 _TN = 'network_device'
+
+_config = Config()
 
 
 class NetworkDevice(HardwareEntity):
@@ -44,3 +47,10 @@ class NetworkDevice(HardwareEntity):
     def check_type(cls, type):
         if type is not None and type not in SWITCH_TYPES:
             raise ArgumentError("Unknown switch type '%s'." % type)
+
+    def validates_location(self, key, value):
+        if isinstance(value, Building) or not any(isinstance(par, Building) for par in value.parents):
+            if _config.getboolean('hardware_network_device', 'restrict_building'):
+                raise ArgumentError("This building is restricted: network devices should be added to "
+                                    "either rack or chassis, not building directly.")
+        return value

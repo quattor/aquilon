@@ -3957,6 +3957,10 @@
 	    <option name="iftype" type="string">Interface type</option>
 	    <option name="ip" type="ip">IP address</option>
 	    <optgroup fields="one">
+		<optgroup fields="all">
+		    <option name="chassis" type="string">Chassis name</option>
+		    <option name="slot" type="int">Chassis slot</option>
+		</optgroup>
 		<option name="rack" type="string">Rack name</option>
 		<option name="building" type="string">Building name</option>
 	    </optgroup>
@@ -3996,6 +4000,10 @@
 	    <option name="ip" type="ip">IP address</option>
 	    <option name="interface" type="string">Interface name (like xge49)</option>
 	    <optgroup fields="one">
+		<optgroup fields="all">
+		    <option name="chassis" type="string">Chassis name</option>
+		    <option name="slot" type="int">Chassis slot</option>
+		</optgroup>
 		<option name="rack" type="string">Rack name</option>
 		<option name="building" type="string">Building name</option>
 	    </optgroup>
@@ -4023,7 +4031,13 @@
 	    <optgroup fields="one">
 		<option name="rack" type="string">Rack name</option>
 		<option name="building" type="string">Building name</option>
+		<optgroup>
+		    <option name="chassis" type="string">Chassis name</option>
+		    <option name="slot" type="int">Chassis slot</option>
+		</optgroup>
 	    </optgroup>
+	    <option name="clearchassis" type="boolean">Remove chassis and slot information</option>
+	    <option name="multislot" type="boolean">Use to record machine as taking multiple slots in a chassis</option>
 	    <option name="model" type="string">Network device model</option>
 	    <option name="type" type="string">Network device type (tor, bor, agg)</option>
 	    <option name="ip" type="ip">IP address</option>
@@ -4126,6 +4140,8 @@
 	    </optgroup>
 	    <option name="serial" type="string">Serial number</option>
 	    <option name="exact_location" type="flag">Match the location exactly</option>
+	    <option name="chassis" type="string">Chassis name</option>
+	    <option name="slot" type="int">Chassis slot number</option>
 	    <option name="fullinfo" type="flag">Show full information for the matching network devices</option>
 	    <option name="all" type="flag">Show all</option>
 	</optgroup>
@@ -4170,6 +4186,8 @@
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
 	    <option name="serial" type="string">Serial number</option>
+	    <option name="chassis" type="string">Chassis name</option>
+	    <option name="slot" type="int">Chassis slot number</option>
 	    <option name="exact_location" type="flag">Match the location exactly</option>
 	    <option name="fullinfo" type="flag">Show full information for the matching switches</option>
 	    <option name="all" type="flag">Show all</option>

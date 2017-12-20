@@ -92,6 +92,13 @@ class HardwareEntity(Base):
         self.check_label(value)
         return value
 
+    @validates('location')
+    def _validate_location(self, key, value):  # pylint: disable=W0613
+        return self.validates_location(key, value)
+
+    def validates_location(self, key, value):
+        return value
+
     def __init__(self, label=None, **kwargs):
         label = AqStr.normalize(label)
         if not label:

@@ -74,6 +74,18 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                          "is not a chassis.",
                          command)
 
+    # Moving this test here from test_add_chassis so that
+    # test_add_chassis can run before test_add_netdev
+    def test_200_primary_reuse(self):
+        command = ["add", "chassis", "--chassis",
+                   "ut3gd1r01.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "utchassis"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Record ut3gd1r01.aqd-unittest.ms.com is already "
+                         "used as the primary name of switch ut3gd1r01.",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateChassis)

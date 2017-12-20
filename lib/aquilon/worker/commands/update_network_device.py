@@ -20,7 +20,7 @@ from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.types import MACAddress
-from aquilon.aqdb.model import Model, NetworkDevice, ObservedMac
+from aquilon.aqdb.model import Model, NetworkDevice, ObservedMac, Chassis, NetworkDeviceChassisSlot
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
@@ -40,8 +40,8 @@ class CommandUpdateNetworkDevice(BrokerCommand):
     required_parameters = ["network_device"]
 
     def render(self, session, logger, plenaries, network_device, model, type, ip, vendor,
-               serial, rename_to, discovered_macs, clear, discover, comments,
-               user, justification, reason, exporter, **arguments):
+               serial, rename_to, discovered_macs, clear, discover, comments, chassis, slot,
+               clearchassis, multislot, user, justification, reason, exporter, **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         # Validate ChangeManagement
@@ -66,8 +66,44 @@ class CommandUpdateNetworkDevice(BrokerCommand):
                                     "add network devices.")
             dbnetdev.model = dbmodel
 
+        if clearchassis:
+            del dbnetdev.chassis_slot[:]
+
+        if chassis:
+            dbchassis = Chassis.get_unique(session, chassis, compel=True)
+            if slot is None:
+                raise ArgumentError("The --chassis option requires a --slot.")
+            dbnetdev.location = dbchassis.location
+            self.adjust_slot(session, logger,
+                             dbnetdev, dbchassis, slot, multislot)
+        elif slot is not None:
+            dbchassis = None
+            for dbslot in dbnetdev.chassis_slot:
+                if dbchassis and dbslot.chassis != dbchassis:
+                    raise ArgumentError("Network Device in multiple chassis, please "
+                                        "use --chassis argument.")
+                dbchassis = dbslot.chassis
+            if not dbchassis:
+                raise ArgumentError("Option --slot requires --chassis "
+                                    "information.")
+            self.adjust_slot(session, logger,
+                             dbnetdev, dbchassis, slot, multislot)
+
         dblocation = get_location(session, **arguments)
         if dblocation:
+            loc_clear_chassis = False
+            for dbslot in dbnetdev.chassis_slot:
+                dbcl = dbslot.chassis.location
+                if dbcl != dblocation:
+                    if chassis or slot is not None:
+                        raise ArgumentError("{0} conflicts with chassis {1!s} "
+                                            "location {2}."
+                                            .format(dblocation, dbslot.chassis,
+                                                    dbcl))
+                    else:
+                        loc_clear_chassis = True
+            if loc_clear_chassis:
+                del dbnetdev.chassis_slot[:]
             dbnetdev.location = dblocation
 
         if serial is not None:
@@ -114,4 +150,36 @@ class CommandUpdateNetworkDevice(BrokerCommand):
             dsdb_runner.update_host(dbnetdev, oldinfo)
             dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
 
+        return
+
+    def adjust_slot(self, session, logger,
+                    dbnetdev, dbchassis, slot, multislot):
+        for dbslot in dbnetdev.chassis_slot:
+            if dbslot.chassis == dbchassis and dbslot.slot_number == slot:
+                return
+            if dbslot.chassis != dbchassis and multislot:
+                raise ArgumentError("Network Device cannot be in multiple chassis. "
+                                    "Use --clearchassis to remove "
+                                    "current chassis slot information.")
+        if len(dbnetdev.chassis_slot) > 1 and not multislot:
+            raise ArgumentError("Use --multislot to support a network device in more "
+                                "than one slot, or --clearchassis to remove "
+                                "current chassis slot information.")
+        if not multislot:
+            slots = ", ".join(str(dbslot.slot_number) for dbslot in
+                              dbnetdev.chassis_slot)
+            logger.info("Clearing {0:l} out of {1:l} slot(s) "
+                        "{2}".format(dbnetdev, dbchassis, slots))
+            del dbnetdev.chassis_slot[:]
+        q = session.query(NetworkDeviceChassisSlot)
+        q = q.filter_by(chassis=dbchassis, slot_number=slot)
+        dbslot = q.first()
+        if dbslot:
+            if dbslot.network_device:
+                raise ArgumentError("{0} slot {1} already has network device "
+                                    "{2}.".format(dbchassis, slot,
+                                                  dbslot.network_device.label))
+        else:
+            dbslot = NetworkDeviceChassisSlot(chassis=dbchassis, slot_number=slot)
+        dbnetdev.chassis_slot.append(dbslot)
         return

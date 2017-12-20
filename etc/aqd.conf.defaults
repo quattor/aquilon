@@ -233,11 +233,9 @@ ant = %(ant_home)s/bin/ant
 
 location_uri_validator = /bin/true
 
-[network_device]
-require_rack = False
-
 [hardware_network_device]
 default_archetype = netinfra
+restrict_building = False
 
 [archetype_aquilon]
 default_personality = inventory

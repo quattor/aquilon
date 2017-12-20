@@ -400,6 +400,14 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Use --multislot to support a machine in more "
                               "than one slot", command)
 
+    def test_1101_multislot_update_fail_multichassis(self):
+        command = ["update", "machine", "--machine", "ut9s03p19", "--multislot",
+                   "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "7"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine cannot be in multiple chassis. "
+                              "Use --clearchassis to remove "
+                              "current chassis slot information.", command)
+
     def test_1105_verify_multislot_update_fail(self):
         command = ["show", "machine", "--machine", "ut9s03p19"]
         out = self.commandtest(command)

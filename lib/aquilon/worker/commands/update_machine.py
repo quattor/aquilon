@@ -374,6 +374,11 @@ class CommandUpdateMachine(BrokerCommand):
             # required.
             if dbslot.chassis == dbchassis and dbslot.slot_number == slot:
                 return
+            if dbslot.chassis != dbchassis and multislot:
+                raise ArgumentError("Machine cannot be in multiple chassis. "
+                                    "Use --clearchassis to remove "
+                                    "current chassis slot information.")
+
         if len(dbmachine.chassis_slot) > 1 and not multislot:
             raise ArgumentError("Use --multislot to support a machine in more "
                                 "than one slot, or --clearchassis to remove "
