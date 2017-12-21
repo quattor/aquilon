@@ -61,7 +61,7 @@ class CommandUpdateBuilding(BrokerCommand):
             q = q.filter(HWS.location_id.in_(dbbuilding.offspring_ids()))
 
             # Validate ChangeManagement
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
             cm.consider(q)
             # This one would change the template's locations hence forbidden
             if dbcity.hub != dbbuilding.hub and q.count():

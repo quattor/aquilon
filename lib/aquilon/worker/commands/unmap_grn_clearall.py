@@ -31,7 +31,7 @@ class CommandUnMapGrnClearAll(BrokerCommand):
 
     def render(self, session, plenaries, target, hostname, list, membersof,
                personality, personality_stage, archetype, user, justification,
-               reason, logger, **_):
+               reason, logger, **arguments):
 
         target_type = "personality" if personality else "host"
 
@@ -50,7 +50,7 @@ class CommandUnMapGrnClearAll(BrokerCommand):
             objs = [dbpersonality.active_stage(personality_stage)]
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
 
         for obj in objs:
             # Validate ChangeManagement

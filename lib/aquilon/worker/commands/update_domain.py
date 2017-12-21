@@ -30,10 +30,10 @@ class CommandUpdateDomain(BrokerCommand):
 
     def render(self, session, domain, comments, compiler_version, auto_compile,
                autosync, change_manager, allow_manage, profile_formats,
-               archived, user, justification, reason, logger, **_):
+               archived, user, justification, reason, logger, **arguments):
         dbdomain = Domain.get_unique(session, domain, compel=True)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdomain)
         cm.validate()
 

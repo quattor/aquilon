@@ -32,7 +32,7 @@ class CommandAddRouterAddress(BrokerCommand):
 
     def render(self, session, plenaries, dbuser,
                fqdn, building, ip, network_environment, comments,
-               exporter, user, justification, reason, logger, **_):
+               exporter, user, justification, reason, logger, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -79,7 +79,7 @@ class CommandAddRouterAddress(BrokerCommand):
                                     "on {1:l}.".format(ip, dbnetwork))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnetwork)
         cm.validate()
 

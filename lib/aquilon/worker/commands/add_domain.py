@@ -33,7 +33,7 @@ class CommandAddDomain(BrokerCommand):
 
     def render(self, session, logger, domain, track, start, change_manager,
                auto_compile, comments, allow_manage, user, justification,
-               reason, **_):
+               reason, **arguments):
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
             if getattr(dbtracked, "tracked_branch", None):
@@ -55,7 +55,7 @@ class CommandAddDomain(BrokerCommand):
                               comments=comments, allow_manage=allow_manage)
 
         session.flush()
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdomain)
         cm.validate()
 

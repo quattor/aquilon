@@ -65,11 +65,12 @@ class ChangeManagement(object):
 
     # 'decommissioned', 'blind', 'install', 'reinstall', 'almostready', 'failed'
 
-    def __init__(self, session, user, justification, reason, logger, command):
+    def __init__(self, session, user, justification, reason, logger, command, **arguments):
         self.command = command
         self.justification = justification
         self.reason = reason
         self.logger = logger
+        self.requestid = arguments.get('requestid', '')
 
         self.dict_of_impacted_envs = {}
         self.eonid = 6980  # to be calculated for each target
@@ -188,7 +189,7 @@ class ChangeManagement(object):
             disable_edm = 'Yes'
         else:
             disable_edm = 'No'
-        log_dict = {"edm_instance": edm_ins, "mode": mode, "disable_edm": disable_edm}
+        log_dict = {"edm_instance": edm_ins, "mode": mode, "disable_edm": disable_edm, "request_id": str(self.requestid)}
         date_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S +0000')
         log_dict['timestamp'] = date_time
         log_dict.update(metadata)

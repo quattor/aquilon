@@ -38,7 +38,7 @@ class CommandUnbindClientHostname(BrokerCommand):
         dbobj = self.get_dbobj(session, **arguments)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbobj)
         cm.validate()
 

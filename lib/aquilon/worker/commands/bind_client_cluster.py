@@ -29,12 +29,12 @@ class CommandBindClientCluster(BrokerCommand):
     required_parameters = ["cluster", "service"]
 
     def render(self, session, logger, plenaries, cluster, service, instance, user,
-               justification, reason, force=False,**_):
+               justification, reason, force=False, **arguments):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbcluster)
         cm.validate()
 

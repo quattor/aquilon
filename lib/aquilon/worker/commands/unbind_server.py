@@ -30,7 +30,7 @@ class CommandUnbindServer(BrokerCommand):
 
     def render(self, session, logger, plenaries, service, instance, position, hostname,
                cluster, ip, resourcegroup, service_address, alias,
-               justification, reason, user, **_):
+               justification, reason, user, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
 
         if instance:
@@ -49,7 +49,7 @@ class CommandUnbindServer(BrokerCommand):
             dbinstances = q.all()
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         if position is not None:
             params = None
         else:

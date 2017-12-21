@@ -25,7 +25,7 @@ class CommandAddNsRecord(BrokerCommand):
     required_parameters = ["fqdn", "dns_domain"]
 
     def render(self, session, fqdn, dns_domain, comments,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
 
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
@@ -37,7 +37,7 @@ class CommandAddNsRecord(BrokerCommand):
                              comments=comments)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(ns_record.a_record.fqdn)
         cm.validate()
 

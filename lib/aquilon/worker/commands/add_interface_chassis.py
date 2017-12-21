@@ -51,7 +51,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbchassis)
         cm.validate()
 

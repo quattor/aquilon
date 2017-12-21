@@ -113,7 +113,7 @@ class CommandBindServer(BrokerCommand):
 
     def render(self, session, logger, plenaries, service, instance, position, hostname,
                cluster, ip, resourcegroup, service_address, alias,
-               justification, reason, user, **_):
+               justification, reason, user, **arguments):
         # Check for invalid combinations. We allow binding as a server:
         # - a host, in which case the primary IP address will be used
         # - an auxiliary IP address of a host
@@ -141,7 +141,7 @@ class CommandBindServer(BrokerCommand):
 
         # Validate ChangeManagement
         # Validating service providers
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for key in ["host", "cluster"]:
             cm.consider(params.get(key, None))
         if params.get("alias", None):

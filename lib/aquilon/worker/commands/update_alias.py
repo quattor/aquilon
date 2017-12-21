@@ -32,7 +32,7 @@ class CommandUpdateAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, target,
                target_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, exporter, user, justification, reason, **_):
+               comments, exporter, user, justification, reason, **arguments):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -46,7 +46,7 @@ class CommandUpdateAlias(BrokerCommand):
                                    dns_environment=dbdns_env, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbalias.target)
         cm.validate()
 

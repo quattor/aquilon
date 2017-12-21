@@ -34,7 +34,7 @@ class CommandMergeNetwork(BrokerCommand):
     requierd_parameters = ["ip"]
 
     def render(self, session, plenaries, dbuser, ip, netmask, prefixlen,
-               network_environment, exporter, user, justification, reason, logger, **_):
+               network_environment, exporter, user, justification, reason, logger, **arguments):
         if netmask:
             # There must me a faster way, but this is the easy one
             net = IPv4Network(u"127.0.0.0/%s" % netmask)
@@ -61,7 +61,7 @@ class CommandMergeNetwork(BrokerCommand):
         dbnets = q.all()
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnets)
         cm.validate()
 

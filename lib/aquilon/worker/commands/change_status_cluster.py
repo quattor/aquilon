@@ -28,7 +28,7 @@ class CommandChangeClusterStatus(BrokerCommand):
     required_parameters = ["cluster"]
 
     def render(self, session, logger, plenaries, cluster, metacluster, buildstatus,
-               user, justification, reason, **_):
+               user, justification, reason, **arguments):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -40,7 +40,7 @@ class CommandChangeClusterStatus(BrokerCommand):
                                                compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbcluster)
         cm.validate()
 

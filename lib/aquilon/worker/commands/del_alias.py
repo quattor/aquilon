@@ -29,14 +29,14 @@ class CommandDelAlias(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, logger, fqdn, dns_environment,
-               exporter, user, justification, reason, **_):
+               exporter, user, justification, reason, **arguments):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
                                      dns_environment=dbdns_env, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdns_rec.target)
         cm.validate()
 

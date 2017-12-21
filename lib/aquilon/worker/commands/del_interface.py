@@ -43,7 +43,7 @@ class CommandDelInterface(BrokerCommand):
             dbhw_ent = dbinterface.hardware_entity
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhw_ent)
         cm.validate()
 

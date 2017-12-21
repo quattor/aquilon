@@ -139,7 +139,7 @@ class CommandManageList(BrokerCommand):
                                                               logger=logger,
                                                               **arguments)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for obj in objects:
             if isinstance(obj, Host):
                 cm.consider(obj)

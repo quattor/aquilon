@@ -34,11 +34,11 @@ class CommandMake(BrokerCommand):
 
     def render(self, session, logger, plenaries, hostname, osname, osversion, archetype,
                personality, personality_stage, buildstatus, keepbindings, grn,
-               eon_id, cleargrn, comments, user, justification, reason, **_):
+               eon_id, cleargrn, comments, user, justification, reason, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhost)
         cm.validate()
 

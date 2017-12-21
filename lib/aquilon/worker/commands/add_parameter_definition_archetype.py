@@ -27,7 +27,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, archetype, template, path, value_type,
                schema, required, activation, default, description,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbarchetype.require_compileable("parameters are not supported")
@@ -38,7 +38,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
         # Validate ChangeManagement
         if required is not None:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbarchetype)
             cm.validate()
 

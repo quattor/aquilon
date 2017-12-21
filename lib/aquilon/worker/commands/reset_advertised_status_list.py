@@ -31,14 +31,14 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, plenaries, list, user, justification, reason, **_):
+    def render(self, session, logger, plenaries, list, user, justification, reason, **arguments):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 
         dbbranch, dbauthor = validate_branch_author(dbhosts)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
 
         failed = []
         # Do any cross-list or dependency checks

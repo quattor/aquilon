@@ -33,7 +33,7 @@ class CommandDelHost(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, plenaries, hostname, user,
-               justification, reason, exporter, **_):
+               justification, reason, exporter, **arguments):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
@@ -43,7 +43,7 @@ class CommandDelHost(BrokerCommand):
                                 "but {0} is a {1:cl}.".format(hostname, dbmachine))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhost)
         cm.validate()
 

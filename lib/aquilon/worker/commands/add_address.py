@@ -45,7 +45,7 @@ class CommandAddAddress(BrokerCommand):
                                     exporter=exporter)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdns_rec.fqdn)
         cm.validate()
 

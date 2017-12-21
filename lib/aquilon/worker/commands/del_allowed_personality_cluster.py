@@ -28,7 +28,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
     required_parameters = ["archetype", "personality", "cluster"]
 
     def render(self, session, plenaries, archetype, personality, cluster,
-               metacluster, user, justification, reason, logger, **_):
+               metacluster, user, justification, reason, logger, **arguments):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)
         if cluster:
@@ -39,7 +39,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
             dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbclus)
         cm.validate()
 

@@ -33,12 +33,12 @@ class CommandUpdateServiceAddress(BrokerCommand):
 
     def render(self, session, logger, plenaries, ip, name, interfaces, hostname, cluster,
                metacluster, resourcegroup, network_environment, map_to_primary,
-               comments, user, justification, reason, **_):
+               comments, user, justification, reason, **arguments):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(holder)
         cm.validate()
 

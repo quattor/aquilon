@@ -54,7 +54,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         dbhw_ent = Machine.get_unique(session, machine, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhw_ent)
         cm.validate()
 

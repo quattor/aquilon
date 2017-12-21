@@ -188,7 +188,7 @@ class CommandUpdateMachine(BrokerCommand):
         old_location = dbmachine.location
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbmachine)
         cm.validate()
 

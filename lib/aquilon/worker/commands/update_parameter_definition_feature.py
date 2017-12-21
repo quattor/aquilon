@@ -30,7 +30,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
     def render(self, session, logger, plenaries, feature, type, path, schema,
                clear_schema, required, default, clear_default, description,
-               user, justification, reason, **_):
+               user, justification, reason, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         path = ParamDefinition.normalize_path(path)
@@ -38,7 +38,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
         #Validate ChangeManagement
         if default is not None or clear_default or required is not None:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbfeature)
             cm.validate()
 

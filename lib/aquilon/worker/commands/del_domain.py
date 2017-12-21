@@ -28,7 +28,7 @@ class CommandDelDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, logger, domain, justification, reason, user,
-               requestid, **_):
+               requestid, **arguments):
         dbdomain = Domain.get_unique(session, domain, compel=True)
 
         # Deleting non-tracking domains may lose history, so more controls are
@@ -37,8 +37,8 @@ class CommandDelDomain(BrokerCommand):
             if not dbdomain.archived:
                 raise ArgumentError("{0} is not archived, it cannot be deleted."
                                     .format(dbdomain))
-
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            arguments['requestid'] = requestid
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbdomain)
             cm.validate()
 

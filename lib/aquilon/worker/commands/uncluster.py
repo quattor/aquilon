@@ -31,12 +31,12 @@ class CommandUncluster(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, plenaries, hostname, cluster,
-               personality, personality_stage, user, justification, reason, **_):
+               personality, personality_stage, user, justification, reason, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbcluster)
         cm.consider(dbhost)
         cm.validate()

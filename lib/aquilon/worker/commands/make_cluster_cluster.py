@@ -30,7 +30,7 @@ class CommandMakeClusterCluster(BrokerCommand):
     required_parameters = ["cluster"]
 
     def render(self, session, logger, plenaries, cluster, metacluster, keepbindings,
-               justification, reason, user, **_):
+               justification, reason, user, **arguments):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -47,7 +47,7 @@ class CommandMakeClusterCluster(BrokerCommand):
                                                   dbcluster.archetype))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbcluster)
         cm.validate()
 

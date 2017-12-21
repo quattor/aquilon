@@ -31,7 +31,7 @@ class CommandAddAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, target,
                target_environment, ttl, grn, eon_id, comments, exporter,
-               user, justification, reason, **_):
+               user, justification, reason, **arguments):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         if target_environment:
@@ -52,7 +52,7 @@ class CommandAddAlias(BrokerCommand):
         dbtarget = create_target_if_needed(session, logger, target, dbtgt_env)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbtarget)
         cm.validate()
 

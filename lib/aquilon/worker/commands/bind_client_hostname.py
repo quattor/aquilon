@@ -29,11 +29,11 @@ class CommandBindClientHostname(BrokerCommand):
     required_parameters = ["hostname", "service"]
 
     def render(self, session, logger, plenaries, hostname, service, instance, user,
-               justification, reason, force=False, **_):
+               justification, reason, force=False, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhost)
         cm.validate()
 

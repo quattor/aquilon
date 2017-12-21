@@ -34,7 +34,7 @@ class CommandAddDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, dns_domain,
-               prefix, exporter, user, justification, reason, **_):
+               prefix, exporter, user, justification, reason, **arguments):
         if not prefix:
             prefix = 'dynamic'
         dbnet_env, dbdns_env = get_net_dns_env(session)
@@ -51,7 +51,7 @@ class CommandAddDynamicRange(BrokerCommand):
                                      "supported on IPv6 networks.")
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(startnet)
         cm.validate()
 

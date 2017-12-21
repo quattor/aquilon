@@ -42,7 +42,7 @@ class CommandMapGrn(BrokerCommand):
 
     def render(self, session, logger, plenaries, target, grn, eon_id, hostname, list,
                membersof, personality, personality_stage, archetype,
-               justification, reason, user, **_):
+               justification, reason, user, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config,
                            usable_only=self.require_usable_grn)
@@ -70,7 +70,7 @@ class CommandMapGrn(BrokerCommand):
             config_key = "personality_grn_targets"
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
 
         for obj in objs:
             # Validate ChangeManagement

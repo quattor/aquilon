@@ -29,7 +29,7 @@ class CommandUpdateShare(BrokerCommand):
     required_parameters = ["share"]
 
     def render(self, session, plenaries, share, latency_threshold,
-               comments, user, justification, reason, logger, **_):
+               comments, user, justification, reason, logger, **arguments):
 
         validate_nlist_key("share", share)
 
@@ -37,7 +37,7 @@ class CommandUpdateShare(BrokerCommand):
 
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
 
         if not q.count():
             raise ArgumentError("Share %s is not used on any resource and "

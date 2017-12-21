@@ -31,7 +31,7 @@ class CommandDelServiceAddress(BrokerCommand):
     required_parameters = ["name"]
 
     def render(self, session, logger, plenaries, name, hostname, cluster, metacluster,
-               resourcegroup, keep_dns, user, justification, reason, exporter, **_):
+               resourcegroup, keep_dns, user, justification, reason, exporter, **arguments):
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
                                 "be deleted.")
@@ -40,7 +40,7 @@ class CommandDelServiceAddress(BrokerCommand):
                                      metacluster, resourcegroup, compel=False)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(holder)
         cm.validate()
 

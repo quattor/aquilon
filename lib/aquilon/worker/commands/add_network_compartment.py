@@ -26,7 +26,7 @@ class CommandAddNetworkCompartment(BrokerCommand):
     required_parameters = ["network_compartment"]
 
     def render(self, session, network_compartment, comments, user,
-               justification, reason, logger, **_):
+               justification, reason, logger, **arguments):
         NetworkCompartment.get_unique(session, network_compartment,
                                       preclude=True)
 
@@ -34,7 +34,7 @@ class CommandAddNetworkCompartment(BrokerCommand):
                                         comments=comments)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnet_comp)
         cm.validate()
 

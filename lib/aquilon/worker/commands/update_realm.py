@@ -25,11 +25,11 @@ class CommandUpdateRealm(BrokerCommand):
     required_parameters = ["realm"]
 
     def render(self, session, realm, trusted, comments, user,
-               justification, reason, logger, **_):
+               justification, reason, logger, **arguments):
         dbrealm = Realm.get_unique(session, realm, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbrealm)
         cm.validate()
 

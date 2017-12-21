@@ -43,7 +43,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
         dbhw_ent = get_hardware(session, **kwargs)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
         cm.consider(dbhw_ent)
         cm.validate()
 

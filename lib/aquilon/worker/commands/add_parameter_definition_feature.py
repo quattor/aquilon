@@ -29,14 +29,14 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
 
     def render(self, session, logger, plenaries, feature, type, path,
                value_type, schema, required, default, description, user,
-               justification, reason, **_):
+               justification, reason, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
         # Validating always not only when default not specified?
         # Validate ChangeManagement
         if default is not None or required is not None:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbfeature)
             cm.validate()
 

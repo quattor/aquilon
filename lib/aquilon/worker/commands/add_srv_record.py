@@ -34,7 +34,7 @@ class CommandAddSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
                weight, target, port, dns_environment, ttl, comments, grn,
-               eon_id, target_environment, exporter, user, justification, reason, **_):
+               eon_id, target_environment, exporter, user, justification, reason, **arguments):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -84,7 +84,7 @@ class CommandAddSrvRecord(BrokerCommand):
                               owner_grn=dbgrn)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbsrv_rec.fqdn)
         cm.validate()
 

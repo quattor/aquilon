@@ -44,7 +44,7 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnetdev)
         cm.validate()
 

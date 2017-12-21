@@ -25,11 +25,11 @@ class CommandUpdateUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, gid, full_name, home_directory,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
         dbuser = User.get_unique(session, username, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbuser)
         cm.validate()
 

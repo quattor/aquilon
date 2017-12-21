@@ -26,7 +26,7 @@ class CommandAddGrn(BrokerCommand):
     required_parameters = ["grn", "eon_id"]
 
     def render(self, session, grn, eon_id, disabled, user,
-               justification, reason, logger, **_):
+               justification, reason, logger, **arguments):
         Grn.get_unique(session, grn=grn, preclude=True)
         Grn.get_unique(session, eon_id=eon_id, preclude=True)
 
@@ -35,7 +35,7 @@ class CommandAddGrn(BrokerCommand):
         dbgrn = Grn(grn=grn, eon_id=eon_id, disabled=disabled)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbgrn)
         cm.validate()
 

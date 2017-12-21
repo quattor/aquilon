@@ -57,7 +57,7 @@ class CommandUpdateNetwork(BrokerCommand):
             raise NotFoundException("No matching network was found.")
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(q)
         cm.validate()
 

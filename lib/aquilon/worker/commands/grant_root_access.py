@@ -34,12 +34,12 @@ class CommandGrantRootAccess(BrokerCommand):
             obj.root_netgroups.append(dbnetgroup)
 
     def render(self, session, logger, plenaries, username, netgroup,
-               personality, archetype, justification, user, reason, **_):
+               personality, archetype, justification, user, reason, **arguments):
 
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)
         for dbstage in dbobj.stages.values():
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbstage)
             cm.validate()
 
