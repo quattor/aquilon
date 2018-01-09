@@ -37,7 +37,8 @@ class TestShowNetwork(TestBrokerCommand):
                   "aurora1": False, "aurora2": False, "routing2": False, "autopg1": False, "switch_loopback": False,
                   "switch_sync": False, "routing3": False, "refreshtest3": False, "refreshtest4": False,
                   "refreshtest5": False, "ut_dmz1": False, "dyndhcp0": False, "dyndhcp1": False, "dyndhcp2": False,
-                  "dyndhcp3": False, "cardnetwork": False, "unknown0": False, "ipv6_test": False, "ut9_chassis": False}
+                  "dyndhcp3": False, "dyndhcp5": False, "cardnetwork": False, "unknown0": False,
+                  "ipv6_test": False, "ut9_chassis": False}
     }
 
     network_not_exist = ['netuc_transit_2b', 'netuc_transit_2a', 'netuc_transit_4a', 'netuc_transit_4b',
