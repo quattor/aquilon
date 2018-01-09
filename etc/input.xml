@@ -4815,6 +4815,7 @@
 	    <option name="prefix" type="string">Prefix to use for generated names, defaults to 'dynamic'</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="range_class" type="string">Class of the range, defaults to 'vm'</option>
 	</optgroup>
 	<transport method="put" path="dynamic_range/%(startip)s/%(endip)s"/>
 	<transport trigger="fillnetwork" method="post" path="dynamic_range/fill/%(fillnetwork)s"/>

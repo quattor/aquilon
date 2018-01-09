@@ -24,10 +24,13 @@ from sqlalchemy.sql import join, and_
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Network, NetworkEnvironment, DnsRecord, Fqdn
-from aquilon.aqdb.column_types import IP
+from aquilon.aqdb.column_types import IP, AqStr
+from aquilon.config import Config
 
 _TN = 'a_record'
 _DTN = 'dynamic_stub'
+
+_config = Config()
 
 
 class ARecord(DnsRecord):
@@ -183,13 +186,17 @@ class DynamicStub(ARecord):
     __mapper_args__ = {'polymorphic_identity': _DTN}
     _class_label = 'Dynamic Stub'
 
+    range_class = Column(AqStr(16), nullable=False,
+                         default=_config.get("broker", "default_dynamic_range_class"))
+
     dns_record_id = Column(ForeignKey(ARecord.dns_record_id,
                                       ondelete='CASCADE'),
                            primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['fqdn'],
                                 'extra_search_fields': ['ip', 'network',
-                                                        'dns_environment']}},)
+                                                        'dns_environment',
+                                                        'range_class']}})
 
     def validate_reverse_ptr(self, key, value):
         super(DynamicStub, self).validate_reverse_ptr(key, value)
@@ -197,6 +204,15 @@ class DynamicStub(ARecord):
             raise ValueError("The reverse PTR record cannot be set for "
                              "DNS records used for dynamic DHCP.")
         return value
+
+    @validates('range_class')
+    def validate_range_class(self, key, value):
+        valid_range_classes = [s.strip() for s in
+                               _config.get("broker", "dynamic_range_classes").split(",")]
+        if value is None or value in valid_range_classes:
+            return value
+        raise ArgumentError("Unknown range class '{}'.  The valid range classes are: {}."
+                            .format(value, ", ".join(valid_range_classes)))
 
 Network.dynamic_stubs = relation(DynamicStub, order_by=[DynamicStub.ip],
                                  viewonly=True)

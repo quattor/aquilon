@@ -29,6 +29,9 @@ class CommandShowDynamicRange(BrokerCommand):
     def render(self, session, fqdn, ip, dns_environment, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
+
+        dbdns_rec = None
+
         if fqdn:
             dbdns_rec = DynamicStub.get_unique(session, fqdn=fqdn,
                                                dns_environment=dbdns_env,
@@ -38,16 +41,24 @@ class CommandShowDynamicRange(BrokerCommand):
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
 
-        q = session.query(DynamicStub.ip)
-        q = q.filter_by(network=dbnetwork)
-        all_stubs = frozenset(int(stub.ip) for stub in q)
+        if not dbdns_rec:
+            dbdns_rec = session.query(DynamicStub).filter_by(ip=ip, network=dbnetwork).first()
 
         start = int(ip)
-        while start > int(dbnetwork.network_address) and start - 1 in all_stubs:
-            start = start - 1
-
         end = int(ip)
-        while end < int(dbnetwork.broadcast_address) and end + 1 in all_stubs:
-            end = end + 1
+        range_class = None
 
-        return DynamicRange(dbnetwork, ip_address(start), ip_address(end))
+        if dbdns_rec:
+            range_class = dbdns_rec.range_class
+
+            q = session.query(DynamicStub.ip)
+            q = q.filter_by(network=dbnetwork, range_class=range_class)
+            all_stubs = frozenset(int(stub.ip) for stub in q)
+
+            while start > int(dbnetwork.network_address) and start - 1 in all_stubs:
+                start = start - 1
+
+            while end < int(dbnetwork.broadcast_address) and end + 1 in all_stubs:
+                end = end + 1
+
+        return DynamicRange(dbnetwork, ip_address(start), ip_address(end), range_class)

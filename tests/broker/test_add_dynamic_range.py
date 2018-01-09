@@ -39,6 +39,8 @@ class TestAddDynamicRange(TestBrokerCommand):
                                   "building", "ut")
         self.net.allocate_network(self, "dyndhcp4", 28, "unknown",
                                   "building", "cards")
+        self.net.allocate_network(self, "dyndhcp5", 25, "tor_net2",
+                                  "building", "ut")
 
     def test_100_add_range(self):
         messages = []
@@ -54,6 +56,28 @@ class TestAddDynamicRange(TestBrokerCommand):
                    "--startip=%s" % self.net["dyndhcp0"].usable[2],
                    "--endip=%s" % self.net["dyndhcp0"].usable[-3],
                    "--dns_domain=aqd-unittest.ms.com"] + self.valid_just_tcm
+        err = self.statustest(command)
+        for message in messages:
+            self.matchoutput(err, message, command)
+        self.dsdb_verify()
+
+    def test_101_add_range_class(self):
+        messages = []
+        for ip in range(int(self.net["dyndhcp5"].usable[2]),
+                        int(self.net["dyndhcp5"].usable[-3]) + 1):
+            address = IPv4Address(ip)
+            hostname = self.dynname(address)
+            self.dsdb_expect_add(hostname, address)
+            messages.append("DSDB: add_host -host_name %s -ip_address %s "
+                            "-status aq" % (hostname, address))
+
+        range_class = "fab"
+
+        command = ["add_dynamic_range",
+                   "--startip=%s" % self.net["dyndhcp5"].usable[2],
+                   "--endip=%s" % self.net["dyndhcp5"].usable[-3],
+                   "--dns_domain=aqd-unittest.ms.com",
+                   "--range_class=%s" % range_class] + self.valid_just_tcm
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -84,6 +108,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
+        self.matchoutput(out, "Range Class: %s" % "vm", command)
 
     def test_105_show_fqdn(self):
         net = self.net["dyndhcp0"]
@@ -94,6 +119,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
+        self.matchoutput(out, "Range Class: %s" % "vm", command)
 
     def test_105_verify_network(self):
         command = "show network --ip %s" % self.net["dyndhcp0"].ip
@@ -111,6 +137,46 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.assertEqual(len(network.dynamic_ranges), 1)
         self.assertEqual(network.dynamic_ranges[0].start, str(start))
         self.assertEqual(network.dynamic_ranges[0].end, str(end))
+        self.assertEqual(network.dynamic_ranges[0].range_class, "vm")
+
+    def test_106_verify_range_class(self):
+        command = "search_dns --record_type=dynamic_stub"
+        out = self.commandtest(command.split(" "))
+        # Assume that first three octets are the same.
+        start = self.net["dyndhcp5"].usable[2]
+        end = self.net["dyndhcp5"].usable[-3]
+        checked = False
+        for i in range(int(start), int(end) + 1):
+            checked = True
+            ip = IPv4Address(i)
+            self.matchoutput(out, self.dynname(ip), command)
+            subcommand = ["search_dns", "--ip", ip, "--fqdn", self.dynname(ip)]
+            subout = self.commandtest(subcommand)
+            self.matchoutput(subout, self.dynname(ip), command)
+        self.assertTrue(checked, "Problem with test algorithm or data.")
+
+    def test_106_show_range_class(self):
+        net = self.net["dyndhcp5"]
+        start = net.usable[2]
+        end = net.usable[-3]
+        command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
+                         command)
+        self.matchoutput(out, "Range Class: %s" % "fab", command)
+
+    def test_106_verify_network_proto_range_class(self):
+        command = "show network --ip %s --format proto" % self.net["dyndhcp5"].ip
+        network = self.protobuftest(command.split(" "), expect=1)[0]
+        start = self.net["dyndhcp5"].usable[2]
+        end = self.net["dyndhcp5"].usable[-3]
+        range_class = "fab"
+        self.assertEqual(len(network.hosts), 0)
+        self.assertEqual(len(network.dynamic_ranges), 1)
+        self.assertEqual(network.dynamic_ranges[0].start, str(start))
+        self.assertEqual(network.dynamic_ranges[0].end, str(end))
+        self.assertEqual(network.dynamic_ranges[0].range_class, range_class)
 
     def test_110_add_end_in_grange(self):
         # Set up a network that has its final IP address taken.
@@ -174,6 +240,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.assertEqual(len(network.dynamic_ranges), 1)
         self.assertEqual(network.dynamic_ranges[0].start, str(net.usable[0]))
         self.assertEqual(network.dynamic_ranges[0].end, str(net.usable[-1]))
+        self.assertEqual(network.dynamic_ranges[0].range_class, "vm")
 
     def test_125_delete_address_in_middle(self):
         net = self.net["dyndhcp3"]
@@ -199,8 +266,10 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.assertEqual(len(network.dynamic_ranges), 2)
         self.assertEqual(network.dynamic_ranges[0].start, str(net.usable[0]))
         self.assertEqual(network.dynamic_ranges[0].end, str(net.usable[4]))
+        self.assertEqual(network.dynamic_ranges[0].range_class, "vm")
         self.assertEqual(network.dynamic_ranges[1].start, str(net.usable[6]))
         self.assertEqual(network.dynamic_ranges[1].end, str(net.usable[-1]))
+        self.assertEqual(network.dynamic_ranges[1].range_class, "vm")
 
     def test_130_dsdb_rollback(self):
         for ip in range(int(self.net["dyndhcp2"].usable[2]),

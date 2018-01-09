@@ -34,6 +34,7 @@
 	    <arg choice="plain"><option>--endip <replaceable>IP</replaceable></option></arg>
 	    <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
 	    <arg><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
+	    <arg><option>--range_class <replaceable>CLASS</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -42,6 +43,7 @@
 	    <arg choice="plain"><option>--fillnetwork <replaceable>NETWORK</replaceable></option></arg>
 	    <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
 	    <arg><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
+	    <arg><option>--range_class <replaceable>CLASS</replaceable></option></arg>
 	</cmdsynopsis>
     </refsynopsisdiv>
 
@@ -124,6 +126,18 @@
 		    <para>
 			The prefix to use when generating FQDNs for the stub DNS entries. If not specified,
 			it defaults to <literal>dynamic</literal>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--range_class <replaceable>RANGE_CLASS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        The class used to specify what the dynamic range will be used for. Possible values
+                        for this are limited (configuration options) and if not specified, it defaults
+                        to <literal>vm</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>

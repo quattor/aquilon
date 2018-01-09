@@ -205,6 +205,9 @@ auto_mac_end = 00:50:56:3f:ff:ff
 
 disk_controller_types = cciss, fibrechannel, flash, ide, nvme, sas, sata, scsi
 
+dynamic_range_classes = vm, fab
+default_dynamic_range_class = vm
+
 [change_management]
 # The contents of --justification will not be validated externally
 # (syntax checking will still be performed)
@@ -377,4 +380,4 @@ precreated_compartments_only = False
 ignore_network_compartments_regex =
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.37/common/lib/python
+directory = /ms/dist/aquilon/PROJ/protocols/1.39/common/lib/python

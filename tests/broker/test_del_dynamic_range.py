@@ -45,7 +45,7 @@ class TestDelDynamicRange(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Nothing found in range", command)
 
-    def test_100_del_nos_tart(self):
+    def test_100_del_no_start(self):
         command = ["del_dynamic_range",
                    "--startip", self.net["dyndhcp0"].usable[1],
                    "--endip", self.net["dyndhcp0"].usable[-3]] + self.valid_just_tcm
@@ -96,6 +96,21 @@ class TestDelDynamicRange(TestBrokerCommand):
             self.matchoutput(err, message, command)
         self.dsdb_verify()
 
+    def test_200_del_range_proto(self):
+        messages = []
+        for ip in range(int(self.net["dyndhcp5"].usable[2]),
+                        int(self.net["dyndhcp5"].usable[-3]) + 1):
+            address = IPv4Address(ip)
+            self.dsdb_expect_delete(address)
+            messages.append("DSDB: delete_host -ip_address %s" % address)
+        command = ["del_dynamic_range",
+                   "--startip", self.net["dyndhcp5"].usable[2],
+                   "--endip", self.net["dyndhcp5"].usable[-3]] + self.valid_just_tcm
+        err = self.statustest(command)
+        for message in messages:
+            self.matchoutput(err, message, command)
+        self.dsdb_verify()
+
     def test_210_del_end_in_range(self):
         ip = self.net["dyndhcp1"].usable[-1]
         self.dsdb_expect_delete(ip)
@@ -137,6 +152,7 @@ class TestDelDynamicRange(TestBrokerCommand):
         self.net.dispose_network(self, "dyndhcp1")
         self.net.dispose_network(self, "dyndhcp2")
         self.net.dispose_network(self, "dyndhcp3")
+        self.net.dispose_network(self, "dyndhcp5")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDynamicRange)

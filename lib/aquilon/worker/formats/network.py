@@ -33,19 +33,24 @@ def summarize_ranges(addrlist):
     """ Convert a list like [1,2,3,5] to ["1-3", "5"], but with IP addresses """
     ranges = []
     start = None
+    prev_range_class = None
     for addr in addrlist:
         if start is None:
             start = addr.ip
             end = addr.ip
+            prev_range_class = addr.range_class
             continue
-        if int(addr.ip) == int(end) + 1:
-            end = addr.ip
-            continue
+        if addr.range_class == prev_range_class:
+            if int(addr.ip) == int(end) + 1:
+                end = addr.ip
+                prev_range_class = addr.range_class
+                continue
         if start == end:
             ranges.append(str(start))
         else:
             ranges.append("%s-%s" % (start, end))
         start = end = addr.ip
+        prev_range_class = addr.range_class
     if start is not None:
         if start == end:
             ranges.append(str(start))
@@ -174,13 +179,18 @@ class NetworkFormatter(ObjectFormatter):
         # Look for dynamic DHCP ranges
         range_msg = None
         last_ip = None
+        last_range_class = None
         for dynhost in net.dynamic_stubs:
-            if not last_ip or dynhost.ip != last_ip + 1:
+            if not last_ip or dynhost.ip != last_ip + 1 or \
+               dynhost.range_class != last_range_class:
                 if last_ip:
                     range_msg.end = str(last_ip)
                 range_msg = skeleton.dynamic_ranges.add()
                 range_msg.start = str(dynhost.ip)
+                if dynhost.range_class:
+                    range_msg.range_class = str(dynhost.range_class)
             last_ip = dynhost.ip
+            last_range_class = dynhost.range_class
         if last_ip:
             range_msg.end = str(last_ip)
 
