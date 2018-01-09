@@ -19,7 +19,9 @@
 from collections import defaultdict
 from operator import attrgetter
 
-from aquilon.aqdb.model import Host
+from sqlalchemy.inspection import inspect
+
+from aquilon.aqdb.model import Host, Machine
 from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.compileable import CompileableFormatter
@@ -56,7 +58,9 @@ class HostFormatter(CompileableFormatter):
         skeleton.owner_eonid = host.effective_owner_grn.eon_id
         self.redirect_proto(host.archetype, skeleton.archetype)  # Deprecated
         self.redirect_proto(host.operating_system, skeleton.operating_system)
-        self.redirect_proto(dbhw_ent, skeleton.machine)
+
+        if dbhw_ent.hardware_type == inspect(Machine).polymorphic_identity:
+            self.redirect_proto(dbhw_ent, skeleton.machine)
 
         self.redirect_proto(host.services_used, skeleton.services_used,
                             indirect_attrs=False)

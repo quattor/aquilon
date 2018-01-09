@@ -362,6 +362,18 @@ class TestBindServer(TestBrokerCommand):
                          "--hostname", "server1.aqd-unittest.ms.com",
                          "--service", "utsvc", "--instance", "utsi1"])
 
+    def test_805_bind_to_network_device(self):
+        # Test service bind to network device
+        # Test @test_show_service_all.py: 'show service all --format=proto'
+        command = ['add_service', '--service', 'test_network_dev']
+        self.noouttest(command)
+        command = ['add_service', '--service', 'test_network_dev', '--instance', 'test']
+        self.noouttest(command)
+        command = ['bind_server', '--service', 'test_network_dev', '--instance', 'test',
+                   '--hostname', 'switchinbuilding.aqd-unittest.ms.com']
+        self.noouttest(command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)
     unittest.TextTestRunner(verbosity=2).run(suite)

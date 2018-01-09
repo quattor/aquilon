@@ -597,6 +597,12 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --hostname unittest02.one-nyp.ms.com --format proto"
         self.protobuftest(command.split(" "), expect=1)
 
+    def testprotobuf_machine_netdev_mix(self):
+        # Pick network with Machine as well as NetworkDevices
+        ip = self.net["vmotion_net"].network_address
+        command = ["search_host", "--networkip", ip, "--format=proto"]
+        hosts = self.protobuftest(command)
+
     def testip(self):
         ip = self.net["unknown0"].usable[2]
         command = ["search_host", "--ip=%s" % ip]

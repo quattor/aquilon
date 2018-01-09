@@ -21,7 +21,7 @@ from sqlalchemy.orm import joinedload, subqueryload, undefer
 from aquilon.aqdb.model import Network, NetworkEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.formats.network import NetworkHostList
+from aquilon.worker.formats.network import NetworkHostList, NetworkAddressAssignmentList
 
 
 class CommandShowNetwork(BrokerCommand):
@@ -29,7 +29,7 @@ class CommandShowNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, ip, network_environment, all, hosts,
-               **arguments):
+               address_assignments, **arguments):
         options = [undefer('comments'),
                    joinedload('location'),
                    undefer('routers.comments'),
@@ -50,7 +50,10 @@ class CommandShowNetwork(BrokerCommand):
             dbnetwork = Network.get_unique(session, name=network, ip=ip,
                                            network_environment=dbnet_env,
                                            query_options=options, compel=True)
-            if hosts:
+
+            if address_assignments:
+                return NetworkAddressAssignmentList([dbnetwork])
+            elif hosts:
                 return NetworkHostList([dbnetwork])
             else:
                 return dbnetwork
@@ -59,7 +62,9 @@ class CommandShowNetwork(BrokerCommand):
         q = q.filter_by(network_environment=dbnet_env)
         q = q.order_by(Network.ip)
         q = q.options(*options)
-        if hosts:
+        if address_assignments:
+            return NetworkAddressAssignmentList(q.all())
+        elif hosts:
             return NetworkHostList(q.all())
         else:
             return q.all()

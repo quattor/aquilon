@@ -27,6 +27,7 @@ from sqlalchemy.orm import object_session, subqueryload
 from aquilon.aqdb.model import Network, HardwareEntity
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
+from aquilon.worker.formats.service_address import ServiceAddressFormatter
 
 
 def summarize_ranges(addrlist):
@@ -340,6 +341,51 @@ class NetworkHostListFormatter(ListFormatter):
 
 
 ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
+
+
+class NetworkAddressAssignmentList(list):
+    """Holds a list of networks for which an address assignment list will be formatted
+    """
+    pass
+
+
+class NetworkAddressAssignmentFormatter(NetworkHostListFormatter):
+
+    def format_raw(self, netlist, indent="", embedded=True,
+                   indirect_attrs=True):
+        details = []
+        for network in netlist:
+            details_str = super(NetworkAddressAssignmentFormatter, self).format_raw(netlist=[network], indent=indent, embedded=embedded,
+                                                                                    indirect_attrs=indirect_attrs)
+            details.extend(details_str.split("\n"))
+
+            for srv in network.service_addresses:
+                handler = ServiceAddressFormatter()
+                service_addr_list = handler.format_raw(srv).split("\n")
+                details.append("  " + ", ".join([srv.strip() for srv in service_addr_list]))
+
+        return "\n".join(details)
+
+
+    def format_proto(self, result, container, embedded=True, indirect_attrs=True):
+        for item in result:
+            skeleton = container.add()
+            handler = NetworkFormatter()
+            # Use the standard network formatter to fill in the non-host details
+            handler.format_proto(item, skeleton, embedded=embedded,
+                                 indirect_attrs=indirect_attrs)
+            # Use ourself to fill in all of the assignement information
+            self.fill_proto(item, skeleton, embedded=embedded,
+                            indirect_attrs=indirect_attrs)
+
+            for srv in item.service_addresses:
+                service_address = skeleton.service_addresses.add()
+                handler = ServiceAddressFormatter()
+                handler.fill_proto(srv, service_address, embedded=embedded,
+                                indirect_attrs=indirect_attrs)
+
+
+ObjectFormatter.handlers[NetworkAddressAssignmentList] = NetworkAddressAssignmentFormatter()
 
 
 class NetworkList(list):

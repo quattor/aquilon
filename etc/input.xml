@@ -782,6 +782,7 @@
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="hosts" type="flag">Hosts</option>
+	    <option name="address_assignments" type="flag">All network IP address assignments: Service Addresses and Hosts</option>
 	</optgroup>
 	<transport method="get" path="network"/>
 	<format name="proto" >
