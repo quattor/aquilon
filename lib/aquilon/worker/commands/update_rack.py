@@ -29,7 +29,7 @@ class CommandUpdateRack(BrokerCommand):
     required_parameters = ["rack"]
 
     def render(self, session, plenaries, rack, row, column, room, building, bunker,
-               fullname, default_dns_domain, comments, user, justification, reason, logger, **_):
+               fullname, default_dns_domain, comments, user, justification, reason, logger, **arguments):
         dbrack = Rack.get_unique(session, rack, compel=True)
 
         q = session.query(Machine)
@@ -37,7 +37,7 @@ class CommandUpdateRack(BrokerCommand):
 
         if row or column or bunker or room or building:
             # Validate ChangeManagement
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(q)
             cm.validate()
 

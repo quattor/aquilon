@@ -33,7 +33,7 @@ class CommandAddRequiredServiceOsname(BrokerCommand):
         dbos.required_services.append(dbservice)
 
     def render(self, session, logger, service, archetype, osname, osversion,
-               justification, reason, user, **_):
+               justification, reason, user, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbarchetype.require_compileable("required services are not supported")
 
@@ -42,7 +42,7 @@ class CommandAddRequiredServiceOsname(BrokerCommand):
                                           archetype=dbarchetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbos)
         cm.validate()
 

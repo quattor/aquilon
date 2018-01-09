@@ -29,13 +29,13 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, archetype, path, schema, clear_schema, required,
                activation, default, clear_default, description,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbarchetype.require_compileable("parameters are not supported")
 
         # Validate ChangeManagement
         if required is not None:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbarchetype)
             cm.validate()
 

@@ -36,7 +36,7 @@ class CommandAddDisk(BrokerCommand):
         dbmachine = get_hardware(session, compel=True, **kwargs)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
         cm.consider(dbmachine)
         cm.validate()
 

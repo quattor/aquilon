@@ -34,7 +34,7 @@ class CommandCluster(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, plenaries, hostname, cluster, personality,
-               personality_stage, user, justification, reason, **_):
+               personality_stage, user, justification, reason, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
@@ -42,7 +42,7 @@ class CommandCluster(BrokerCommand):
             raise ArgumentError("Cannot add hosts to decommissioned clusters.")
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbcluster)
         cm.consider(dbhost)
         cm.validate()

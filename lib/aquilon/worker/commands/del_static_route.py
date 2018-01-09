@@ -38,7 +38,7 @@ class CommandDelStaticRoute(BrokerCommand):
 
     def render(self, session, logger, plenaries, gateway, ip, netmask,
                prefixlen, network_environment, archetype, personality,
-               personality_stage, justification, reason, user, **_):
+               personality_stage, justification, reason, user, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
@@ -91,7 +91,7 @@ class CommandDelStaticRoute(BrokerCommand):
         q = q.options(PlenaryHost.query_options())
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(q.all())
         cm.validate()
 

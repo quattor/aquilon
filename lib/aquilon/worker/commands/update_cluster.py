@@ -98,7 +98,7 @@ class CommandUpdateCluster(BrokerCommand):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbcluster)
         cm.validate()
 

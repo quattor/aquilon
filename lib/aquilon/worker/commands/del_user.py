@@ -25,11 +25,11 @@ class CommandDelUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, user, justification,
-               reason, logger, **_):
+               reason, logger, **arguments):
         dbuser = User.get_unique(session, username, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbuser)
         cm.validate()
 

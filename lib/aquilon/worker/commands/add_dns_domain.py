@@ -27,13 +27,13 @@ class CommandAddDnsDomain(BrokerCommand):
     required_parameters = ["dns_domain"]
 
     def render(self, session, logger, dns_domain, restricted, comments,
-               user, justification, reason, **_):
+               user, justification, reason, **arguments):
         DnsDomain.get_unique(session, dns_domain, preclude=True)
 
         dbdns_domain = DnsDomain(name=dns_domain, comments=comments)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdns_domain)
         cm.validate()
 

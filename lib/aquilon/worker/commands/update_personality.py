@@ -58,7 +58,7 @@ class CommandUpdatePersonality(BrokerCommand):
     def render(self, session, logger, plenaries, personality, personality_stage, archetype,
                vmhost_capacity_function, cluster_required, config_override,
                host_environment, grn, eon_id, leave_existing, staged,
-               justification, reason, comments, user, **_):
+               justification, reason, comments, user, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -83,7 +83,7 @@ class CommandUpdatePersonality(BrokerCommand):
 
         dbstage = dbpersona.active_stage(personality_stage)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         # It's a bit ugly. If any of the non-staged attributes are touched,
         # then we need to check for prod hosts for all stages
         if (cluster_required is not None or config_override is not None or

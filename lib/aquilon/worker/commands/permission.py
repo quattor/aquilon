@@ -28,13 +28,13 @@ class CommandPermission(BrokerCommand):
     required_parameters = ["principal", "role"]
 
     def render(self, session, logger, principal, role, createuser, createrealm,
-               comments, user, justification, reason, **_):
+               comments, user, justification, reason, **arguments):
         dbrole = Role.get_unique(session, role, compel=True)
         dbuser = get_or_create_user_principal(session, principal, createuser,
                                               createrealm, comments=comments,
                                               logger=logger)
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbrole)
         cm.validate()
 

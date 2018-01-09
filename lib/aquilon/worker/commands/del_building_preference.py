@@ -28,13 +28,13 @@ class CommandDelBuildingPreference(BrokerCommand):
     required_parameters = ["building_pair", "archetype"]
 
     def render(self, session, logger, plenaries, building_pair, archetype,
-               justification, reason, user, **_):
+               justification, reason, user, **arguments):
         db_pref = BuildingPreference.get_unique(session,
                                                 building_pair=building_pair,
                                                 archetype=archetype,
                                                 compel=True)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(db_pref.archetype)
         cm.validate()
 

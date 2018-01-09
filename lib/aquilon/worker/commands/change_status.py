@@ -29,11 +29,11 @@ class CommandChangeStatus(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, plenaries, hostname, buildstatus,
-               user, justification, reason, **_):
+               user, justification, reason, **arguments):
         dbhost = hostname_to_host(session, hostname)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhost)
         cm.validate()
 

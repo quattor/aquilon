@@ -32,7 +32,7 @@ class CommandUpdateAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, reverse_ptr, dns_environment,
                network_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, exporter, user, justification, reason, **_):
+               comments, exporter, user, justification, reason, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
@@ -45,7 +45,7 @@ class CommandUpdateAddress(BrokerCommand):
                                 .format(dbdns_rec))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdns_rec.fqdn)
         cm.validate()
 

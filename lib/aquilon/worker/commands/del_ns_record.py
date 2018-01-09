@@ -25,7 +25,7 @@ class CommandDelNsRecord(BrokerCommand):
     required_parameters = ["dns_domain", "fqdn"]
 
     def render(self, session, fqdn, dns_domain, user, justification,
-               reason, logger, **_):
+               reason, logger, **arguments):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)
@@ -34,7 +34,7 @@ class CommandDelNsRecord(BrokerCommand):
                                         a_record=dba_rec, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(ns_record.a_record.fqdn)
         cm.validate()
 

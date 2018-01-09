@@ -32,11 +32,11 @@ class CommandDelNetworkDevice(BrokerCommand):
     required_parameters = ["network_device"]
 
     def render(self, session, logger, plenaries, network_device, user,
-               justification, reason, exporter, **_):
+               justification, reason, exporter, **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnetdev)
         cm.validate()
 

@@ -159,7 +159,7 @@ class CommandAddHost(BrokerCommand):
         # Add Host, Windows Host or Aurora Host will allow to set buildstatus to ready
         # Adding validation, though maybe we do not need that as the creating host, not changing
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbmachine)
         cm.validate()
 

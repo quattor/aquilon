@@ -31,7 +31,7 @@ class CommandDelDynamicRange(BrokerCommand):
     required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, exporter, user,
-               justification, reason, **_):
+               justification, reason, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)
@@ -42,7 +42,7 @@ class CommandDelDynamicRange(BrokerCommand):
                                  endip, endnet.network_address))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(startnet)
         cm.validate()
 

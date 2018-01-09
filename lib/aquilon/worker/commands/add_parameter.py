@@ -51,14 +51,14 @@ class CommandAddParameter(BrokerCommand):
 
     def render(self, session, logger, plenaries, archetype, personality,
                personality_stage, feature, type, path, user, value=None,
-               justification=None, reason=None, **_):
+               justification=None, reason=None, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbpersonality.archetype.require_compileable("parameters are not supported")
 
         dbstage = dbpersonality.active_stage(personality_stage)
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbstage)
         cm.validate()
 

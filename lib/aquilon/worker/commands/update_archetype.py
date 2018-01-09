@@ -29,11 +29,11 @@ class CommandUpdateArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, compilable, cluster_type,
-               description, comments, user, justification, reason, logger, **_):
+               description, comments, user, justification, reason, logger, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbarchetype)
         cm.validate()
 

@@ -53,7 +53,7 @@ class CommandMapService(BrokerCommand):
         dbpersona = None
         dbenv = None
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
         if personality:
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)

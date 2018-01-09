@@ -47,7 +47,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
 
     def render(self, session, logger, plenaries, service, archetype, personality,
                personality_stage, environment_override, justification, reason,
-               user, **_):
+               user, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbpersonality.archetype.require_compileable("required services are not supported")
@@ -59,7 +59,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
         else:
             dbenv = None
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbstage)
         cm.validate()
 

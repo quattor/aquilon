@@ -29,7 +29,7 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, target, ttl, clear_ttl, comments,
                dns_environment, target_environment, grn, eon_id, clear_grn,
-               exporter, user, justification, reason, **_):
+               exporter, user, justification, reason, **arguments):
         if not target_environment:
             target_environment = dns_environment
 
@@ -61,7 +61,7 @@ class CommandUpdateAddressAlias(BrokerCommand):
             update_grn = True
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for dbaddr_alias in dbdns_records:
             cm.consider(dbaddr_alias.target)
 

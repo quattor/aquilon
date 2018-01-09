@@ -29,7 +29,7 @@ class CommandUpdateRouterAddress(BrokerCommand):
 
     def render(self, session, plenaries, fqdn, ip, building, clear_location,
                network_environment, dns_environment, comments,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         if fqdn:
@@ -43,7 +43,7 @@ class CommandUpdateRouterAddress(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnetwork)
         cm.validate()
 

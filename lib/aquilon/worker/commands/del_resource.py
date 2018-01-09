@@ -47,7 +47,7 @@ class CommandDelResource(BrokerCommand):
                                      metacluster, resourcegroup)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
         cm.consider(holder)
         cm.validate()
 

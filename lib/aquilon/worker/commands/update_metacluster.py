@@ -35,7 +35,7 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
                                                compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbmetacluster)
         cm.validate()
 

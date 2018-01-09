@@ -56,7 +56,7 @@ class CommandAddServiceAddress(BrokerCommand):
                                      metacluster, resourcegroup, compel=False)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
         cm.consider(holder)
         cm.validate()
 

@@ -26,7 +26,7 @@ class CommandUpdateOS(BrokerCommand):
     required_parameters = ["osname", "osversion", "archetype"]
 
     def render(self, session, osname, osversion, archetype, lifecycle, comments,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,
@@ -37,7 +37,7 @@ class CommandUpdateOS(BrokerCommand):
 
         if lifecycle:
             # Validate ChangeManagement
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbos)
             cm.validate()
 

@@ -32,7 +32,7 @@ class CommandUpdateSrvRecord(BrokerCommand):
     def render(self, session, logger, service, protocol, dns_domain, target,
                priority, weight, port, ttl, clear_ttl, comments,
                dns_environment, grn, eon_id, clear_grn, user,
-               justification, reason, **_):
+               justification, reason, **arguments):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
@@ -62,7 +62,7 @@ class CommandUpdateSrvRecord(BrokerCommand):
             update_grn = True
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for dbsrv_rec in dbdns_records:
             cm.consider(dbsrv_rec.fqdn)
 

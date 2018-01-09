@@ -29,11 +29,11 @@ class CommandBindClientMetacluster(BrokerCommand):
     required_parameters = ["metacluster", "service"]
 
     def render(self, session, logger, plenaries, metacluster, service, instance,
-               user, justification, reason, force=False, **_):
+               user, justification, reason, force=False, **arguments):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbmeta)
         cm.validate()
 

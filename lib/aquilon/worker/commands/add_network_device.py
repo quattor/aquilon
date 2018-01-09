@@ -122,7 +122,7 @@ class CommandAddNetworkDevice(BrokerCommand):
         session.flush()
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbhost)
         cm.validate()
 

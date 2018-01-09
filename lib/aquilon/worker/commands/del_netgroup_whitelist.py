@@ -27,12 +27,12 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
     required_parameters = ["netgroup"]
 
     def render(self, session, netgroup, user, justification,
-               reason, logger, **_):
+               reason, logger, **arguments):
         dbng = NetGroupWhiteList.get_unique(session, name=netgroup,
                                             compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbng)
         cm.validate()
 

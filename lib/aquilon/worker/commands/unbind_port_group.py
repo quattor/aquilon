@@ -30,11 +30,11 @@ class CommandUnbindPortGroup(BrokerCommand):
     required_parameters = ["virtual_switch"]
 
     def render(self, session, plenaries, virtual_switch, networkip,
-               network_environment, tag, user, justification, reason, logger, **_):
+               network_environment, tag, user, justification, reason, logger, **arguments):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for cluster in dbvswitch.clusters:
             cm.consider(cluster)
         cm.validate()

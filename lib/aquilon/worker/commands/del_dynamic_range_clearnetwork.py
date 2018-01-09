@@ -30,14 +30,14 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
     required_parameters = ["clearnetwork"]
 
     def render(self, session, logger, clearnetwork, user, exporter,
-               justification, reason, **_):
+               justification, reason, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         dbnetwork = Network.get_unique(session, clearnetwork,
                                        network_environment=dbnet_env,
                                        compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnetwork)
         cm.validate()
 

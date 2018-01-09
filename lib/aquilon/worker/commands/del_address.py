@@ -31,7 +31,7 @@ from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 class CommandDelAddress(BrokerCommand):
     def render(self, session, logger, fqdn, ip, dns_environment,
-               network_environment, exporter, user, justification, reason, **_):
+               network_environment, exporter, user, justification, reason, **arguments):
         _, dbdns_env = get_net_dns_env(session, network_environment,
                                        dns_environment)
 
@@ -84,7 +84,7 @@ class CommandDelAddress(BrokerCommand):
                                 .format(dbaddress))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbaddress.fqdn)
         cm.validate()
 

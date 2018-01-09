@@ -33,7 +33,7 @@ class CommandUpdateCity(BrokerCommand):
     required_parameters = ["city"]
 
     def render(self, session, logger, plenaries, city, timezone, fullname, campus,
-               default_dns_domain, comments, user, justification, reason, **_):
+               default_dns_domain, comments, user, justification, reason, **arguments):
         dbcity = City.get_unique(session, city, compel=True)
 
         plenaries.add(dbcity)
@@ -67,7 +67,7 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcity, dbcity.hub))
 
             # Validate ChangeManagement
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(q)
             plenaries.add(q)
 

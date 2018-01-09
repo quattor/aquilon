@@ -43,6 +43,7 @@ class TestCMLogger(TestBrokerCommand):
         cmlogfile = self.config.get("broker", "cmlogfile")
         last_entry = json.loads(self.tail_file(cmlogfile))
         self.assertEqual(last_entry["reason"], "Test logger")
+        self.assertTrue(last_entry["request_id"])
         self.assertEqual(last_entry["Status"], "Permitted")
         self.assertEqual(last_entry["Reason"], "No justification found, please "
                                                "supply a TCM or SN ticket. Continuing "
@@ -54,5 +55,5 @@ class TestCMLogger(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestStatus)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestCMLogger)
     unittest.TextTestRunner(verbosity=2).run(suite)

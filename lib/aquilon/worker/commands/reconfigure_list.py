@@ -121,7 +121,7 @@ class CommandReconfigureList(BrokerCommand):
         os_cache = defaultdict(dict)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
 
         for dbhost in dbhosts:
 

@@ -30,7 +30,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
     required_parameters = ["path", "feature", "type"]
 
     def render(self, session, logger, plenaries, feature, type, path, user,
-               justification, reason, **_):
+               justification, reason, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         path = ParamDefinition.normalize_path(path, strict=False)
@@ -45,7 +45,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                                 .format(path, ", ".join(sorted(holders))))
 
         if db_paramdef.default is not None:
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbfeature)
             cm.validate()
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)

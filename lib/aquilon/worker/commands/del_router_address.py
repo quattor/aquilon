@@ -30,7 +30,7 @@ class CommandDelRouterAddress(BrokerCommand):
     required_parameters = []
 
     def render(self, session, plenaries, dbuser, ip, fqdn,
-               network_environment, exporter, user, justification, reason, logger, **_):
+               network_environment, exporter, user, justification, reason, logger, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
@@ -45,7 +45,7 @@ class CommandDelRouterAddress(BrokerCommand):
         dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbnetwork)
         cm.validate()
 

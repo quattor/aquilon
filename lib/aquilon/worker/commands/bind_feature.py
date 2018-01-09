@@ -34,12 +34,12 @@ class CommandBindFeature(BrokerCommand):
 
     def render(self, session, logger, plenaries, feature, archetype, personality,
                personality_stage, model, vendor, interface, justification,
-               reason, user, **_):
+               reason, user, **arguments):
 
         params = {}
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
 
         # Step 1: define the target - either a personality or an archetype
         if personality:

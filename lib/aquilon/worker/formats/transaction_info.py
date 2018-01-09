@@ -27,6 +27,7 @@ class TransactionFormatter(ObjectFormatter):
         skeleton.start_time = calendar.timegm(xtn.start_time.utctimetuple())
         skeleton.username = xtn.username
         skeleton.command = xtn.command
+        skeleton.request_id = str(xtn.id)
         skeleton.return_code = xtn.return_code
         if xtn.end:
             skeleton.end_time = calendar.timegm(

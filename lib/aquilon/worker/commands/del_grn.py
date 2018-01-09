@@ -26,11 +26,11 @@ from aquilon.worker.dbwrappers.change_management import ChangeManagement
 class CommandDelGrn(BrokerCommand):
 
     def render(self, session, logger, grn, eon_id, user,
-               justification, reason, **_):
+               justification, reason, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config, usable_only=False)
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbgrn)
         cm.validate()
 

@@ -30,7 +30,7 @@ class CommandUpdateChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, logger, chassis, model, rack, ip, vendor, serial,
-               comments, user, justification, reason, **_):
+               comments, user, justification, reason, **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
@@ -47,7 +47,7 @@ class CommandUpdateChassis(BrokerCommand):
 
             # Validate ChangeManagement
             # Only if lacation being updated
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbchassis)
             cm.validate()
 

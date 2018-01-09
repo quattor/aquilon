@@ -34,7 +34,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbmachine)
         cm.validate()
 

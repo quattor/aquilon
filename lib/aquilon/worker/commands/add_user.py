@@ -28,7 +28,7 @@ class CommandAddUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, autouid, gid, full_name,
-               home_directory, user, justification, reason, logger, **_):
+               home_directory, user, justification, reason, logger, **arguments):
         User.get_unique(session, username, preclude=True)
 
         if autouid:
@@ -48,7 +48,7 @@ class CommandAddUser(BrokerCommand):
                       home_dir=home_directory)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbuser)
         cm.validate()
 

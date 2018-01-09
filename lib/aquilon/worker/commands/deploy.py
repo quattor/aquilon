@@ -41,7 +41,7 @@ class CommandDeploy(BrokerCommand):
 
     def render(self, session, logger, source, target, sync, dryrun,
                merge_strategy, strategy_options, justification, reason, user,
-               requestid, **_):
+               requestid, **arguments):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -74,7 +74,8 @@ class CommandDeploy(BrokerCommand):
 
         if not dryrun:
             # Validate ChangeManagement
-            cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+            arguments['requestid'] = requestid
+            cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbtarget)
             cm.validate()
 

@@ -27,14 +27,14 @@ class CommandAddDnsEnvironment(BrokerCommand):
     required_parameters = ["dns_environment"]
 
     def render(self, session, dns_environment, comments,
-               user, justification, reason, logger, **_):
+               user, justification, reason, logger, **arguments):
         validate_nlist_key("DNS environment", dns_environment)
         DnsEnvironment.get_unique(session, dns_environment, preclude=True)
 
         db_dnsenv = DnsEnvironment(name=dns_environment, comments=comments)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(db_dnsenv)
         cm.validate()
 

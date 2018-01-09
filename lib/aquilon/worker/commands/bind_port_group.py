@@ -29,7 +29,7 @@ class CommandBindPortGroup(BrokerCommand):
     required_parameters = ["virtual_switch", "networkip"]
 
     def render(self, session, plenaries, virtual_switch, networkip, tag, type,
-               network_environment, user, justification, reason, logger, **_):
+               network_environment, user, justification, reason, logger, **arguments):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         dbnetwork = get_net_id_from_ip(session, networkip, network_environment=network_environment)
@@ -61,7 +61,7 @@ class CommandBindPortGroup(BrokerCommand):
             dbnetwork.port_group = PortGroup(network_tag=tag, usage=type)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for cluster in dbvswitch.clusters:
             cm.consider(cluster)
         cm.validate()

@@ -29,13 +29,13 @@ class CommandRollback(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, logger, domain, ref, lastsync, user,
-               justification, reason, **_):
+               justification, reason, **arguments):
         dbdomain = Domain.get_unique(session, domain, compel=True)
         if not dbdomain.tracked_branch:
             # Could check dbdomain.trackers and rollback all of them...
             raise ArgumentError("Rollback requires a tracking domain.")
 
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(dbdomain)
         cm.validate()
 

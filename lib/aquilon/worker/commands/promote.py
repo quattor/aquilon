@@ -30,7 +30,7 @@ class CommandPromote(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, plenaries, personality, archetype, user,
-               justification, reason, logger, **_):
+               justification, reason, logger, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if "next" not in dbpersonality.stages:
@@ -55,7 +55,7 @@ class CommandPromote(BrokerCommand):
         next = dbpersonality.stages["next"]
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         cm.consider(current)
         cm.validate()
 

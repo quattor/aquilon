@@ -70,7 +70,7 @@ class CommandPXESwitchList(BrokerCommand):
         hosts_per_instance = defaultdict(_listtype)
         failed = []
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command)
+        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
         for dbhost in dbhosts:
             if arguments.get("install", None) and (dbhost.status.name == "ready" or
                                                    dbhost.status.name == "almostready"):
