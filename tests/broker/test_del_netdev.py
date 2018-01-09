@@ -177,6 +177,18 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
+    def test_164_del_ut3c5netdev1(self):
+        self.dsdb_expect_delete(ip = self.net["ut_net_mgmt"].usable[7])
+        command = "del network_device --network_device ut3c5netdev1.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
+    def test_164_del_ut3c5netdev2(self):
+        self.dsdb_expect_delete(ip = self.net["ut_net_mgmt"].usable[8])
+        command = "del network_device --network_device ut3c5netdev2.aqd-unittest.ms.com"
+        self.noouttest(command.split(" "))
+        self.dsdb_verify()
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

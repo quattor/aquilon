@@ -90,16 +90,6 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
                          command)
 
-    def test_200_primary_reuse(self):
-        command = ["add", "chassis", "--chassis",
-                   "ut3gd1r01.aqd-unittest.ms.com",
-                   "--rack", "ut3", "--model", "utchassis"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "DNS Record ut3gd1r01.aqd-unittest.ms.com is already "
-                         "used as the primary name of switch ut3gd1r01.",
-                         command)
-
     def test_300_verifychassisall(self):
         command = ["show", "chassis", "--all"]
         out = self.commandtest(command)

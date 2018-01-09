@@ -31,7 +31,7 @@ from networktest import DummyIP
 class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_100_add_ut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
-                        "--chassis", "ut3c5", "--slot", 10,
+                        "--chassis", "ut3c5", "--slot", '10',
                         "--model", "hs21-8853",
                         "--cpucount", "2", "--cpuvendor", "intel",
                         "--cpuname", "e5-2660",

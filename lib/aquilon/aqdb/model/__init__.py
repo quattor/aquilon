@@ -91,13 +91,17 @@ from aquilon.aqdb.model.host import Host, HostGrnMap
 
 # HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
-from aquilon.aqdb.model.chassis_slot import ChassisSlot
+
 from aquilon.aqdb.model.vlan import PortGroup, VlanInfo
 from aquilon.aqdb.model.interface import (Interface, PublicInterface,
                                           ManagementInterface, OnboardInterface,
                                           VlanInterface, BondingInterface,
                                           BridgeInterface, LoopbackInterface,
                                           VirtualInterface, PhysicalInterface)
+
+from aquilon.aqdb.model.chassis_slot import ChassisSlot, MachineChassisSlot,\
+    NetworkDeviceChassisSlot
+
 from aquilon.aqdb.model.address_assignment import (AddressAssignment,
                                                    SharedAddressAssignment)
 

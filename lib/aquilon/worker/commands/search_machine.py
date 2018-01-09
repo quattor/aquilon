@@ -23,7 +23,7 @@ from aquilon.aqdb.types import CpuType
 from aquilon.aqdb.model import (Machine, Model, Cluster, ClusterResource,
                                 HostResource, Resource, Share, Filesystem, Disk,
                                 VirtualDisk, MetaCluster, DnsRecord, Chassis,
-                                ChassisSlot)
+                                MachineChassisSlot)
 from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import (
@@ -134,7 +134,7 @@ class CommandSearchMachine(BrokerCommand):
             q = q.reset_joinpoint()
 
         if chassis or slot is not None:
-            q = q.join(ChassisSlot, aliased=True)
+            q = q.join(MachineChassisSlot, aliased=True)
             if chassis:
                 dbchassis = Chassis.get_unique(session, chassis, compel=True)
                 q = q.filter_by(chassis=dbchassis)

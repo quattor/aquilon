@@ -18,7 +18,8 @@
 
 from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
-from aquilon.aqdb.model import NetworkDevice, DnsRecord, Fqdn, DnsDomain
+from aquilon.aqdb.model import (NetworkDevice, DnsRecord, Fqdn, DnsDomain,
+                                NetworkDeviceChassisSlot, Chassis)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
 from aquilon.worker.formats.list import StringAttributeList
@@ -29,7 +30,7 @@ class CommandSearchNetworkDevice(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network_device, type, vlan, fullinfo, style,
-               **arguments):
+               chassis, slot, **arguments):
         q = search_hardware_entity_query(session, hardware_type=NetworkDevice,
                                          **arguments)
         if type:
@@ -50,6 +51,16 @@ class CommandSearchNetworkDevice(BrokerCommand):
                       contains_eager('primary_name.fqdn'),
                       contains_eager('primary_name.fqdn.dns_domain'))
         q = q.reset_joinpoint()
+
+        if chassis or slot is not None:
+            q = q.join(NetworkDeviceChassisSlot, aliased=True)
+            if chassis:
+                dbchassis = Chassis.get_unique(session, chassis, compel=True)
+                q = q.filter_by(chassis=dbchassis)
+            if slot is not None:
+                q = q.filter_by(slot_number=slot)
+            q = q.reset_joinpoint()
+
         q = q.order_by(Fqdn.name, DnsDomain.name, NetworkDevice.label)
 
         if fullinfo or style != 'raw':
@@ -61,6 +72,8 @@ class CommandSearchNetworkDevice(BrokerCommand):
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'),
                           joinedload('interfaces.assignments.network'),
+                          joinedload('chassis_slot'),
+                          subqueryload('chassis_slot.chassis'),
                           subqueryload('observed_macs'),
                           undefer('observed_macs.creation_date'),
                           subqueryload('port_groups'),

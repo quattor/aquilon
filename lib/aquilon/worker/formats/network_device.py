@@ -34,6 +34,10 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
                    indirect_attrs=True):
         details = [super(NetworkDeviceFormatter, self).format_raw(device, indent)]
 
+        for slot in device.chassis_slot:
+            details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))
+            details.append(indent + "  Slot: %d" % slot.slot_number)
+
         ports = defaultdict(list)
         for om in device.observed_macs:
             ports[om.port].append(om)

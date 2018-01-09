@@ -19,15 +19,17 @@
 from sqlalchemy import Column, Integer, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Base, Machine, Chassis
+from aquilon.aqdb.model import Base, Machine, Chassis, NetworkDevice, HardwareEntity
+from aquilon.aqdb.column_types import AqStr
 
 _TN = 'chassis_slot'
 
 
 class ChassisSlot(Base):
-    """ ChassisSlot allows a Machine to be assigned to each unique position
-        within a Chassis. """
-
+    """
+    ChassisSlot allows a Machine or Network Device to be
+    assigned to each unique position within a Chassis.
+    """
     __tablename__ = _TN
 
     chassis_id = Column(ForeignKey(Chassis.hardware_entity_id,
@@ -36,17 +38,41 @@ class ChassisSlot(Base):
 
     slot_number = Column(Integer, nullable=False, autoincrement=False)
 
-    # TODO: Code constraint that these are Blades...
-    machine_id = Column(ForeignKey(Machine.hardware_entity_id), nullable=True)
-
     chassis = relation(Chassis, innerjoin=True,
                        backref=backref('slots', cascade='delete, delete-orphan',
                                        passive_deletes=True,
                                        order_by=[slot_number]))
+
+    slot_type = Column(AqStr(32), nullable=False)
+
+    __mapper_args__ = {'polymorphic_on': slot_type}
+
+    __table_args__ = (PrimaryKeyConstraint(chassis_id, slot_number, slot_type),)
+
+
+class MachineChassisSlot(ChassisSlot):
+    """ MachineChassisSlot allows a Machine to be assigned to each unique position
+        within a Chassis. """
+
+    __mapper_args__ = {'polymorphic_identity': 'machine'}
+
+    machine_id = Column(ForeignKey(Machine.hardware_entity_id), nullable=True)
 
     # No delete-orphan here, it's fine to leave the slot in place even if the
     # machine is removed
     machine = relation(Machine,
                        backref=backref('chassis_slot', cascade='all'))
 
-    __table_args__ = (PrimaryKeyConstraint(chassis_id, slot_number),)
+
+class NetworkDeviceChassisSlot(ChassisSlot):
+    """ NetworkDeviceChassisSlot allows a Network Device to be assigned to each unique
+    position within a Chassis. """
+
+    __mapper_args__ = {'polymorphic_identity': 'network_device'}
+
+    network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id), nullable=True)
+
+    # No delete-orphan here, it's fine to leave the slot in place even if the
+    # network_device is removed
+    network_device = relation(NetworkDevice,
+                              backref=backref('chassis_slot', cascade='all'))

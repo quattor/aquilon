@@ -16,8 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq add network_device`."""
 
+from sqlalchemy.orm import subqueryload
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import NetworkDevice, Model, Archetype
+from aquilon.aqdb.model import NetworkDevice, Model, Archetype, Chassis, NetworkDeviceChassisSlot
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -38,7 +40,7 @@ class CommandAddNetworkDevice(BrokerCommand):
                            "ip", "interface", "iftype"]
 
     def render(self, session, logger, plenaries, network_device, label, model, type, ip,
-               interface, iftype, mac, vendor, serial, comments, exporter,
+               interface, iftype, mac, vendor, serial, comments, exporter, chassis, slot,
                archetype, domain, sandbox, user, justification, reason, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
@@ -47,11 +49,18 @@ class CommandAddNetworkDevice(BrokerCommand):
             raise ArgumentError("This command can only be used to "
                                 "add network devices.")
 
-        if self.config.getboolean('network_device', 'require_rack') \
-                and not arguments.get('rack'):
-            raise ArgumentError("--rack must be specified when adding network devices.")
+        dblocation = get_location(session, query_options=[subqueryload('parents')], **arguments)
 
-        dblocation = get_location(session, compel=True, **arguments)
+        if chassis:
+            dbchassis = Chassis.get_unique(session, chassis, compel=True)
+            if slot is None:
+                raise ArgumentError("The --chassis option requires a --slot.")
+            if dblocation and dblocation != dbchassis.location:
+                raise ArgumentError("{0} conflicts with chassis location "
+                                    "{1}.".format(dblocation, dbchassis.location))
+            dblocation = dbchassis.location
+        elif slot is not None:
+            raise ArgumentError("The --slot option requires a --chassis.")
 
         dbdns_rec, _ = grab_address(session, network_device, ip,
                                     allow_restricted_domain=True,
@@ -72,6 +81,19 @@ class CommandAddNetworkDevice(BrokerCommand):
                                  location=dblocation, model=dbmodel,
                                  serial_no=serial, comments=comments)
         session.add(dbnetdev)
+
+        if chassis:
+            dbslot = session.query(NetworkDeviceChassisSlot).filter_by(chassis=dbchassis,
+                                                                       slot_number=slot).first()
+            if dbslot and dbslot.network_device:
+                raise ArgumentError("{0} slot {1} already has network device "
+                                    "{2}.".format(dbchassis, slot,
+                                                  dbslot.network_device.label))
+            if not dbslot:
+                dbslot = NetworkDeviceChassisSlot(chassis=dbchassis, slot_number=slot)
+            dbslot.network_device = dbnetdev
+            session.add(dbslot)
+
         dbnetdev.primary_name = dbdns_rec
 
         check_netdev_iftype(iftype)

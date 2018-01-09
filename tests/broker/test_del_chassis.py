@@ -27,9 +27,18 @@ from brokertest import TestBrokerCommand
 
 
 class TestDelChassis(TestBrokerCommand):
-    def test_100_del_ut3c5(self):
+    def test_100_del_ut3c5_used(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[6])
         command = "del chassis --chassis ut3c5.aqd-unittest.ms.com"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Chassis ut3c5.aqd-unittest.ms.com is "
+                              "still in use by 3 machines or network devices. "
+                              "Use --clear_slots if you really want to delete it.",
+                         command.split(" "))
+
+    def test_101_del_ut3c5(self):
+        self.dsdb_expect_delete(self.net["unknown0"].usable[6])
+        command = "del chassis --chassis ut3c5.aqd-unittest.ms.com --clear_slots"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 

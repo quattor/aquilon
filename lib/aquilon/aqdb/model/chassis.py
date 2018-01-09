@@ -20,8 +20,9 @@
     blade center e's in VA but they are like rackmounts as well"""
 
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.inspection import inspect
 
-from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import HardwareEntity, Machine, NetworkDevice
 
 _TN = 'chassis'
 
@@ -35,3 +36,16 @@ class Chassis(HardwareEntity):
     hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
                                            ondelete='CASCADE'),
                                 primary_key=True)
+
+    @property
+    def machine_slots(self):
+        return [slot for slot in self.slots if slot.slot_type == inspect(Machine).polymorphic_identity]
+
+    @property
+    def network_device_slots(self):
+        return [slot for slot in self.slots if slot.slot_type == inspect(NetworkDevice).polymorphic_identity]
+
+    @property
+    def not_empty_slots(self):
+        return [slot for slot in self.machine_slots if slot.machine_id != None] + \
+               [slot for slot in self.network_device_slots if slot.network_device_id != None]

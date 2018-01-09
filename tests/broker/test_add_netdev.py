@@ -343,6 +343,39 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = "show network_device --network_device badmodel.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def test_210_add_netdev_to_chassis(self):
+        ip = self.net["ut_net_mgmt"].usable[7]
+        self.dsdb_expect_add("ut3c5netdev1.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
+        command = ["add", "network_device", "--network_device", "ut3c5netdev1.aqd-unittest.ms.com",
+                   "--type", "tor", "--ip", ip, "--mac", ip.mac,
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--chassis", "ut3c5", "--slot", "1", "--model", "temp_switch"]
+        self.successtest(command)
+        self.dsdb_verify()
+
+    def test_215_add_netdev_to_chassis_fail(self):
+        ip = self.net["ut_net_mgmt"].usable[8]
+        command = ["add", "network_device", "--network_device", "ut3c5netdev2.aqd-unittest.ms.com",
+                   "--type", "tor", "--ip", ip, "--mac", ip.mac,
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--chassis", "ut3c5", "--slot", "1", "--model", "temp_switch"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Chassis ut3c5.aqd-unittest.ms.com slot 1 already "
+                              "has network device ut3c5netdev", command)
+
+    def test_220_add_netdev_to_chassis_2(self):
+        ip = self.net["ut_net_mgmt"].usable[8]
+        self.dsdb_expect_add("ut3c5netdev2.aqd-unittest.ms.com", ip, "xge49",
+                             ip.mac)
+        command = ["add", "network_device", "--network_device", "ut3c5netdev2.aqd-unittest.ms.com",
+                   "--type", "tor", "--ip", ip, "--mac", ip.mac,
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--chassis", "ut3c5", "--slot", "5", "--model", "temp_switch"]
+        self.successtest(command)
+        self.dsdb_verify()
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

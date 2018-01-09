@@ -20,7 +20,7 @@ from sqlalchemy.orm import joinedload, subqueryload, undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
-                                            preload_machine_data)
+                                            preload_hw_data)
 
 
 class CommandShowHostList(BrokerCommand):
@@ -46,6 +46,6 @@ class CommandShowHostList(BrokerCommand):
                    joinedload('hardware_entity.location'),
                    subqueryload('hardware_entity.location.parents')]
         dbhosts = hostlist_to_hosts(session, list, options)
-        preload_machine_data(session, dbhosts)
+        preload_hw_data(session, dbhosts)
 
         return dbhosts

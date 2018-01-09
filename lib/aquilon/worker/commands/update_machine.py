@@ -19,7 +19,7 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
+from aquilon.aqdb.model import (Chassis, MachineChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
 from aquilon.aqdb.types import CpuType
 from aquilon.worker.broker import BrokerCommand
@@ -374,6 +374,11 @@ class CommandUpdateMachine(BrokerCommand):
             # required.
             if dbslot.chassis == dbchassis and dbslot.slot_number == slot:
                 return
+            if dbslot.chassis != dbchassis and multislot:
+                raise ArgumentError("Machine cannot be in multiple chassis. "
+                                    "Use --clearchassis to remove "
+                                    "current chassis slot information.")
+
         if len(dbmachine.chassis_slot) > 1 and not multislot:
             raise ArgumentError("Use --multislot to support a machine in more "
                                 "than one slot, or --clearchassis to remove "
@@ -384,7 +389,7 @@ class CommandUpdateMachine(BrokerCommand):
             logger.info("Clearing {0:l} out of {1:l} slot(s) "
                         "{2}".format(dbmachine, dbchassis, slots))
             del dbmachine.chassis_slot[:]
-        q = session.query(ChassisSlot)
+        q = session.query(MachineChassisSlot)
         q = q.filter_by(chassis=dbchassis, slot_number=slot)
         dbslot = q.first()
         if dbslot:
@@ -393,7 +398,7 @@ class CommandUpdateMachine(BrokerCommand):
                                     "{2}.".format(dbchassis, slot,
                                                   dbslot.machine.label))
         else:
-            dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
+            dbslot = MachineChassisSlot(chassis=dbchassis, slot_number=slot)
         dbmachine.chassis_slot.append(dbslot)
 
         return

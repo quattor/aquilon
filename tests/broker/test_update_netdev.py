@@ -119,6 +119,109 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
                          command)
 
+    def test_205_update_netdev_in_chassis_slot(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com",
+                   "--slot", "2"]
+        self.successtest(command)
+        command = ["show", "chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Slot #1 (type: network_device): Empty",
+                         command)
+        self.matchoutput(out,
+                         "Slot #2 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+
+    def test_210_update_netdev_in_chassis_slot(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com",
+                   "--slot", "3", "--multislot"]
+        self.successtest(command)
+        command = ["show", "chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Slot #1 (type: network_device): Empty",
+                         command)
+        self.matchoutput(out,
+                         "Slot #2 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+        self.matchoutput(out,
+                         "Slot #3 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+
+    def test_215_update_netdev_in_chassis_slot(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com", "--chassis",
+                   "ut3c1", "--slot", "1", "--multislot"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Network Device cannot be in multiple chassis. "
+                         "Use --clearchassis to remove current chassis slot information.",
+                         command)
+        command = ["show", "chassis", "--chassis", "ut3c1"]
+        out = self.commandtest(command)
+        self.matchclean(out,
+                         "Slot #1 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+
+    def test_220_update_netdev_in_chassis_slot(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com", "--chassis",
+                   "ut3c1", "--slot", "1", "--clearchassis"]
+        self.successtest(command)
+        command = ["show", "chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        for i in range(2):
+            self.matchoutput(out,
+                             "Slot #{} (type: network_device): Empty".format(i+1),
+                             command)
+        command = ["show", "chassis", "--chassis", "ut3c1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                        "Slot #1 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                        command)
+
+    def test_225_update_netdev_in_chassis_chassis(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com", "--chassis",
+                   "ut3c5", "--slot", "1"]
+        self.successtest(command)
+        command = ["show", "chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Slot #1 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+
+    def test_230_update_netdev_in_chassis_chassis(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com", "--slot", "2", "--multislot"]
+        self.successtest(command)
+        command = ["show", "chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Slot #1 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+        self.matchoutput(out,
+                         "Slot #2 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
+                         command)
+        self.matchoutput(out,
+                         "Slot #3 (type: network_device): Empty",
+                         command)
+        command = ["show", "chassis", "--chassis", "ut3c1"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Slot #1 (type: network_device): Empty",
+                         command)
+
+    def test_235_update_netdev_in_chassis_chassis(self):
+        command = ["update", "network_device", "--network_device",
+                   "ut3c5netdev1.aqd-unittest.ms.com", "--chassis", "ut3c5", "--slot", "5", "--multislot"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Chassis ut3c5.aqd-unittest.ms.com "
+                              "slot 5 already has network device ut3c5netdev2", command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)
