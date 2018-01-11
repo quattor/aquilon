@@ -41,18 +41,23 @@ class TestUpdateFeature(TestBrokerCommand):
     def test_105_verify_show(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
-        self.output_equals(out, """
-            Host Feature: pre_host
-              Post Personality: False
-              Owned by GRN: grn:/ms/ei/aquilon/unittest
-              Visibility: restricted
-              Activation: dispatch
-              Deactivation: rebuild
-              Template: features/pre_host
-              Bound to: Personality aquilon/inventory
-              Bound to: Archetype aquilon
-              Comments: New feature comments
-            """, command)
+        self.searchoutput(out, r"Host Feature: pre_host\s*"
+                               r"Post Personality: False\s*"
+                               r"Owned by GRN: grn:/ms/ei/aquilon/unittest\s*"
+                               r"Visibility: restricted\s*"
+                               r"Activation: dispatch\s*"
+                               r"Deactivation: rebuild\s*"
+                               r"Template: features/pre_host\s*",
+                          command)
+        self.matchoutput(out,
+                         "Bound to: Personality aquilon/inventory",
+                         command)
+        self.matchoutput(out,
+                         "Bound to: Archetype aquilon",
+                         command)
+        self.matchoutput(out,
+                         "Comments: New feature comments",
+                         command)
 
     def test_105_verify_show_proto(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]

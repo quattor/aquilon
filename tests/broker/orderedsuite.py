@@ -33,6 +33,7 @@ from subprocess import Popen
 from aquilon.config import Config
 
 from .test_start import TestBrokerStart
+from .test_restart import TestBrokerReStart
 from .test_ping import TestPing
 from .test_status import TestStatus
 from .test_cm_logger import TestCMLogger
@@ -333,6 +334,8 @@ class BrokerTestSuite(unittest.TestSuite):
     """
     test_start = [TestBrokerStart,
                   TestPing, TestStatus]
+    test_restart = [TestBrokerReStart,
+                    TestPing, TestStatus]
     test_list = [TestAddRole, TestPermission,
                  TestAddDnsDomain, TestAddDnsEnvironment,
                  TestAddUser,
@@ -514,8 +517,11 @@ class BrokerTestSuite(unittest.TestSuite):
             except Exception as e:
                  raise AttributeError("Wrong --start parameter value. Pass --start "
                        "TestCase.testmethod, to re-start the tests from specific tests.")
-        for test in self.test_start:
-            self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
+            for test in self.test_restart:
+                self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
+        else:
+            for test in self.test_start:
+                self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
         for index, test in enumerate(self.test_list):
             if start and start_index > index:
                 continue
