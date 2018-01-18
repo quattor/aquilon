@@ -204,6 +204,7 @@ from .test_search_next import TestSearchNext
 from .test_search_network import TestSearchNetwork
 from .test_search_model import TestSearchModel
 from .test_search_service import TestSearchService
+from .test_search_resource import TestSearchResource
 from .test_refresh_network import TestRefreshNetwork
 from .test_split_merge_network import TestSplitMergeNetwork
 from .test_update_alias import TestUpdateAlias
@@ -434,6 +435,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                  TestSearchModel,
                  TestSearchService,
+                 TestSearchResource,
                  TestUpdateInterface, TestUpdateMachine, TestVMMigration,
                  TestUpdateModel,
                  TestUpdateDisk,

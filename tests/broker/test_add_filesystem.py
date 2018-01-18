@@ -34,6 +34,8 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out,
                          "Host server1.aqd-unittest.ms.com has no resources.",
                          command)
+        command = ["search_filesystem", "--hostname=server1.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt1", "--blockdevice=/dev/vx/dsk/dg.0/gnr.0",

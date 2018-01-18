@@ -33,8 +33,10 @@ class TestAddResourceGroup(TestBrokerCommand):
         command = ["show_filesystem", "--cluster=utvcs1"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "High Availability Cluster utvcs1 has no resources.",
-                         command)
+                     "High Availability Cluster utvcs1 has no resources.",
+                     command)
+        command = ["search_filesystem", "--cluster=utvcs1"]
+        self.noouttest(command)
 
     def test_100_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
