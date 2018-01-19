@@ -136,6 +136,17 @@ class Config(NewStyleClassSafeConfigParser):
         # If no override was specified, we rely on $PATH lookup
         return prog
 
+    def lookup_tool_timeout(self, prog):
+        key = prog.replace('-', '_').split('/')[-1]
+
+        if self.has_value("tool_timeout", key):
+            timeout_value = int(self.get("tool_timeout", key))
+        elif self.getboolean("tool_timeout", "default_enabled"):
+            timeout_value = int(self.get("tool_timeout", "default_value"))
+        else:
+            timeout_value = 0
+        return timeout_value
+
     def has_value(self, section, key):
         if self.has_option(section, key) and self.get(section, key):
             return True
