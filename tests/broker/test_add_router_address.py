@@ -36,6 +36,16 @@ class TestAddRouterAddress(TestBrokerCommand):
                    "--comments", "Some router address comments"]
         self.noouttest(command)
 
+    def test_101_add_router_primary_address(self):
+        primary_name = "ut3gd1r04.aqd-unittest.ms.com"
+        command = ["add", "router", "address",
+                   "--fqdn", primary_name]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "{0} is already used as the primary name of switch "
+                         "ut3gd1r04.".format(primary_name),
+                         command)
+
     def test_105_show_router(self):
         net = self.net["ut10_eth1"]
         command = ["show", "router", "address", "--ip", net.gateway]
@@ -124,8 +134,8 @@ class TestAddRouterAddress(TestBrokerCommand):
                    "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
                    "--building", "ut"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "IP address %s is already present as a router "
-                         "for network %s [%s]." % (net.gateway, net.name, net),
+        self.matchoutput(out, "IP address {} is already in use by DNS "
+                              "record ut3gd1r04-v109-hsrp.aqd-unittest.ms.com.".format(net.gateway),
                          command)
 
     def test_200_add_normal_host_as_router(self):
@@ -147,9 +157,8 @@ class TestAddRouterAddress(TestBrokerCommand):
                    "--fqdn", "reserved-address.aqd-unittest.ms.com",
                    "--building", "ut"]
         out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "IP address %s is not a valid router address on "
-                         "network %s [%s]." % (ip, net.name, net),
+        self.matchoutput(out, "The IP address {} is reserved for dynamic DHCP for "
+                              "a switch on subnet {}".format(ip, net.network_address),
                          command)
 
     def test_200_show_bad_ip(self):

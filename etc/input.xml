@@ -1586,13 +1586,13 @@
 
     <command name="add_router_address">
 	Add a router address.
-	<optgroup mandatory="True" fields="all">
+	<optgroup mandatory="True">
 	    <option name="fqdn" type="string">Name of the router</option>
+	    <option name="ip" type="ip">IP address of the router</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="building" type="string">Building where the router is located</option>
-	    <option name="ip" type="ip">IP address of the router</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>

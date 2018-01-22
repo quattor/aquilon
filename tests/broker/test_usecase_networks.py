@@ -319,13 +319,21 @@ class TestUsecaseNetworks(TestBrokerCommand):
     def test_205_add_default_route(self):
         if 'skip_add' in flags:
             return True
-        for network in self.net:
-            if not network.name.startswith('netuc_'):
-                continue
-            if network.nettype == 'management':
-                continue
+
+        net_list = [net for net in self.net if (net.name.startswith('netuc_') and net.nettype != 'management')]
+
+        for network in net_list[:5]:
             fqdn = '-'.join(network.name.split('_')[1:] + ['gateway']) + '.' + config['domain']
             command = ["add_router_address", "--fqdn", fqdn]
+            self.noouttest(command)
+
+        for network in net_list[5:10]:
+            command = ["add_router_address", "--ip", network[1]]
+            self.noouttest(command)
+
+        for network in net_list[10:]:
+            fqdn = '-'.join(network.name.split('_')[1:] + ['gateway']) + '.' + config['domain']
+            command = ["add_router_address", "--fqdn", fqdn, "--ip", network[1]]
             self.noouttest(command)
 
     ########## TESTING STAGE ##########
@@ -373,6 +381,58 @@ class TestUsecaseNetworks(TestBrokerCommand):
                                nlist(("interface", sec_router_if),
                                      ("ip", sec_router_ip),
                                      ("router", sec_router_fqdn)))))
+
+    def test_305_test_router_address_using_netdev_ip(self):
+        net = self.net["tor_net_12"]
+        ip = net[1]
+        command = ['add_interface', '--iftype', 'virtual', '--interface', 'v700',
+                   '--network_device', 'ut3gd1r01.aqd-unittest.ms.com']
+        self.noouttest(command)
+        self.dsdb_expect_add("ut3gd1r01-v700.aqd-unittest.ms.com", ip,
+                             "v700", primary="ut3gd1r01.aqd-unittest.ms.com")
+        command = ['add_interface_address', '--interface', 'v700', '--ip',
+                   ip, '--network_device', 'ut3gd1r01.aqd-unittest.ms.com']
+        out, err = self.successtest(command)
+        self.matchoutput(err,
+                         "Bunker violation: rack ut3 is inside "
+                         "bunker zebrabucket.ut, but network "
+                         "tor_net_12 [{}] is not bunkerized.".format(net),
+                         command)
+        self.dsdb_verify()
+        command = ['add_router_address', '--ip', ip]
+        self.noouttest(command)
+
+    def test_306_test_router_address_using_netdev_show(self):
+        ip = self.net["tor_net_12"][1]
+        command = ['show_router_address', '--fqdn', 'ut3gd1r01-v700.aqd-unittest.ms.com']
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Router: ut3gd1r01-v700.aqd-unittest.ms.com [{}]".format(ip),
+                         command)
+        self.matchoutput(out,
+                         "Network: tor_net_12 [4.2.5.0/25]",
+                         command)
+
+    def test_307_test_router_address_using_netdev_del(self):
+        ip = self.net["tor_net_12"][1]
+        self.dsdb_expect_delete(ip)
+        command = ['del_interface_address', '--interface', 'v700', '--ip',
+                   ip, '--network_device', 'ut3gd1r01.aqd-unittest.ms.com']
+        self.noouttest(command)
+        self.dsdb_verify()
+        command = ['del_interface', '--interface', 'v700', '--network_device', 'ut3gd1r01.aqd-unittest.ms.com']
+        self.noouttest(command)
+
+    def test_308_test_router_address_using_netdev_show(self):
+        ip = self.net["tor_net_12"][1]
+        command = ['show_router_address', '--ip', ip]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Router: unknown [{}]".format(ip),
+                         command)
+        self.matchoutput(out,
+                         "Network: tor_net_12 [4.2.5.0/25]",
+                         command)
 
     ########## DELETEION STAGE ##########
 

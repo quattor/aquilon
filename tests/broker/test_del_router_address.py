@@ -57,6 +57,11 @@ class TestDelRouterAddress(TestBrokerCommand):
         self.matchoutput(out, "IP address %s is not a router on network %s [%s]."
                          % (net.gateway, net.name, net), command)
 
+    def test_201_del_routertor_net_12(self):
+        ip = self.net["tor_net_12"][1]
+        command = ["del", "router", "address", "--ip", ip]
+        out = self.noouttest(command)
+
     def test_300_verify_all(self):
         command = ["show", "router", "address", "--all"]
         out = self.commandtest(command)
