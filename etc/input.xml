@@ -2566,14 +2566,16 @@
 	specified template sandbox branch.  This makes the changes
 	available to others for review and for the deploy command.
 	The manage and compile commands can be used before running
-	publish to test the changes.
+	publish to test the changes. NB: when specifying the name of
+    a SANDBOX or BRANCH, do not include a $USER/ prefix.
 	<optgroup mandatory="True" fields="one">
-	    <option name="branch" type="string">Name of the sandbox update</option>
-	    <option name="sandbox" type="string">Name of the sandbox update</option>
+	    <option name="branch" type="string">Name of the branch to update</option>
+	    <option name="sandbox" type="string">Name of the branch to update</option>
 	</optgroup>
 	<optgroup>
 	    <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
-	    <option name="rebase" type="flag">Allow rebasing the branch</option>
+	    <option name="rebase" type="flag">Force the commit history in
+        the branch to be re-written (e.g. after a rebase)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
