@@ -18,54 +18,32 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
-                                ReservedName, NetworkEnvironment)
-from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model import (RouterAddress, Building)
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.worker.dbwrappers.dns import grab_address
 
 
 class CommandAddRouterAddress(BrokerCommand):
     requires_plenaries = True
 
-    required_parameters = ["fqdn"]
-
     def render(self, session, plenaries, dbuser,
                fqdn, building, ip, network_environment, comments,
                exporter, user, justification, reason, logger, **arguments):
-        dbnet_env = NetworkEnvironment.get_unique_or_default(session,
-                                                             network_environment)
-        self.az.check_network_environment(dbuser, dbnet_env)
 
         if building:
             dbbuilding = Building.get_unique(session, building, compel=True)
         else:
             dbbuilding = None
 
-        (short, dbdns_domain) = parse_fqdn(session, fqdn)
-        dbfqdn = Fqdn.get_or_create(session, name=short,
-                                    dns_domain=dbdns_domain,
-                                    dns_environment=dbnet_env.dns_environment)
-        if ip:
-            dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
-            dbdns_rec = ARecord.get_or_create(session, fqdn=dbfqdn, ip=ip,
-                                              network=dbnetwork)
-        else:
-            dbdns_rec = ARecord.get_unique(session, dbfqdn, compel=True)
+        (dbdns_rec, newly_created) = grab_address(session, fqdn, ip,
+                                                  network_environment,
+                                                  exporter=exporter, router=True)
+        if not ip:
             ip = dbdns_rec.ip
-            dbnetwork = dbdns_rec.network
 
-        if exporter:
-            if any(
-                    dr != dbdns_rec and
-                    not isinstance(dr, ReservedName)
-                    for dr in dbfqdn.dns_records):
-                exporter.update(dbfqdn)
-            else:
-                exporter.create(dbfqdn)
+        dbnetwork = dbdns_rec.network
 
-        assert ip in dbnetwork.network, "IP %s is outside network %s" % (ip,
-                                                                         dbnetwork.network_address)
+        self.az.check_network_environment(dbuser, dbnetwork.network_environment)
 
         if ip in dbnetwork.router_ips:
             raise ArgumentError("IP address {0} is already present as a router "

@@ -156,7 +156,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
                  dns_environment=None, comments=None,
                  allow_restricted_domain=False, allow_multi=False,
                  allow_reserved=False, allow_shared=False, relaxed=False,
-                 preclude=False, exporter=None):
+                 preclude=False, exporter=None, router=False):
     """
     Take ownership of an address.
 
@@ -198,19 +198,33 @@ def grab_address(session, fqdn, ip, network_environment=None,
         raise ArgumentError("Entering external IP addresses to the "
                             "internal DNS environment is not allowed.")
 
-    short, dbdns_domain = parse_fqdn(session, fqdn)
+    if not fqdn:
+        if not ip:
+            raise ArgumentError("Neither IP nor FQDN is provided.")
+        dns_rec = session.query(ARecord).filter(ARecord.ip == ip).all()
+        if len(dns_rec) > 1:
+            raise ArgumentError("IP address %s is referenced by multiple "
+                                "DNS records: %s" %
+                                (ip, ", ".join(sorted(format(rec, "a")
+                                                      for rec in dns_rec))))
+        if not dns_rec:
+            raise ArgumentError("IP has no associated DNS records.")
 
-    # Lock the domain to prevent adding/deleting records while we're checking
-    # FQDN etc. availability
-    dbdns_domain.lock_row()
+        dbfqdn = dns_rec[0].fqdn
+    else:
+        short, dbdns_domain = parse_fqdn(session, fqdn)
 
-    if dbdns_domain.restricted and not allow_restricted_domain:
-        raise ArgumentError("{0} is restricted, adding extra addresses "
-                            "is not allowed.".format(dbdns_domain))
+        # Lock the domain to prevent adding/deleting records while we're checking
+        # FQDN etc. availability
+        dbdns_domain.lock_row()
 
-    dbfqdn = Fqdn.get_or_create(session, dns_environment=dns_environment,
-                                name=short, dns_domain=dbdns_domain,
-                                query_options=[joinedload('dns_records')])
+        if dbdns_domain.restricted and not allow_restricted_domain:
+            raise ArgumentError("{0} is restricted, adding extra addresses "
+                                "is not allowed.".format(dbdns_domain))
+
+        dbfqdn = Fqdn.get_or_create(session, dns_environment=dns_environment,
+                                    name=short, dns_domain=dbdns_domain,
+                                    query_options=[joinedload('dns_records')])
 
     existing_record = None
     newly_created = False
@@ -330,7 +344,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
     if preclude and not newly_created:
         raise ArgumentError("{0} already exists.".format(existing_record))
 
-    if ip:
+    if ip and not router:
         q = session.query(AddressAssignment)
         q = q.with_polymorphic('*')
         q = q.filter_by(network=dbnetwork)
