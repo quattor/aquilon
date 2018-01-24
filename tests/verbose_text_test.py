@@ -70,10 +70,7 @@ class VerboseTextTestResult(unittest._TextTestResult):
         # Specifically skip over base class's implementation.
         unittest.TestResult.addError(self, test, err)
         self.printResult("ERROR", self.errors[-1])
-        copy_sqldb(self.config, target='SNAPSHOT',
-                   dump_path='{0}.failure:{1}:{2}'.format(self.config.get("database", "dbfile"),
-                                                          test.__class__.__name__,
-                                                          test._testMethodName))
+        copy_sqldb(self.config, target='SNAPSHOT', test=test)
         self._cleanup_if_exit(test)
 
     def addFailure(self, test, err):
@@ -81,10 +78,7 @@ class VerboseTextTestResult(unittest._TextTestResult):
         # Specifically skip over base class's implementation.
         unittest.TestResult.addFailure(self, test, err)
         self.printResult("FAIL", self.failures[-1])
-        copy_sqldb(self.config, target='SNAPSHOT',
-                   dump_path='{0}.failure:{1}:{2}'.format(self.config.get("database", "dbfile"),
-                                                          test.__class__.__name__,
-                                                          test._testMethodName))
+        copy_sqldb(self.config, target='SNAPSHOT', test=test)
         self._cleanup_if_exit(test)
 
 

@@ -155,19 +155,18 @@ if opts.mirror:
 database_type = config.get('database', 'database_section')
 if opts.start:
     dumfile = config.get('unittest', 'last_success_db_snapshot')
-    if not os.path.isfile(dumfile):
+    if not os.path.isfile(dumfile) and database_type == 'database_sqlite':
         print("Tests cannot be started from the test {0}. "
           "Database dumpfile - {1} does not exist.".format(opts.start, dumfile),
               file=sys.stderr)
         sys.exit(1)
-    if database_type != 'database_sqlite':
-        print("Database dumps only implemented for sqlite.")
-        sys.exit(1)
-    print("Will be using database dump {} to create DB. Tests will start from {}.".format(dumfile, opts.start))
+    if database_type == 'database_sqlite':
+        print("Will be using database dump {} to create DB. Tests will start from {}.".format(dumfile, opts.start))
 
 if opts.failfast:
-    if not config.has_option("unittest", "last_success_db_snapshot") or \
-        not config.get("unittest", "last_success_db_snapshot"):
+    if (not config.has_option("unittest", "last_success_db_snapshot") or \
+        not config.get("unittest", "last_success_db_snapshot")) and \
+                    database_type == 'database_sqlite':
         print("'last_success_db_snapshot' path config parameter missing.")
         sys.exit(1)
 
@@ -236,7 +235,8 @@ os.environ["AQTEST_SCRATCHDIR"] = scratchdir
 suite = unittest.TestSuite()
 # Relies on the oracle rebuild doing a nuke first.
 if opts.start:
-    copy_sqldb(config, target='DB')
+    if database_type == 'database_sqlite':
+        copy_sqldb(config, target='DB')
 else:
     suite.addTest(DatabaseTestSuite())
 suite.addTest(BrokerTestSuite(opts.start))

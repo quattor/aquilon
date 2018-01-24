@@ -39,7 +39,7 @@ def load_classpath():
     import aquilon.aqdb.depends
 
 
-def copy_sqldb(config, target='DB', dump_path=None):
+def copy_sqldb(config, target='DB', test=None):
     """
     Function that copy sqlite DB files: either takes a database snapshot
      or restored database from snapshot
@@ -51,8 +51,10 @@ def copy_sqldb(config, target='DB', dump_path=None):
     dsn = config.get("database", "dsn")
     if dsn.startswith("sqlite:///"):
         work_db_file = config.get("database", "dbfile")
-        if dump_path:
-            dump = dump_path
+        if test:
+            dump = '{0}.failure:{1}:{2}'.format(config.get("database", "dbfile"),
+                                                test.__class__.__name__,
+                                                test._testMethodName)
         else:
             dump = config.get('unittest', 'last_success_db_snapshot')
         if target == 'DB':

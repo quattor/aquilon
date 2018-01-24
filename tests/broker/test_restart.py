@@ -1,0 +1,123 @@
+#!/usr/bin/env python
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
+#
+# Copyright (C) 2018  Contributor
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Test module for starting the broker."""
+
+import os
+import sys
+from subprocess import Popen, PIPE
+
+import unittest
+
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
+
+from aquilon.config import Config
+
+
+class TestBrokerReStart(unittest.TestCase):
+
+    config = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.config = Config()
+
+    def run_command(self, command, **kwargs):
+        p = Popen(command, stdout=PIPE, stderr=PIPE, **kwargs)
+        out, err = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Command '%s' returned %d:"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (command, p.returncode, out, err))
+
+    def teststart(self):
+        # FIXME: Either remove any old pidfiles, or ignore it as a warning
+        # from stderr... or IMHO (daqscott) if pid files exist and are knc or
+        # python processes, kill -9 the pids and delete the files (with a
+        # warning message it tickles you)
+
+        aqd = os.path.join(self.config.get("broker", "srcdir"),
+                           "lib", "aquilon", "unittest_patches.py")
+        pidfile = os.path.join(self.config.get("broker", "rundir"), "aqd.pid")
+        logfile = self.config.get("broker", "logfile")
+
+        # Specify aqd and options...
+        args = [sys.executable, aqd,
+                "--pidfile", pidfile, "--logfile", logfile]
+
+        if self.config.getboolean("unittest", "profile"):
+            args.append("--profile")
+            args.append(os.path.join(self.config.get("broker", "logdir"),
+                                     "aqd.profile"))
+            args.append("--profiler=cProfile")
+            args.append("--savestats")
+
+        # And then aqd and options...
+        args.extend(["aqd", "--config", self.config.baseconfig])
+
+        if self.config.getboolean("unittest", "coverage"):
+            args.append("--coveragedir")
+            dir = os.path.join(self.config.get("broker", "logdir"), "coverage")
+            args.append(dir)
+
+            coveragerc = os.path.join(self.config.get("broker", "srcdir"),
+                                      "tests", "coverage.rc")
+            args.append("--coveragerc")
+            args.append(coveragerc)
+
+        self.run_command(args)
+
+        # FIXME: Check that it is listening on the correct port(s)...
+
+        # FIXME: If it fails, either cat the log file, or tell the user to try
+        # running '%s -bn aqd --config %s'%(aqd, self.config.baseconfig)
+
+    def testeventsstart(self):
+        # pidfile = os.path.join(self.config.get('broker', 'rundir'), 'read_events.pid')
+        read_events = os.path.join(self.config.get('broker', 'srcdir'),
+                                   'tests', 'read_events.py')
+        args = [sys.executable, read_events, '--store',
+                '--config', self.config.baseconfig]
+        self.run_command(args)
+
+
+    def testsetuppanclinks(self):
+        # Some tests want multiple versions of panc.jar available. Nothing
+        # depends on the behavior being different, so a couple symlinks will do
+        # the job
+        real_panc = self.config.get("unittest", "real_panc_location")
+        fake_panc_default = self.config.get("panc", "pan_compiler")
+        fake_panc_utpanc = self.config.get("panc", "pan_compiler",
+                                           vars={'version': 'utpanc'})
+
+        fake_panc_dir = os.path.dirname(fake_panc_default)
+        if not os.path.exists(fake_panc_dir):
+            os.makedirs(fake_panc_dir, 0o755)
+
+        for dst in (fake_panc_default, fake_panc_utpanc):
+            try:
+                os.unlink(dst)
+            except OSError:
+                pass
+            os.symlink(real_panc, dst)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerReStart)
+    unittest.TextTestRunner(verbosity=2).run(suite)
