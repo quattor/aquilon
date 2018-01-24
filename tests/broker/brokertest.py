@@ -62,6 +62,8 @@ class TestBrokerCommand(unittest.TestCase):
 
     valid_just_tcm = ["--justification", "tcm=123456789"]
     exception_trigger_just_tcm = ["--justification", "tcm=666666666"]
+    timeout_trigger_just_tcm = ["--justification", "tcm=111111111"]
+    timeout_default_trigger_just_tcm = ["--justification", "tcm=222222222"]
     valid_just_sn = ["--justification", "sn=CHNG123456"]
     invalid_justification = ["--justification", "foo"]
     emergency_just_with_reason = ["--justification", "emergency", "--reason", "Valid reason"]

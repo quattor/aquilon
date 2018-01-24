@@ -345,9 +345,28 @@ gzip_output = false
 # only used if gzip_output = true
 transparent_gzip = true
 template_extension = .tpl
-# Max. time a compilation is allowed to take. The value is passed to the "timeout" command verbatim.
-timeout = 30m
 include_pan = True
+
+[tool_timeout]
+# If set to True, timeout will be set to 'default_value' for any tools run via subprocess
+default_enabled = True
+
+# Should be always specified
+default_value = 1800
+
+# Override timeout for specific tools: values in seconds, 0 - no timeout
+# If toolname is not specified or empty timeout value given, use default_value (if default_enabled)
+ant =
+mean = 300
+get_camtable = 300
+aii_installfe = 600
+vlan2net = 600
+qip_dump_subnetdata = 600
+aqd_checkedm = 30
+location_uri_validator = 30
+switch_discover = 30
+dsdb = 30
+git = 30
 
 [site]
 # Site specific settings

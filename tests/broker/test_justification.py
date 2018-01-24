@@ -644,7 +644,17 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         command = ["del_domain", "--domain", "deployable"] + self.exception_trigger_just_tcm
         err = self.internalerrortest(command)
-        self.matchoutput(err, "Invalid response received for the change management check. No JSON object could be decoded", command)
+        self.matchoutput(err, "Invalid response received for the change "
+                              "management check. No JSON object could be decoded", command)
+        command = ["update_domain", "--domain", "deployable", "--noarchived"]
+        out = self.commandtest(command)
+
+    def test_915_test_subporcess_timeout(self):
+        command = ["update_domain", "--domain", "deployable", "--archived"]
+        out = self.commandtest(command)
+        command = ["del_domain", "--domain", "deployable"] + self.timeout_trigger_just_tcm
+        err = self.internalerrortest(command)
+        self.matchoutput(err, "when reaching timeout of 15 sec", command)
         command = ["update_domain", "--domain", "deployable", "--noarchived"]
         out = self.commandtest(command)
 

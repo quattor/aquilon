@@ -65,7 +65,7 @@ class TestDelDomain(TestBrokerCommand):
         self.justificationmissingtest(command, auth=True, msgcheck=False)
 
     def test_123_del_deployable_archived(self):
-        command = ["del_domain", "--domain=deployable"] + self.valid_just_tcm
+        command = ["del_domain", "--domain=deployable"] + self.timeout_default_trigger_just_tcm
         self.successtest(command)
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
@@ -77,7 +77,7 @@ class TestDelDomain(TestBrokerCommand):
         out, _ = self.gitcommand(command, cwd=kingdir)
 
         self.matchoutput(out, "Delete archived branch deployable", command)
-        self.matchoutput(out, "Justification: tcm=12345678", command)
+        self.matchoutput(out, "Justification: tcm=222222222", command)
 
     def test_130_del_unittest_xml(self):
         self.noouttest(["del_domain", "--domain", "unittest-xml"])

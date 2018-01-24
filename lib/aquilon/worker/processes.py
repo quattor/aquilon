@@ -81,7 +81,7 @@ class StreamLoggerThread(Thread):
 
 
 def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
-                stream_level=None, filterre=None, input=None):
+                stream_level=None, filterre=None, input=None, timeout_enabled=True):
     '''Run the specified command (args should be a list corresponding to ARGV).
 
     Returns any output (stdout only).  If the command fails, then
@@ -92,7 +92,14 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     with the filterre keyword argument.  Any output lines on stdout will
     only be kept if filterre.search() finds a match.
 
+    All commands are triggered with timeout if timeout_enabled is set to True
+    and default_timeout_enabled in config is True or there is timeout value set
+    for sepcific tool.
+    Timeout can be disabled by passing timeout_enabled=False kwarg to the function
+    or in config by stting tool timeout value to 0 or default_timeout_enabled=False.
+
     '''
+    config = Config()
     if env:
         shell_env = env.copy()
     else:
@@ -113,19 +120,27 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     # the database.
     command_args = [str(arg) for arg in args]
 
+    timeout_value = 0
+    if timeout_enabled:
+        timeout_value = config.lookup_tool_timeout(command_args[0])
+
     # If the command was not given with an absolute path, then check if there's
     # an override specified in the config file. If not, we'll rely on $PATH.
     if command_args[0][0] != "/":
-        config = Config()
         command_args[0] = config.lookup_tool(command_args[0])
 
+    if timeout_value:
+        command_args = ["/usr/bin/timeout",
+                        str(timeout_value)] + \
+                       command_args
+
     simple_command = " ".join(command_args)
-    logger.log(loglevel, "run_command: %s (CWD: %s)", simple_command,
-               os.path.abspath(path))
+    logger.log(loglevel, "run_command: {} (CWD: {})".format(simple_command,
+                                                            os.path.abspath(path)))
 
     if input:
         proc_stdin = PIPE
-        logger.info("command `%s` stdin: %s", simple_command, input)
+        logger.info("command `{}` stdin: {}".format(simple_command, input))
     else:
         proc_stdin = None
 
@@ -161,19 +176,22 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
         err = "".join(err_thread.buffer)
 
     if p.returncode >= 0:
-        logger.log(loglevel, "command `%s` exited with return code %d",
-                   simple_command, p.returncode)
+        logger.log(loglevel, "command `{}` exited with return code {}".format(simple_command,
+                                                                              p.returncode))
         retcode = p.returncode
         signal_num = None
     else:  # pragma: no cover
-        logger.log(loglevel, "command `%s` exited with signal %d",
-                   simple_command, -p.returncode)
+        logger.log(loglevel, "command `{}` exited with signal {}".format(simple_command,
+                                                                         -p.returncode))
         retcode = None
         signal_num = -p.returncode
     if err:
-        logger.log(loglevel, "command `%s` stderr: %s", simple_command, err)
-
-    if p.returncode != 0:
+        logger.log(loglevel, "command `{}` stderr: {}".format(simple_command, err))
+    if p.returncode == 124:
+        raise ProcessException(command=simple_command, out=out, err=err,
+                               code=retcode, signalNum=signal_num,
+                               filtered=bool(filterre), timeouted=timeout_value)
+    elif p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
                                code=retcode, signalNum=signal_num,
                                filtered=bool(filterre))

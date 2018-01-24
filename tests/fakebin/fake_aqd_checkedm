@@ -24,6 +24,7 @@ Stanley, except with written permission of Morgan Stanley.
 """
 import sys
 import json
+import time
 import re
 from argparse import ArgumentParser
 
@@ -129,8 +130,13 @@ def main(args):
         if not just.tcm and not just.sn and just.emergency:
             stdout_and_exit(status='Permitted',
                             msg=PERMITTED_RESPONSE_MESSAGES["no_just_emergency"])
-        if just.tcm and just.tcm == "666666666":
-            print('Simulating unknown error. Making json not parsable.')
+        if just.tcm:
+            if just.tcm == "666666666":
+                print('Simulating unknown error. Making json not parsable.')
+            elif just.tcm == "111111111":
+                time.sleep(20)
+            elif just.tcm == "222222222":
+                time.sleep(12)
         if args.disable_edm:
             stdout_and_exit(status='Approved', msg=APPROVED_RESPONSE_MESSAGES["edm_disabled"])
 

@@ -190,11 +190,7 @@ class TemplateDomain(object):
 
         formats.append("dep")
 
-        if config.has_value("panc", "timeout"):
-            args = ["timeout", config.get("panc", "timeout")]
-            args.append(config.lookup_tool("ant"))
-        else:
-            args = ["ant"]
+        args = ["ant"]
 
         args.append("--noconfig")
         args.append("-f")
