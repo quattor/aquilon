@@ -89,6 +89,55 @@ class TestRenameNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           interface="xge49",
                           comments="Some new switch comments")
 
+    def test_215_rename_ut3gd1r04_domain(self):
+        self.dsdb_expect_rename("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com",
+                                "ut3gd1r04-vlan110-hsrp.aqd-unittest-ut-env.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04-vlan110.aqd-unittest.ms.com",
+                                "ut3gd1r04-vlan110.aqd-unittest-ut-env.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04-loop0.aqd-unittest.ms.com",
+                                "ut3gd1r04-loop0.aqd-unittest-ut-env.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04.aqd-unittest.ms.com",
+                                "ut3gd1r04.aqd-unittest-ut-env.ms.com")
+
+        command = ["update", "network_device",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--rename_to", "ut3gd1r04.aqd-unittest-ut-env.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_220_domain_verify(self):
+        self.verifynetdev("ut3gd1r04.aqd-unittest-ut-env.ms.com", "hp", "uttorswitch",
+                          "ut3", "a", "3", switch_type='bor',
+                          ip=self.net["ut10_eth1"].usable[1],
+                          mac=self.net["ut10_eth1"].usable[0].mac,
+                          interface="xge49",
+                          comments="Some new switch comments")
+
+    def test_225_rename_ut3gd1r04_domain_back(self):
+        self.dsdb_expect_rename("ut3gd1r04-vlan110-hsrp.aqd-unittest-ut-env.ms.com",
+                                "ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04-vlan110.aqd-unittest-ut-env.ms.com",
+                                "ut3gd1r04-vlan110.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04-loop0.aqd-unittest-ut-env.ms.com",
+                                "ut3gd1r04-loop0.aqd-unittest.ms.com")
+        self.dsdb_expect_rename("ut3gd1r04.aqd-unittest-ut-env.ms.com",
+                                "ut3gd1r04.aqd-unittest.ms.com")
+
+        command = ["update", "network_device",
+                   "--network_device", "ut3gd1r04.aqd-unittest-ut-env.ms.com",
+                   "--rename_to", "ut3gd1r04.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_230_domain_verify_back(self):
+        self.verifynetdev("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
+                          "ut3", "a", "3", switch_type='bor',
+                          ip=self.net["ut10_eth1"].usable[1],
+                          mac=self.net["ut10_eth1"].usable[0].mac,
+                          interface="xge49",
+                          comments="Some new switch comments")
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRenameNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

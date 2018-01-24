@@ -227,9 +227,12 @@ def rename_hardware(session, dbhw_ent, rename_to):
         new_domain.lock_row()
 
     dbhw_ent.check_label(new_label)
-    HardwareEntity.get_unique(session, new_label, preclude=True)
 
+    new_hw = HardwareEntity.get_unique(session, new_label)
     old_label = dbhw_ent.label
+
+    if new_hw and new_hw.label != old_label:
+        raise ArgumentError('{0} already exists.'.format(new_hw))
 
     fqdns = []
     for addr in dbhw_ent.all_addresses():
