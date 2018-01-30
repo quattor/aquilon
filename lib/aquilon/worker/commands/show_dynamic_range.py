@@ -21,6 +21,7 @@ from ipaddress import ip_address
 from aquilon.aqdb.model import DynamicStub, DnsEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.dynamic_range import DynamicRange
 
@@ -48,17 +49,20 @@ class CommandShowDynamicRange(BrokerCommand):
         end = int(ip)
         range_class = None
 
-        if dbdns_rec:
-            range_class = dbdns_rec.range_class
+        if not dbdns_rec:
+            raise NotFoundException(
+                '{} is not part of a dynamic range'.format(ip))
 
-            q = session.query(DynamicStub.ip)
-            q = q.filter_by(network=dbnetwork, range_class=range_class)
-            all_stubs = frozenset(int(stub.ip) for stub in q)
+        range_class = dbdns_rec.range_class
 
-            while start > int(dbnetwork.network_address) and start - 1 in all_stubs:
-                start = start - 1
+        q = session.query(DynamicStub.ip)
+        q = q.filter_by(network=dbnetwork, range_class=range_class)
+        all_stubs = frozenset(int(stub.ip) for stub in q)
 
-            while end < int(dbnetwork.broadcast_address) and end + 1 in all_stubs:
-                end = end + 1
+        while start > int(dbnetwork.network_address) and start - 1 in all_stubs:
+            start = start - 1
+
+        while end < int(dbnetwork.broadcast_address) and end + 1 in all_stubs:
+            end = end + 1
 
         return DynamicRange(dbnetwork, ip_address(start), ip_address(end), range_class)
