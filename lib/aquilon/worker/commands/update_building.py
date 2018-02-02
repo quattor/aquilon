@@ -49,7 +49,7 @@ class CommandUpdateBuilding(BrokerCommand):
 
         update_location(dbbuilding, fullname=fullname, comments=comments,
                         uri=uri, default_dns_domain=default_dns_domain,
-                        force_uri=force_uri)
+                        force_uri=force_uri, logger=logger)
 
         if city:
             dbcity = City.get_unique(session, city, compel=True)

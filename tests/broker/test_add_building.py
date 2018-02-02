@@ -138,19 +138,29 @@ class TestAddBuilding(TestBrokerCommand):
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
 
-    def test_115_addbuinvaliduri(self):
+    def test_115_addbuincorrecturi(self):
         command = ["add", "building", "--building", "plaza", "--city", "ex",
-                   "--address", "Nowhere", "--uri", "invalid://003427"]
+                   "--address", "Nowhere", "--uri", "incorrect://003427"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Location URI not valid: Building code 'invalid://003427' "
-                              "does not match '^assetinventory://[0-9]+$'", command)
+        self.matchoutput(out, "Building name and URI do not match", command)
 
     def test_116_addinvaliduri(self):
         command = ["add", "building", "--building", "plaza", "--city", "ex",
                    "--address", "Nowhere", "--uri", "fakeuri=003427"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Location URI not valid: URI 'fakeuri=003427' "
-                              "is not formatted correctly", command)
+        self.matchoutput(out, "URI 'fakeuri=003427' is not formatted correctly. It must be of the form "
+                              "'string://012345' where the number contains 6 digits and is "
+                              "zero-padded.", command)
+
+    def test_117_addnocode(self):
+        self.dsdb_expect("add_building_aq -building_name Testo -city ln "
+                         "-building_addr test address")
+        self.dsdb_expect_add_campus_building("ln", "Testo")
+        command = ["add", "building", "--building", "Testo", "--city", "ln",
+                   "--address", "test address", "--uri", "assetinventory://005555"]
+        (out, err) = self.successtest(command)
+        self.searchoutput(err, "Warning: 'IT_CODE' in '(.*)' is empty for "
+                               "URI 'assetinventory://005555'! Proceeding without validation.", command)
 
     def test_120_addbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
