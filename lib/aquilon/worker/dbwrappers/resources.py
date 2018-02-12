@@ -136,7 +136,8 @@ def walk_resources(dbobj):
         return
     for res in dbobj.resholder.resources:
         if isinstance(res, ResourceGroup):
-            walk_resources(res)
+            for r in walk_resources(res):
+                yield r
         else:
             yield res
 
