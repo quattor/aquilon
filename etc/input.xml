@@ -1521,6 +1521,7 @@
 	    <option name="ip" type="ip">Network address</option>
 	</optgroup>
 	<optgroup>
+            <option name="rename_to" type="string">Network name</option>
 	    <option name="type" type="string">Network type</option>
 	    <option name="side" type="string">Network side</option>
 	    <option name="comments" type="string">Comments</option>

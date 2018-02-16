@@ -27,7 +27,7 @@ class CommandUpdateNetwork(BrokerCommand):
     requires_plenaries = True
 
     def render(self, session, plenaries, dbuser, network, ip, network_environment,
-               type, side, network_compartment, comments, user,
+               rename_to, type, side, network_compartment, comments, user,
                justification, reason, logger, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -44,6 +44,13 @@ class CommandUpdateNetwork(BrokerCommand):
                 dbcomp = NetworkCompartment.get_unique(session,
                                                        network_compartment,
                                                        compel=True)
+
+        if rename_to:
+            q = session.query(Network).filter_by(name=rename_to)
+            dbnetwork = q.first()
+            if dbnetwork:
+                logger.client_info("WARNING: Network name %s is already used for "
+                                   "address %s." % (rename_to, str(dbnetwork.network)))
 
         q = session.query(Network)
         q = q.filter_by(network_environment=dbnet_env)
@@ -64,6 +71,8 @@ class CommandUpdateNetwork(BrokerCommand):
         dblocation = get_location(session, **arguments)
 
         for dbnetwork in q:
+            if rename_to:
+                dbnetwork.name = rename_to
             if type:
                 dbnetwork.network_type = type
             if side:
