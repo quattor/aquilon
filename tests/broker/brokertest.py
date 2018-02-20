@@ -142,8 +142,8 @@ class TestBrokerCommand(unittest.TestCase):
                 pass
 
     def tearDown(self):
-        if not self.config.has_option("unittest", "last_success_db_snapshot") or \
-                not self.config.get("unittest", "last_success_db_snapshot"):
+        
+        if not os.environ.get("AQD_UNITTEST_FAILFAST"):
             return
         if not all(sys.exc_info()):
             copy_sqldb(self.config, target='SNAPSHOT')
