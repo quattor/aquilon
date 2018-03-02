@@ -39,6 +39,29 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
                            "utchassis", "np3", "a", "3", "ABC1234",
                            comments="Some chassis comments")
 
+    def test_106_show_ut3c5_proto(self):
+        command = ["show", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        chassis = self.protobuftest(command, expect=1)[0]
+
+        self.assertEqual(chassis.name, 'ut3c5')
+        self.assertEqual(chassis.primary_name, 'ut3c5.aqd-unittest.ms.com')
+        self.assertEqual(chassis.serial_no, 'ABC1234')
+
+        self.assertEqual(chassis.model.model_type, 'chassis')
+        self.assertEqual(chassis.model.name, 'utchassis')
+        self.assertEqual(chassis.model.vendor, 'aurora_vendor')
+
+        self.assertEqual(chassis.location.location_type, 'rack')
+        self.assertEqual(chassis.location.name, 'np3')
+        self.assertEqual(chassis.location.fullname, 'np3')
+        self.assertEqual(chassis.location.col, '3')
+        self.assertEqual(chassis.location.row, 'a')
+
+        self.assertEqual(len(chassis.slots), 0)
+
+        self.assertEqual(len(chassis.interfaces), 1)
+
     def test_110_add_ut3c1(self):
         command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"
         self.noouttest(command.split(" "))
@@ -96,6 +119,25 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
+
+    def test_305_show_chassis_all_proto(self):
+        command = ["show", "chassis", "--all", "--format", "proto"]
+        chassis_list = self.protobuftest(command, expect=10)
+
+        # Verify that the chassis that were created in the previous
+        # methods of this class are in the protobuf dump too
+        search_chassis_primary_name = set([
+            'ut3c5.aqd-unittest.ms.com',
+            'ut3c1.aqd-unittest.ms.com',
+            'ut9c1.aqd-unittest.ms.com',
+        ])
+        for chassis in chassis_list:
+            search_chassis_primary_name.discard(chassis.primary_name)
+
+        self.assertFalse(
+            search_chassis_primary_name,
+            'The following chassis have not been found in the protobuf '
+            'output: {}'.format(', '.join(search_chassis_primary_name)))
 
 
 if __name__ == '__main__':

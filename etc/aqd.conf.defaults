@@ -400,4 +400,4 @@ precreated_compartments_only = False
 ignore_network_compartments_regex =
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.41/common/lib/python/
+directory = /ms/dist/aquilon/PROJ/protocols/1.42/common/lib/python/
