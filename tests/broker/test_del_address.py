@@ -115,22 +115,6 @@ class TestDelAddress(TestBrokerCommand):
                          "eth1 of machine unittest00.one-nyp.ms.com" % ip,
                          command)
 
-    def testdelunittest20_e1(self):
-        ip = self.net["zebra_eth1"].usable[0]
-        self.dsdb_expect_delete(ip)
-        command = ["del", "address", "--ip", ip,
-                   "--fqdn", "unittest20-e1.aqd-unittest.ms.com"] + self.valid_just_tcm
-        self.noouttest(command)
-        self.dsdb_verify()
-
-    def testdelzebra3(self):
-        ip = self.net["zebra_vip"].usable[13]
-        self.dsdb_expect_delete(ip)
-        command = ["del", "address", "--ip", ip,
-                   "--fqdn", "zebra3.aqd-unittest.ms.com"] + self.valid_just_tcm
-        self.noouttest(command)
-        self.dsdb_verify()
-
     def test_delip_with_network_env(self):
         ip = "192.168.3.1"
         fqdn = "cardenvtest600.aqd-unittest.ms.com"

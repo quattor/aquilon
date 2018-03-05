@@ -33,7 +33,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
     required_parameters = ['interface']
 
-    def render(self, session, logger, plenaries, interface, fqdn, ip, label, keep_dns,
+    def render(self, session, logger, plenaries, interface, fqdn, ip, label,
                network_environment, user, justification, reason, exporter, **kwargs):
         dbhw_ent = get_hardware(session, **kwargs)
 
@@ -103,7 +103,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
         q = session.query(AddressAssignment)
         q = q.filter_by(network=dbnetwork, ip=ip)
         other_uses = q.all()
-        if not other_uses and not keep_dns:
+        if not other_uses:
             q = session.query(ARecord)
             q = q.filter_by(network=dbnetwork, ip=ip)
             q = q.join(ARecord.fqdn)
@@ -124,21 +124,9 @@ class CommandDelInterfaceAddress(BrokerCommand):
             dsdb_runner.delete_host_details(fqdn, ip)
 
         with plenaries.transaction():
-            if dbhw_ent.host:
-                if dbhw_ent.host.archetype.name == 'aurora':
-                    logger.client_info("WARNING: removing IP %s from AQDB and "
-                                       "*not* changing DSDB." % ip)
-                else:
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
-
-                    if not other_uses and keep_dns:
-                        q = session.query(ARecord)
-                        q = q.filter_by(network=dbnetwork)
-                        q = q.filter_by(ip=ip)
-                        dbdns_rec = q.first()
-                        dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
-
-                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+            if dbhw_ent.host and dbhw_ent.host.archetype.name == 'aurora':
+                logger.client_info("WARNING: removing IP %s from AQDB and "
+                                   "*not* changing DSDB." % ip)
             else:
                 dsdb_runner.update_host(dbhw_ent, oldinfo)
                 dsdb_runner.commit_or_rollback("Could not add host to DSDB")

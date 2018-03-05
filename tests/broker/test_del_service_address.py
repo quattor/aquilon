@@ -53,21 +53,13 @@ class TestDelServiceAddress(TestBrokerCommand):
                          "found.", command)
 
     def test_130_delzebra3(self):
-        command = ["del", "service", "address", "--keep_dns",
+        ip = self.net["zebra_vip"].usable[13]
+        self.dsdb_expect_delete(ip)
+        command = ["del", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--name", "zebra3"]
         self.noouttest(command)
-        self.dsdb_verify(empty=True)
-
-    def test_140_verifyzebra3(self):
-        ip = self.net["zebra_vip"].usable[13]
-        command = ["show", "address", "--fqdn", "zebra3.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "DNS Record: zebra3.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "IP: %s" % ip, command)
-        self.matchclean(out, "Assigned To", command)
-        self.matchclean(out, "ut3c5n2", command)
-        self.matchclean(out, "eth0", command)
+        self.dsdb_verify()
 
     def test_150_delzebra3again(self):
         command = ["del", "service", "address", "--name", "zebra3",

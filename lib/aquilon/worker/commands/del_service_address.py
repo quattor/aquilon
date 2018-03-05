@@ -31,7 +31,7 @@ class CommandDelServiceAddress(BrokerCommand):
     required_parameters = ["name"]
 
     def render(self, session, logger, plenaries, name, hostname, cluster, metacluster,
-               resourcegroup, keep_dns, user, justification, reason, exporter, **arguments):
+               resourcegroup, user, justification, reason, exporter, **arguments):
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
                                 "be deleted.")
@@ -58,13 +58,13 @@ class CommandDelServiceAddress(BrokerCommand):
         plenaries.add(dbsrv)
 
         holder.resources.remove(dbsrv)
-        if not dbdns_rec.service_addresses and not keep_dns:
+        if not dbdns_rec.service_addresses:
             delete_dns_record(dbdns_rec, exporter=exporter)
 
         session.flush()
 
         with plenaries.transaction():
-            if (not dbdns_rec.service_addresses and not keep_dns and
+            if (not dbdns_rec.service_addresses and
                     dbdns_rec.network.is_internal):
                 dsdb_runner.delete_host_details(old_fqdn, old_ip)
             dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
