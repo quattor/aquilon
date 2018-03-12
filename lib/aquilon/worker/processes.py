@@ -21,7 +21,7 @@ expect to handle a generic result from whatever happened earlier in
 the chain.
 
 """
-
+from functools import wraps
 import os
 import re
 import logging
@@ -29,6 +29,7 @@ from contextlib import contextmanager
 from subprocess import Popen, PIPE
 from tempfile import mkdtemp
 from threading import Thread, Lock
+import types
 
 from six import iteritems
 
@@ -44,6 +45,22 @@ from aquilon.aqdb.model import Machine
 from aquilon.utils import remove_dir
 
 LOGGER = logging.getLogger(__name__)
+config = Config()
+
+DSDB_ENABLED = config.getboolean("dsdb", "enable")
+
+if DSDB_ENABLED:
+    # FIXME - this needs to be moved to depends.py after
+    # refactoring runtests.py and Config to allow override
+    # sys.path for python modules when running tests
+    # DSDB python client
+    import ms.version
+    ms.version.addpkg("requests", "2.7.0")
+    ms.version.addpkg("requests-kerberos", "0.5-ms2")
+    ms.version.addpkg("kerberos", "1.1.5")
+    ms.version.addpkg("dns", "1.10.0")
+    ms.version.addpkg('ms.dsdb', '6.0.6')
+    import ms.dsdb.client
 
 # subprocess.Popen is not thread-safe in Python 2, so we need locking
 _popen_lock = Lock()
@@ -386,13 +403,44 @@ DNS_DOMAIN_EXISTS = re.compile(r"DNS domain [-\w\.\d]+ already defined")
 INVALID_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]")
 
 
+def dsdb_enabled(view_func):
+    def _decorator(request, *args, **kwargs):
+        if DSDB_ENABLED:
+            response = view_func(request, *args, **kwargs)
+            return response
+        return
+    return wraps(view_func)(_decorator)
+
+
+class DSDBEnabledMeta(type):
+    def __new__(mcls, name, bases, body):
+        for name, obj in body.items():
+            if name[:2] == name[-2:] == '__' or name in ['normalize_iface', 'getenv']:
+                # skip special method names like __init__ and helper class methods
+                continue
+            if isinstance(obj, types.FunctionType):
+                # decorate all functions
+                # class variables, classmethods and staticmethods are not decorated
+                body[name] = dsdb_enabled(obj)
+        return super(DSDBEnabledMeta, mcls).__new__(mcls, name, bases, body)
+
+    def __call__(cls, *args, **kwargs):
+        # create a new instance for this class
+        # add in `dsdbclient` attribute
+        instance = super(DSDBEnabledMeta, cls).__call__(*args, **kwargs)
+        if DSDB_ENABLED:
+            if instance.dsdb_use_testdb:
+                os.environ['DSDB_USE_TESTDB'] = "1"
+            instance.dsdbclient = ms.dsdb.client.DSDB(plant='prod', debug=True)
+        return instance
+
+
 class DSDBRunner(object):
+    __metaclass__ = DSDBEnabledMeta
 
     def __init__(self, logger=LOGGER):
-        config = Config()
         self.logger = logger
-        self.dsdb_use_testdb = config.getboolean("broker", "dsdb_use_testdb")
-        self.location_sync = config.getboolean("broker", "dsdb_location_sync")
+        self.dsdb_use_testdb = config.getboolean("dsdb", "dsdb_use_testdb")
         self.actions = []
         self.rollback_list = []
 
@@ -400,35 +448,39 @@ class DSDBRunner(object):
         return INVALID_NAME_RE.sub("_", iface)
 
     def commit(self, verbose=False):
-        for args, rollback, error_filter, ignore_msg in self.actions:
-            cmd = ["dsdb"]
-            cmd.extend(args)
-
+        for cmd_line, args, rollback, error_filter, ignore_msg in self.actions:
             try:
-                if verbose:
-                    self.logger.client_info("DSDB: %s" %
-                                            " ".join(str(a) for a in args))
-                run_command(cmd, env=self.getenv(), logger=self.logger)
+                if cmd_line:
+                    cmd = ["dsdb"]
+                    cmd.extend(args)
+                    if verbose:
+                        self.logger.client_info("DSDB: %s" %
+                                                " ".join(str(a) for a in args))
+                    run_command(cmd, env=self.getenv(), logger=self.logger)
+                else:
+                    self.invoke_dsdb_module(args, verbose=verbose)
             except ProcessException as err:
                 if error_filter and err.out and error_filter.search(err.out):
                     self.logger.warning(ignore_msg)
                 else:
                     raise
-
             if rollback:
-                self.rollback_list.append(rollback)
+                self.rollback_list.append((cmd_line, rollback))
 
     def rollback(self, verbose=False):
         self.rollback_list.reverse()
         rollback_failures = []
-        for args in self.rollback_list:
-            cmd = ["dsdb"]
-            cmd.extend(args)
+        for cmd_line, args in self.rollback_list:
             try:
-                self.logger.client_info("DSDB: %s" %
-                                        " ".join(str(a) for a in args))
-                run_command(cmd, env=self.getenv(), logger=self.logger)
-            except ProcessException as err:
+                if cmd_line:
+                    cmd = ["dsdb"]
+                    cmd.extend(args)
+                    self.logger.client_info("DSDB: %s" %
+                                            " ".join(str(a) for a in args))
+                    run_command(cmd, env=self.getenv(), logger=self.logger)
+                else:
+                    self.invoke_dsdb_module(args, verbose=True)
+            except Exception as err:
                 rollback_failures.append(str(err))
 
         did_something = bool(self.rollback_list)
@@ -440,10 +492,19 @@ class DSDBRunner(object):
         elif did_something:
             self.logger.client_info("DSDB rollback completed.")
 
+    def invoke_dsdb_module(self, args, verbose=False):
+        for method, attributes in args.iteritems():
+            if verbose:
+                self.logger.client_info("DSDB: command {} "
+                                        "called with arguments: {}.".format(method,
+                                                                            attributes))
+            dsdb_client_action = getattr(self.dsdbclient, method)
+            dsdb_client_action(**attributes)
+
     def commit_or_rollback(self, error_msg=None, verbose=False):
         try:
             self.commit(verbose=verbose)
-        except ProcessException as err:
+        except Exception as err:
             if not error_msg:
                 error_msg = "DSDB update failed"
             self.logger.warning(str(err))
@@ -451,7 +512,7 @@ class DSDBRunner(object):
             raise ArgumentError(error_msg)
 
     def add_action(self, command_args, rollback_args, error_filter=None,
-                   ignore_msg=False):
+                   ignore_msg=False, cmd_line=True):
         """
         Register an action to execute and it's rollback counterpart.
 
@@ -464,7 +525,7 @@ class DSDBRunner(object):
         if error_filter and not ignore_msg:
             raise InternalError("Specifying an error filter needs the message "
                                 "specified as well.")
-        self.actions.append((command_args, rollback_args, error_filter,
+        self.actions.append((cmd_line, command_args, rollback_args, error_filter,
                              ignore_msg))
 
     def getenv(self):
@@ -473,9 +534,6 @@ class DSDBRunner(object):
         return None
 
     def add_campus(self, campus, comments):
-        if not self.location_sync:
-            return
-
         command = ["add_campus_aq", "-campus_name", campus]
         if comments:
             command.extend(["-comments", comments])
@@ -483,24 +541,18 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def del_campus(self, campus):
-        if not self.location_sync:
-            return
         command = ["delete_campus_aq", "-campus", campus]
         rollback = ["add_campus_aq", "-campus_name", campus]
         self.add_action(command, rollback, CAMPUS_NOT_FOUND,
                         "DSDB does not have campus %s defined, proceeding.")
 
     def add_city(self, city, country, fullname):
-        if not self.location_sync:
-            return
         command = ["add_city_aq", "-city_symbol", city, "-country_symbol",
                    country, "-city_name", fullname]
         rollback = ["delete_city_aq", "-city", city]
         self.add_action(command, rollback)
 
     def update_city(self, city, campus, prev_campus):
-        if not self.location_sync:
-            return
         command = ["update_city_aq", "-city", city, "-campus", campus]
         # We can't revert to an empty campus
         if prev_campus:
@@ -510,16 +562,12 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def del_city(self, city, old_country, old_fullname):
-        if not self.location_sync:
-            return
         command = ["delete_city_aq", "-city", city]
         rollback = ["add_city_aq", "-city_symbol", city, "-country_symbol",
                     old_country, "-city_name", old_fullname]
         self.add_action(command, rollback)
 
     def add_campus_building(self, campus, building):
-        if not self.location_sync:
-            return
         command = ["add_campus_building_aq", "-campus_name", campus,
                    "-building_name", building]
         rollback = ["delete_campus_building_aq", "-campus_name", campus,
@@ -527,16 +575,12 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def add_building(self, building, city, building_addr):
-        if not self.location_sync:
-            return
         command = ["add_building_aq", "-building_name", building, "-city", city,
                    "-building_addr", building_addr]
         rollback = ["delete_building_aq", "-building", building]
         self.add_action(command, rollback)
 
     def del_campus_building(self, campus, building):
-        if not self.location_sync:
-            return
         command = ["delete_campus_building_aq", "-campus_name", campus,
                    "-building_name", building]
         rollback = ["add_campus_building_aq", "-campus_name", campus,
@@ -544,8 +588,6 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def del_building(self, building, old_city, old_addr):
-        if not self.location_sync:
-            return
         command = ["delete_building_aq", "-building", building]
         rollback = ["add_building_aq", "-building_name", building,
                     "-city", old_city, "-building_addr", old_addr]
@@ -554,13 +596,33 @@ class DSDBRunner(object):
                         "proceeding." % building)
 
     def update_building(self, building, address, old_addr):
-        if not self.location_sync:
-            return
         command = ["update_building_aq", "-building_name", building,
                    "-building_addr", address]
         rollback = ["update_building_aq", "-building_name", building,
                     "-building_addr", old_addr]
         self.add_action(command, rollback)
+
+    def add_rack(self, dbrack):
+        dsdb_client_command_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
+                                                 'building': dbrack.building.name,
+                                                 'floor': dbrack.room.floor if dbrack.room else '0',
+                                                 'comp_room': dbrack.room.name if dbrack.room else 'unknown',
+                                                 'row': dbrack.rack_row,
+                                                 'column': dbrack.rack_column,
+                                                 'comments': dbrack.comments}}
+        dsdb_client_roolback_dict = {'delete_rack': {'rack_name': dbrack.name}}
+        self.add_action(dsdb_client_command_dict, dsdb_client_roolback_dict, cmd_line=False)
+
+    def del_rack(self, dbrack):
+        dsdb_client_command_dict = {'delete_rack': {'rack_name': dbrack.name}}
+        dsdb_client_roolback_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
+                                                  'building': dbrack.building.name,
+                                                  'floor': dbrack.room.floor if dbrack.room else '0',
+                                                  'comp_room': dbrack.room.name if dbrack.room else 'unknown',
+                                                  'row': dbrack.rack_row,
+                                                  'column': dbrack.rack_column,
+                                                  'comments': dbrack.comments}}
+        self.add_action(dsdb_client_command_dict, dsdb_client_roolback_dict, cmd_line=False)
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                          comments=None, **_):
@@ -697,7 +759,7 @@ class DSDBRunner(object):
 
             iface = addr.logical_name
             if addr.interface.comments and not \
-               addr.interface.comments.startswith("Created automatically"):
+                    addr.interface.comments.startswith("Created automatically"):
                 comments = addr.interface.comments
 
             # Determine if we need to specify a primary name to DSDB.  By
@@ -743,8 +805,8 @@ class DSDBRunner(object):
         # The primary address of Zebra hosts needs extra care. Here, we cheat a
         # bit - we do not check if the primary name is a service address, but
         # instead check if it has an IP address and it was not handled above.
-        if dbhw_ent.primary_ip and \
-           str(dbhw_ent.primary_name.fqdn) not in hwdata["by-fqdn"]:
+        if (dbhw_ent.primary_ip and
+                    str(dbhw_ent.primary_name.fqdn) not in hwdata["by-fqdn"]):
             ifdata = {'iface': "vip",
                       'ip': dbhw_ent.primary_ip,
                       'mac': None,
@@ -821,13 +883,13 @@ class DSDBRunner(object):
                                      ('new_', new_ifdata)]
                       for k, v in iteritems(d)}
 
-            if old_ifdata['ip'] != new_ifdata['ip'] or \
-               old_ifdata['mac'] != new_ifdata['mac'] or \
-               old_ifdata['comments'] != new_ifdata['comments']:
+            if (old_ifdata['ip'] != new_ifdata['ip'] or
+                        old_ifdata['mac'] != new_ifdata['mac'] or
+                        old_ifdata['comments'] != new_ifdata['comments']):
                 addr_updates.append(kwargs)
 
-            if old_ifdata['fqdn'] != new_ifdata['fqdn'] or \
-               old_ifdata['iface'] != new_ifdata['iface']:
+            if (old_ifdata['fqdn'] != new_ifdata['fqdn'] or
+                        old_ifdata['iface'] != new_ifdata['iface']):
                 name_updates.append(kwargs)
 
             # Delete the entries from new_hwdata.  We have recorded an
@@ -881,22 +943,16 @@ class DSDBRunner(object):
                         "The DNS domain %s does not exist in DSDB, "
                         "proceeding." % dns_domain)
 
-    rack_row_re = re.compile(r'^\s*Row:\s*\b([-\w]+)\b$', re.M)
-    rack_col_re = re.compile(r'^\s*Column:\s*\b([-\w]+)\b$', re.M)
-
     def show_rack(self, rackname):
-
-        out = run_command(["dsdb", "show_rack", "-rack_name", rackname],
-                          env=self.getenv())
-        rack_row = self.rack_row_re.search(out)
-        rack_col = self.rack_col_re.search(out)
+        rack_data = self.dsdbclient.show_rack(rack_name=rackname).results()
         fields = {}
-        fields["rack_row"] = rack_row and rack_row.group(1) or None
-        fields["rack_col"] = rack_col and rack_col.group(1) or None
+        if rack_data:
+            fields = {"rack_row": rack_data[0]["row"],
+                      "rack_col": rack_data[0]["column"]}
 
-        if not fields["rack_row"] or not fields["rack_col"]:
-            raise ValueError("Rack %s is missing row and/or col data")
-
+        if not fields or not fields["rack_row"] or not fields["rack_col"]:
+            raise ValueError("Rack %s is not found in DSDB or missing "
+                             "row and/or col data")
         return fields
 
     primary_re = re.compile(r'^\s*Primary Name:\s*\b([-\w]+)\b$', re.M)

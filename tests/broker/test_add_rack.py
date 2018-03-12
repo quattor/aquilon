@@ -158,6 +158,24 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "rack,np997,building,np,zz,99", command)
         self.matchoutput(out, "rack,np909,building,np,99,zz", command)
 
+    def testbadrackid(self):
+        command = "add rack --rackid gg-rr --building np --row 100 --column zz"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Invalid Rack name gg-rr. Correct name format: "
+                              "Building name + numeric Rack ID.", command)
+
+    def testdsdbfailure(self):
+        command = "add rack --rackid ut666 --building ut --row 666 --column zz"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Rack ut666 is already defined", command)
+        self.matchoutput(err, "Bad Request: DSDB update failed", command)
+
+    def testdsdbfailureoy604(self):
+        command = "add rack --rackid oy604 --building oy --row 604 --column zz"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Rack oy604 is already defined", command)
+        self.matchoutput(err, "Bad Request: DSDB update failed", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRack)
