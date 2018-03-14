@@ -25,7 +25,6 @@ if __name__ == "__main__":
 
 from brokertest import TestBrokerCommand
 
-
 class TestAddNetwork(TestBrokerCommand):
 
     def test_100_addnetwork(self):

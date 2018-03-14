@@ -44,6 +44,28 @@ class TestUpdateNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network Type: dmz-net", command)
         self.matchoutput(out, "Side: b", command)
 
+    def test_120_update_rename(self):
+        command = ["update", "network", "--network", "netsvcmap",
+                   "--rename_to", "rename-test", "--comments", "New comment"]
+        self.noouttest(command)
+
+    def test_121_update_rename_verify(self):
+        command = ["show", "network", "--network", "rename-test"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network: rename-test", command)
+        self.matchoutput(out, "Comments: New comment", command)
+
+    def test_122_update_rename_existing(self):
+        net = self.net["np06bals03_v103"]
+        command = ["update", "network", "--network", "rename-test",
+                   "--rename_to", "np06bals03_v103"]
+        out,err = self.successtest(command)
+        self.matchoutput(err, "WARNING: Network name {} is already used for address {}/{}."
+                              .format("np06bals03_v103", net.ip, net.prefixlen), command)
+
+        command = ["update", "network", "--ip", net.ip, "--rename_to", "netsvcmap"]
+        self.noouttest(command)
+
     def test_200_update_utdmz1(self):
         net = self.net["ut_dmz1"]
         command = ["update_network",
