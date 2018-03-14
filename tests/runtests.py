@@ -164,11 +164,8 @@ if opts.start:
         print("Will be using database dump {} to create DB. Tests will start from {}.".format(dumfile, opts.start))
 
 if opts.failfast:
-    if (not config.has_option("unittest", "last_success_db_snapshot") or \
-        not config.get("unittest", "last_success_db_snapshot")) and \
-                    database_type == 'database_sqlite':
-        print("'last_success_db_snapshot' path config parameter missing.")
-        sys.exit(1)
+    print("Running unittests with failfast option.")
+    os.environ["AQD_UNITTEST_FAILFAST"] = "1"
 
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None

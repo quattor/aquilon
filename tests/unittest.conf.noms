@@ -77,9 +77,7 @@ ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
 building_feed = %(srcdir)s/tests/fakebin/user-data/location_feed.csv
 
 [unittest]
-last_success_db_snapshot =
-# To be used with --failfast option
-#last_success_db_snapshot = %(quattordir)s/aquilondb/aquilon_last_success_snapshot.db
+last_success_db_snapshot = %(quattordir)s/aquilondb/aquilon_last_success_snapshot.db
 scratchdir = %(basedir)s/scratch
 mirrordir = %(basedir)s/mirror
 
