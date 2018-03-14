@@ -28,12 +28,11 @@ from brokertest import TestBrokerCommand
 
 class TestDelInterfaceAddress(TestBrokerCommand):
 
-    def test_100_delkeepdns(self):
+    def test_100_del(self):
         ip = self.net["zebra_eth1"].usable[0]
         self.dsdb_expect_delete(ip)
-        self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", ip)
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
-                   "--interface", "eth1", "--ip", ip, "--keep_dns"]
+                   "--interface", "eth1", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -62,12 +61,6 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                    "--interface", "eth0", "--ip", "192.168.0.1"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Machine no-such-machine not found.", command)
-
-    def test_140_verifykeepdns(self):
-        command = ["search", "dns",
-                   "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
 
     def test_150_delbylabel(self):
         ip = self.net["zebra_eth1"].usable[3]

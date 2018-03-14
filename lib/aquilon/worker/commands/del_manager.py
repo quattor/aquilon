@@ -50,6 +50,6 @@ class CommandDelManager(CommandDelInterfaceAddress):
                                                      interface=dbinterface.name,
                                                      fqdn=manager,
                                                      ip=assignment.ip,
-                                                     label=None, keep_dns=False,
+                                                     label=None,
                                                      network_environment=None,
                                                      **arguments)
