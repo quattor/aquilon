@@ -27,7 +27,7 @@ class CommandShowChassisAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **_):
+    def render(self, session, style, **_):
         q = session.query(Chassis)
 
         # Prefer the primary name for ordering
@@ -37,4 +37,8 @@ class CommandShowChassisAll(BrokerCommand):
                       contains_eager('primary_name.fqdn'),
                       contains_eager('primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name, Chassis.label)
-        return StringAttributeList(q.all(), "fqdn")
+
+        if style == 'proto':
+            return q.all()
+        else:
+            return StringAttributeList(q.all(), "fqdn")

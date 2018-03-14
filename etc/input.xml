@@ -2877,6 +2877,9 @@
 	    <option name="chassis" type="string">Chassis name</option>
 	    <option name="all" type="flag">Select all</option>
 	</optgroup>
+	<format name="proto">
+	    <message_class name="ChassisList" module="aqdsystems_pb2"/>
+	</format>
 	<transport trigger="all" method="get" path="chassis"/>
 	<transport trigger="chassis" method="get" path="chassis/%(chassis)s"/>
     </command>
