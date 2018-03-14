@@ -110,6 +110,14 @@ class TestAddDynamicRange(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Range Class: %s" % "vm", command)
 
+    def test_105_show_range_notfound(self):
+        ip = str(self.net['unknown0'].usable[13])
+        command = ["show", "dynamic", "range", "--ip", ip]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "{} is not part of a dynamic range".format(ip),
+                         command)
+
     def test_105_show_fqdn(self):
         net = self.net["dyndhcp0"]
         start = net.usable[2]
