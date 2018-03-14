@@ -23,7 +23,7 @@ from aquilon.aqdb.model import Location, DnsDomain
 from aquilon.utils import validate_nlist_key
 from aquilon.config import Config
 from aquilon.worker.processes import run_command
-
+from aquilon.worker.logger import CLIENT_INFO
 
 def get_location(session, query_options=None, compel=False, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
@@ -64,10 +64,10 @@ def get_location_list(session, compel=False, **kwargs):
             for name in names.split(",")]
 
 
-def add_location(session, cls, name, parent, force_uri=None, **kwargs):
+def add_location(session, cls, name, parent, force_uri=None, logger=None, **kwargs):
     validate_nlist_key(cls.__name__, name)
     if 'uri' in kwargs and kwargs['uri'] is not None:
-        validate_uri(kwargs['uri'], cls.__name__, name, force_uri)
+        validate_uri(kwargs['uri'], cls.__name__, name, force_uri, logger)
 
     cls.get_unique(session, name, preclude=True)
     dbloc = cls(name=name, parent=parent, **kwargs)
@@ -88,7 +88,7 @@ def get_default_dns_domain(dblocation):
                             "{0:l}.  Please specify --dns_domain."
                             .format(dblocation))
 
-def validate_uri(uri, clsname, name, force):
+def validate_uri(uri, clsname, name, force, logger):
     config = Config()
     validator = config.lookup_tool("location_uri_validator")
     if config.has_section("location_feeds"):
@@ -97,22 +97,23 @@ def validate_uri(uri, clsname, name, force):
     if force is None and validator is not None:
         try:
             run_command([validator, "--uri", uri, "--location-type", clsname,
-                    "--location", name, "--location-feed", location_feed])
+                        "--location", name, "--location-feed", location_feed],
+                        logger=logger, stream_level=CLIENT_INFO)
         except ProcessException as err:
             raise ArgumentError("Location URI not valid: %s%s" % (err.out, err.err))
 
     return uri
 
 def update_location(dblocation, fullname=None, default_dns_domain=None,
-                    comments=None, uri=None, force_uri=None):
+                    comments=None, uri=None, force_uri=None, logger=None):
     """ Update common location attributes """
 
     if fullname is not None:
         dblocation.fullname = fullname
 
     if uri is not None:
-        dblocation.uri = validate_uri(uri, dblocation.__class__.__name__, dblocation.name,
-                                      force_uri)
+        dblocation.uri = validate_uri(uri, dblocation.__class__.__name__,
+                                      dblocation.name, force_uri, logger)
 
     if default_dns_domain is not None:
         if default_dns_domain:

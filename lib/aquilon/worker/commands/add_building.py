@@ -31,7 +31,7 @@ class CommandAddBuilding(BrokerCommand):
         dbcity = City.get_unique(session, city, compel=True)
         add_location(session, Building, building, dbcity, uri=uri,
                      fullname=fullname, address=address, comments=comments,
-                     force_uri=force_uri)
+                     force_uri=force_uri, logger=logger)
 
         session.flush()
 

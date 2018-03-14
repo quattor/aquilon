@@ -139,6 +139,13 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Location URI: assetinventory://003550",
                          command)
+    def test_145_update_uri_nocode(self):
+        command = ["update", "building", "--building", "Testo",
+                   "--uri", "assetinventory://005555"]
+        (out, err) = self.successtest(command)
+        self.searchoutput(err, "Warning: 'IT_CODE' in '(.*)' is empty for "
+                               "URI 'assetinventory://005555'! Proceeding "
+                               "without validation.", command)
 
     def test_150_set_up_prod_personality(self):
         GRN = "grn:/ms/ei/aquilon/aqd"
