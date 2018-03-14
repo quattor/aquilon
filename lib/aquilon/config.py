@@ -20,6 +20,7 @@
 import os
 import socket
 import pwd
+import sys
 from six.moves.configparser import SafeConfigParser  # pylint: disable=F0401
 
 from aquilon.exceptions_ import AquilonError
@@ -68,6 +69,18 @@ def lookup_file_path(name):
     # We know it does not exist, but returning the name may give the user a
     # clue
     return paths_to_try[0]
+
+
+def amend_sys_path(config):
+    """
+    Amend sys path to change which python modules will be loaded
+    If application running in unittest mode, prepend
+    fakepython module dir to replace modules used for tests
+    :param config:
+    :return:
+    """
+    if config.has_value('unittest', 'fake_module_location'):
+        sys.path = [config.get('unittest', 'fake_module_location')] + sys.path
 
 
 # All defaults should be in etc/aqd.conf.defaults.  This is only needed to

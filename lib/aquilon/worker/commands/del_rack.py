@@ -17,14 +17,24 @@
 """Contains the logic for `aq del rack`."""
 
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Rack
 from aquilon.worker.commands.del_location import CommandDelLocation
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandDelRack(CommandDelLocation):
 
     required_parameters = ["rack"]
 
-    def render(self, session, rack, **arguments):
-        return CommandDelLocation.render(self, session=session, name=rack,
-                                         type='rack', **arguments)
+    def render(self, session, logger, rack, **arguments):
+        dbrack = Rack.get_unique(session, rack, compel=True)
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.del_rack(dbrack)
+
+        result = CommandDelLocation.render(self, session=session, name=rack,
+                                           type='rack', **arguments)
+        session.flush()
+        dsdb_runner.commit_or_rollback()
+
+        return result

@@ -63,14 +63,22 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.assertEqual(len(chassis.interfaces), 1)
 
     def test_110_add_ut3c1(self):
-        command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model utchassis"
+        command = "add chassis --chassis ut3c1.aqd-unittest.ms.com --rack ut3 --model aurora_chassis_model"
         self.noouttest(command.split(" "))
 
     def test_115_verify_ut3c1(self):
         self.verifychassis("ut3c1.aqd-unittest.ms.com",
+                           "aurora_vendor", "aurora_chassis_model", "ut3", "a", "3")
+
+    def test_116_add_ut3c1(self):
+        command = "update chassis --chassis ut3c1.aqd-unittest.ms.com --model utchassis"
+        self.noouttest(command.split(" "))
+
+    def test_117_verify_ut3c1(self):
+        self.verifychassis("ut3c1.aqd-unittest.ms.com",
                            "aurora_vendor", "utchassis", "ut3", "a", "3")
 
-    def test_115_verify_chassis_dns(self):
+    def test_118_verify_chassis_dns(self):
         command = "search dns --fqdn ut3c1.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
