@@ -23,9 +23,9 @@ from aquilon.aqdb.model import Rack
 from aquilon.worker.dbwrappers.location import get_location
 
 
-def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
+def get_or_create_rack(session, rackrow, rackcolumn, building=None,
                        room=None, bunker=None, fullname=None, comments=None,
-                       preclude=False):
+                       force_rackid=None, preclude=False):
     dblocation = get_location(session, building=building, room=room,
                               bunker=bunker, compel=True)
     dbbuilding = dblocation.building
@@ -38,15 +38,20 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
         rackrow = str(rackrow).strip().lower()
     if rackcolumn is not None:
         rackcolumn = str(rackcolumn).strip().lower()
-    if rackid is not None:
-        rackid = str(rackid).strip().lower()
 
-    rackid_numeric = rackid
-    if rackid.startswith(dbbuilding.name):
-        rackid_numeric = rackid.replace(dbbuilding.name, '')
-    if not rackid_numeric.isdigit():
-        raise ArgumentError("Invalid Rack name {}. Correct name format: Building name + numeric Rack ID.".format(rackid))
-    rack_name = dbbuilding.name + rackid_numeric
+    if force_rackid is not None:
+        rackid_numeric = force_rackid.replace(dbbuilding.name, '')
+        if not rackid_numeric.isdigit():
+            raise ArgumentError("Invalid rack name {}. Correct name format: "
+                                "building name + numeric rack ID.".format(force_rackid))
+        rack_name = force_rackid
+        # Allow to fill in rack name gaps without resetting the next_rackid
+        if dbbuilding.next_rackid <= int(rackid_numeric):
+            dbbuilding.next_rackid = int(rackid_numeric) + 1
+    else:
+        rackid_numeric = dbbuilding.next_rackid
+        rack_name = dbbuilding.name + str(rackid_numeric)
+        dbbuilding.next_rackid += 1
 
     try:
         dbrack = session.query(Rack).filter_by(name=rack_name).one()
@@ -69,5 +74,5 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
 
     dbrack = Rack(name=rack_name, fullname=fullname, parent=dblocation,
                   rack_row=rackrow, rack_column=rackcolumn, comments=comments)
-    session.add(dbrack)
+    session.add(dbrack, dbbuilding)
     return dbrack

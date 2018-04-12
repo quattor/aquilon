@@ -37,9 +37,9 @@ def host_fqdn(host):
 config = {
     # Buildings to add
     "building": {
-        "utb1": {"address": "Unit 1 Test Park", "city": "ny"},
-        "utb2": {"address": "Unit 2 Test Park", "city": "ny"},
-        "utb3": {"address": "Unit 3 Test Park", "city": "ny"},
+        "utb1": {"address": "Unit 1 Test Park", "city": "ny", "next_rackid": "1"},
+        "utb2": {"address": "Unit 2 Test Park", "city": "ny", "next_rackid": "1"},
+        "utb3": {"address": "Unit 3 Test Park", "city": "ny", "next_rackid": "1"},
     },
 
     # Service mappings required (by service name and instance)
@@ -172,8 +172,9 @@ class TestBuildClusters(MachineTestMixin, TestBrokerCommand):
         """ Add racks needed for the use case """
         for rack in config["rack"]:
             args = config["rack"][rack]
-            self.noouttest(["add_rack", "--rack", rack] +
-                           ["--%s=%s" % (a, args[a]) for a in args])
+            cmd = ["add_rack"] + ["--%s=%s" % (a, args[a]) for a in args]
+            out = self.commandtest(cmd)
+            self.matchoutput(out, rack, cmd)
 
     def test_120_add_host(self):
         """ Add hosts needed for the use case """

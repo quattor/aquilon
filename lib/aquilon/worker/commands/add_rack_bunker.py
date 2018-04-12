@@ -22,4 +22,4 @@ from aquilon.worker.commands.add_rack import CommandAddRack
 
 class CommandAddRackBunker(CommandAddRack):
 
-    required_parameters = ["rackid", "bunker", "row", "column"]
+    required_parameters = ["bunker", "row", "column"]

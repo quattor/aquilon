@@ -105,11 +105,15 @@ def validate_uri(uri, clsname, name, force, logger):
     return uri
 
 def update_location(dblocation, fullname=None, default_dns_domain=None,
-                    comments=None, uri=None, force_uri=None, logger=None):
+                    comments=None, uri=None, force_uri=None, logger=None,
+                    next_rackid=None):
     """ Update common location attributes """
 
     if fullname is not None:
         dblocation.fullname = fullname
+
+    if next_rackid is not None:
+        dblocation.next_rackid = next_rackid
 
     if uri is not None:
         dblocation.uri = validate_uri(uri, dblocation.__class__.__name__,

@@ -118,6 +118,7 @@ class TestSearchRack(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ut13", command)
 
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchRack)
     unittest.TextTestRunner(verbosity=2).run(suite)
