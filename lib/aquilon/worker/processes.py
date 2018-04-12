@@ -37,6 +37,7 @@ from ipaddress import IPv4Address
 from mako.lookup import TemplateLookup
 from twisted.python import context
 from twisted.python.log import callWithContext, ILogContext
+from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
@@ -437,6 +438,7 @@ class DSDBEnabledMeta(type):
 
 class DSDBRunner(object):
     __metaclass__ = DSDBEnabledMeta
+    snapshot_handlers = {}
 
     def __init__(self, logger=LOGGER):
         self.logger = logger
@@ -446,6 +448,10 @@ class DSDBRunner(object):
 
     def normalize_iface(self, iface):
         return INVALID_NAME_RE.sub("_", iface)
+
+    def snapshot(self, obj):
+        env_calculate_method = self.snapshot_handlers.get(inspect(obj.__class__).polymorphic_identity)
+        return env_calculate_method(self, obj)
 
     def commit(self, verbose=False):
         for cmd_line, args, rollback, error_filter, ignore_msg in self.actions:
@@ -464,6 +470,11 @@ class DSDBRunner(object):
                     self.logger.warning(ignore_msg)
                 else:
                     raise
+            except:
+                if error_filter:
+                    self.logger.warning(ignore_msg)
+                else:
+                    raise AquilonError("DSDB commands failed: {}.".format(', '.join(args.keys())))
             if rollback:
                 self.rollback_list.append((cmd_line, rollback))
 
@@ -602,6 +613,14 @@ class DSDBRunner(object):
                     "-building_addr", old_addr]
         self.add_action(command, rollback)
 
+    def snapshot_rack(self, dbrack):
+        snapshot_rack = {'floor': dbrack.room.floor if dbrack.room else '0',
+                         'comp_room': dbrack.room.name if dbrack.room else 'unknown',
+                         'row': dbrack.rack_row,
+                         'column': dbrack.rack_column,
+                         'comments': dbrack.comments}
+        return snapshot_rack
+
     def add_rack(self, dbrack):
         dsdb_client_command_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
                                                  'building': dbrack.building.name,
@@ -610,19 +629,39 @@ class DSDBRunner(object):
                                                  'row': dbrack.rack_row,
                                                  'column': dbrack.rack_column,
                                                  'comments': dbrack.comments}}
-        dsdb_client_roolback_dict = {'delete_rack': {'rack_name': dbrack.name}}
-        self.add_action(dsdb_client_command_dict, dsdb_client_roolback_dict, cmd_line=False)
+        dsdb_client_rollback_dict = {'delete_rack': {'rack_name': dbrack.name}}
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False)
+
+    def update_rack(self, dbrack, snapshot_rack):
+        dsdb_client_command_dict = {'update_rack': {'rack': dbrack.name,
+                                                 'floor': dbrack.room.floor if dbrack.room else '0',
+                                                 'comp_room': dbrack.room.name if dbrack.room else 'unknown',
+                                                 'row': dbrack.rack_row,
+                                                 'column': dbrack.rack_column,
+                                                 'comments': dbrack.comments}}
+        dsdb_client_rollback_dict = {'update_rack': {'rack': dbrack.name,
+                                                     'floor': snapshot_rack['floor'],
+                                                     'comp_room': snapshot_rack['comp_room'],
+                                                     'row': snapshot_rack['row'],
+                                                     'column': snapshot_rack['column'],
+                                                     'comments': snapshot_rack['comments']}}
+        # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False,
+                        error_filter=True, ignore_msg="Update rack {} in DSDB failed, "
+                                                      "proceeding.".format(dbrack.name))
 
     def del_rack(self, dbrack):
         dsdb_client_command_dict = {'delete_rack': {'rack_name': dbrack.name}}
-        dsdb_client_roolback_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
+        dsdb_client_rollback_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
                                                   'building': dbrack.building.name,
                                                   'floor': dbrack.room.floor if dbrack.room else '0',
                                                   'comp_room': dbrack.room.name if dbrack.room else 'unknown',
                                                   'row': dbrack.rack_row,
                                                   'column': dbrack.rack_column,
                                                   'comments': dbrack.comments}}
-        self.add_action(dsdb_client_command_dict, dsdb_client_roolback_dict, cmd_line=False)
+        # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False, error_filter=True,
+                        ignore_msg="Delete rack {} in DSDB failed, proceeding.".format(dbrack.name))
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                          comments=None, **_):
@@ -1036,3 +1075,6 @@ def build_mako_lookup(config, kind, **kwargs):
             directories.append(srcpath)
 
     return TemplateLookup(directories=directories, **kwargs)
+
+
+DSDBRunner.snapshot_handlers['rack'] = DSDBRunner.snapshot_rack

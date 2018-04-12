@@ -6,3 +6,4 @@ build/bdist.*
 VERSION
 MANIFEST
 .idea/
+tests/fakebin/user-data/passwd.byname

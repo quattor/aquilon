@@ -102,13 +102,9 @@ class TestDelRack(TestBrokerCommand):
 
     def test_305_del_rack(self):
         command = ["del_rack", "--rack", "oy604"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err,
-                         "Delete from DSDB failed!",
-                         command)
-        self.matchoutput(err,
-                         "Bad Request: DSDB update failed",
-                         command)
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Delete rack oy604 in DSDB failed, "
+                              "proceeding.", command)
 
     def test_300_show_all(self):
         command = ["show_rack", "--all"]

@@ -200,6 +200,18 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, "np997", command)
         self.matchoutput(out, "np998", command)
 
+    def test_240_dsdb_fail(self):
+        command = ["update", "rack", "--rack", "oy604",
+                   "--comments", "Important comments"]
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Update rack oy604 in DSDB failed, "
+                              "proceeding.", command)
+
+    def test_245_dsdb_fail_verify(self):
+        command = ["show", "rack", "--rack", "oy604"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Comments: Important comments", command)
+
 
     def test_250_verifyshowallcsv(self):
         command = "show rack --all --format=csv"

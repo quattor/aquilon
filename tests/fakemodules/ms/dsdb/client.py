@@ -44,6 +44,11 @@ class DSDB(object):
         if rack_name in dsdb_racks.side_effect:
             raise Exception('Delete from DSDB failed!')
 
+    def update_rack(self, rack, **kwargs):
+        dsdb_racks = DSDBRackData(rack)
+        if rack in dsdb_racks.side_effect:
+            raise Exception('Update in DSDB failed!')
+
 
 class DSDBRackData(object):
     """
