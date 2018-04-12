@@ -362,10 +362,10 @@ get_camtable = 300
 aii_installfe = 600
 vlan2net = 600
 qip_dump_subnetdata = 600
-aqd_checkedm = 30
+aqd_checkedm = 120
 location_uri_validator = 30
 switch_discover = 30
-dsdb = 30
+dsdb = 120
 git = 30
 
 [site]
