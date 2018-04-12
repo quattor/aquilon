@@ -216,7 +216,7 @@ dsdb_use_testdb = False
 enable = False
 
 [tool_locations]
-dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
+dsdb = /ms/dist/aurora/PROJ/dsdb/6.x-prod/bin/dsdb
 ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh
 switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
 get_camtable = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/get-camtable
