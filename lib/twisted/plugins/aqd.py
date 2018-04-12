@@ -29,7 +29,7 @@ from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
 from twisted.internet import reactor
 
-from aquilon.config import Config, amend_sys_path
+from aquilon.config import Config
 from aquilon.twisted_patches import (GracefulProcessMonitor, integrate_logging)
 from aquilon.worker.knc_protocol import KNCSite
 from aquilon.worker.base_protocol import AQDSite
@@ -135,7 +135,6 @@ class AQDMaker(object):
 
         # Set this up before the aqdb libs get imported...
         integrate_logging(config)
-        amend_sys_path(config)
 
         progname = os.path.split(sys.argv[0])[1]
 

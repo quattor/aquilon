@@ -26,7 +26,6 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_ip_restrictions,
                                                  assign_address)
-from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -51,13 +50,7 @@ class CommandAddChassis(BrokerCommand):
 
         dblocation = get_location(session, rack=rack)
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   model_type=ChassisType.Chassis)
-        if not dbmodel:
-            dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type=ChassisType.AuroraChassis)
-        if not dbmodel:
-            raise NotFoundException("Model {}, model_type chassis or aurora_chassis not found.".format(model))
-
+                                   model_type=ChassisType.Chassis, compel=True)
         # FIXME: Precreate chassis slots?
         dbchassis = Chassis(label=label, location=dblocation, model=dbmodel,
                             serial_no=serial, comments=comments)

@@ -2920,10 +2920,11 @@
 
     <command name="add_rack">
 	Add a new rack to the database.  To add a rack named dd120 on tile H13,
-	use --building=dd --rackid=120 --row=H --column=13.  The rackid option can also
-	be prepended by building name: --building=dd --rackid=dd120 --row=H --column=13.
+	use --building=dd --rackid=120 --row=H --column=13.  The rackid
+	option can also be prefixed by building name, so using
+	--building=dd --rackid=dd120 --row=H --column=13 would also work.
 	<optgroup mandatory="True" fields="all">
-	    <option name="rackid" type="string">Name of the new rack: building name + rackid, or just the rackid number</option>
+	    <option name="rackid" type="string">Name of the new rack, or just the id number</option>
 	    <option name="row" type="string">Row of the tile location</option>
 	    <option name="column" type="string">Column of the tile location</option>
 	    <optgroup fields="one">
@@ -2933,7 +2934,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="fullname" type="string">Full rack name from Aperture</option>
+	    <option name="fullname" type="string">Full, descriptive name</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -2951,7 +2952,7 @@
 	<optgroup>
 	    <option name="row" type="string">Row of the tile location</option>
 	    <option name="column" type="string">Column of the tile location</option>
-	    <option name="fullname" type="string">Full rack name from Aperture</option>
+	    <option name="fullname" type="string">Full, descriptive name</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3148,7 +3149,6 @@
 	Add a new room to the database.
 	<optgroup mandatory="True" fields="all">
 	    <option name="room" type="string">Name of the new room</option>
-	    <option name="floor" type="string">Floor of the room</option>
 	    <option name="building" type="string">Name of the building that contains the room</option>
 	</optgroup>
 	<optgroup>

@@ -21,7 +21,6 @@ from aquilon.aqdb.model import Model, Chassis, HardwareEntity
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
-from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
@@ -38,12 +37,8 @@ class CommandUpdateChassis(BrokerCommand):
 
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type=ChassisType.Chassis)
-            if not dbmodel:
-                dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                           model_type=ChassisType.AuroraChassis)
-            if not dbmodel:
-                raise NotFoundException("Model {}, model_type chassis or aurora_chassis not found.".format(model))
+                                       model_type=ChassisType.Chassis,
+                                       compel=True)
             dbchassis.model = dbmodel
 
         dblocation = get_location(session, rack=rack)

@@ -23,12 +23,12 @@ from aquilon.worker.dbwrappers.location import add_location
 
 class CommandAddRoom(BrokerCommand):
 
-    required_parameters = ["room", "building", "floor"]
+    required_parameters = ["room", "building"]
 
-    def render(self, session, room, building, fullname, comments, floor, **_):
+    def render(self, session, room, building, fullname, comments, **_):
         dbbuilding = Building.get_unique(session, building, compel=True)
         add_location(session, Room, room, dbbuilding, fullname=fullname,
-                     comments=comments, floor=floor)
+                     comments=comments)
 
         session.flush()
 

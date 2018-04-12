@@ -18,7 +18,6 @@
 
 from sqlalchemy import Column, ForeignKey
 
-from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Location, Building
 
 _TN = 'room'
@@ -32,6 +31,5 @@ class Room(Location):
     valid_parents = [Building]
 
     id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
-    floor = Column(AqStr(16), default='0')
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)

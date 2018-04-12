@@ -41,15 +41,17 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
     if rackid is not None:
         rackid = str(rackid).strip().lower()
 
-    rackid_numeric = rackid
-    if rackid.startswith(dbbuilding.name):
-        rackid_numeric = rackid.replace(dbbuilding.name, '')
-    if not rackid_numeric.isdigit():
-        raise ArgumentError("Invalid Rack name {}. Correct name format: Building name + numeric Rack ID.".format(rackid))
-    rack_name = dbbuilding.name + rackid_numeric
+    # Because of http, rackid comes in as a string.  It just
+    # gets treated as such here.
+    # Check for redundancy...
+    if len(rackid) > len(dbbuilding.name) and rackid.startswith(
+            dbbuilding.name):
+        rack = rackid
+    else:
+        rack = dbbuilding.name + rackid
 
     try:
-        dbrack = session.query(Rack).filter_by(name=rack_name).one()
+        dbrack = session.query(Rack).filter_by(name=rack).one()
         if rackrow is not None and rackrow != dbrack.rack_row:
             raise ArgumentError("Found rack with name %s, but the current "
                                 "row %s does not match given row %s." %
@@ -65,9 +67,8 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
         pass
 
     if fullname is None:
-        fullname = rack_name
-
-    dbrack = Rack(name=rack_name, fullname=fullname, parent=dblocation,
+        fullname = rack
+    dbrack = Rack(name=rack, fullname=fullname, parent=dblocation,
                   rack_row=rackrow, rack_column=rackcolumn, comments=comments)
     session.add(dbrack)
     return dbrack

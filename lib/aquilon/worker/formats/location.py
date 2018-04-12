@@ -16,7 +16,7 @@
 # limitations under the License.
 """Location formatter."""
 
-from aquilon.aqdb.model import Location, Rack, Building, Room
+from aquilon.aqdb.model import Location, Rack, Building
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
@@ -37,8 +37,6 @@ class LocationFormatter(ObjectFormatter):
             details.append(indent + "  Address: %s" % location.address)
             if location.uri:
                 details.append(indent + "  Location URI: %s" % location.uri)
-        elif isinstance(location, Room) and location.floor:
-            details.append(indent + "  Floor: %s" % location.floor)
         if location.comments:
             details.append(indent + "  Comments: %s" % location.comments)
         if location.parents:

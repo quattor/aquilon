@@ -36,6 +36,7 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testaddaurorawithnode(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_with_node)
+        self.dsdb_expect("show_rack -rack_name oy604")
         self.noouttest(["add", "aurora", "host",
                         "--osname", "linux", "--osversion", self.linux_version_prev,
                         "--hostname", self.aurora_with_node, "--buildstatus", "build"])
@@ -48,9 +49,6 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Machine: %s" % self.aurora_with_node, command)
         self.matchoutput(out, "Model Type: aurora_node", command)
         self.matchoutput(out, "Chassis: oy604c2.ms.com", command)
-        self.matchoutput(out, "Rack: oy604", command)
-        self.matchoutput(out, "Row: b", command)
-        self.matchoutput(out, "Column: 04", command)
         self.matchoutput(out, "Slot: 6", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
@@ -103,9 +101,10 @@ class TestAddAuroraHost(TestBrokerCommand):
 
     def testdsdbrackmissing(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_rack)
+        self.dsdb_expect("show_rack -rack_name oy605", fail=True)
         command = ["add", "aurora", "host",
                    "--hostname", self.aurora_without_rack,
-                   "--osname", "linux", "--osversion", self.linux_version_prev] + self.valid_just_tcm
+                   "--osname", "linux", "--osversion", self.linux_version_prev]  + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
         self.dsdb_verify()

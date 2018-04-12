@@ -78,7 +78,6 @@ building_feed = %(srcdir)s/tests/fakebin/user-data/location_feed.csv
 
 [unittest]
 last_success_db_snapshot = %(quattordir)s/aquilondb/aquilon_last_success_snapshot.db
-fake_module_location = %(srcdir)s/tests/fakemodules/
 scratchdir = %(basedir)s/scratch
 mirrordir = %(basedir)s/mirror
 

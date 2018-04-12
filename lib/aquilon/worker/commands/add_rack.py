@@ -18,23 +18,16 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.rack import get_or_create_rack
-from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddRack(BrokerCommand):
 
     required_parameters = ["rackid", "building", "row", "column"]
 
-    def render(self, session, logger, rackid, building, room, bunker, row, column,
+    def render(self, session, rackid, building, room, bunker, row, column,
                fullname, comments, **_):
-        dbrack = get_or_create_rack(session=session, rackid=rackid, rackrow=row,
-                                   rackcolumn=column, building=building, room=room,
-                                   bunker=bunker, fullname=fullname, comments=comments,
-                                   preclude=True)
-
-        session.flush()
-        dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.add_rack(dbrack)
-        dsdb_runner.commit_or_rollback()
-
+        get_or_create_rack(session=session, rackid=rackid, rackrow=row,
+                           rackcolumn=column, building=building, room=room,
+                           bunker=bunker, fullname=fullname, comments=comments,
+                           preclude=True)
         return

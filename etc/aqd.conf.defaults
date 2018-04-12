@@ -151,6 +151,8 @@ plenarydir = %(cfgdir)s/plenary
 #git_author_email =
 #git_committer_name =
 #git_committer_email =
+dsdb_location_sync = True
+dsdb_use_testdb = False
 #ant_options = -Xmx2560m -server
 service = %(user)s
 keytab = /var/spool/keytabs/%(service)s
@@ -205,10 +207,6 @@ disk_controller_types = cciss, fibrechannel, flash, ide, nvme, sas, sata, scsi
 
 dynamic_range_classes = vm, fab
 default_dynamic_range_class = vm
-
-[dsdb]
-enable = True
-dsdb_use_testdb = False
 
 [change_management]
 # The contents of --justification will not be validated externally
