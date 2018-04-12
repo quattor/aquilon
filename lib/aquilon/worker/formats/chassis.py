@@ -62,12 +62,14 @@ class ChassisFormatter(HardwareEntityFormatter):
                 s_slot.type = slot.slot_type
 
                 if isinstance(slot, MachineChassisSlot):
-                    MachineFormatter().fill_proto(
-                        slot.machine, s_slot.machine,
-                        embedded=embedded, indirect_attrs=indirect_attrs)
+                    if slot.machine:
+                        MachineFormatter().fill_proto(
+                            slot.machine, s_slot.machine,
+                            embedded=embedded, indirect_attrs=indirect_attrs)
                 elif isinstance(slot, NetworkDeviceChassisSlot):
-                    NetworkDeviceFormatter().fill_proto(
-                        slot.network_device, s_slot.network_device,
-                        embedded=embedded, indirect_attrs=indirect_attrs)
+                    if slot.network_device:
+                        NetworkDeviceFormatter().fill_proto(
+                            slot.network_device, s_slot.network_device,
+                            embedded=embedded, indirect_attrs=indirect_attrs)
 
 ObjectFormatter.handlers[Chassis] = ChassisFormatter()

@@ -133,6 +133,48 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "Slot #2 (type: network_device): ut3c5netdev1 (ut3c5netdev1.aqd-unittest.ms.com)",
                          command)
 
+    def test_206_show_ut3c5_proto_with_empty_netdev_slot(self):
+        command = ["show", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        chassis = self.protobuftest(command, expect=1)[0]
+
+        self.assertEqual(chassis.name, 'ut3c5')
+        self.assertEqual(chassis.primary_name, 'ut3c5.aqd-unittest.ms.com')
+        self.assertEqual(chassis.serial_no, 'ABC1234')
+
+        self.assertEqual(chassis.model.model_type, 'chassis')
+        self.assertEqual(chassis.model.name, 'utchassis')
+        self.assertEqual(chassis.model.vendor, 'aurora_vendor')
+
+        self.assertEqual(chassis.location.location_type, 'rack')
+        self.assertEqual(chassis.location.name, 'np3')
+        self.assertEqual(chassis.location.fullname, 'np3')
+        self.assertEqual(chassis.location.col, '3')
+        self.assertEqual(chassis.location.row, 'a')
+
+        i = 0
+        self.assertEqual(chassis.slots[i].number, 1)
+        self.assertEqual(chassis.slots[i].type, 'network_device')
+        self.assertIsNone(chassis.slots[i].WhichOneof('hardware_entity'))
+
+        i += 1
+        self.assertEqual(chassis.slots[i].number, 2)
+        self.assertEqual(chassis.slots[i].type, 'network_device')
+        self.assertEqual(chassis.slots[i].WhichOneof('hardware_entity'),
+                         'network_device')
+        self.assertEqual(chassis.slots[i].network_device.primary_name,
+                         'ut3c5netdev1.aqd-unittest.ms.com')
+
+        i += 1
+        self.assertEqual(chassis.slots[i].number, 5)
+        self.assertEqual(chassis.slots[i].type, 'network_device')
+        self.assertEqual(chassis.slots[i].WhichOneof('hardware_entity'),
+                         'network_device')
+        self.assertEqual(chassis.slots[i].network_device.primary_name,
+                         'ut3c5netdev2.aqd-unittest.ms.com')
+
+        self.assertEqual(len(chassis.interfaces), 1)
+
     def test_210_update_netdev_in_chassis_slot(self):
         command = ["update", "network_device", "--network_device",
                    "ut3c5netdev1.aqd-unittest.ms.com",
