@@ -612,6 +612,20 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "evm42",
                         "--cluster", "utecl13", "--model", "utmedium"])
 
+    def test_305_add_utmc8_pg_customtype_only(self):
+        self.noouttest(["add", "interface", "--machine", "evm40",
+                        "--interface", "eth0", "--automac", "--pg",
+                        "customtype"])
+        self.noouttest(["del", "interface", "--machine", "evm40",
+                        "--interface", "eth0"])
+
+    def test_306_add_utmc8_pg_customtype_full(self):
+        self.noouttest(["add", "interface", "--machine", "evm40",
+                        "--interface", "eth0", "--automac", "--pg",
+                        "customtype-v123"])
+        self.noouttest(["del", "interface", "--machine", "evm40",
+                        "--interface", "eth0"])
+
     # Autopg test
     def test_310_add_utmc8_interfaces(self):
         self.noouttest(["add", "interface", "--machine", "evm40",

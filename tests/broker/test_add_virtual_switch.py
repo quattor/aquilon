@@ -39,15 +39,9 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.matchclean(out, "system/virtual_switch/port_groups", command)
 
     def test_106_bind_custom_type(self):
-        net = self.net["autopg1"]
+        net = self.net["autopg3"]
         command = ["bind_port_group", "--virtual_switch", "utvswitch",
-                   "--networkip", net.ip, "--type", "customtype", "--tag", "710"]
-        self.noouttest(command)
-
-    def test_107_unbind_custom_type(self):
-        net = self.net["autopg1"]
-        command = ["unbind_port_group", "--virtual_switch", "utvswitch",
-                   "--networkip", net.ip]
+                   "--networkip", net.ip, "--type", "customtype", "--tag", "123"]
         self.noouttest(command)
 
     def test_108_bind_network_env(self):
@@ -89,27 +83,33 @@ class TestAddVirtualSwitch(TestBrokerCommand):
     def test_115_show_utvswitch(self):
         net1 = self.net["autopg1"]
         net2 = self.net["vmotion_net"]
+        net3 = self.net["autopg3"]
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.commandtest(command)
         self.output_equals(out, """
             Virtual Switch: utvswitch
+              Port Group: customtype-v123
+                Network: %s [%s]
               Port Group: user-v710
                 Network: %s [%s]
               Port Group: vmotion-v800
                 Network: %s [%s]
-            """ % (net1.name, net1, net2.name, net2), command)
+            """ % (net3.name, net3,
+                   net1.name, net1,
+                   net2.name, net2), command)
 
     def test_115_show_utvswitch_proto(self):
         nets = {
             self.net["autopg1"]: ("user", 710),
             self.net["vmotion_net"]: ("vmotion", 800),
+            self.net["autopg3"]: ("customtype", 123),
         }
 
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch",
                    "--format", "proto"]
         vswitch = self.protobuftest(command, expect=1)[0]
         self.assertEqual(vswitch.name, "utvswitch")
-        self.assertEqual(len(vswitch.portgroups), 2)
+        self.assertEqual(len(vswitch.portgroups), 3)
         pgs = {pg.ip: pg for pg in vswitch.portgroups}
         for net, (usage, network_tag) in nets.items():
             self.assertIn(str(net.ip), pgs)
@@ -141,10 +141,12 @@ class TestAddVirtualSwitch(TestBrokerCommand):
     def test_115_search_network_vswitch(self):
         net1 = self.net["autopg1"]
         net2 = self.net["vmotion_net"]
+        net3 = self.net["autopg3"]
         command = ["search_network", "--virtual_switch", "utvswitch"]
         out = self.commandtest(command)
         self.output_equals(out,
-                           "\n".join(str(n) for n in sorted([net1, net2])),
+                           "\n".join(str(n) for n in sorted([
+                               net1, net2, net3])),
                            command)
 
     def test_115_search_network_vswitch_pg(self):
