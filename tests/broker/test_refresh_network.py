@@ -194,7 +194,8 @@ class TestRefreshNetwork(TestBrokerCommand):
         for ip in ips:
             name = "test-%s.aqd-unittest.ms.com" % ip.replace('.', '-')
             self.dsdb_expect_add(name, ip)
-            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name] + self.valid_just_tcm)
+            self.noouttest(["add", "address", "--ip", ip, "--fqdn", name,
+                            "--grn=grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm)
         self.dsdb_verify()
 
     def test_260_test_split_merge(self):

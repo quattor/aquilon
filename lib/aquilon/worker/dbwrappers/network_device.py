@@ -188,7 +188,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun, exporter=
             # tricky, so prevent that case by passing preclude=True
             dbdns_rec, _ = grab_address(session, fqdn, ip, dbnet_env,
                                         relaxed=relaxed, preclude=True,
-                                        exporter=exporter)
+                                        exporter=exporter, require_grn=False)
             assign_address(iface, ip, dbdns_rec.network, label=label,
                            logger=logger)
 

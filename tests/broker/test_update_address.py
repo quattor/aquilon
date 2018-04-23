@@ -249,18 +249,6 @@ class TestUpdateAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "TTL: 600", command)
 
-    def test_400_clear_grn(self):
-        command = ["update", "address",
-                   "--fqdn", "arecord50.aqd-unittest.ms.com",
-                   "--clear_grn"] + self.valid_just_tcm
-        self.noouttest(command)
-
-    def test_420_verify_clear_grn(self):
-        command = ["show", "fqdn",
-                   "--fqdn", "arecord50.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchclean(out, "Owned by GRN", command)
-
     def test_430_update_grn(self):
         command = ["update", "address",
                    "--fqdn", "arecord50.aqd-unittest.ms.com",

@@ -62,7 +62,8 @@ class CommandAddAlias(BrokerCommand):
                                config=self.config)
         try:
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, ttl=ttl,
-                              owner_grn=dbgrn, comments=comments)
+                              owner_grn=dbgrn, comments=comments,
+                              require_grn=False)
             session.add(db_record)
 
             if exporter:

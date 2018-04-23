@@ -4996,7 +4996,6 @@
 	    <optgroup fields="one">
 	      <option name="grn" type="string">GRN as string</option>
 	      <option name="eon_id" type="int">Numeric EON ID</option>
-	      <option name="clear_grn" type="flag" conflicts="grn eon_id">Clear GRN value</option>
 	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>

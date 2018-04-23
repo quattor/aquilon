@@ -37,7 +37,9 @@ class CommandAddRouterAddress(BrokerCommand):
 
         (dbdns_rec, newly_created) = grab_address(session, fqdn, ip,
                                                   network_environment,
-                                                  exporter=exporter, router=True)
+                                                  exporter=exporter,
+                                                  router=True,
+                                                  require_grn=False)
         if not ip:
             ip = dbdns_rec.ip
 

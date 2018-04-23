@@ -156,7 +156,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
                  dns_environment=None, comments=None,
                  allow_restricted_domain=False, allow_multi=False,
                  allow_reserved=False, allow_shared=False, relaxed=False,
-                 preclude=False, exporter=None, router=False):
+                 preclude=False, exporter=None, router=False, grn=None,
+                 require_grn=True):
     """
     Take ownership of an address.
 
@@ -295,7 +296,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
 
         if not existing_record:
             existing_record = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                                      comments=comments)
+                                      comments=comments, owner_grn=grn,
+                                      require_grn=require_grn)
             session.add(existing_record)
             newly_created = True
 

@@ -81,7 +81,7 @@ class CommandAddSrvRecord(BrokerCommand):
                               priority=priority, weight=weight, target=dbtarget,
                               port=port, dns_domain=dbdns_domain, ttl=ttl,
                               dns_environment=dbdns_env, comments=comments,
-                              owner_grn=dbgrn)
+                              owner_grn=dbgrn, require_grn=False)
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
