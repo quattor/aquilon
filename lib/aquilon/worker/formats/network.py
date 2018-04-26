@@ -319,6 +319,7 @@ class NetworkHostListFormatter(ListFormatter):
                         self.redirect_proto(hwent.host.operating_system,
                                             host_msg.operating_system,
                                             indirect_attrs=False)
+                        host_msg.status = hwent.host.status.name
 
                 host_msg.hostname = addr.dns_records[0].fqdn.name
                 host_msg.fqdn = str(addr.dns_records[0].fqdn)
