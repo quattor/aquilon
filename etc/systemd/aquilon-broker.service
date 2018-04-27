@@ -1,0 +1,18 @@
+[Unit]
+Description=Quattor Aquilon broker
+After=network.target
+
+[Service]
+# /etc/sysconfig/aqd must be created from the default file provided with Aquilon (see the documentation)
+EnvironmentFile=/etc/sysconfig/aqd
+# Update python path to reflect your configuration. If a virtualenv is used, be sure to use the python path
+# for the virutalenv
+ExecStart=/usr/bin/python ${TWISTD} --logfile=${LOGFILE} --pidfile=${PIDFILE} aqd --config=${CONF_FILE}"
+Restart=always
+SyslogIdentifier=aqd
+User=aquilon
+Group=aquilon
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
