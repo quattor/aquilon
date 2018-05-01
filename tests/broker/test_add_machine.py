@@ -61,6 +61,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Rack: ut3
                 Row: a
                 Column: 3
+                Fullname: ut3
               Room: utroom1
               Vendor: ibm Model: hs21-8853
                 Model Type: blade
@@ -208,6 +209,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Rack: ut3
                 Row: a
                 Column: 3
+                Fullname: ut3
               Room: utroom1
               Vendor: ibm Model: hs21-8853
                 Model Type: blade

@@ -839,6 +839,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
               Rack: ut3
                 Row: a
                 Column: 3
+                Fullname: ut3
               Room: utroom1
               Vendor: hp Model: c-class
                 Model Type: chassis
