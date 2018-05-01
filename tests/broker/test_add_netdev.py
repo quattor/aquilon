@@ -279,7 +279,48 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s01')
         self.check_plenary_exists('hostdata', 'ut01ga2s01.aqd-unittest.ms.com')
 
-    def test_161_add_ut01ga2s02(self):
+    def test_162_bind_port_group_ut01ga2s01(self):
+        net = self.net["ut01ga2s01_v713"]
+        command = ["bind_port_group",
+                   "--network_device", "ut01ga2s01.aqd-unittest.ms.com",
+                   "--networkip", net.ip,
+                   "--tag", "713"]
+        err = self.statustest(command)
+        self.matchoutput(
+            err,
+            "The bind_port_group command with the --network_device option "
+            "is deprecated and should only be used for rollback purposes of "
+            "changes involving a call to unbind_port_group --network_device.",
+            command)
+
+    def test_164_verify_bind_port_group_ut01gas01(self):
+        net = self.net["ut01ga2s01_v713"]
+        command = ["show_network_device",
+                   "--network_device", "ut01ga2s01.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "VLAN 713: {}".format(net.ip), command)
+
+    def test_166_unbind_port_group_ut01ga2s01(self):
+        net = self.net["ut01ga2s01_v713"]
+        command = ["unbind_port_group",
+                   "--network_device", "ut01ga2s01.aqd-unittest.ms.com",
+                   "--networkip", net.ip]
+        err = self.statustest(command)
+        self.matchoutput(
+            err,
+            "The unbind_port_group command with the --network_device option "
+            "is deprecated and should only be used to move old setups using "
+            "port groups attached to physical network devices, to new setups "
+            "using port groups attached to virtual switches.",
+            command)
+
+    def test_168_verify_unbind_port_group_ut01gas01(self):
+        command = ["show_network_device",
+                   "--network_device", "ut01ga2s01.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "VLAN 713", command)
+
+    def test_170_add_ut01ga2s02(self):
         ip = self.net["vmotion_net"].usable[1]
         self.dsdb_expect_add("ut01ga2s02.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
@@ -293,7 +334,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s02')
         self.check_plenary_exists('hostdata', 'ut01ga2s02.aqd-unittest.ms.com')
 
-    def test_162_add_ut01ga2s03(self):
+    def test_180_add_ut01ga2s03(self):
         ip = self.net["ut_net_mgmt"].usable[5]
         self.dsdb_expect_add("ut01ga2s03.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)
@@ -305,7 +346,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.successtest(command)
         self.dsdb_verify()
 
-    def test_162_add_ut01ga2s04(self):
+    def test_180_add_ut01ga2s04(self):
         ip = self.net["ut_net_mgmt"].usable[6]
         self.dsdb_expect_add("ut01ga2s04.aqd-unittest.ms.com", ip, "xge49",
                              ip.mac)

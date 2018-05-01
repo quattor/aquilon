@@ -6939,7 +6939,10 @@
     <command name="bind_port_group">
         Bind a port group to a virtual switch.
         <optgroup mandatory="True" fields="all">
-            <option name="virtual_switch" type="string">Name of the virtual switch</option>
+            <optgroup fields="one">
+                <option name="virtual_switch" type="string">Name of the virtual switch</option>
+                <option name="network_device" type="string">[Deprecated] Name of the network device</option>
+            </optgroup>
             <option name="networkip" type="ip">IP address of the network</option>
         </optgroup>
         <optgroup>
@@ -6950,12 +6953,16 @@
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
         </optgroup>
         <transport method="put" path="virtual_switch/%(virtual_switch)s/port_group/%(networkip)s"/>
+        <transport trigger="network_device" method="put" path="network_device/%(network_device)s/port_group/%(networkip)s"/>
     </command>
 
     <command name="unbind_port_group">
         Unbind a port group from a virtual switch.
         <optgroup mandatory="True" fields="all">
-            <option name="virtual_switch" type="string">Name of the virtual switch</option>
+            <optgroup fields="one">
+                <option name="virtual_switch" type="string">Name of the virtual switch</option>
+                <option name="network_device" type="string">[Deprecated] Name of the network device</option>
+            </optgroup>
             <optgroup>
                 <option name="networkip" type="ip">IP address of the network</option>
                 <option name="tag" type="int">VLAN/VxLAN/etc. tag used for the network</option>
@@ -6967,6 +6974,7 @@
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
         </optgroup>
         <transport method="delete" path="virtual_switch/%(virtual_switch)s/port_group"/>
+        <transport trigger="network_device" method="delete" path="network_device/%(network_device)s/port_group"/>
     </command>
 
     <command name="promote">
