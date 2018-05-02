@@ -6420,7 +6420,7 @@
 
     <command name="del_parameter_definition">
 	Delete parameter definition for a given object.
-	<optgroup mandatory="True">
+	<optgroup mandatory="True" fields="all">
 	    <optgroup fields="one">
 		<option name="archetype" type="string">Archetype</option>
 		<optgroup fields="all">
@@ -6440,7 +6440,7 @@
 
     <command name="update_parameter_definition">
 	Update parameter definition for a given object.
-	<optgroup mandatory="True">
+	<optgroup mandatory="True" fields="all">
 	    <optgroup fields="one">
 		<option name="archetype" type="string">Archetype</option>
 		<optgroup fields="all">
