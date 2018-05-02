@@ -123,6 +123,40 @@ class TestBindConsoleServer(TestBrokerCommand, VerifyConsoleServerMixin, VerifyN
                          "Port 5003 is not used.",
                          command)
 
+    def test_400_bind_machine_ut3c5n10(self):
+        command = ["bind", "console_server", "--console_server", "ut9csa2.aqd-unittest.ms.com",
+                   "--console_port", "5011", "--machine", "ut3c5n10"]
+        self.noouttest(command)
+
+    def test_401_bind_machine_ut3c5n3(self):
+        command = ["bind", "console_server", "--console_server", "ut9csa2.aqd-unittest.ms.com",
+                   "--console_port", "5012", "--machine", "ut3c5n3"]
+        self.noouttest(command)
+
+    def test_402_verify_utcs01(self):
+        ip = self.net["ut9_conservers"].usable[2]
+        mac = self.net["ut9_conservers"].usable[2].mac
+        self.verifyconsoleserver("ut9csa2.aqd-unittest.ms.com", "aurora_vendor",
+                           "utconserver", "ut9", "h", "9", None,
+                           ip, mac, ports=[(5011, 'Machine', 'unittest02.one-nyp.ms.com'),
+                                           (5012, 'Machine', 'unittest21.aqd-unittest.ms.com')])
+
+    def test_403_unbind_by_port(self):
+        command = ["unbind", "console_server", "--console_server", "ut9csa2.aqd-unittest.ms.com",
+                   "--console_port", "5011"]
+        self.noouttest(command)
+
+    def test_404_unbind_by_client(self):
+        command = ["unbind", "console_server", "--console_server", "ut9csa2.aqd-unittest.ms.com",
+                   "--machine", "ut3c5n3"]
+        self.noouttest(command)
+
+    #This host will be unbind at del_console_server
+    def test_501_bind_machine_ut3c5n2(self):
+        command = ["bind", "console_server", "--console_server", "utcs01.aqd-unittest.ms.com",
+                   "--console_port", "5022", "--machine", "ut3c5n2"]
+        self.noouttest(command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)

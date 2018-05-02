@@ -194,6 +194,12 @@ class PlenaryMachineInfo(StructurePlenary):
         # "/console" directly
         for manager in sorted(managers):
             pan_assign(lines, "console/%s" % manager, managers[manager])
+        for port in self.dbobj.consoles:
+            console_port = self.dbobj.consoles[port]
+            pan_assign(lines, "console/remote/%s/fqdn" % console_port.client_port,
+                       console_port.console_server)
+            pan_assign(lines, "console/remote/%s/port" % console_port.client_port,
+                       console_port.port_number)
 
         if self.dbobj.uri:
             pan_assign(lines, "uri", self.dbobj.uri)

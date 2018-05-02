@@ -59,6 +59,12 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         for i in sorted(hwe.interfaces, key=attrgetter('name')):
             details.append(self.redirect_raw(i, indent + "  "))
+        for port in hwe.consoles:
+            console_port = hwe.consoles[port]
+            details.append(indent + "  Console Port: %s" % console_port.client_port)
+            details.append(indent +
+                           "    Connected to {0:c}: {0!s} Port: {1!s}"
+                           .format(console_port.console_server, console_port.port_number))
 
         return "\n".join(details)
 

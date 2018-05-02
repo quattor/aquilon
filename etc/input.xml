@@ -4376,7 +4376,10 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="console_server" type="string">Name of the console server</option>
 	    <option name="console_port" type="int">Port number on the console server</option>
+	</optgroup>
+	<optgroup mandatory="True" fields="one">
 	    <option name="network_device" type="string">Name of the network device</option>
+	    <option name="machine" type="string">Machine name (exact)</option>
 	</optgroup>
 	<optgroup>
 	    <option name="client_port" type="string">Local port name, defaults to "console"</option>
@@ -4392,6 +4395,7 @@
 	    <optgroup fields="one">
 		<option name="console_port" type="int">Port number on the console server</option>
 		<option name="network_device" type="string">Name of the network device</option>
+		<option name="machine" type="string">Machine name (exact)</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>

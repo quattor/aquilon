@@ -33,12 +33,6 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
     def format_raw(self, device, indent="", embedded=True,
                    indirect_attrs=True):
         details = [super(NetworkDeviceFormatter, self).format_raw(device, indent)]
-        for port in device.consoles:
-            console_port = device.consoles[port]
-            details.append(indent + "  Console Port: %s" % console_port.client_port)
-            details.append(indent +
-                           "    Connected to {0:c}: {0!s} Port: {1!s}"
-                           .format(console_port.console_server, console_port.port_number))
 
         for slot in device.chassis_slot:
             details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))

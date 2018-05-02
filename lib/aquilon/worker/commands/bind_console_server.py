@@ -19,20 +19,20 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ConsoleServer, ConsolePort, NetworkDevice
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandBindConsoleServer(BrokerCommand):
 
     requires_plenaries = True
-    required_parameters = ["console_server", "console_port", "network_device"]
+    required_parameters = ["console_server", "console_port"]
 
     def render(self, session, logger, plenaries, console_server, console_port,
                user, justification, reason,
-               network_device, client_port, **kwargs):
+               client_port, **kwargs):
         dbcons = ConsoleServer.get_unique(session, console_server, compel=True)
-        dbnetdev = NetworkDevice.get_unique(session, network_device,
-                                            compel=True)
+        dbhw_ent = get_hardware(session, **kwargs)
 
         # We expect most devices to have only a single client port...
         if not client_port:
@@ -42,23 +42,23 @@ class CommandBindConsoleServer(BrokerCommand):
             raise ArgumentError("Port {0!s} is already in use by {1:l}."
                                 .format(console_port,
                                         dbcons.ports[console_port].client))
-        for port in dbnetdev.consoles:
+        for port in dbhw_ent.consoles:
             if port.client_port == client_port:
                 raise ArgumentError("{0} already has console port '{1!s}' "
                                     "bound to {2:l}."
-                                    .format(dbnetdev, client_port,
+                                    .format(dbhw_ent, client_port,
                                             port.console_server))
 
-        plenaries.add(dbnetdev)
+        plenaries.add(dbhw_ent)
 
         dbcport = ConsolePort(console_server=dbcons, port_number=console_port,
-                              client=dbnetdev, client_port=client_port)
+                              client=dbhw_ent, client_port=client_port)
         dbcons.ports[console_port] = dbcport
 
         session.flush()
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
-        cm.consider(dbnetdev)
+        cm.consider(dbhw_ent)
         cm.validate()
 
         plenaries.write()

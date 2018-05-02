@@ -30,7 +30,7 @@ class CommandUnbindConsoleServer(BrokerCommand):
 
     def render(self, session, logger, plenaries, console_server, console_port,
                user, justification, reason,
-               network_device, client_port=None, **kwargs):
+               client_port=None, **kwargs):
         dbcons = ConsoleServer.get_unique(session, console_server, compel=True)
 
         found = set()
@@ -41,16 +41,15 @@ class CommandUnbindConsoleServer(BrokerCommand):
                                     .format(console_port))
             found.add(dbcons.ports[console_port])
         else:
-            dbnetdev = NetworkDevice.get_unique(session, network_device,
-                                                compel=True)
-            for cport in dbnetdev.consoles:
-                if dbnetdev.consoles[cport].console_server == dbcons and (client_port is None or
-                                            dbnetdev.consoles[cport].client_port == client_port):
-                        found.add(dbnetdev.consoles[cport])
+            dbhw_ent = get_hardware(session, **kwargs)
+            for cport in dbhw_ent.consoles:
+                if dbhw_ent.consoles[cport].console_server == dbcons and (client_port is None or
+                                            dbhw_ent.consoles[cport].client_port == client_port):
+                    found.add(dbhw_ent.consoles[cport])
 
             if not found:
                 raise ArgumentError("{0} is not bound to {1:l}."
-                                    .format(dbnetdev, dbcons))
+                                    .format(dbhw_ent, dbcons))
 
 
         cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)
