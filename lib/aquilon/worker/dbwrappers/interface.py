@@ -186,7 +186,7 @@ def generate_ip(session, logger, dbinterface, net_location_set=None, ip=None, ip
             if not pg:
                 raise ArgumentError("No network found for {0:l} and port "
                                     "group {1}".format(allocator,
-                                                       dbinterface.pot_group_name))
+                                                       dbinterface.port_group_name))
             dbnetwork = pg.network
         elif dbinterface.mac:
             q = session.query(ObservedMac)
