@@ -19,7 +19,6 @@ database_section = database_sqlite
 
 [broker]
 run_git_daemon = True
-dsdb_use_testdb = True
 #server_notifications = cdb2sql bootserver
 client_notifications = no
 
@@ -29,6 +28,10 @@ version = beta
 [tool_locations]
 dsdb = /bin/echo
 mean = %(srcdir)s/tests/fakebin/fake_mean
+
+[dsdb]
+dsdb_use_testdb = True
+enable = True
 
 [change_management]
 # The contents of --justification will not be validated externally

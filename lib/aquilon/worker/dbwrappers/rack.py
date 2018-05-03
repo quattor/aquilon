@@ -23,9 +23,9 @@ from aquilon.aqdb.model import Rack
 from aquilon.worker.dbwrappers.location import get_location
 
 
-def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
+def get_or_create_rack(session, rackrow, rackcolumn, building=None,
                        room=None, bunker=None, fullname=None, comments=None,
-                       preclude=False):
+                       force_rackid=None, preclude=False):
     dblocation = get_location(session, building=building, room=room,
                               bunker=bunker, compel=True)
     dbbuilding = dblocation.building
@@ -38,20 +38,23 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
         rackrow = str(rackrow).strip().lower()
     if rackcolumn is not None:
         rackcolumn = str(rackcolumn).strip().lower()
-    if rackid is not None:
-        rackid = str(rackid).strip().lower()
 
-    # Because of http, rackid comes in as a string.  It just
-    # gets treated as such here.
-    # Check for redundancy...
-    if len(rackid) > len(dbbuilding.name) and rackid.startswith(
-            dbbuilding.name):
-        rack = rackid
+    if force_rackid is not None:
+        rackid_numeric = force_rackid.replace(dbbuilding.name, '')
+        if not rackid_numeric.isdigit():
+            raise ArgumentError("Invalid rack name {}. Correct name format: "
+                                "building name + numeric rack ID.".format(force_rackid))
+        rack_name = force_rackid
+        # Allow to fill in rack name gaps without resetting the next_rackid
+        if dbbuilding.next_rackid <= int(rackid_numeric):
+            dbbuilding.next_rackid = int(rackid_numeric) + 1
     else:
-        rack = dbbuilding.name + rackid
+        rackid_numeric = dbbuilding.next_rackid
+        rack_name = dbbuilding.name + str(rackid_numeric)
+        dbbuilding.next_rackid += 1
 
     try:
-        dbrack = session.query(Rack).filter_by(name=rack).one()
+        dbrack = session.query(Rack).filter_by(name=rack_name).one()
         if rackrow is not None and rackrow != dbrack.rack_row:
             raise ArgumentError("Found rack with name %s, but the current "
                                 "row %s does not match given row %s." %
@@ -67,8 +70,9 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
         pass
 
     if fullname is None:
-        fullname = rack
-    dbrack = Rack(name=rack, fullname=fullname, parent=dblocation,
+        fullname = rack_name
+
+    dbrack = Rack(name=rack_name, fullname=fullname, parent=dblocation,
                   rack_row=rackrow, rack_column=rackcolumn, comments=comments)
-    session.add(dbrack)
+    session.add(dbrack, dbbuilding)
     return dbrack

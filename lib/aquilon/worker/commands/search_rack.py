@@ -27,13 +27,17 @@ class CommandSearchRack(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, rack, row, column, fullinfo, style, **arguments):
+    def render(self, session, rack, row, column, fullinfo,
+               fullname, style, **arguments):
 
         dbparent = get_location(session, **arguments)
         q = session.query(Rack)
 
         if rack:
             q = q.filter_by(name=rack)
+
+        if fullname:
+            q = q.filter_by(fullname=fullname)
 
         if row:
             q = q.filter_by(rack_row=row)

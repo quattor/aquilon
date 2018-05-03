@@ -100,6 +100,12 @@ class TestDelRack(TestBrokerCommand):
         command = "show rack --rack cards1"
         self.notfoundtest(command.split(" "))
 
+    def test_305_del_rack(self):
+        command = ["del_rack", "--rack", "oy604"]
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Delete rack oy604 in DSDB failed, "
+                              "proceeding.", command)
+
     def test_300_show_all(self):
         command = ["show_rack", "--all"]
         out = self.commandtest(command)

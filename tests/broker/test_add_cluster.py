@@ -51,6 +51,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                 Building: ut
                   Fullname: Unittest-building
                   Address: unittest address
+                  Next Rack ID: 666
                   Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Member Buildings: (none)
               Max members: %s
@@ -122,6 +123,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                 Building: ut
                   Fullname: Unittest-building
                   Address: unittest address
+                  Next Rack ID: 666
                   Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Member Buildings: (none)
               Max members: unlimited

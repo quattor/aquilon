@@ -28,16 +28,24 @@ from brokertest import TestBrokerCommand
 
 class TestAddRack(TestBrokerCommand):
 
-    def testaddut3(self):
-        command = "add rack --rackid 3 --bunker zebrabucket.ut --row a --column 3"
-        self.noouttest(command.split(" "))
+    def test_100_addut3(self):
+        command = "add rack --fullname ut3 --bunker zebrabucket.ut --row a --column 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut3", command)
+        command = "show building --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Next Rack ID: 4", command)
 
-    def testaddut3again(self):
-        command = "add rack --rackid 3 --room utroom1 --row a --column 3"
+    def test_101_addut3again(self):
+        command = "update building --building ut --next_rackid 3"
+        out = self.commandtest(command.split(" "))
+        command = "add rack --fullname ut3 --room utroom1 --row a --column 3"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Rack ut3 already exists.", command)
+        command = "update building --building ut --next_rackid 4"
+        out = self.commandtest(command.split(" "))
 
-    def testverifyaddut3(self):
+    def test_105_verifyaddut3(self):
         command = "show rack --rack ut3"
         out = self.commandtest(command.split(" "))
         self.output_equals(out, """
@@ -48,7 +56,7 @@ class TestAddRack(TestBrokerCommand):
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny, Building ut, Room utroom1, Bunker zebrabucket.ut]
             """, command)
 
-    def testverifyaddut3proto(self):
+    def test_110_verifyaddut3proto(self):
         command = "show rack --rack ut3 --format proto"
         loc = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(loc.name, "ut3")
@@ -56,107 +64,178 @@ class TestAddRack(TestBrokerCommand):
         self.assertEqual(loc.row, "a")
         self.assertEqual(loc.col, "3")
 
-    def testaddcards1(self):
-        command = "add rack --rackid 1 --building cards --row a --column 1"
-        self.noouttest(command.split(" "))
+    def test_115_addcards1(self):
+        command = "add rack --fullname cards1 --building cards --row a --column 1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "cards1", command)
 
-    def testverifyaddcards1(self):
+    def test_120_verifyaddcards1(self):
         command = "show rack --rack cards1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: cards1", command)
         self.matchoutput(out, "Row: a", command)
         self.matchoutput(out, "Column: 1", command)
 
-    def testaddnp3(self):
-        command = "add rack --rackid 3 --bunker zebrabucket.np --row a --column 3"
-        self.noouttest(command.split(" "))
+    def test_125_addnp3(self):
+        command = "add rack --fullname np3 --bunker zebrabucket.np --row a --column 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np3", command)
 
-    def testaddut4(self):
-        command = "add rack --rackid 4 --room utroom1 --row a --column 4"
-        self.noouttest(command.split(" "))
+    def test_130_addut4(self):
+        command = "add rack --fullname A4 --room utroom1 --row a --column 4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut4", command)
 
-    def testaddut8(self):
-        command = "add rack --rackid 8 --building ut --row g --column 2"
-        self.noouttest(command.split(" "))
+    def test_135_addut8(self):
+        # Test override rackid
+        command = "add rack --fullname 8.6.7 --building ut --row g --column 2 --force_rackid ut8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut8", command)
 
-    def testaddut9(self):
-        command = "add rack --rackid 9 --bunker bucket2.ut --row g --column 3"
-        self.noouttest(command.split(" "))
+    def test_140_addut9(self):
+        # Test that next rackid for building ut was reset to 8 + 1,
+        # because force_rackid with value > current next_rackid was used
+        command = "add rack --fullname Aperture_name --bunker bucket2.ut --row g --column 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut9", command)
 
-    def testverifyut9(self):
+    def test_145_verifyut9(self):
         command = "show rack --rack ut9"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Fullname: Aperture_name", command)
         self.matchoutput(out,
                          "Location Parents: [Organization ms, Hub ny, "
                          "Continent na, Country us, Campus ny, City ny, "
                          "Building ut, Room utroom2, Bunker bucket2.ut]",
                          command)
 
-    def testaddut10(self):
-        command = "add rack --rackid 10 --building ut --row g --column 4"
+    def test_146_test_fillin_gaps(self):
+        # Test that next rackid for building ut was NOT reset,
+        # because force_rackid with value < current next_rackid was used
+        command = "add rack --fullname Aperture_name --building ut --row g --column 6 --force_rackid ut6"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut6", command)
+        command = "show building --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Next Rack ID: 10", command)
+
+    def test_147_test_fillin_gaps_delete(self):
+        command = "del rack --rack ut6"
         self.noouttest(command.split(" "))
 
-    def testaddut11(self):
-        command = "add rack --rackid 11 --bunker zebrabucket.ut --row k --column 1"
-        self.noouttest(command.split(" "))
+    def test_148_add_rack_fail_name_format(self):
+        command = "add rack --force_rackid ut12-66-1 --building ut --row g --column 4"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Invalid rack name ut12-66-1. Correct name format: "
+                              "building name + numeric rack ID.", command)
 
-    def testaddut12(self):
-        command = "add rack --rackid 12 --building ut --row k --column 2"
-        self.noouttest(command.split(" "))
+    def test_149_add_rack_fail_option(self):
+        command = "add rack --rackid ut12-66-1 --building ut --row g --column 4"
+        err = self.badoptiontest(command.split(" "))
+        self.matchoutput(err, "no such option: --rackid", command)
 
-    def testaddnp7(self):
-        command = "add rack --rackid 7 --building np --row g --column 1"
-        self.noouttest(command.split(" "))
+    def test_150_addut10(self):
+        command = "add rack --building ut --row g --column 4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut10", command)
 
-    def testaddnp997(self):
-        command = "add rack --rackid np997 --building np --row ZZ --column 99"
-        self.noouttest(command.split(" "))
+    def test_155_addut11(self):
+        # Test that if next_rackid == force_rackid this next_rackid is incremented by 1
+        command = "add rack --bunker zebrabucket.ut --row k --column 1 --force_rackid ut11"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut11", command)
+        command = "show building --building ut"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Next Rack ID: 12", command)
 
-    def testaddnp998(self):
-        command = "add rack --rackid np998 --building np --row yy --column 88"
-        self.noouttest(command.split(" "))
+    def test_160_addut12(self):
+        command = "add rack --building ut --row k --column 2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut12", command)
 
-    def testaddnp999(self):
-        command = "add rack --rackid np999 --building np --row zz --column 11"
-        self.noouttest(command.split(" "))
+    def test_165_addnp7(self):
+        command = "update building --building np --next_rackid 7"
+        out = self.commandtest(command.split(" "))
+        command = "add rack --building np --row g --column 1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np7", command)
 
-    def testaddut13(self):
-        command = "add rack --rackid 13 --building ut --row k --column 3"
-        self.noouttest(command.split(" "))
+    def test_170_addnp997(self):
+        command = "update building --building np --next_rackid 997"
+        out = self.commandtest(command.split(" "))
+        command = "add rack --building np --row ZZ --column 99"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np997", command)
 
-    def testaddnp13(self):
-        command = "add rack --rackid 13 --building np --row k --column 3"
-        self.noouttest(command.split(" "))
+    def test_175_addnp998(self):
+        command = "add rack --building np --row yy --column 88"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np998", command)
 
-    def testaddut14(self):
-        command = "add rack --rackid 14 --bunker zebrabucket.ut --row k --column 4"
-        self.noouttest(command.split(" "))
+    def test_180_addnp999(self):
+        command = "add rack --building np --row zz --column 11"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np999", command)
 
-    def testverifyaddnp997(self):
+    def test_185_addut13(self):
+        command = "add rack --building ut --row k --column 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut13", command)
+
+    def test_190_addnp13(self):
+        command = "update building --building np --next_rackid 13"
+        out = self.commandtest(command.split(" "))
+        command = "add rack --building np --row k --column 3"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np13", command)
+
+    def test_195_addut14(self):
+        command = "add rack --bunker zebrabucket.ut --row k --column 4"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "ut14", command)
+
+    def test_200_verifyaddnp997(self):
         command = "show rack --rack np997"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: np997", command)
         self.matchoutput(out, "Row: zz", command)
         self.matchoutput(out, "Column: 99", command)
 
-    def testaddnewalphanumericrack(self):
-        command = "add rack --rackid np909 --building np --row 99 --column zz"
-        self.noouttest(command.split(" "))
+    def test_205_addnewalphanumericrack(self):
+        command = "update building --building np --next_rackid 909"
+        out = self.commandtest(command.split(" "))
+        command = "add rack --building np --row 99 --column zz"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "np909", command)
 
-    def testverifynp909(self):
+    def test_210_verifynp909(self):
         command = "show rack --rack np909"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rack: np909", command)
         self.matchoutput(out, "Row: 99", command)
         self.matchoutput(out, "Column: zz", command)
 
-    def testverifyshowallcsv(self):
+    def test_215_verifyshowallcsv(self):
         command = "show rack --all --format=csv"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "rack,ut3,bunker,zebrabucket.ut,a,3", command)
         self.matchoutput(out, "rack,ut4,room,utroom1,a,4", command)
         self.matchoutput(out, "rack,np997,building,np,zz,99", command)
         self.matchoutput(out, "rack,np909,building,np,99,zz", command)
+
+    def test_220_dsdbfailure(self):
+        command = "update building --building ut --next_rackid 666"
+        out = self.commandtest(command.split(" "))
+        command = "add rack --building ut --row 666 --column zz"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "DSDB commands failed: add_rack", command)
+        self.matchoutput(err, "Bad Request: DSDB update failed", command)
+
+    def test_225_dsdbfailureoy604(self):
+        command = "add rack --building oy --row 604 --column zz"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Bad Request: DSDB update failed", command)
+        self.matchoutput(err, "DSDB commands failed: add_rack", command)
 
 
 if __name__ == '__main__':

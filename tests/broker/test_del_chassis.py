@@ -77,6 +77,11 @@ class TestDelChassis(TestBrokerCommand):
     def test_130_del_np3c5(self):
         self.noouttest(["del_chassis", "--chassis", "np3c5.one-nyp.ms.com"])
 
+    def test_140_del_aurora_chassis(self):
+        self.noouttest(["del_chassis", "--chassis", "oy604c2.ms.com"])
+        self.noouttest(["del_chassis", "--chassis", "oy605c2.ms.com"])
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)

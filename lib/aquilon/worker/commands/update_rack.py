@@ -21,6 +21,7 @@ from aquilon.aqdb.model import Rack, Machine
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandUpdateRack(BrokerCommand):
@@ -32,6 +33,8 @@ class CommandUpdateRack(BrokerCommand):
                fullname, default_dns_domain, comments, user, justification, reason, logger, **arguments):
         dbrack = Rack.get_unique(session, rack, compel=True)
 
+        dsdb_runner = DSDBRunner(logger=logger)
+        snapshot_rack = dsdb_runner.snapshot(dbrack)
         q = session.query(Machine)
         q = q.filter(Machine.location_id.in_(dbrack.offspring_ids()))
 
@@ -63,6 +66,9 @@ class CommandUpdateRack(BrokerCommand):
             dbrack.update_parent(parent=dbparent)
 
         session.flush()
+
+        dsdb_runner.update_rack(dbrack, snapshot_rack)
+        dsdb_runner.commit_or_rollback()
 
         plenaries.add(q)
         plenaries.write()

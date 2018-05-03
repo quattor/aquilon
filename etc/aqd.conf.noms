@@ -19,6 +19,11 @@ user_list_location =
 
 ###############################################################################
 
+[dsdb]
+enable = False
+
+###############################################################################
+
 [tool_locations]
 # If option is set to empty value
 # tool will default to binary available in PATH

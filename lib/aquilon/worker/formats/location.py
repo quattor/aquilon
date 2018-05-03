@@ -16,7 +16,7 @@
 # limitations under the License.
 """Location formatter."""
 
-from aquilon.aqdb.model import Location, Rack, Building
+from aquilon.aqdb.model import Location, Rack, Building, Room
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
@@ -25,26 +25,27 @@ class LocationFormatter(ObjectFormatter):
                    indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(location)]
         if location.fullname:
-            details.append(indent + "  Fullname: %s" % location.fullname)
+            details.append(indent + "  Fullname: {}".format(location.fullname))
         if hasattr(location, 'timezone'):
-            details.append(indent + "  Timezone: %s" % location.timezone)
+            details.append(indent + "  Timezone: {}".format(location.timezone))
         # Rack could have been a separate formatter, but since this is
         # the only difference...
         if isinstance(location, Rack):
-            details.append(indent + "  Row: %s" % location.rack_row)
-            details.append(indent + "  Column: %s" % location.rack_column)
+            details.append(indent + "  Row: {}".format(location.rack_row))
+            details.append(indent + "  Column: {}".format(location.rack_column))
         elif isinstance(location, Building):
-            details.append(indent + "  Address: %s" % location.address)
+            details.append(indent + "  Address: {}".format(location.address))
+            details.append(indent + "  Next Rack ID: {}".format(location.next_rackid))
             if location.uri:
-                details.append(indent + "  Location URI: %s" % location.uri)
+                details.append(indent + "  Location URI: {}".format(location.uri))
+        elif isinstance(location, Room) and location.floor:
+            details.append(indent + "  Floor: {}".format(location.floor))
         if location.comments:
-            details.append(indent + "  Comments: %s" % location.comments)
+            details.append(indent + "  Comments: {}".format(location.comments))
         if location.parents:
-            details.append(indent + "  Location Parents: [%s]" %
-                           ", ".join(format(p) for p in location.parents))
+            details.append(indent + "  Location Parents: [{}]".format(", ".join(format(p) for p in location.parents)))
         if location.default_dns_domain:
-            details.append(indent + "  Default DNS Domain: %s" %
-                           location.default_dns_domain)
+            details.append(indent + "  Default DNS Domain: {0.name}".format(location.default_dns_domain))
         return "\n".join(details)
 
     def fill_proto(self, loc, skeleton, embedded=True, indirect_attrs=True):

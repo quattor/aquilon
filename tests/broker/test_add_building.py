@@ -58,7 +58,7 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_addr 1 NY Plaza")
         self.dsdb_expect_add_campus_building("ny", "np")
         command = ["add_building", "--building", "np", "--city", "ny",
-                   "--fullname", "one-nyp", "--address", "1 NY Plaza"]
+                   "--fullname", "one-nyp", "--address", "1 NY Plaza", "--next_rackid", "3"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -67,7 +67,8 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_addr Hounslow, Middlesex")
         self.dsdb_expect_add_campus_building("ln", "oy")
         command = ["add_building", "--building", "oy", "--city", "ln",
-                   "--fullname", "heathrow", "--address", "Hounslow, Middlesex"]
+                   "--fullname", "heathrow", "--address", "Hounslow, Middlesex",
+                   "--next_rackid", "604"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -87,7 +88,7 @@ class TestAddBuilding(TestBrokerCommand):
         self.dsdb_expect_add_campus_building("ny", "ut")
         command = ["add_building", "--building", "ut", "--city", "ny",
                    "--fullname", "Unittest-building",
-                   "--address", "unittest address"]
+                   "--address", "unittest address", "--next_rackid", "3"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -113,6 +114,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: bu
               Fullname: bu
               Address: 12 Cherry Lane
+              Next Rack ID: 2
               Location URI: assetinventory://003428
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
@@ -123,7 +125,7 @@ class TestAddBuilding(TestBrokerCommand):
         self.dsdb_expect_add_campus_building("ny", "fo")
         command = ["add", "building", "--building", "fo", "--city", "ny",
                    "--address", "64 Force Lane", "--uri", "assetinventory://003430",
-                   "--force_uri"]
+                   "--force_uri", "--next_rackid", "3"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -134,6 +136,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: fo
               Fullname: fo
               Address: 64 Force Lane
+              Next Rack ID: 3
               Location URI: assetinventory://003430
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
@@ -167,7 +170,8 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_addr Nowhere")
         self.dsdb_expect_add_campus_building("ta", "cards")
         command = ["add", "building", "--building", "cards", "--city", "ex",
-                   "--address", "Nowhere", "--uri", "assetinventory://003427"]
+                   "--address", "Nowhere", "--uri", "assetinventory://003427",
+                   "--next_rackid", "1"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -178,6 +182,7 @@ class TestAddBuilding(TestBrokerCommand):
             Building: cards
               Fullname: cards
               Address: Nowhere
+              Next Rack ID: 1
               Location URI: assetinventory://003427
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ta, City ex]
             """, command)

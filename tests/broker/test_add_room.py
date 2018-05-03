@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 class TestAddRoom(TestBrokerCommand):
 
     def testaddutroom1(self):
-        command = ['add_room', '--room=utroom1', '--building=ut',
+        command = ['add_room', '--room=utroom1', '--building=ut', '--floor=42',
                    '--fullname=UT pod1']
         self.noouttest(command)
 
@@ -37,10 +37,11 @@ class TestAddRoom(TestBrokerCommand):
         command = "show room --room utroom1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom1", command)
+        self.matchoutput(out, "Floor: 42", command)
         self.matchoutput(out, "Fullname: UT pod1", command)
 
     def testaddutroom2(self):
-        command = ['add_room', '--room=utroom2', '--building=ut']
+        command = ['add_room', '--room=utroom2', '--building=ut', '--floor=GF']
         self.noouttest(command)
 
     def testverifyutroom2(self):
@@ -48,6 +49,7 @@ class TestAddRoom(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom2", command)
         self.matchoutput(out, "Fullname: utroom2", command)
+        self.matchoutput(out, "Floor: gf", command)
 
     def testverifyshowcsv(self):
         command = "show room --all --format=csv"
@@ -57,7 +59,14 @@ class TestAddRoom(TestBrokerCommand):
 
     def testaddnplab1(self):
         self.noouttest(["add_room", "--room", "np-lab1", "--building", "np",
-                        "--fullname", "NP lab1"])
+                        "--fullname", "NP lab1", '--floor=0'])
+
+    def testverifynplab1(self):
+        command = "show room --room np-lab1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Room: np-lab1", command)
+        self.matchoutput(out, "Fullname: NP lab1", command)
+        self.matchoutput(out, "Floor: 0", command)
 
 
 if __name__ == '__main__':
