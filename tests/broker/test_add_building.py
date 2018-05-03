@@ -58,7 +58,8 @@ class TestAddBuilding(TestBrokerCommand):
                          "-building_addr 1 NY Plaza")
         self.dsdb_expect_add_campus_building("ny", "np")
         command = ["add_building", "--building", "np", "--city", "ny",
-                   "--fullname", "one-nyp", "--address", "1 NY Plaza", "--next_rackid", "3"]
+                   "--fullname", "one-nyp", "--address", "1 NY Plaza",
+                   "--next_rackid", "3", "--nonetdev_require_rack"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -115,6 +116,7 @@ class TestAddBuilding(TestBrokerCommand):
               Fullname: bu
               Address: 12 Cherry Lane
               Next Rack ID: 2
+              Network Devices Require Racks: True
               Location URI: assetinventory://003428
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
@@ -137,6 +139,7 @@ class TestAddBuilding(TestBrokerCommand):
               Fullname: fo
               Address: 64 Force Lane
               Next Rack ID: 3
+              Network Devices Require Racks: True
               Location URI: assetinventory://003430
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
             """, command)
@@ -183,6 +186,7 @@ class TestAddBuilding(TestBrokerCommand):
               Fullname: cards
               Address: Nowhere
               Next Rack ID: 1
+              Network Devices Require Racks: True
               Location URI: assetinventory://003427
               Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ta, City ex]
             """, command)
@@ -227,6 +231,7 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.internalerrortest(command)
         self.matchoutput(out, "Value for parameter address is not valid UTF-8",
                          command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddBuilding)

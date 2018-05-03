@@ -49,8 +49,7 @@ class NetworkDevice(HardwareEntity):
             raise ArgumentError("Unknown switch type '%s'." % type)
 
     def validates_location(self, key, value):
-        if isinstance(value, Building) or not any(isinstance(par, Building) for par in value.parents):
-            if _config.getboolean('hardware_network_device', 'restrict_building'):
-                raise ArgumentError("This building is restricted: network devices should be added to "
-                                    "either rack or chassis, not building directly.")
+        if isinstance(value, Building) and value.netdev_rack:
+            raise ArgumentError("This building is restricted to use racks as location: "
+                                "--rack must be specified when adding new network devices.")
         return value

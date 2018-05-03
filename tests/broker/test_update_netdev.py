@@ -52,6 +52,24 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           interface="xge49",
                           comments="Some new switch comments")
 
+    def test_106_update_fail_ut3gd1r04(self):
+        command = ["update", "building", "--building", "ut", "--netdev_require_rack"]
+        self.successtest(command)
+        command = ["show", "building", "--building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Network Devices Require Racks: True",
+                         command)
+        command = ["update", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--building", "ut"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "This building is restricted to use racks as location:"
+                         " --rack must be specified when adding new network devices.",
+                         command)
+        command = ["update", "building", "--building", "ut", "--nonetdev_require_rack"]
+        self.successtest(command)
+
     def test_110_update_ut3gd1r05(self):
         command = ["update", "network_device",
                    "--network_device", "ut3gd1r05.aqd-unittest.ms.com",

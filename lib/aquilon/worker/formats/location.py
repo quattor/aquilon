@@ -36,6 +36,7 @@ class LocationFormatter(ObjectFormatter):
         elif isinstance(location, Building):
             details.append(indent + "  Address: {}".format(location.address))
             details.append(indent + "  Next Rack ID: {}".format(location.next_rackid))
+            details.append(indent + "  Network Devices Require Racks: {}".format(location.netdev_rack))
             if location.uri:
                 details.append(indent + "  Location URI: {}".format(location.uri))
         elif isinstance(location, Room) and location.floor:

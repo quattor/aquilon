@@ -33,7 +33,7 @@ class CommandUpdateBuilding(BrokerCommand):
     required_parameters = ["building"]
 
     def render(self, session, logger, plenaries, building, city, address,
-               fullname, uri, default_dns_domain, comments, user,
+               fullname, uri, default_dns_domain, comments, netdev_require_rack, user,
                justification, reason, force_uri, next_rackid, **kwargs):
         dbbuilding = Building.get_unique(session, building, compel=True)
 
@@ -48,6 +48,7 @@ class CommandUpdateBuilding(BrokerCommand):
                                         old_address)
 
         update_location(dbbuilding, fullname=fullname, comments=comments,
+                        netdev_require_rack=netdev_require_rack,
                         uri=uri, default_dns_domain=default_dns_domain,
                         force_uri=force_uri, logger=logger, next_rackid=next_rackid)
 
