@@ -21,11 +21,12 @@ from aquilon.aqdb.model import Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.worker.processes import DSDBRunner
 
 
 class CommandDelInterface(BrokerCommand):
-    requires_plenaries = True
 
+    requires_plenaries = True
     required_parameters = []
 
     def render(self, session, logger, plenaries, interface, switch, mac, user,
@@ -90,12 +91,19 @@ class CommandDelInterface(BrokerCommand):
                                 "configured, delete them first: "
                                 "{1}.".format(dbinterface, addrs))
 
-        dbhw_ent.interfaces.remove(dbinterface)
-        session.flush()
+        dsdb_runner = DSDBRunner(logger=logger)
+        oldinfo = dsdb_runner.snapshot_hw(dbhw_ent)
 
         if dbhw_ent.hardware_type != 'chassis':
             plenaries.add(dbhw_ent)
-            if dbhw_ent.host:
-                plenaries.add(dbhw_ent.host)
-            plenaries.write()
+        if dbhw_ent.host:
+            plenaries.add(dbhw_ent.host)
+
+        dbhw_ent.interfaces.remove(dbinterface)
+        session.flush()
+
+        with plenaries.transaction():
+            dsdb_runner.update_host(dbhw_ent, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update entry in DSDB")
+
         return

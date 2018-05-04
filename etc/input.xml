@@ -1328,6 +1328,7 @@
 		<option name="chassis" type="string">Chassis name</option>
 		<option name="network_device" type="string">Network device name</option>
 		<option name="switch" type="string">[Deprecated] Switch name</option>
+		<option name="console_server" type="string">Console server name</option>
 	    </optgroup>
 	    <option name="interface" type="string">Interface name</option>
 	</optgroup>
@@ -1732,6 +1733,7 @@
 		<option name="network_device" type="string">Network device name</option>
 		<option name="switch" type="string">[Deprecated] Switch name</option>
 		<option name="chassis" type="string">Chassis name</option>
+		<option name="console_server" type="string">Chassis name</option>
 	    </optgroup>
 	    <option name="interface" type="string">Interface name</option>
 	</optgroup>
@@ -1781,6 +1783,7 @@
 	    <option name="switch" type="string">[Deprecated] Switch name</option>
 	    <option name="network_device" type="string">Network device name</option>
 	    <option name="chassis" type="string">Chassis name</option>
+	    <option name="console_server" type="string">Console server name</option>
 	    <option name="mac" type="mac">MAC address</option>
 	</optgroup>
 	<optgroup>
@@ -1805,6 +1808,7 @@
 		<option name="chassis" type="string">Chassis name</option>
 		<option name="network_device" type="string">Network device name</option>
 		<option name="switch" type="string">[Deprecated] Switch name</option>
+		<option name="console_server" type="string">Console server name</option>
 	    </optgroup>
 	    <option name="interface" type="string">Name of the interface.</option>
 	</optgroup>
@@ -1842,6 +1846,7 @@
 		<option name="chassis" type="string">Chassis name</option>
 		<option name="network_device" type="string">Network device name</option>
 		<option name="switch" type="string">[Deprecated] Switch name</option>
+		<option name="console_server" type="string">Console server name</option>
 	    </optgroup>
 	    <option name="interface" type="string">Name of the interface</option>
 	    <optgroup>
@@ -4296,6 +4301,105 @@
 	</optgroup>
 	<transport trigger="switch" method="post" path="switch/%(switch)s/command/poll"/>
 	<transport method="post" path="poll/rack/%(rack)s"/>
+    </command>
+
+    <command name="add_console_server">
+	Create a new console server.
+	<optgroup mandatory="True" fields="all">
+	    <option name="console_server" type="string">Console server fully qualified name</option>
+	    <option name="model" type="string">Model</option>
+	    <optgroup fields="one">
+		<option name="rack" type="string">Rack name</option>
+	    </optgroup>
+	    <option name="ip" type="ip">IP address</option>
+	</optgroup>
+	<optgroup>
+	    <option name="interface" type="string">Interface name (default: console)</option>
+	    <option name="mac" type="mac">MAC address of the interface</option>
+	    <option name="label" type="string">Hardware label. If not specified, the FQDN minus the DNS domain is used.</option>
+	    <option name="vendor" type="string">Vendor. Needed if the model name is not unique</option>
+	    <option name="serial" type="string">Serial Number</option>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="console_server/%(console_server)s" />
+    </command>
+
+    <command name="update_console_server">
+	Update console server information.
+	<optgroup mandatory="True" fields="all">
+	    <option name="console_server" type="string">Fully qualified name</option>
+	</optgroup>
+	<optgroup>
+	    <optgroup fields="one">
+		<option name="rack" type="string">Rack name</option>
+		<option name="room" type="string">Room name</option>
+		<option name="building" type="string">Building name</option>
+	    </optgroup>
+	    <option name="ip" type="ip">IP address</option>
+	    <option name="model" type="string">Model</option>
+	    <option name="vendor" type="string" requires="model">Vendor. Needed if the model name is not unique</option>
+	    <option name="serial" type="string">Serial Number</option>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="console_server/%(console_server)s" />
+    </command>
+
+    <command name="show_console_server">
+	Show the configuration information for the specified console server.
+	<optgroup mandatory="True" fields="one">
+	    <option name="console_server" type="string">Fully qualified name</option>
+	    <option name="all" type="flag">Show all</option>
+	</optgroup>
+	<transport trigger="console_server" method="get" path="console_server/%(console_server)s" />
+	<transport trigger="all" method="get" path="console_server" />
+    </command>
+
+    <command name="del_console_server">
+	Delete the specified console server.
+	<optgroup mandatory="True" fields="all">
+	    <option name="console_server" type="string">Console server name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="clear_ports" type="flag">Delete existing port bindings</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="console_server/%(console_server)s" />
+    </command>
+
+    <command name="bind_console_server">
+	Register a console port binding.
+	<optgroup mandatory="True" fields="all">
+	    <option name="console_server" type="string">Name of the console server</option>
+	    <option name="console_port" type="int">Port number on the console server</option>
+	    <option name="network_device" type="string">Name of the network device</option>
+	</optgroup>
+	<optgroup>
+	    <option name="client_port" type="string">Local port name, defaults to "console"</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="console_server/%(console_server)s/bind"/>
+    </command>
+
+    <command name="unbind_console_server">
+	<optgroup mandatory="True" fields="all">
+	    <option name="console_server" type="string">Name of the console server</option>
+	    <optgroup fields="one">
+		<option name="console_port" type="int">Port number on the console server</option>
+		<option name="network_device" type="string">Name of the network device</option>
+	    </optgroup>
+	</optgroup>
+	<optgroup>
+	    <option name="client_port" type="string">Local port name, if there are more than one</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="console_server/%(console_server)s/unbind"/>
     </command>
 
     <command name="show_principal">

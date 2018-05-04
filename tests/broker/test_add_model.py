@@ -142,6 +142,18 @@ class TestAddModel(TestBrokerCommand):
                         "--cpunum", 0, "--memory", 0, "--disktype", "local",
                         "--diskcontroller", "sata", "--disksize", 0])
 
+    def test_190_add_utconserver(self):
+        command = "add model --model utconserver --vendor aurora_vendor --type console_server"
+        self.noouttest(command.split(" "))
+
+    def test_195_show_utconserver(self):
+        command = "show model --model utconserver"
+        out = self.commandtest(command.split(" "))
+        self.output_equals(out, """
+            Vendor: aurora_vendor Model: utconserver
+              Model Type: console_server
+            """, command)
+
     def test_200_search_type_switch(self):
         command = "search model --machine_type switch"
         out = self.commandtest(command.split(" "))

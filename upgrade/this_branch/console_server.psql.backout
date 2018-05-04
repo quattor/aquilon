@@ -1,0 +1,2 @@
+DROP TABLE console_port;
+DROP TABLE console_server;

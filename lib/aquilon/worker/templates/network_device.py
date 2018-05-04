@@ -56,6 +56,12 @@ class PlenaryNetworkDeviceInfo(StructurePlenary):
         pan_assign(lines, "model_type", self.dbobj.model.model_type)
         pan_include(lines, "hardware/network_device/%s/%s" %
                     (self.dbobj.model.vendor.name, self.dbobj.model.name))
+        for port in self.dbobj.consoles:
+            console_port = self.dbobj.consoles[port]
+            pan_assign(lines, "hardware/console/port/%s/server_name" % console_port.client_port,
+                       console_port.console_server)
+            pan_assign(lines, "hardware/console/port/%s/server_port" % console_port.client_port,
+                       console_port.port_number)
         lines.append("")
 
         add_location_info(lines, self.dbobj.location)

@@ -34,6 +34,7 @@ _table_abbrev = {
     'cluster_service_binding': 'clstr_svc_bndg',
     'cluster_group': 'clstr_grp',
     'cluster_group_member': 'clstr_grp_mmbr',
+    'console_server': 'consrv',
     'dns_environment': 'dns_env',
     'dns_record': 'dnsrec',
     'hardware_entity': 'hw_ent',
