@@ -23,8 +23,9 @@ from ipaddress import IPv4Network
 
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm import object_session, subqueryload
+from sqlalchemy.inspection import inspect
 
-from aquilon.aqdb.model import Network, HardwareEntity
+from aquilon.aqdb.model import Network, HardwareEntity, Machine
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.formats.service_address import ServiceAddressFormatter
@@ -330,6 +331,7 @@ class NetworkHostListFormatter(ListFormatter):
                     host_msg.mac = str(mac)
 
                 host_msg.machine.name = hwent.label
+                self.redirect_proto(hwent.model, host_msg.machine.model)
 
                 # aqdhcpd uses the interface list when excluding hosts it is not
                 # authoritative for

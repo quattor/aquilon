@@ -118,6 +118,24 @@ class TestSearchNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network: %s" % net.name, command)
         self.matchoutput(out, "IP: %s" % net.ip, command)
 
+    def testmachinemodelproto(self):
+        command = ["search_network", "--network=unknown0", "--fullinfo",
+                   "--format=proto"]
+        network = self.protobuftest(command)[0]
+        host = network.hosts[0]
+        self.assertEqual(host.machine.model.name, "hs21-8853")
+        self.assertEqual(host.machine.model.vendor, "ibm")
+        self.assertEqual(host.machine.model.model_type, "blade")
+
+    def testmachinemodelnetdevproto(self):
+        command = ["search_network", "--network=np06bals03_v103", "--fullinfo",
+                   "--format=proto"]
+        network = self.protobuftest(command)[0]
+        host = network.hosts[0]
+        self.assertEqual(host.machine.model.name, "rs g8000")
+        self.assertEqual(host.machine.model.vendor, "bnt")
+        self.assertEqual(host.machine.model.model_type, "switch")
+
     def testnoenv(self):
         # Same IP defined differently in different environments
         net = self.net["unknown0"]
