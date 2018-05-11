@@ -232,7 +232,9 @@ class AQDMaker(object):
                                        "aq_notifyd")
                 if not os.path.exists(notifyd):
                     notifyd = notifyd + ".py"
-                args = [notifyd, "--config", config.baseconfig]
+                # notifyd must use the same Python interpreter as aqd: this is necessary
+                # to properly support virtualenv.
+                args = [sys.executable, notifyd, "--config", config.baseconfig]
                 mon.addProcess("notifyd", args, env=os.environ)
             mon.startService()
             reactor.addSystemEventTrigger('before', 'shutdown', mon.stopService)
