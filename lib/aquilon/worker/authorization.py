@@ -22,8 +22,10 @@ from six.moves.configparser import RawConfigParser  # pylint: disable=F0401
 
 from twisted.python import log
 
-from aquilon.exceptions_ import AuthorizationException
+from aquilon.exceptions_ import AuthorizationException, ArgumentError
 from aquilon.config import Config, lookup_file_path
+from aquilon.aqdb.model import Role
+from aquilon.worker.command_registry import CommandRegistry
 
 host_re = re.compile(r'^host/(.+)@([^@]+)$')
 
@@ -36,23 +38,19 @@ class AuthorizationBroker(object):
 
     def __init__(self):
         self.__dict__ = self.__shared_state
-
         # TODO: Make the initialization more explicit
         if getattr(self, "config", None):
             return
-
         self.config = Config()
-
+        self.cregistry = CommandRegistry()
         self.action_whitelist = {}
         self.role_whitelist = {}
         self.default_allow = {}
-
         authz_config = lookup_file_path(self.config.get("broker",
                                                         "authorization_rules"))
         log.msg("Reading authorization rules from " + authz_config)
         rules = RawConfigParser()
         rules.read(authz_config)
-
         for section in rules.sections():
             if section.startswith("action-"):
                 if not rules.has_option(section, "role_whitelist"):
@@ -147,3 +145,89 @@ class AuthorizationBroker(object):
                                          "environment." %
                                          (allowed_roles, default))
         return
+
+    def check_command_permission(self, session, command, option):
+        """This function return all roles that are allowed to use a given
+        command with or without option"""
+
+        exist = False
+        for k in self.cregistry._commands_cache.values():
+            if k["command"] == command:
+                exist = True
+                break
+        if not exist:
+            raise ArgumentError("{} command does not exist".format(command))
+        del(exist)
+
+        if option is False:
+            c = [command]
+            return self.check_commands_role(session, c)
+
+        elif option is None:
+            to_check = []  # composed commands related to the one searched
+            for k, v in self.cregistry._commands_cache.items():
+                if v["command"] == command:
+                    to_check.append(k)
+            return self.check_commands_role(session, to_check)
+
+        else:
+            c = ['{}_{}'.format(command, option)]
+            return self.check_commands_role(session, c)
+
+    def check_commands_role(self, session, commands):
+        """This function returns all roles that are allowed to use at least one
+        of the command in the command list passed in arguments"""
+
+        if any(c in self.cregistry._readonly_commands for c in commands):
+            return sorted(session.query(Role).all(), key=str)
+
+        roles = set()
+        for c in commands:
+            if c in self.action_whitelist:
+                roles = roles.union(set(self.action_whitelist[c]))
+            else:
+                roles = roles.union(set(self.default_allow.keys()))
+                for r, actions in self.role_whitelist.iteritems():
+                    if c in actions:
+                        roles = roles.union(set([r]))
+
+        return sorted(session.query(Role).
+                      filter(Role.name.in_(roles)), key=str)
+
+    def add_command_to_option_dict(self, option_dict, command_info):
+        if not command_info["command"] in option_dict:
+            option_dict[command_info["command"]] = set()
+        option_dict[command_info["command"]].add(command_info["option"])
+
+    def check_role_permission(self, session, role):
+        # This function return all commands that are allowed for a given role
+        l = []
+        # option_dict : {command : (option1, option2), command2 : (option1)..}
+        option_dict = {}
+        for c, v in self.cregistry._commands_cache.items():
+            if c in self.cregistry._readonly_commands:
+                self.add_command_to_option_dict(option_dict, v)
+
+            elif c in self.action_whitelist \
+                    and role in self.action_whitelist[c]:
+                self.add_command_to_option_dict(option_dict, v)
+
+            elif role in self.default_allow:
+                self.add_command_to_option_dict(option_dict, v)
+
+            elif role in self.role_whitelist \
+                    and c in self.role_whitelist[role]:
+                self.add_command_to_option_dict(option_dict, v)
+
+        for c, s in option_dict.items():
+            if self.cregistry._commands_options[c] == s:
+                l.append(c)
+            elif None in s:
+                options = sorted(self.cregistry._commands_options[c] - s)
+                l.append("{} (expect with: --{})"
+                         .format(c, ', --'.join(str(e) for e in options)))
+            else:
+                l.append("{} (only with: --{})".
+                         format(c, ', --'.join(str(e) for e in sorted(s))))
+
+        return sorted(l)

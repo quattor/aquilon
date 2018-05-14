@@ -66,6 +66,7 @@ from aquilon.worker.messages import StatusCatalog
 from aquilon.utils import (force_int, force_float, force_boolean, force_ip,
                            force_mac, force_ascii, force_list, force_json,
                            force_uuid)
+from aquilon.worker.command_registry import CommandRegistry, CommandEntry
 
 # Regular Expression for matching variables in a path definition.
 # Currently only supports stuffing a single variable in a path
@@ -366,98 +367,6 @@ class RestServer(ResponsePage):
         container.handlers[rendermethod] = handler
 
 ###############################################################################
-
-
-class CommandEntry(object):
-    """Representation of a single command in the registry.
-
-    For each transport defined for a command in input.xml a command entry
-    will be created.
-    """
-    def __init__(self, fullname, method, path, name, trigger):
-        self.fullname = fullname
-        self.method = method
-        self.path = path
-        self.name = name
-        self.trigger = trigger
-
-    def add_option(self, option_name, paramtype, enumtype=None):
-        """Add an option to a command.
-
-        This function is called for each option tag found within a
-        command defined in input.xml.  Note it will be repeated for
-        each transport.
-        """
-        pass
-
-    def add_format(self, format, style):
-        """Add a format to a command.
-
-        This function is called for each format tag found within a
-        command defined in inpux.xml.  Note it will be repeated for
-        each transport.
-        """
-        pass
-
-
-class CommandRegistry(object):
-
-    def new_entry(self, fullname, method, path, name, trigger):
-        """Create a new CommandEntry"""
-        return CommandEntry(fullname, method, path, name, trigger)
-
-    def add_entry(self, entry):
-        """Save the completed CommandEntry"""
-        pass
-
-    def __init__(self):
-        tree = ElementTree.parse(lookup_file_path("input.xml"))
-
-        for command in tree.getiterator("command"):
-            if 'name' not in command.attrib:
-                continue
-            name = command.attrib['name']
-
-            for transport in command.getiterator("transport"):
-                if "method" not in transport.attrib or \
-                   "path" not in transport.attrib:
-                    log.msg("Warning: incorrect transport specification "
-                            "for %s." % name)
-                    continue
-
-                method = transport.attrib["method"]
-                path = transport.attrib["path"]
-                trigger = transport.attrib.get("trigger")
-
-                fullname = name
-                if trigger:
-                    fullname = fullname + "_" + trigger
-
-                entry = self.new_entry(fullname, method, path, name, trigger)
-                if not entry:
-                    continue
-
-                for option in command.getiterator("option"):
-                    if 'name' not in option.attrib or \
-                       'type' not in option.attrib:
-                        log.msg("Warning: incorrect options specification "
-                                "for %s." % fullname)
-                        continue
-                    option_name = option.attrib["name"]
-                    paramtype = option.attrib["type"]
-                    enumtype = option.attrib.get("enum")
-                    entry.add_option(option_name, paramtype, enumtype)
-
-                for format in command.getiterator("format"):
-                    if "name" not in format.attrib:
-                        log.msg("Warning: incorrect format specification "
-                                "for %s." % fullname)
-                        continue
-                    style = format.attrib["name"]
-                    entry.add_format(format, style)
-
-                self.add_entry(entry)
-
 
 class ResourcesCommandEntry(CommandEntry):
 

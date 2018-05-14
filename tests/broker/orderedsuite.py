@@ -322,7 +322,7 @@ from .test_consistency import TestConsistency
 from .test_root_access import TestRootAccess
 from .test_refresh_user import TestRefreshUser
 from .test_justification import TestJustification
-
+from .test_show_permission import TestShowPermission
 
 class BrokerTestSuite(unittest.TestSuite):
     """Set up the broker's unit tests in an order that allows full coverage.
@@ -339,7 +339,7 @@ class BrokerTestSuite(unittest.TestSuite):
                     TestPing, TestStatus]
     test_list = [TestAddRole, TestPermission,
                  TestAddDnsDomain, TestAddDnsEnvironment,
-                 TestAddUser,
+                 TestAddUser, TestShowPermission,
                  TestAddSandbox, TestAddDomain, TestUpdateBranch,
                  TestCMLogger,
                  TestGet, TestPublishSandbox, TestDeployDomain,
