@@ -37,7 +37,7 @@ from aquilon.aqdb.types import NicType, MACAddress
 from aquilon.aqdb.column_types import AqMac
 from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
                                 Fqdn, ARecord, VlanInfo, AddressAssignment,
-                                SharedAddressAssignment,
+                                SharedAddressAssignment, PortGroup,
                                 Model, Bunker, Location, HardwareEntity,
                                 Network, Host)
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -389,8 +389,10 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
         usable_pgs = set(allocator.port_groups)
         usable_pgs -= used_pgs
 
+        port_group_parsed = PortGroup.parse_name(port_group_name)
         for pg in sorted(usable_pgs, key=attrgetter('network_tag')):
-            if pg.usage != port_group_name:
+            if pg.usage != port_group_name and (
+                    pg.usage, pg.network_tag) != port_group_parsed:
                 continue
             net = pg.network
             free_capacity = net.available_ip_count - net.guest_count

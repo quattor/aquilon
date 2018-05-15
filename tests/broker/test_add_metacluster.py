@@ -181,17 +181,22 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                          command)
 
     def test_172_show_utmc8_proto(self):
-        net = self.net["autopg1"]
+        net1 = self.net["autopg1"]
+        net2 = self.net["autopg3"]
         command = ["show_metacluster", "--metacluster", "utmc8",
                    "--format", "proto"]
         mc = self.protobuftest(command, expect=1)[0]
         self.assertEqual(mc.name, "utmc8")
         self.assertEqual(mc.virtual_switch.name, "utvswitch")
-        self.assertEqual(len(mc.virtual_switch.portgroups), 1)
-        self.assertEqual(mc.virtual_switch.portgroups[0].ip, str(net.ip))
+        self.assertEqual(len(mc.virtual_switch.portgroups), 2)
+        self.assertEqual(mc.virtual_switch.portgroups[0].ip, str(net1.ip))
         self.assertEqual(mc.virtual_switch.portgroups[0].cidr, 29)
         self.assertEqual(mc.virtual_switch.portgroups[0].network_tag, 710)
         self.assertEqual(mc.virtual_switch.portgroups[0].usage, "user")
+        self.assertEqual(mc.virtual_switch.portgroups[1].ip, str(net2.ip))
+        self.assertEqual(mc.virtual_switch.portgroups[1].cidr, 29)
+        self.assertEqual(mc.virtual_switch.portgroups[1].network_tag, 123)
+        self.assertEqual(mc.virtual_switch.portgroups[1].usage, "customtype")
 
     def test_175_add_utmc9(self):
         # FIXME: Localdisk setups should not have a metacluster, but the

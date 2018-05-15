@@ -31,6 +31,12 @@ class TestDelVirtualSwitch(TestBrokerCommand):
         self.noouttest(["unbind_port_group", "--virtual_switch", "utvswitch",
                         "--tag", "710"])
 
+    def test_102_unbind_pg_custom_type(self):
+        net = self.net["autopg3"]
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip]
+        self.noouttest(command)
+
     def test_105_verify_pg_gone(self):
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.commandtest(command)
