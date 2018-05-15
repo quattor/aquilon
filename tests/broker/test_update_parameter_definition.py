@@ -36,6 +36,13 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                "--activation", "reboot"] + self.valid_just_tcm
         self.statustest(cmd)
 
+    def test_103_missing_option(self):
+        command = ["update_parameter_definition", "--path=foo/testint"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out,
+                         "Please provide exactly one of the required options!",
+                         command)
+
     def test_105_verify_update(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
                "--path", "foo/testint"]

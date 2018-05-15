@@ -39,6 +39,13 @@ class TestDelParameterDefinition(TestBrokerCommand):
             self.statustest(["del_parameter_definition", "--archetype", "aquilon",
                              "--path", path])
 
+    def test_103_missing_option(self):
+        command = ["del_parameter_definition", "--path=foo/testint"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out,
+                "Please provide exactly one of the required options!",
+                command)
+
     def test_105_verify_delete(self):
         command = ["search_parameter_definition", "--archetype", "aquilon"]
         out = self.commandtest(command)
