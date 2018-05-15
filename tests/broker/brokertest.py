@@ -862,10 +862,11 @@ class TestBrokerCommand(unittest.TestCase):
 
     def promote_current_user(self):
         srcdir = self.config.get("broker", "srcdir")
-        add_admin = os.path.join(srcdir, "tests", "aqdb", "add_admin.py")
+        set_role = os.path.join(srcdir, "tests", "aqdb", "set_role.py")
         env = os.environ.copy()
         env['AQDCONF'] = self.config.baseconfig
-        p = Popen([add_admin], stdout=PIPE, stderr=PIPE, env=env)
+        p = Popen([set_role, '--role', 'aqd_admin'],
+                  stdout=PIPE, stderr=PIPE, env=env)
         (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0,
                          "Failed to restore admin privs '%s', '%s'." %

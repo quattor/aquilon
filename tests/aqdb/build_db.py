@@ -112,7 +112,8 @@ def main(*args, **kw):
 
         env = os.environ.copy()
         env['AQDCONF'] = config.baseconfig
-        rc = subprocess.call([os.path.join(BINDIR, 'add_admin.py')],
+        rc = subprocess.call([os.path.join(BINDIR, 'set_role.py'),
+                              '--role', 'aqd_admin'],
                              env=env, stdout=1, stderr=2)
         if rc != 0:
             log.warn("Failed to add current user as administrator.")

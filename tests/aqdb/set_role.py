@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Give anyone with write access to the database the aqd_admin role."""
+"""Give anyone with write access to the database the role they want."""
 
 import argparse
 import logging
@@ -24,7 +24,7 @@ import sys
 from subprocess import Popen, PIPE
 
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger('aqdb.add_admin')
+log = logging.getLogger('aqdb.add_role')
 
 import utils
 utils.load_classpath()
@@ -53,6 +53,10 @@ def parse_cli(*args, **kw):
                         dest='commit',
                         default=True,
                         help='do not add records to the database')
+
+    parser.add_argument('-r', '--role',
+                        required=True,
+                        help='The role to set for the user')
 
     return parser.parse_args()
 
@@ -85,7 +89,7 @@ def main(*args, **kw):
 
     session = db.Session()
 
-    aqd_admin = Role.get_unique(session, "aqd_admin", compel=True)
+    aqd_role = Role.get_unique(session, opts.role, compel=True)
 
     dbrealm = Realm.get_unique(session, realm)
     if not dbrealm:
@@ -94,16 +98,16 @@ def main(*args, **kw):
 
     dbuser = UserPrincipal.get_unique(session, name=principal, realm=dbrealm)
     if dbuser:
-        if dbuser.role == aqd_admin:
-            log.info("%s@%s is already an aqd_admin, nothing to do",
-                     principal, realm)
+        if dbuser.role == aqd_role:
+            log.info("%s@%s is already an %s, nothing to do",
+                     principal, realm, opts.role)
         else:
-            log.info("Updating %s %s to aqd_admin",
-                     dbuser.name, dbuser.role.name)
-            dbuser.role = aqd_admin
+            log.info("Updating %s %s to %s",
+                     dbuser.name, dbuser.role.name, opts.role)
+            dbuser.role = aqd_role
     else:
-        log.info("Creating %s@%s as aqd_admin", principal, realm)
-        dbuser = UserPrincipal(name=principal, realm=dbrealm, role=aqd_admin,
+        log.info("Creating %s@%s as %s", principal, realm, opts.role)
+        dbuser = UserPrincipal(name=principal, realm=dbrealm, role=aqd_role,
                                comments='User with write access to database')
         session.add(dbuser)
 
