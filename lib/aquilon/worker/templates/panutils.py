@@ -25,16 +25,24 @@ from six import string_types
 _valid_id = re.compile(r"^[a-zA-Z_][\w.+\-]*$")
 
 
-def pan(obj, indent=0):
-    """pan(OBJ) -- return a string representing OBJ in the PAN language"""
+def pan(obj, indent=0, quoted=True):
+    """
+    pan(OBJ) -- return a string representing OBJ in the PAN language
+
+    :param quoted: if true, a string value is quoted. Can be set to false if the value is
+                   a variable name.
+    """
 
     spaces = "  " * (indent + 1)
     accumulator = list()
 
     if isinstance(obj, string_types):
-        quote = '"'
-        if '"' in obj:
-            quote = "'"
+        if quoted:
+            quote = '"'
+            if '"' in obj:
+                quote = "'"
+        else:
+            quote = ''
         accumulator.append("%s%s%s" % (quote, obj, quote))
 
     elif isinstance(obj, bool):
@@ -56,14 +64,14 @@ def pan(obj, indent=0):
         # Enforce a deterministic order to avoid recompilations due to change in
         # ordering. This also helps with the testsuite.
         for key in sorted(obj):
-            val = pan(obj[key], indent + 1)
+            val = pan(obj[key], indent + 1, quoted)
             if isinstance(key, string_types):
                 if not _valid_id.match(str(key)):  # pragma: no cover
                     raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover
                 raise TypeError("The value of an nlist key must be a string, "
                                 "optionally escaped (it was: %r)" % key)
-            accumulator.append("%s%s, %s," % (spaces, pan(key), val))
+            accumulator.append("%s%s, %s," % (spaces, pan(key, quoted), val))
         # remove the last comma
         accumulator[-1] = accumulator[-1].rstrip(",")
         accumulator.append("%s)" % ("  " * indent))
@@ -71,7 +79,7 @@ def pan(obj, indent=0):
     elif isinstance(obj, Iterable):
         accumulator.append("list(")
         for item in obj:
-            val = pan(item, indent + 1)
+            val = pan(item, indent + 1, quoted)
             accumulator.append("%s%s," % (spaces, val))
         # remove the last comma
         accumulator[-1] = accumulator[-1].rstrip(",")
@@ -81,7 +89,7 @@ def pan(obj, indent=0):
         accumulator.append("null")
 
     else:
-        accumulator.append(pan(str(obj)))
+        accumulator.append(pan(str(obj), quoted))
 
     if len(accumulator) == 1:
         return accumulator[0]
@@ -142,11 +150,15 @@ def pan_include_if_exists(lines, templates):
     lines.extend('include { if_exists("%s") };' % tpl for tpl in templates)
 
 
-def pan_variable(lines, variable, value, final=False):
+def pan_variable(lines, variable, value, final=False, quoted=True):
+    """
+    :param final: mark the variable as final if true
+    :param quoted: quotes the value if true (can be set to false if the value is a variable name)
+    """
     if final:
-        lines.append('final variable %s = %s;' % (variable, pan(value)))
+        lines.append('final variable %s = %s;' % (variable, pan(value, quoted=quoted)))
     else:
-        lines.append('variable %s = %s;' % (variable, pan(value)))
+        lines.append('variable %s = %s;' % (variable, pan(value, quoted=quoted)))
 
 
 class PanObject(object):
