@@ -28,45 +28,46 @@ from brokertest import TestBrokerCommand
 
 class TestAddRoom(TestBrokerCommand):
 
-    def testaddutroom1(self):
+    def test_100_addutroom1(self):
         command = ['add_room', '--room=utroom1', '--building=ut', '--floor=42',
                    '--fullname=UT pod1']
         self.noouttest(command)
 
-    def testverifyaddutroom1(self):
+    def test_105_verifyaddutroom1(self):
         command = "show room --room utroom1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom1", command)
         self.matchoutput(out, "Floor: 42", command)
         self.matchoutput(out, "Fullname: UT pod1", command)
 
-    def testaddutroom2(self):
+    def test_110_addutroom2(self):
         command = ['add_room', '--room=utroom2', '--building=ut', '--floor=GF']
         self.noouttest(command)
 
-    def testverifyutroom2(self):
+    def test_115_verifyutroom2(self):
         command = "show room --room utroom2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: utroom2", command)
         self.matchoutput(out, "Fullname: utroom2", command)
         self.matchoutput(out, "Floor: gf", command)
 
-    def testverifyshowcsv(self):
+    def test_120_verifyshowcsv(self):
         command = "show room --all --format=csv"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "room,utroom1,building,ut", command)
         self.matchoutput(out, "room,utroom2,building,ut", command)
 
-    def testaddnplab1(self):
+    def test_125_addnplab1(self):
         self.noouttest(["add_room", "--room", "np-lab1", "--building", "np",
-                        "--fullname", "NP lab1", '--floor=0'])
+                        "--fullname", "NP lab1", '--floor=0', '--uri=TEST URI'])
 
-    def testverifynplab1(self):
+    def test_130_verifynplab1(self):
         command = "show room --room np-lab1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Room: np-lab1", command)
         self.matchoutput(out, "Fullname: NP lab1", command)
         self.matchoutput(out, "Floor: 0", command)
+        self.matchoutput(out, "Location URI: TEST URI", command)
 
 
 if __name__ == '__main__':

@@ -25,9 +25,9 @@ class CommandAddRoom(BrokerCommand):
 
     required_parameters = ["room", "building", "floor"]
 
-    def render(self, session, room, building, fullname, comments, floor, **_):
+    def render(self, session, room, building, fullname, comments, floor, uri, **_):
         dbbuilding = Building.get_unique(session, building, compel=True)
-        add_location(session, Room, room, dbbuilding, fullname=fullname,
+        add_location(session, Room, room, dbbuilding, fullname=fullname, uri=uri,
                      comments=comments, floor=floor)
 
         session.flush()

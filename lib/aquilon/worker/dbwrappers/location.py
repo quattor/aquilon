@@ -89,12 +89,18 @@ def get_default_dns_domain(dblocation):
                             .format(dblocation))
 
 def validate_uri(uri, clsname, name, force, logger):
+    # To Do: move this to Building model @validates method so that different
+    # location models can have different validate_uri methods
+    # Additional attributes - logger, force, can be passed via init
+    # or added to class instance directly in render
     config = Config()
+    location_feed = None
     validator = config.lookup_tool("location_uri_validator")
-    if config.has_section("location_feeds"):
+    if config.has_value("location_feeds", clsname + "_feed"):
         location_feed = config.get("location_feeds", clsname + "_feed")
-
-    if force is None and validator is not None:
+    if force is None and \
+                    validator is not None and \
+                    location_feed is not None:
         try:
             run_command([validator, "--uri", uri, "--location-type", clsname,
                         "--location", name, "--location-feed", location_feed],
