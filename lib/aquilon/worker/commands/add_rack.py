@@ -26,7 +26,7 @@ class CommandAddRack(BrokerCommand):
     required_parameters = ["building", "row", "column"]
 
     def render(self, session, logger, fullname, building, room, bunker, row, column,
-               comments, force_rackid, **_):
+               comments, force_rackid, **args):
         dbrack = get_or_create_rack(session=session, rackrow=row,
                                    rackcolumn=column, building=building, room=room,
                                    bunker=bunker, fullname=fullname, comments=comments,
@@ -36,5 +36,6 @@ class CommandAddRack(BrokerCommand):
         dsdb_runner = DSDBRunner(logger=logger)
         dsdb_runner.add_rack(dbrack)
         dsdb_runner.commit_or_rollback()
+        self.audit_result(session, 'rackid', dbrack.name, **args)
 
         return dbrack.name

@@ -208,6 +208,12 @@ class TestAddRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "np909", command)
 
+    def test_205_rackid_in_search_audit(self):
+        command = ["search_audit", "--command", "add_rack", "--limit", 1,
+                   "--keyword", "99", "--argument", "row"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "[Result: rackid=np909]", command)
+
     def test_210_verifynp909(self):
         command = "show rack --rack np909"
         out = self.commandtest(command.split(" "))
