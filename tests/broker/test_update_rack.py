@@ -204,8 +204,8 @@ class TestUpdateRack(TestBrokerCommand):
         command = ["update", "rack", "--rack", "oy604",
                    "--comments", "Important comments"]
         out, err = self.successtest(command)
-        self.matchoutput(err, "Update rack oy604 in DSDB failed, "
-                              "proceeding.", command)
+        self.matchoutput(err, "Rack oy604 update in DSDB failed!", command)
+        self.matchoutput(err, "Update rack oy604 in DSDB failed, proceeding in AQDB.", command)
 
     def test_245_dsdb_fail_verify(self):
         command = ["show", "rack", "--rack", "oy604"]

@@ -228,14 +228,16 @@ class TestAddRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         command = "add rack --building ut --row 666 --column zz"
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err, "DSDB commands failed: add_rack", command)
+        self.matchoutput(err, "Rack ut666 is already defined", command)
+        self.matchoutput(err, "DSDB command failed: add_rack", command)
         self.matchoutput(err, "Bad Request: DSDB update failed", command)
 
     def test_225_dsdbfailureoy604(self):
         command = "add rack --building oy --row 604 --column zz"
         err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Rack oy604 is already defined", command)
         self.matchoutput(err, "Bad Request: DSDB update failed", command)
-        self.matchoutput(err, "DSDB commands failed: add_rack", command)
+        self.matchoutput(err, "DSDB command failed: add_rack", command)
 
 
 if __name__ == '__main__':
