@@ -34,13 +34,13 @@ class TestUpdateModel(TestBrokerCommand):
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
-                          r'"size", 8192\s*\)\s*\);',
+                          r'"size", 8192\*MB\s*\)\s*\);',
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
                           r'create\("hardware/cpu/intel/l5520"\)\s*\);',
                           command)
-        self.matchoutput(out, '"capacity", 15*1024,', command)
+        self.matchoutput(out, '"capacity", 15*GB,', command)
         self.matchoutput(out, '"interface", "sata",', command)
 
     def test_100_updateexisting(self):
@@ -74,13 +74,13 @@ class TestUpdateModel(TestBrokerCommand):
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
-                          r'"size", 4096\s*\)\s*\);',
+                          r'"size", 4096\*MB\s*\)\s*\);',
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
                           r'create\("hardware/cpu/intel/utcpu"\)\s*\);',
                           command)
-        self.matchoutput(out, '"capacity", 45*1024,', command)
+        self.matchoutput(out, '"capacity", 45*GB,', command)
         self.matchoutput(out, '"interface", "scsi",', command)
 
     def test_130_clear_comments(self):
@@ -122,13 +122,13 @@ class TestUpdateModel(TestBrokerCommand):
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
-                          r'"size", 4096\s*\)\s*\);',
+                          r'"size", 4096\*MB\s*\)\s*\);',
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
                           r'create\("hardware/cpu/intel/utcpu"\)\s*\);',
                           command)
-        self.matchoutput(out, '"capacity", 45*1024,', command)
+        self.matchoutput(out, '"capacity", 45*GB,', command)
         self.matchoutput(out, '"interface", "scsi",', command)
 
     def test_300_updatetype(self):

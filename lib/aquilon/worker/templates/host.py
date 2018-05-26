@@ -374,12 +374,10 @@ class PlenaryHostObject(ObjectPlenary):
         services.sort()
         provides.sort()
 
-        # This is required to be able to override LOADPATH
-        if self.config.getboolean("panc", "include_pan"):
-            pan_include(lines, ["pan/units", "pan/functions"])
-            lines.append("")
-
         # Okay, here's the real content
+        pan_include(lines, ["pan/units", "pan/functions"])
+        lines.append("")
+
         path = PlenaryHostData.template_name(self.dbobj)
         pan_assign(lines, "/",
                    StructureTemplate(path,

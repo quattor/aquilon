@@ -177,7 +177,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             self.searchoutput(out,
                               r'"ram" = list\(\s*'
                               r'create\("hardware/ram/generic",\s*'
-                              r'"size", 8192\s*\)\s*\);',
+                              r'"size", 8192\*MB\s*\)\s*\);',
                               command)
             self.searchoutput(out,
                               r'"cpu" = list\(\s*'
@@ -194,7 +194,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               r'"harddisks/\{sda\}" = nlist\(\s*'
                               r'"address", "0:0",\s*'
                               r'"boot", true,\s*'
-                              r'"capacity", 15\*1024,\s*'
+                              r'"capacity", 15\*GB,\s*'
                               r'"interface", "sata",\s*'
                               r'"mountpoint", "/vol/lnn30f1v1/test_share_%d",\s*'
                               r'"path", "evm%d/sda.vmdk",\s*'
@@ -467,7 +467,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             self.searchoutput(out,
                               r'"ram" = list\(\s*'
                               r'create\("hardware/ram/generic",\s*'
-                              r'"size", 8192\s*\)\s*\);',
+                              r'"size", 8192\*MB\s*\)\s*\);',
                               command)
             self.searchoutput(out,
                               r'"cpu" = list\(\s*'
@@ -485,7 +485,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               r'"harddisks/\{sda\}" = nlist\(\s*'
                               r'"address", "0:0",\s*'
                               r'"boot", true,\s*'
-                              r'"capacity", 15\*1024,\s*'
+                              r'"capacity", 15\*GB,\s*'
                               r'"interface", "sata",\s*'
                               r'"mountpoint", "/vol/lnn30f1v1/%s",\s*'
                               r'"path", "%s/sda.vmdk",\s*'

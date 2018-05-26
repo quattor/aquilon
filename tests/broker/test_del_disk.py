@@ -57,7 +57,7 @@ class TestDelDisk(EventsTestMixin, TestBrokerCommand):
                           r'create\("hardware/harddisk/generic/cciss",\s*'
                           r'"boot", true,\s*'
                           r'"bus", "pci:0000:01:00.0",\s*'
-                          r'"capacity", 34\*1024,\s*'
+                          r'"capacity", 34\*GB,\s*'
                           r'"interface", "cciss"\s*\)',
                           command)
 
