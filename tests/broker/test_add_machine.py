@@ -84,7 +84,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
-                          r'"size", 8192\s*\)\s*\);',
+                          r'"size", 8192\*MB\s*\)\s*\);',
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
@@ -259,7 +259,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
-                          r'"size", 8192\s*\)\s*\);',
+                          r'"size", 8192\*MB\s*\)\s*\);',
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
@@ -297,7 +297,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
                           r'create\("hardware/ram/generic",\s*'
-                          r'"size", 8192\s*\)\s*\);',
+                          r'"size", 8192\*MB\s*\)\s*\);',
                           command)
         self.searchoutput(out,
                           r'"cpu" = list\(\s*'
@@ -332,7 +332,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          'create("hardware/harddisk/generic/cciss",',
                          command)
         self.matchoutput(out,
-                         '"capacity", 466*1024',
+                         '"capacity", 466*GB',
                          command)
 
     def test_170_add_ut3c1n9(self):
