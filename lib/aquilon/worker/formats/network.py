@@ -48,16 +48,16 @@ def summarize_ranges(addrlist):
                 prev_range_class = addr.range_class
                 continue
         if start == end:
-            ranges.append(str(start))
+            ranges.append("{} ({})".format(start, prev_range_class))
         else:
-            ranges.append("%s-%s" % (start, end))
+            ranges.append("{}-{} ({})".format(start, end, prev_range_class))
         start = end = addr.ip
         prev_range_class = addr.range_class
     if start is not None:
         if start == end:
-            ranges.append(str(start))
+            ranges.append("{} ({})".format(start, prev_range_class))
         else:
-            ranges.append("%s-%s" % (start, end))
+            ranges.append("{}-{} ({})".format(start, end, prev_range_class))
 
     return ranges
 
