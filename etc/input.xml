@@ -538,6 +538,22 @@
 	</format>
     </command>
 
+    <command name="search_room">
+	Shows any information available for the matching rooms.
+	<optgroup mandatory="True">
+	    <option name="uri" type="string">URI</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="fullname" type="string">Full descriptive name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="fullinfo" type="flag">Show full information for the matching buildings</option>
+	</optgroup>
+	<transport method="get" path="find/room"/>
+	<format name="proto" >
+	    <message_class name="LocationList" module="aqdlocations_pb2"/>
+	</format>
+    </command>
+
     <command name="search_esx_cluster">
 	Shows any information available for the matching ESX clusters.
 	<p/>
@@ -2965,6 +2981,22 @@
 	    <option name="bunker" type="string">Name of the bunker that houses the rack</option>
 	</optgroup>
 	<transport method="post" path="location/rack/%(rack)s"/>
+    </command>
+
+    <command name="update_room">
+	Update room parameters.
+	<optgroup mandatory="True" fields="all">
+	    <option name="room" type="string">Name of the room</option>
+	</optgroup>
+	<optgroup>
+	    <option name="uri" type="string">URI</option>
+	    <option name="fullname" type="string">Room fullname</option>
+	    <option name="floor" type="string">Floor of the room</option>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="location/room/%(room)s"/>
     </command>
 
     <command name="show_rack">

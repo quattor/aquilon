@@ -69,6 +69,45 @@ class TestAddRoom(TestBrokerCommand):
         self.matchoutput(out, "Floor: 0", command)
         self.matchoutput(out, "Location URI: TEST URI", command)
 
+    def test_135_update_room_fullname(self):
+        self.noouttest(["update_room", "--room", "np-lab1", "--fullname", "TEST"])
+        command = ["show_room", "--room", "np-lab1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Fullname: TEST", command)
+
+    def test_140_update_room_uri_comments_floor(self):
+        self.noouttest(["update_room", "--room", "np-lab1", "--uri", "TEST",
+                        "--comments", "TEST", "--floor", "TEST"])
+        command = ["show_room", "--room", "np-lab1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Location URI: TEST", command)
+        self.matchoutput(out, "Comments: TEST", command)
+        self.matchoutput(out, "Floor: test", command)
+
+    def test_145_search_room(self):
+        command = ["search_room", "--fullname", "TEST"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np-lab1", command)
+        command = ["search_room", "--uri", "TEST"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np-lab1", command)
+
+    def test_150_search_room_case_insensite(self):
+        command = ["search_room", "--fullname", "test"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np-lab1", command)
+        command = ["search_room", "--fullname", "test", "--uri", "test"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np-lab1", command)
+
+    def test_145_search_room_building(self):
+        command = ["search_room", "--building", "np"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np-lab1", command)
+
+    def test_185_update_room_back(self):
+        self.noouttest(["update_room", "--room", "np-lab1", "--floor", "0"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRoom)
