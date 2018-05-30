@@ -7065,5 +7065,29 @@ appear earlier
 	<transport method="get" trigger="all" path="cluster/cluster_systemlist"/>
     </command>
 
+    <command name="show_permission">
+	Show aquilon permission per command role or user
+	<optgroup fields="one">
+	    <optgroup>
+		<option name="command" type="string">Show all roles that are allowed to use the given command</option>
+		<optgroup fields="one">
+		    <option name="option" type="string" requires="command">Show all roles that are allowed to use the given option of the specified command</option>
+		    <option name="no-option" type ="flag" requires="command">Show all roles that are allowed to use the specified command without any option </option>
+		</optgroup>
+	    </optgroup>
+	    <option name="role" type="string">Show all commands allowed for the given role</option>
+	    <optgroup>
+		<option name="username" type="string">Show all commands allowed for the given user</option>
+		<optgroup>
+		    <option name="realm" type="string" requires="username">The realm used for the specified user</option>
+		</optgroup>
+	    </optgroup>
+	</optgroup>
+	<transport method="get" trigger="command" path="permission/command/%(command)s"/>
+	<transport method="get" trigger="role" path="permission/role/%(role)s"/>
+	<transport method="get" trigger="username" path="permission/username/%(username)s"/>
+	<transport method="get" path="permission/currentuser"/>
+    </command>
+
 </commandline>
 <!-- vim: set ai sw=4: -->

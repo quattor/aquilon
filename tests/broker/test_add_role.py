@@ -39,6 +39,9 @@ class TestAddRole(TestBrokerCommand):
     def test_110_add_operations(self):
         self.noouttest(["add_role", "--role", "operations"])
 
+    def test_115_add_unittester(self):
+        self.noouttest(["add_role", "--role", "unittester"])
+
     def test_200_add_engineering_again(self):
         command = ["add_role", "--role", "engineering"]
         out = self.badrequesttest(command)
@@ -51,6 +54,7 @@ class TestAddRole(TestBrokerCommand):
         self.matchoutput(out, "Role: operations", command)
         self.matchoutput(out, "Role: nobody", command)
         self.matchoutput(out, "Role: aqd_admin", command)
+        self.matchoutput(out, "Role: unittester", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRole)
