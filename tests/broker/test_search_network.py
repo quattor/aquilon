@@ -100,6 +100,12 @@ class TestSearchNetwork(TestBrokerCommand):
             else:
                 self.matchclean(out, str(net.ip), command)
 
+    def testhoststatusproto(self):
+        command = ["search_network", "--network=unknown0", "--fullinfo", "--format=proto"]
+        network = self.protobuftest(command)[0]
+        host = network.hosts[0]
+        self.assertEqual(host.status, "ready")
+
     def testexactlocation(self):
         command = ["search_network", "--building=ut", "--exact_location"]
         out = self.commandtest(command)

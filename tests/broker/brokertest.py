@@ -142,7 +142,6 @@ class TestBrokerCommand(unittest.TestCase):
                 pass
 
     def tearDown(self):
-        
         if not os.environ.get("AQD_UNITTEST_FAILFAST"):
             return
         if not all(sys.exc_info()):
