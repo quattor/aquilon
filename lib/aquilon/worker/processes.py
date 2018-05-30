@@ -432,7 +432,7 @@ class DSDBEnabledMeta(type):
         if DSDB_ENABLED:
             if instance.dsdb_use_testdb:
                 os.environ['DSDB_USE_TESTDB'] = "1"
-            instance.dsdbclient = ms.dsdb.client.DSDB(plant='prod', debug=True)
+            instance.dsdbclient = ms.dsdb.client.DSDB(plant='prod')
         return instance
 
 
@@ -470,11 +470,12 @@ class DSDBRunner(object):
                     self.logger.warning(ignore_msg)
                 else:
                     raise
-            except:
+            except Exception as err:
+                self.logger.warning(str(err))
                 if error_filter:
                     self.logger.warning(ignore_msg)
                 else:
-                    raise AquilonError("DSDB commands failed: {}.".format(', '.join(args.keys())))
+                    raise AquilonError("DSDB command failed: {}.".format(', '.join(args.keys())))
             if rollback:
                 self.rollback_list.append((cmd_line, rollback))
 
@@ -648,7 +649,7 @@ class DSDBRunner(object):
         # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
         self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False,
                         error_filter=True, ignore_msg="Update rack {} in DSDB failed, "
-                                                      "proceeding.".format(dbrack.name))
+                                                      "proceeding in AQDB.".format(dbrack.name))
 
     def del_rack(self, dbrack):
         dsdb_client_command_dict = {'delete_rack': {'rack_name': dbrack.name}}
@@ -661,7 +662,7 @@ class DSDBRunner(object):
                                                   'comments': dbrack.comments}}
         # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
         self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False, error_filter=True,
-                        ignore_msg="Delete rack {} in DSDB failed, proceeding.".format(dbrack.name))
+                        ignore_msg="Delete rack {} in DSDB failed, proceeding in AQDB.".format(dbrack.name))
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                          comments=None, **_):

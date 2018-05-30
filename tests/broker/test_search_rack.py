@@ -118,6 +118,44 @@ class TestSearchRack(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ut13", command)
 
+    def test_115_search_rack(self):
+        command = ["update_rack", "--rack", "np3", "--fullname", "TEST FULLname", "--uri", "TEST uri"]
+        self.noouttest(command)
+        command = ["search_rack", "--fullname", "TEST FULLname"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np3", command)
+
+    def test_116_search_rack(self):
+        command = ["search_rack", "--fullname", "TEST"]
+        out = self.commandtest(command)
+        self.matchclean(out, "np3", command)
+
+    def test_117_search_rack(self):
+        command = ["search_rack", "--uri", "TEST uri"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np3", command)
+
+    def test_118_search_rack(self):
+        command = ["search_rack", "--uri", "TEST uri", "--fullname", "TEST FULLname"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np3", command)
+
+    def test_119_search_rack(self):
+        command = ["search_rack", "--uri", "TEST", "--fullname", "TEST FULLname"]
+        out = self.commandtest(command)
+        self.matchclean(out, "np3", command)
+
+    def test_120_search_rack_case_insensite(self):
+        command = ["search_rack", "--uri", "test uri", "--fullname", "test FULLname"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "np3", command)
+
+    def test_125_update_rack_back(self):
+        command = ["update_rack", "--rack", "np3", "--fullname", "np3", "--uri", ""]
+        out = self.commandtest(command)
+        command = ["search_rack", "--fullname", "TEST FULLname"]
+        self.noouttest(command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchRack)

@@ -29,7 +29,7 @@ class CommandUpdateRack(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, plenaries, rack, row, column, room, building, bunker,
+    def render(self, session, plenaries, rack, row, column, room, building, bunker, uri,
                fullname, default_dns_domain, comments, user, justification, reason, logger, **arguments):
         dbrack = Rack.get_unique(session, rack, compel=True)
 
@@ -49,7 +49,7 @@ class CommandUpdateRack(BrokerCommand):
         if column is not None:
             dbrack.rack_column = column
 
-        update_location(dbrack, fullname=fullname, comments=comments,
+        update_location(dbrack, fullname=fullname, comments=comments, uri=uri,
                         default_dns_domain=default_dns_domain)
 
         if bunker or room or building:

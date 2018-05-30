@@ -208,6 +208,12 @@ class TestAddRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "np909", command)
 
+    def test_205_rackid_in_search_audit(self):
+        command = ["search_audit", "--command", "add_rack", "--limit", 1,
+                   "--keyword", "99", "--argument", "row"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "[Result: rackid=np909]", command)
+
     def test_210_verifynp909(self):
         command = "show rack --rack np909"
         out = self.commandtest(command.split(" "))
@@ -228,14 +234,16 @@ class TestAddRack(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         command = "add rack --building ut --row 666 --column zz"
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err, "DSDB commands failed: add_rack", command)
+        self.matchoutput(err, "Rack ut666 is already defined", command)
+        self.matchoutput(err, "DSDB command failed: add_rack", command)
         self.matchoutput(err, "Bad Request: DSDB update failed", command)
 
     def test_225_dsdbfailureoy604(self):
         command = "add rack --building oy --row 604 --column zz"
         err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Rack oy604 is already defined", command)
         self.matchoutput(err, "Bad Request: DSDB update failed", command)
-        self.matchoutput(err, "DSDB commands failed: add_rack", command)
+        self.matchoutput(err, "DSDB command failed: add_rack", command)
 
 
 if __name__ == '__main__':

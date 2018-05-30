@@ -161,7 +161,9 @@ class Config(NewStyleClassSafeConfigParser):
         return timeout_value
 
     def has_value(self, section, key):
-        if self.has_option(section, key) and self.get(section, key):
+        if self.has_section(section) and \
+                self.has_option(section, key) and \
+                self.get(section, key):
             return True
         return False
 

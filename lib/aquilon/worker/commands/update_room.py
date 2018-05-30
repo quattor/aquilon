@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2016,2018  Contributor
+# Copyright (C) 2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq add room`."""
+"""Contains the logic for `aq update room`."""
 
-from aquilon.aqdb.model import Building, Room
+from aquilon.aqdb.model import Room
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.location import add_location
+from aquilon.worker.dbwrappers.location import get_location, update_location
 
 
-class CommandAddRoom(BrokerCommand):
+class CommandUpdateRoom(BrokerCommand):
 
-    required_parameters = ["room", "building", "floor"]
+    required_parameters = ["room"]
 
-    def render(self, session, room, building, fullname, comments, floor, uri, **_):
-        dbbuilding = Building.get_unique(session, building, compel=True)
-        add_location(session, Room, room, dbbuilding, fullname=fullname, uri=uri,
-                     comments=comments, floor=floor)
+    def render(self, session, room, fullname, uri, comments, floor, user,
+               justification, reason, logger, **arguments):
+        dbroom = Room.get_unique(session, room, compel=True)
+        if floor is not None:
+            dbroom.floor = floor
 
-        session.flush()
-
-        return
+        update_location(dbroom, fullname=fullname, comments=comments,
+                        uri=uri)
