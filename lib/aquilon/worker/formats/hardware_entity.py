@@ -46,6 +46,8 @@ class HardwareEntityFormatter(ObjectFormatter):
                                    hwe.location.rack.rack_row)
                     details.append(indent + "    Column: %s" %
                                    hwe.location.rack.rack_column)
+                    details.append(indent + "    Fullname: %s" %
+                                   hwe.location.rack.fullname)
 
         details.append(self.redirect_raw(hwe.model, indent + "  ",
                                          indirect_attrs=False))
