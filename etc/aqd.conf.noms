@@ -84,6 +84,10 @@ location_uri_validator = /bin/true
 # in raw mode and set the version variable itself.
 pan_compiler = /usr/lib/panc.jar
 
+# Include a preface template in the object template if true
+object_declarations_template = true
+
+
 ###############################################################################
 
 [site]
