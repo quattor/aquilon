@@ -188,7 +188,17 @@ class PlenaryClusterObject(ObjectPlenary):
         return CompileKey.merge(keylist)
 
     def body(self, lines):
+        # Allow settings such as loadpath to be modified by the archetype before anything else happens
+        # Included only if object_declarations_template option is true
+        # It the option is true, the template MUST exist
+        if self.config.getboolean("panc", "object_declarations_template"):
+            pan_include(lines, "archetype/declarations")
+            lines.append("")
+
         pan_include(lines, ["pan/units", "pan/functions"])
+        lines.append("")
+
+        # Okay, here's the real content
         path = PlenaryClusterData.template_name(self.dbobj)
         pan_assign(lines, "/",
                    StructureTemplate(path,
