@@ -19,8 +19,12 @@
 from aquilon.aqdb.types import ChassisType
 from aquilon.aqdb.model import Model, Chassis, HardwareEntity
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.hardware_entity import (
+    get_default_chassis_grn_eonid,
+    update_primary_ip,
+)
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
@@ -31,7 +35,8 @@ class CommandUpdateChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, logger, chassis, model, rack, ip, vendor, serial,
-               comments, user, justification, reason, **arguments):
+               comments, user, grn, eon_id, clear_grn, justification, reason,
+               **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
@@ -65,6 +70,15 @@ class CommandUpdateChassis(BrokerCommand):
 
         if comments is not None:
             dbchassis.comments = comments
+
+        # If the request is to clear the GRN, reset it to the default one
+        if clear_grn:
+            grn, eon_id = get_default_chassis_grn_eonid(self.config)
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbchassis.owner_grn = dbgrn
 
         session.flush()
 

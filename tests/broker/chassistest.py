@@ -21,7 +21,7 @@ class VerifyChassisMixin(object):
 
     def verifychassis(self, chassis, vendor, model, rack, rackrow, rackcol,
                       serial=None, ip=None, mac=None, interface='oa',
-                      comments=None):
+                      comments=None, grn=None):
         command = "show chassis --chassis %s" % chassis
         out = self.commandtest(command.split(" "))
         (short, _, dns_domain) = chassis.partition(".")
@@ -59,5 +59,12 @@ class VerifyChassisMixin(object):
         else:
             self.searchoutput(out, r"Interface: %s \(no MAC addr\)$" %
                               interface, command)
+
+        if grn is not None:
+            if grn is False:
+                self.matchclean(out, "Owned by GRN:", command)
+            else:
+                self.matchoutput(out, "Owned by GRN: {}".format(grn),
+                                 command)
 
         return (out, command)

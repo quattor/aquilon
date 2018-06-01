@@ -34,14 +34,14 @@ class TestAddAuroraHost(TestBrokerCommand):
         super(TestAddAuroraHost, cls).setUpClass()
         cls.linux_version_prev = cls.config.get("unittest", "linux_version_prev")
 
-    def testaddaurorawithnode(self):
+    def test_100_add_aurora_with_node(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_with_node)
         self.noouttest(["add", "aurora", "host",
                         "--osname", "linux", "--osversion", self.linux_version_prev,
                         "--hostname", self.aurora_with_node, "--buildstatus", "build"])
         self.dsdb_verify()
 
-    def testverifyaddaurorawithnode(self):
+    def test_110_verify_add_aurora_with_node(self):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: %s" % self.aurora_with_node, command)
@@ -63,14 +63,30 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Row: b", command)
         self.matchoutput(out, "Column: 04", command)
 
-    def testverifyaddaurorawithnode_modify(self):
+    def test_120_verify_add_aurora_chassis_grn(self):
+        command = ["show_chassis", "--chassis", "oy604c2.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: oy604c2.ms.com",
+                         command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+    def test_130_verify_add_aurora_with_node_modify(self):
         command = "change status --hostname %s.ms.com --buildstatus ready" % self.aurora_with_node
         self.successtest(command.split(" "))
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Status: ready", command)
 
-    def testaddaurorawithoutnode(self):
+    def test_160_show_host_proto(self):
+        fqdn = self.aurora_with_node
+        if not fqdn.endswith(".ms.com"):
+            fqdn = "%s.ms.com" % fqdn
+        command = ["show_host", "--hostname", fqdn, "--format=proto"]
+        host = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(host.fqdn, fqdn)
+        self.assertEqual(host.ip, "")
+
+    def test_200_add_aurora_without_node(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_node)
         command = ["add", "aurora", "host",
                         "--osname", "linux", "--osversion", self.linux_version_prev,
@@ -78,7 +94,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyaddaurorawithoutnode(self):
+    def test_210_verify_add_aurora_without_node(self):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: %s" % self.aurora_without_node,
@@ -93,7 +109,14 @@ class TestAddAuroraHost(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Status: ready", command)
 
-    def testdsdbmissing(self):
+    def test_220_cat_machine(self):
+        command = "cat --machine %s" % self.aurora_without_node
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "structure template "
+                         "machine/americas/ut/None/%s" % self.aurora_without_node,
+                         command)
+
+    def test_300_dsdb_missing(self):
         self.dsdb_expect("show_host -host_name not-in-dsdb", fail=True)
         command = ["add", "aurora", "host", "--hostname", "not-in-dsdb",
                    "--osname", "linux", "--osversion", self.linux_version_prev]
@@ -101,7 +124,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
         self.dsdb_verify()
 
-    def testdsdbrackmissing(self):
+    def test_310_dsdb_rack_missing(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_rack)
         command = ["add", "aurora", "host",
                    "--hostname", self.aurora_without_rack,
@@ -110,12 +133,12 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
         self.dsdb_verify()
 
-    def testverifydsdbrackmissing(self):
+    def test_320_verify_dsdb_rack_missing(self):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: oy", command)
 
-    def testaddnyaqd1(self):
+    def test_400_add_nyaqd1(self):
         self.dsdb_expect("show_host -host_name nyaqd1")
         command = ["add", "aurora", "host", "--hostname", "nyaqd1",
                         "--osname", "linux",
@@ -123,34 +146,18 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyaddnyaqd1(self):
+    def test_410_verify_add_nyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ny00l4as01", command)
         self.matchoutput(out, "Model Type: aurora_node", command)
         self.matchoutput(out, "Primary Name: nyaqd1.ms.com", command)
 
-    def testshowmachine(self):
+    def test_420_show_machine(self):
         command = "search machine --model aurora_model --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ny00l4as01", command)
         self.matchoutput(out, "Model Type: aurora_node", command)
-
-    def testcatmachine(self):
-        command = "cat --machine %s" % self.aurora_without_node
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "structure template "
-                         "machine/americas/ut/None/%s" % self.aurora_without_node,
-                         command)
-
-    def testshowhostproto(self):
-        fqdn = self.aurora_with_node
-        if not fqdn.endswith(".ms.com"):
-            fqdn = "%s.ms.com" % fqdn
-        command = ["show_host", "--hostname", fqdn, "--format=proto"]
-        host = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(host.fqdn, fqdn)
-        self.assertEqual(host.ip, "")
 
 
 if __name__ == '__main__':

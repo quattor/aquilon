@@ -37,7 +37,8 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
     def test_105_verify_ut3c5(self):
         self.verifychassis("ut3c5.aqd-unittest.ms.com", "aurora_vendor",
                            "utchassis", "np3", "a", "3", "ABC1234",
-                           comments="Some chassis comments")
+                           comments="Some chassis comments",
+                           grn="grn:/ms/ei/aquilon/aqd")
 
     def test_106_show_ut3c5_proto(self):
         command = ["show", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
@@ -146,6 +147,49 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
             search_chassis_primary_name,
             'The following chassis have not been found in the protobuf '
             'output: {}'.format(', '.join(search_chassis_primary_name)))
+
+    def test_400_add_chassis_grn(self):
+        command = ["add_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "utchassis",
+                   "--grn", "grn:/ms/ei/aquilon/ut2"]
+        self.noouttest(command)
+
+    def test_410_verify_add_chassis_grn(self):
+        command = ["show_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: ut3c6.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/ut2", command)
+
+    def test_420_del_chassis_grn(self):
+        command = ["del_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_430_add_chassis_eon_id(self):
+        command = ["add_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "utchassis",
+                   "--eon_id", "3"]
+        self.noouttest(command)
+
+    def test_440_verify_add_chassis_eon_id(self):
+        command = ["show_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: ut3c6.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+
+    def test_450_verify_add_chassis_eon_id_proto(self):
+        command = ["show_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        chassis_list = self.protobuftest(command, expect=1)
+        chassis = chassis_list[0]
+
+        self.assertEqual(chassis.owner_eonid, 3)
+
+    def test_460_del_chassis_eon_id(self):
+        command = ["del_chassis", "--chassis", "ut3c6.aqd-unittest.ms.com"]
+        self.noouttest(command)
 
 
 if __name__ == '__main__':

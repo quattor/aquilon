@@ -56,6 +56,9 @@ class HardwareEntityFormatter(ObjectFormatter):
             details.append(indent + "  Serial: %s" % hwe.serial_no)
         if hwe.comments:
             details.append(indent + "  Comments: %s" % hwe.comments)
+        if hwe.owner_grn:
+            details.append(indent + "  Owned by {0:c}: {0.grn}"
+                           .format(hwe.owner_grn))
 
         for i in sorted(hwe.interfaces, key=attrgetter('name')):
             details.append(self.redirect_raw(i, indent + "  "))
@@ -77,6 +80,9 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         if hwent.serial_no:
             skeleton.serial_no = hwent.serial_no
+
+        if hwent.owner_eon_id:
+            skeleton.owner_eonid = hwent.owner_eon_id
 
         self.redirect_proto(hwent.model, skeleton.model, indirect_attrs=False)
 
