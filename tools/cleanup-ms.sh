@@ -17,10 +17,10 @@ grep -lrE '(import aquilon.*depends)|(from aquilon.*import depends)' . \
     |xargs sed -i '/\(import aquilon.*depends\)\|\(from aquilon.*import depends\)/d'
 stylesheets=/usr/share/sgml/docbook/xsl-ns-stylesheets-$(rpm -q --qf %{VERSION} \
     docbook5-style-xsl)
-sed -i -e "s:^XSLTPROC =.*:XSLTPROC = xsltproc" \
-	-e "s:^XMLLINT =.*:XMLLINT = xmllint" \
-	-e "s:^DOCBOOK_XSL =.*:DOCBOOK_XSL = $stylesheets" \
-	-e "s:^DOCBOOK =.*:/usr/share/xml/docbook5/schema/rng/5.0" \
+sed -i -e "s:^XSLTPROC =.*:XSLTPROC = xsltproc:" \
+	-e "s:^XMLLINT =.*:XMLLINT = xmllint:" \
+	-e "s:^DOCBOOK_XSL =.*:DOCBOOK_XSL = $stylesheets:" \
+	-e "s:^DOCBOOK =.*:/usr/share/xml/docbook5/schema/rng/5.0:" \
 	doc/Makefile
 sed -i '/# -- begin path_setup/,/# -- end path_setup/d' \
     bin/* sbin/*
