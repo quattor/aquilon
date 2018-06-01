@@ -11,11 +11,27 @@ default_organization = AquilonOrg
 # Database file containing info about shares
 sharedata =
 
+# Git daemon related options
+run_git_daemon = True
+git_daemon_basedir = %(basedir)s
+
 # Used by refresh_grns
 grn_to_eonid_map_location =
 
 # Could be repaced with /etc/passwd, used by refresh_user
 user_list_location =
+
+###############################################################################
+
+[database]
+#database_section = database_postgresql
+database_section = database_sqlite
+
+[database_postgresql]
+dbname = aquilon
+
+[database_sqlite]
+dbfile = %(quattordir)s/aquilondb/aquilon.db
 
 ###############################################################################
 
@@ -70,7 +86,7 @@ aqd_checkedm = /bin/true
 # Java config
 # default to binary available in PATH
 java_home =
-ant_home =
+ant_home = /usr/share/ant
 ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
 ant =
 
@@ -83,6 +99,14 @@ location_uri_validator = /bin/true
 # The update_domain command expects to be able to read this value
 # in raw mode and set the version variable itself.
 pan_compiler = /usr/lib/panc.jar
+# Option passed to panc the output format that it uses
+xml_profiles = false
+json_profiles = true
+gzip_output = false
+# Assume the webserver will decompress transparently as needed.
+# only used if gzip_output = true
+transparent_gzip = true
+template_extension = .pan
 
 ###############################################################################
 
