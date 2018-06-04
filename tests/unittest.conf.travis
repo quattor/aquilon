@@ -19,7 +19,6 @@ database_section = database_sqlite
 disable_fsync = yes
 
 [broker]
-authorization_rules = %(srcdir)s/tests/unittest_authorization.conf
 servername = %(hostname)s
 umask = 0022
 kncport = 6902
@@ -29,11 +28,12 @@ git_port = 9419
 # It would be better to use localhost (to make sure nothing goes out to the wire), but that would make Kerberos unhappy
 bind_address = %(hostname)s
 run_git_daemon = True
-git_author_name = %(user)s
-git_author_email = %(user)s@%(hostname)s
-git_committer_name = %(user)s
-git_committer_email = %(user)s@%(hostname)s
+git_author_name = travis
+git_author_email = travis@dev
+git_committer_name = travis
+git_committer_email = travis@dev
 trash_branch = unittest_trash
+dsdb_use_testdb = 1
 server_notifications = utnotify
 client_notifications = False
 sharedata = %(srcdir)s/tests/fakebin/nasobjects/testnasobjects.cdb
@@ -49,6 +49,8 @@ map_grn_max_list_size = 15
 unmap_grn_max_list_size = 15
 user_list_location = %(srcdir)s/tests/fakebin/user-data/passwd.byname
 user_delete_limit = 10
+service = aquilon
+keytab = /etc/krb5.keytab
 
 [change_management]
 # The contents of --justification will not be validated externally
@@ -66,32 +68,41 @@ ssh = %(srcdir)s/tests/fakebin/fake_ssh
 switch_discover = %(srcdir)s/tests/fakebin/fake_switchdata
 get_camtable = %(srcdir)s/tests/fakebin/fake_macdata
 checkedm = %(srcdir)s/tests/fakebin/fake_checkedm
-#aqd_checkedm = /ms/dist/aquilon/PROJ/edmtools/dev/bin/aqd_checkedm
 aqd_checkedm = %(srcdir)s/tests/fakebin/fake_aqd_checkedm
-location_uri_validator = /ms/dist/aquilon/PROJ/aqd-scripts/qa/bin/location_uri_validator
-klist = %(srcdir)s/tests/fakebin/fake_klist
+location_uri_validator = %(srcdir)s/tests/fakebin/location_uri_validator
+git = /usr/bin/git
+klist = /usr/bin/klist
+knc = /usr/local/bin/knc
+
+# Alternative tool locations outside MS
+git_daemon = /usr/lib/git-core/git-daemon
+ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
 
 [location_feeds]
 building_feed = %(srcdir)s/tests/fakebin/user-data/location_feed.csv
-
-[hardware_chassis]
-default_eonid = 2
 
 [unittest]
 last_success_db_snapshot = %(quattordir)s/aquilondb/aquilon_last_success_snapshot.db
 fake_module_location = %(srcdir)s/tests/fakemodules/
 scratchdir = %(basedir)s/scratch
 mirrordir = %(basedir)s/mirror
-template_king_host = nyaqd1
-template_base = git://%(template_king_host)s/quattor/template-king
+
+# Update the template_king_host value
+template_king_host = localhost
+template_base =  %(srcdir)s/tests/templates/
+
 template_alternate_prod =
 fake_hosts_location = %(srcdir)s/tests/fakebin/dsdb.d/show_host_-host_name_
 datadir = %(srcdir)s/tests/broker/data
-real_panc_location = /ms/dist/elfms/PROJ/panc/prod/lib/panc.jar
+
+# Alternative tool locations outside MS
+real_panc_location = /usr/lib/panc.jar
 
 # Versions for the Linux models. These are used both for Aquilon and Aurora.
 linux_version_curr = 6.1-x86_64
 linux_version_prev = 5.1-x86_64
+
+hostname = travis.dev
 
 [archetype_aquilon]
 default_grn_target = esp
@@ -128,6 +139,7 @@ default_domain = ut-prod
 
 [panc]
 pan_compiler = %(basedir)s/panc-links/panc-%(version)s.jar
+include_pan = True
 
 [site]
 # Site specific settings
@@ -136,8 +148,9 @@ default_hardware_label_regex = ^[a-z][a-z0-9]{,62}$
 # Temporary option until we can vary API by Aquilon broker instance
 ipfromtype = True
 
-[tool_timeout]
-default_enabled = False
-default_value = 10
-aqd_checkedm = 15
-ant = 1800
+[protocols]
+# Alternative tool locations outside MS
+directory = /usr/local/lib/aquilon/protocols/lib/python
+
+[dsdb]
+enable = False

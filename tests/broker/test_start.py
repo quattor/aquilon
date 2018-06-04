@@ -47,6 +47,7 @@ class TestBrokerStart(TestBrokerReStart):
 
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
+        env["HOME"] = os.environ.get("HOME", "/home/travis")
         git = self.config.lookup_tool("git")
         if source.startswith("git://"):
             # Easy case - just clone the source repository
@@ -93,6 +94,7 @@ class TestBrokerStart(TestBrokerReStart):
         git = self.config.lookup_tool("git")
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
+        env["HOME"] = os.environ.get("HOME", "/home/travis")
 
         tempdir = mkdtemp(prefix="fixup", dir=rundir)
 

@@ -1,0 +1,18 @@
+language: python
+python:
+  - "2.7"
+before_script:
+  - curl https://raw.githubusercontent.com/jrha/krb5-travis/master/install_krb5 | sudo bash
+  - curl https://raw.githubusercontent.com/jrha/krb5-travis/master/install_knc | bash
+  - wget https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip -O /tmp/protoc.zip && cd /tmp && unzip /tmp/protoc.zip && sudo cp bin/protoc /usr/bin/ && sudo chmod ugo+x /usr/bin/protoc
+  - cd /tmp && git clone https://github.com/quattor/aquilon-protocols.git && cd aquilon-protocols && git checkout upstream && ./setup.py build && sudo ./setup.py install --install-lib /usr/local/lib/aquilon/protocols/lib/python
+  - cd $TRAVIS_BUILD_DIR/tools/bootstrap_ms && python setup.py install
+script:
+  - cd $TRAVIS_BUILD_DIR && tests/runtests.py -c tests/unittest.conf.travis -f --assume_yes
+after_script:
+  - tail -n 64 /var/tmp/travis/aqtest/quattor/logs/aqd.log
+addons:
+  hosts:
+    - travis.dev
+  packages:
+    - libkrb5-dev
