@@ -58,13 +58,14 @@ epilog = """
 
 def force_yes(msg):
     print(msg, file=sys.stderr)
-    print("""
-        Please confirm by typing yes (three letters) and pressing enter.
-        """, file=sys.stderr)
-    answer = sys.stdin.readline()
-    if not answer.startswith("yes"):
-        print("""Aborting.""", file=sys.stderr)
-        sys.exit(1)
+    if not opts.assume_yes:
+        print("""
+            Please confirm by typing yes (three letters) and pressing enter.
+            """, file=sys.stderr)
+        answer = sys.stdin.readline()
+        if not answer.startswith("yes"):
+            print("""Aborting.""", file=sys.stderr)
+            sys.exit(1)
 
 parser = argparse.ArgumentParser(description="Run the broker test suite.",
                                  epilog=epilog)
@@ -91,6 +92,8 @@ parser.add_argument('-s', '--start', action='store',
 parser.add_argument('-f', '--failfast', action='store_true',
                     help='Add failfast=True option to TestRunner. This will stop '
                          'unittests immediatelly if any failure.')
+parser.add_argument('--assume_yes', action='store_true',
+                    help='Assume yes to all questions, only use for continuous integration')
 
 
 opts = parser.parse_args()
