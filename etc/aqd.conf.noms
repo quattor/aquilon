@@ -83,6 +83,9 @@ location_uri_validator = /bin/true
 # The update_domain command expects to be able to read this value
 # in raw mode and set the version variable itself.
 pan_compiler = /usr/lib/panc.jar
+# Define archetype/os as a dict (required by template library
+# since 17.7.0). Used to be a string.
+archetype_os_dict = True
 
 ###############################################################################
 

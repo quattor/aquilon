@@ -347,6 +347,9 @@ gzip_output = false
 transparent_gzip = true
 template_extension = .tpl
 include_pan = True
+# Define archetype/os as a dict (required by template library
+# since 17.7.0). Used to be a string.
+archetype_os_dict = False
 
 [tool_timeout]
 # If set to True, timeout will be set to 'default_value' for any tools run via subprocess
