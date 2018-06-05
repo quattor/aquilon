@@ -25,15 +25,5 @@ from aquilon.exceptions_ import ArgumentError
 
 class CommandShowPermission(BrokerCommand):
 
-    def render(self, session, **arguments):
-        username = getpass.getuser()
-        q = session.query(UserPrincipal)
-        q = q.filter_by(name=username)
-        if q.count() > 1:
-            raise ArgumentError("More than one user found for this name: '{}' "
-                                "please try to specify a realm with "
-                                "show_permission --username USER --realm REALM"
-                                .format(username))
-        elif not q.count():
-            raise ArgumentError("User {} not found".format(username))
-        return self.az.check_role_permission(session, str(q.first().role))
+    def render(self, session, dbuser, **arguments):
+        return self.az.check_role_permission(session, dbuser.role.name)

@@ -120,9 +120,8 @@ class TestShowPermission(TestBrokerCommand):
 
     def test_320_no_option(self):
         command = ["show_permission"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "More than one user found for this name",
-                         command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "show_alias", command)
 
     def test_400_bad_arguments(self):
         command = ["show_permission", "--command", "add_user", "--role",
