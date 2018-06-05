@@ -78,7 +78,7 @@ class TestShowPermission(TestBrokerCommand):
         self.matchoutput(out, "engineering", command)
         self.matchoutput(out, "unittester", command)
 
-    def test_215_command_update_service_trigger_instance(self):
+    def test_215_command_update_service_option_instance(self):
         command = ["show_permission", "--command", "update_service",
                    "--option", "instance"]
         out = self.commandtest(command)
@@ -86,7 +86,14 @@ class TestShowPermission(TestBrokerCommand):
         self.matchoutput(out, "unittester", command)
         self.matchclean(out, "engineering", command)
 
-    def test_220_command_update_service_no_trigger(self):
+    def test_217_command_update_service_bad_option(self):
+        command = ["show_permission", "--command", "update_service",
+                   "--option", "bad"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "bad option does not exist in "
+                         "update_service command", command)
+
+    def test_220_command_update_service_no_option(self):
         command = ["show_permission", "--command", "update_service",
                    "--no-option"]
         out = self.commandtest(command)
