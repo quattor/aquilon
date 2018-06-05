@@ -88,7 +88,7 @@ class TestAddRack(TestBrokerCommand):
 
     def test_135_addut8(self):
         # Test override rackid
-        command = "add rack --fullname 8.6.7 --building ut --row g --column 2 --force_rackid ut8"
+        command = "add rack --fullname 8.6.7 --building ut --row g --column 2 --force_rackid 8"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut8", command)
 
