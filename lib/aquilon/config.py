@@ -48,15 +48,18 @@ def running_from_source():
     return os.path.exists(os.path.join(_SRCDIR, "Makefile"))
 
 
-def lookup_file_path(name):
+def lookup_file_path(name, check_conf_in_sources=False):
     """
     Return the full path of a data file.
 
-    If we're running from the source tree, then use the default files;
-    otherwise, use the system-wide ones.
+    If we're running from the source tree and check_conf_in_sources=True,
+    returns the source tree path only if the config file exists. Default
+    is to return it unconditionally.
     """
-    if running_from_source():
-        return os.path.join(_SRCDIR, "etc", name)
+    if  running_from_source():
+        source_config_path = os.path.join(_SRCDIR, "etc", name)
+        if os.path.exists(source_config_path) or not check_conf_in_sources:
+            return source_config_path
 
     paths_to_try = [os.path.join("/etc", "aquilon", name),
                     os.path.join("/usr", "share", "aquilon", "etc", name),
