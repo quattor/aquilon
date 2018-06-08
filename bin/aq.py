@@ -351,7 +351,7 @@ if __name__ == "__main__":
         default_aqservice = get_username()
 
     host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
-        default_aqhost
+        defaultOpts.get('aqhost') or default_aqhost
 
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
         defaultOpts.get('aqport')
@@ -374,7 +374,7 @@ if __name__ == "__main__":
               "AQSERVICE", file=sys.stderr)
         aqservice = os.environ['AQUSER']
     else:
-        aqservice = defaultOpts.get('aqservice') or default_aqservice or get_username()
+        aqservice = defaultOpts.get('aqservice') or default_aqservice
 
     # Save these in case there are errors...
     globalOptions["aqhost"] = host
