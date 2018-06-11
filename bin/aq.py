@@ -298,7 +298,11 @@ def get_default_opts(auth_option, conf_file=None):
 
     if not conf_file:
         # By default, always use the system-wide config file if present
-        conf_file = lookup_file_path("aq.conf", check_conf_in_sources=True)
+        if globalOptions.get('develmode'):
+            check_conf_in_sources = False
+        else:
+            check_conf_in_sources = True
+        conf_file = lookup_file_path("aq.conf", check_conf_in_sources=check_conf_in_sources)
 
     if conf_file:
         config.read(conf_file)
