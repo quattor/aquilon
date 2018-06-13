@@ -75,7 +75,8 @@ class CommandAddAddressAlias(BrokerCommand):
                 break
 
         db_record = AddressAlias(fqdn=dbfqdn, target=dbtarget, ttl=ttl,
-                                 owner_grn=dbgrn, comments=comments)
+                                 owner_grn=dbgrn, comments=comments,
+                                 require_grn=False)
         session.add(db_record)
 
         if exporter:

@@ -172,7 +172,8 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[10]
         fqdn = "zebra4.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_sn
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -189,7 +190,8 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[11]
         fqdn = "zebra5.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_sn
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
         command = ["add_resourcegroup", "--resourcegroup", "test-resource-group",
@@ -209,7 +211,8 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[12]
         fqdn = "zebra6.aqd-unittest.ms.com"
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_sn
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_sn
         self.noouttest(command)
         self.dsdb_verify()
         command = ["add_resourcegroup", "--resourcegroup", "test-host-resgr", "--hostname",

@@ -39,7 +39,7 @@ class CommandAddChassis(BrokerCommand):
         dbdns_rec, _ = grab_address(session, chassis, ip,
                                     allow_restricted_domain=True,
                                     allow_reserved=True, preclude=True,
-                                    exporter=exporter)
+                                    exporter=exporter, require_grn=False)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

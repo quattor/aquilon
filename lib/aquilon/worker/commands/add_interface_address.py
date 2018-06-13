@@ -116,8 +116,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
-                                                relaxed=relaxed, allow_shared=shared,
-                                                exporter=exporter)
+                                                relaxed=relaxed,
+                                                allow_shared=shared,
+                                                exporter=exporter,
+                                                require_grn=False)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
         delete_old_dsdb_entry = not newly_created and not dbdns_rec.assignments

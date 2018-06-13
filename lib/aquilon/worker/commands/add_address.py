@@ -39,10 +39,15 @@ class CommandAddAddress(BrokerCommand):
         ip = generate_ip(session, logger, compel=True, dbinterface=None,
                          network_environment=dbnet_env,
                          audit_results=audit_results, **arguments)
+
+        dbgrn = None
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
         # TODO: add allow_multi=True
         dbdns_rec, _ = grab_address(session, fqdn, ip, dbnet_env, dbdns_env,
                                     comments=comments, preclude=True,
-                                    exporter=exporter)
+                                    exporter=exporter, grn=dbgrn)
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
@@ -54,11 +59,6 @@ class CommandAddAddress(BrokerCommand):
 
         if ttl is not None:
             dbdns_rec.ttl = ttl
-
-        if grn or eon_id:
-            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                               config=self.config)
-            dbdns_rec.owner_grn = dbgrn
 
         session.flush()
 

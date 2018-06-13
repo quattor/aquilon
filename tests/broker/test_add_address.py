@@ -83,6 +83,20 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
                              self.net["unknown0"].usable[13])
         command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[13],
                    "--fqdn=arecord13.aqd-unittest.ms.com"] + self.valid_just_tcm
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Please provide a GRN/EON_ID!", command)
+
+    def test_101_basic_grn(self):
+        self.event_add_arecord(
+            fqdn='arecord13.aqd-unittest.ms.com',
+            ip=str(self.net['unknown0'].usable[13]),
+            dns_environment='internal',
+        )
+        self.dsdb_expect_add("arecord13.aqd-unittest.ms.com",
+                             self.net["unknown0"].usable[13])
+        command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[13],
+                   "--fqdn=arecord13.aqd-unittest.ms.com",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
         self.events_verify()
@@ -106,7 +120,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             dns_environment='internal',
         )
         command = ["add_address", "--ip", self.net["ipv6_test"].usable[1],
-                   "--fqdn", "ipv6test.aqd-unittest.ms.com"] + self.valid_just_tcm
+                   "--fqdn", "ipv6test.aqd-unittest.ms.com",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify(empty=True)
         self.events_verify()
@@ -131,7 +146,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[14],
                    "--fqdn=arecord14.aqd-unittest.ms.com",
                    "--reverse_ptr=arecord13.aqd-unittest.ms.com",
-                   "--dns_environment=%s" % default] + self.valid_just_tcm
+                   "--dns_environment=%s" % default,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
         self.events_verify()
@@ -141,7 +157,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         command = ["add_address", "--ip", self.net["unknown1"].usable[14],
                    "--fqdn", "arecord14.aqd-unittest.ms.com",
                    "--reverse_ptr", "arecord13.aqd-unittest.ms.com",
-                   "--dns_environment", "ut-env"] + self.valid_just_tcm
+                   "--dns_environment", "ut-env",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "Target FQDN arecord13.aqd-unittest.ms.com does "
                          "not exist in DNS environment ut-env.", command)
@@ -155,7 +172,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         # Different IP in this environment
         command = ["add_address", "--ip", self.net["unknown1"].usable[14],
                    "--fqdn", "arecord14.aqd-unittest.ms.com",
-                   "--dns_environment", "ut-env"] + self.valid_just_tcm
+                   "--dns_environment", "ut-env",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.events_verify()
 
@@ -192,7 +210,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
                              self.net["unknown0"].usable[15])
         command = ["add_address", "--ipalgorithm=max",
                    "--ipfromip=%s" % self.net["unknown0"].ip,
-                   "--fqdn=arecord15.aqd-unittest.ms.com"] + self.valid_just_tcm
+                   "--fqdn=arecord15.aqd-unittest.ms.com",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
         self.events_verify()
@@ -224,7 +243,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             dns_environment=dns_env,
         )
         command = ["add_address", "--ip", ip, "--fqdn", fqdn,
-                   "--dns_environment", dns_env] + self.valid_just_tcm
+                   "--dns_environment", dns_env,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
 
         command = ["show_address", "--fqdn", fqdn,
@@ -239,7 +259,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         self.dsdb_expect_add("arecord16.aqd-unittest.ms.com",
                              self.net["unknown0"].usable[16], fail=True)
         command = ["add_address", "--ip", self.net["unknown0"].usable[16],
-                   "--fqdn", "arecord16.aqd-unittest.ms.com"] + self.valid_just_tcm
+                   "--fqdn", "arecord16.aqd-unittest.ms.com",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not add address to DSDB", command)
         self.dsdb_verify()
@@ -251,7 +272,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
     def test_420_failnetaddress(self):
         ip = self.net["unknown0"].ip
         command = ["add", "address", "--fqdn", "netaddress.aqd-unittest.ms.com",
-                   "--ip", ip] + self.valid_just_tcm
+                   "--ip", ip,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is the address of network " % ip,
                          command)
@@ -259,7 +281,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
     def test_420_failnetaddressv6(self):
         ip = self.net["ipv6_test"].network_address
         command = ["add_address", "--fqdn", "netaddress6.aqd-unittest.ms.com",
-                   "--ip", ip] + self.valid_just_tcm
+                   "--ip", ip,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is the address of network " % ip,
                          command)
@@ -267,7 +290,7 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
     def test_425_failbroadcast(self):
         ip = self.net["unknown0"].broadcast_address
         command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
-                   "--ip", ip] + self.valid_just_tcm
+                   "--ip", ip, "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is the broadcast address of "
                          "network " % ip, command)
@@ -275,7 +298,7 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
     def test_425_failbroadcastv6(self):
         ip = self.net["ipv6_test"].broadcast_address
         command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
-                   "--ip", ip] + self.valid_just_tcm
+                   "--ip", ip, "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is the broadcast address of "
                          "network " % ip, command)
@@ -284,14 +307,15 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         ipv4 = self.net["unknown0"].ip
         ipv6 = IPv6Address(u"::ffff:%s" % ipv4)
         command = ["add", "address", "--fqdn", "broadcast.aqd-unittest.ms.com",
-                   "--ip", ipv6] + self.valid_just_tcm
+                   "--ip", ipv6, "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "IPv6-mapped IPv4 addresses are not supported.", command)
 
     def test_440_failbadenv(self):
         ip = self.net["unknown0"].usable[16]
         command = ["add", "address", "--fqdn", "no-such-env.aqd-unittest.ms.com",
-                   "--ip", ip, "--dns_environment", "no-such-env"] + self.valid_just_tcm
+                   "--ip", ip, "--dns_environment", "no-such-env",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.notfoundtest(command)
         self.matchoutput(out, "DNS Environment no-such-env not found.", command)
 
@@ -300,21 +324,23 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         cmd = ['add', 'address', '--fqdn',
                #         1         2         3         4         5         6
                's234567890123456789012345678901234567890123456789012345678901234' +
-               '.aqd-unittest.ms.com', '--dns_environment', 'internal', '--ip', ip] + self.valid_just_tcm
+               '.aqd-unittest.ms.com', '--dns_environment', 'internal',
+               '--ip', ip, "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "is more than the maximum 63 allowed.", cmd)
 
     def test_455_add_invalid_name(self):
         ip = self.net["unknown0"].usable[16]
         command = ['add', 'address', '--fqdn', 'foo-.aqd-unittest.ms.com',
-                   '--dns_environment', 'internal', '--ip', ip] + self.valid_just_tcm
+                   '--dns_environment', 'internal', '--ip', ip,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal DNS name format 'foo-'.", command)
 
     def test_460_restricted_domain(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "address", "--fqdn", "foo.restrict.aqd-unittest.ms.com",
-                   "--ip", ip] + self.valid_just_tcm
+                   "--ip", ip, "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Domain restrict.aqd-unittest.ms.com is "
@@ -332,7 +358,7 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         self.dsdb_expect_add("arecord17.aqd-unittest.ms.com", ip)
         command = ["add", "address", "--fqdn", "arecord17.aqd-unittest.ms.com",
                    "--reverse_ptr", "reverse.restrict.aqd-unittest.ms.com",
-                   "--ip", ip] + self.valid_just_tcm
+                   "--ip", ip, "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         err = self.statustest(command)
         self.matchoutput(err,
                          "WARNING: Will create a reference to "
@@ -365,7 +391,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             dns_environment='internal',
         )
         self.dsdb_expect_add(fqdn, ip)
-        command = ["add", "address", "--ip", ip, "--fqdn", fqdn] + self.valid_just_tcm
+        command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
         self.events_verify()
@@ -379,7 +406,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             dns_environment='ut-env',
         )
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
-                   "--network_environment", "cardenv"] + self.valid_just_tcm
+                   "--network_environment", "cardenv",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
@@ -404,7 +432,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             dns_environment='ut-env',
         )
         command = ["add", "address", "--ipfromip", "192.168.3.0",
-                   "--fqdn", fqdn, "--network_environment", "cardenv"] + self.valid_just_tcm
+                   "--fqdn", fqdn, "--network_environment", "cardenv",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
@@ -427,7 +456,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         default = self.config.get("site", "default_dns_environment")
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
                    "--dns_environment", default,
-                   "--network_environment", "cardenv"] + self.valid_just_tcm
+                   "--network_environment", "cardenv",
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "Entering external IP addresses to the internal DNS environment is not allowed", command)
 
@@ -442,7 +472,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
                              self.net["unknown0"].usable[40])
         command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[40],
                    "--fqdn=arecord40.aqd-unittest.ms.com",
-                   "--ttl", 300] + self.valid_just_tcm
+                   "--ttl", 300,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         self.noouttest(command)
         self.dsdb_verify()
         self.events_verify()
@@ -462,7 +493,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
     def test_730_badttl(self):
         command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[41],
                    "--fqdn=arecord41.aqd-unittest.ms.com",
-                   "--ttl", 2147483648] + self.valid_just_tcm
+                   "--ttl", 2147483648,
+                   "--grn=grn:/ms/ei/aquilon/aqd"] + self.valid_just_tcm
         out = self.badrequesttest(command)
         self.matchoutput(out, "TTL must be between 0 and 2147483647.",
                          command)

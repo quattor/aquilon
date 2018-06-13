@@ -65,7 +65,7 @@ class CommandAddNetworkDevice(BrokerCommand):
         dbdns_rec, _ = grab_address(session, network_device, ip,
                                     allow_restricted_domain=True,
                                     allow_reserved=True, preclude=True,
-                                    exporter=exporter)
+                                    exporter=exporter, require_grn=False)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

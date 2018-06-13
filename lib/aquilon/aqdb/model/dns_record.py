@@ -158,8 +158,18 @@ class DnsRecord(Base):
             session = object_session(self)
             with session.no_autoflush:
                 self.check_grn_conflict(grn)
-
+        else:
+            if not self.has_grn() and self.require_grn:
+                raise ArgumentError("Please provide a GRN/EON_ID!")
         return grn
+
+    def has_grn(self):
+        if (self.owner_grn or self.hardware_entity or \
+                getattr(self, 'assignments', None) or \
+                getattr(self, 'service_addresses', None)):
+            return True
+
+        return False
 
     def check_grn_conflict(self, grn):  # pylint: disable=W0613
         if self.hardware_entity:
@@ -172,6 +182,10 @@ class DnsRecord(Base):
             raise ArgumentError("{0} is already be used by the interfaces "
                                 "{1!s}. GRN should not be set but derived "
                                 "from the device.".format(self, ifaces))
+
+        if getattr(self, 'service_addresses', None):
+            raise ArgumentError("{0} is a service address. GRN should not be set "
+                                "but derived from the device.".format(self))
 
     @property
     def dependent_grn(self):
@@ -222,7 +236,13 @@ class DnsRecord(Base):
         # a record is used.  We should probably check all_aliases.
         return False
 
-    def __init__(self, fqdn=None, **kwargs):
+    @property
+    def require_grn(self):
+        if getattr(self, '_require_grn', None):
+            return self._require_grn
+        return False
+
+    def __init__(self, fqdn=None, require_grn=True, **kwargs):
         if not fqdn:  # pragma: no cover
             raise ValueError("fqdn cannot be empty")
         session = object_session(fqdn)
@@ -245,5 +265,6 @@ class DnsRecord(Base):
                     raise ArgumentError("{0} already exist.".format(existing))
 
         self.fqdn = fqdn
+        self._require_grn = require_grn
 
         super(DnsRecord, self).__init__(**kwargs)

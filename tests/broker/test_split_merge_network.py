@@ -51,10 +51,12 @@ class TestSplitMergeNetwork(TestBrokerCommand):
     def test_110_add_dns_records(self):
         self.dsdb_expect_add("merge1.aqd-unittest.ms.com", "0.2.2.200")
         self.noouttest(["add", "address", "--ip", "0.2.2.200",
-                        "--fqdn", "merge1.aqd-unittest.ms.com"] + self.valid_just_tcm)
+                        "--fqdn", "merge1.aqd-unittest.ms.com",
+                        "--grn=grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm)
         self.dsdb_expect_add("merge2.aqd-unittest.ms.com", "0.2.3.192")
         self.noouttest(["add", "address", "--ip", "0.2.3.192",
-                        "--fqdn", "merge2.aqd-unittest.ms.com"] + self.valid_just_tcm)
+                        "--fqdn", "merge2.aqd-unittest.ms.com",
+                        "--grn=grn:/ms/ei/aquilon/unittest"] + self.valid_just_tcm)
         self.dsdb_verify()
 
     def test_120_add_routers(self):

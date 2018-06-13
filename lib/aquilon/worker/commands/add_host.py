@@ -122,7 +122,7 @@ class CommandAddHost(BrokerCommand):
         dbdns_rec, _ = grab_address(session, hostname, ip,
                                     allow_restricted_domain=True,
                                     allow_reserved=True, preclude=True,
-                                    exporter=exporter)
+                                    exporter=exporter, require_grn=False)
         dbmachine.primary_name = dbdns_rec
 
         # Fix up auxiliary addresses to point to the primary name by default

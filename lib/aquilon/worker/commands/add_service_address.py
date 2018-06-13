@@ -118,7 +118,8 @@ class CommandAddServiceAddress(BrokerCommand):
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
                                                 network_environment,
                                                 allow_shared=shared,
-                                                exporter=exporter)
+                                                exporter=exporter,
+                                                require_grn=False)
         ip = dbdns_rec.ip
 
         if map_to_primary:

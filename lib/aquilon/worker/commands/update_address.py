@@ -31,8 +31,8 @@ from aquilon.worker.dbwrappers.change_management import ChangeManagement
 class CommandUpdateAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, reverse_ptr, dns_environment,
-               network_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, exporter, user, justification, reason, **arguments):
+               network_environment, ttl, clear_ttl, grn, eon_id, comments,
+               exporter, user, justification, reason, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
@@ -67,12 +67,13 @@ class CommandUpdateAddress(BrokerCommand):
         elif clear_ttl:
             dbdns_rec.ttl = None
 
+        dbgrn = None
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
+
+        if not dbdns_rec.has_grn() or (dbdns_rec.has_grn() and dbgrn):
             dbdns_rec.owner_grn = dbgrn
-        elif clear_grn:
-            dbdns_rec.owner_grn = None
 
         if comments is not None:
             dbdns_rec.comments = comments

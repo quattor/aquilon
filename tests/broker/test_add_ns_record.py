@@ -29,7 +29,7 @@ DOMAIN = 'aqd-unittest.ms.com'
 NAME = 'dnstest1.%s' % DOMAIN
 DJB = '--format djb'
 CSV = '--format csv'
-
+GRN = 'grn:/ms/ei/aquilon/aqd'
 
 class TestAddNSRecord(TestBrokerCommand):
     """ The tests for adding and displaying NS Records"""
@@ -42,6 +42,13 @@ class TestAddNSRecord(TestBrokerCommand):
     def test_100_add_a_record(self):
         self.dsdb_expect_add(NAME, self.IP)
         cmd = ['add', 'address', '--fqdn', NAME, '--ip', self.IP] + self.valid_just_tcm
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Please provide a GRN/EON_ID!", cmd)
+
+    def test_101_add_a_record_grn(self):
+        self.dsdb_expect_add(NAME, self.IP)
+        cmd = ['add', 'address', '--fqdn', NAME, '--ip', self.IP,
+               '--grn', GRN] + self.valid_just_tcm
         self.noouttest(cmd)
         self.dsdb_verify()
 

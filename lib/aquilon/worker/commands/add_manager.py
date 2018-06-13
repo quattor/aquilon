@@ -66,7 +66,8 @@ class CommandAddManager(BrokerCommand):
                          audit_results=audit_results, **arguments)
 
         dbdns_rec, _ = grab_address(session, manager, ip, comments=comments,
-                                    preclude=True, exporter=exporter)
+                                    preclude=True, exporter=exporter,
+                                    require_grn=False)
 
         assign_address(dbinterface, ip, dbdns_rec.network, logger=logger)
 
