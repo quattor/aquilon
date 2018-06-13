@@ -45,7 +45,8 @@ class CommandAddConsoleServer(BrokerCommand):
 
         dbdns_rec, _ = grab_address(session, console_server, ip,
                                     allow_restricted_domain=True,
-                                    allow_reserved=True, preclude=True)
+                                    allow_reserved=True, preclude=True,
+                                    require_grn=False)
         if not label:
             label = dbdns_rec.fqdn.name
             try:
