@@ -103,7 +103,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp0"]
         start = net.usable[2]
         end = net.usable[-3]
-        command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
+        command = "show_dynamic_range --ip %s" % IPv4Address(int(start) + 1)
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
@@ -112,7 +112,7 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def test_105_show_range_notfound(self):
         ip = str(self.net['unknown0'].usable[13])
-        command = ["show", "dynamic", "range", "--ip", ip]
+        command = ["show_dynamic_range", "--ip", ip]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "{} is not part of a dynamic range".format(ip),
@@ -122,7 +122,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp0"]
         start = net.usable[2]
         end = net.usable[-3]
-        command = ["show", "dynamic", "range", "--fqdn", self.dynname(end)]
+        command = ["show_dynamic_range", "--fqdn", self.dynname(end)]
         out = self.commandtest(command)
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
@@ -130,14 +130,14 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.matchoutput(out, "Range Class: %s" % "vm", command)
 
     def test_105_verify_network(self):
-        command = "show network --ip %s" % self.net["dyndhcp0"].ip
+        command = "show_network --ip %s" % self.net["dyndhcp0"].ip
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Ranges: %s-%s" %
                          (self.net["dyndhcp0"].usable[2],
                           self.net["dyndhcp0"].usable[-3]), command)
 
     def test_105_verify_network_proto(self):
-        command = "show network --ip %s --format proto" % self.net["dyndhcp0"].ip
+        command = "show_network --ip %s --format proto" % self.net["dyndhcp0"].ip
         network = self.protobuftest(command.split(" "), expect=1)[0]
         start = self.net["dyndhcp0"].usable[2]
         end = self.net["dyndhcp0"].usable[-3]
@@ -167,15 +167,26 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp5"]
         start = net.usable[2]
         end = net.usable[-3]
-        command = "show dynamic range --ip %s" % IPv4Address(int(start) + 1)
+        command = "show_dynamic_range --ip %s" % IPv4Address(int(start) + 1)
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
                          command)
         self.matchoutput(out, "Range Class: %s" % "fab", command)
 
+    def test_106_verify_show_dynamic_range_proto_format(self):
+        net = self.net["dyndhcp5"]
+        start = net.usable[2]
+        end = net.usable[-3]
+        command = ["show_dynamic_range", "--ip", IPv4Address(int(start) + 1), "--format", "proto"]
+        range_class = "fab"
+        dyn_range = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(dyn_range.start, str(start))
+        self.assertEqual(dyn_range.end, str(end))
+        self.assertEqual(dyn_range.range_class, range_class)
+
     def test_106_verify_network_proto_range_class(self):
-        command = "show network --ip %s --format proto" % self.net["dyndhcp5"].ip
+        command = "show_network --ip %s --format proto" % self.net["dyndhcp5"].ip
         network = self.protobuftest(command.split(" "), expect=1)[0]
         start = self.net["dyndhcp5"].usable[2]
         end = self.net["dyndhcp5"].usable[-3]

@@ -4906,6 +4906,7 @@
 
     <command name="show_dynamic_range">
 	Show a range reserved for dynamic DHCP.
+	Supported options for --format: raw, proto
 	<optgroup mandatory="True" fields="one">
 	    <option name="ip" type="ip">Any IP address inside the range</option>
 	    <option name="fqdn" type="string">Any FQDN inside the range</option>
@@ -4913,6 +4914,9 @@
 	<optgroup>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	</optgroup>
+	<format name="proto">
+	    <message_class name="DynamicRangeList" module="aqdnetworks_pb2"/>
+	</format>
 	<transport method="get" path="dynamic_range"/>
     </command>
 

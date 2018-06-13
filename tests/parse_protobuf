@@ -102,6 +102,7 @@ typemap = {
     "virtual_switch": aqdsystems_pb2.VirtualSwitchList(),
     "network_device": aqdsystems_pb2.NetworkDeviceList(),
     "location_preference": aqdsystems_pb2.LocationPreferenceList(),
+    'dynamic_range': aqdsystems_pb2.DynamicRangeList(),
 }
 
 input = sys.stdin

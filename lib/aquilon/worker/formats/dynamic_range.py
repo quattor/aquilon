@@ -39,5 +39,10 @@ class DynamicRangeFormatter(ObjectFormatter):
             details.append(indent + "  Range Class: %s" % range.range_class)
         return "\n".join(details)
 
+    def fill_proto(self, range, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.start = str(range.start)
+        skeleton.end = str(range.end)
+        if range.range_class:
+            skeleton.range_class = range.range_class
 
 ObjectFormatter.handlers[DynamicRange] = DynamicRangeFormatter()
