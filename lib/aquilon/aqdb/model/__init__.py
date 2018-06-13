@@ -81,6 +81,7 @@ from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.hostlifecycle import HostLifecycle
 from aquilon.aqdb.model.network_device import NetworkDevice
 from aquilon.aqdb.model.chassis import Chassis
+from aquilon.aqdb.model.console_server import ConsoleServer, ConsolePort
 from aquilon.aqdb.model.disk import Disk, LocalDisk
 from aquilon.aqdb.model.machine_specs import MachineSpecs
 

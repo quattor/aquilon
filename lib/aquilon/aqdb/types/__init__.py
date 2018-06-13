@@ -22,6 +22,7 @@ from aquilon.aqdb.types.model_types import HardwareEntityType
 from aquilon.aqdb.types.model_types import MachineType
 from aquilon.aqdb.types.model_types import PhysicalMachineType
 from aquilon.aqdb.types.model_types import VirtualMachineType
+from aquilon.aqdb.types.model_types import ConsoleServerType
 from aquilon.aqdb.types.model_types import ChassisType
 from aquilon.aqdb.types.model_types import NetworkDeviceType
 from aquilon.aqdb.types.model_types import CpuType

@@ -323,6 +323,11 @@ from .test_root_access import TestRootAccess
 from .test_refresh_user import TestRefreshUser
 from .test_justification import TestJustification
 from .test_show_permission import TestShowPermission
+from .test_add_console_server import TestAddConsoleServer
+from .test_update_console_server import TestUpdateConsoleServer
+from .test_del_console_server import TestDelConsoleServer
+from .test_bind_console_server import TestBindConsoleServer
+
 
 class BrokerTestSuite(unittest.TestSuite):
     """Set up the broker's unit tests in an order that allows full coverage.
@@ -366,8 +371,10 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestClusterConstraintsNoMembers,
                  TestDeprecatedSwitch,
                  TestAddChassis,
+                 TestAddConsoleServer,
                  TestAddNetworkDevice, TestUpdateNetworkDevice,
                  TestUpdateChassis,
+                 TestUpdateConsoleServer,
                  TestAddMachine, TestAddDisk, TestAddInterface,
                  TestAddAddress,
                  TestAddRouterAddress, TestAddDynamicRange,
@@ -443,6 +450,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestUpdateModel,
                  TestUpdateDisk,
                  TestUpdateRack,
+                 TestBindConsoleServer,
                  TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                  TestUpdateAddressAlias,
                  TestUpdateServiceAddress,
@@ -488,6 +496,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestDelAddress, TestDelNSRecord,
                  TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                  TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
+                 TestDelConsoleServer,
                  TestDelNetworkDevice,
                  TestDelCluster,
                  TestDelESXCluster, TestDelMetaCluster,

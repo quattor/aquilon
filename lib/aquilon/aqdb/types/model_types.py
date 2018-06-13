@@ -42,6 +42,10 @@ class VirtualMachineType(MachineType):
     VirtualAppliance = 'virtual_appliance'
 
 
+class ConsoleServerType(HardwareEntityType):
+    ConsoleServer = 'console_server'
+
+
 class ChassisType(HardwareEntityType):
     Chassis = 'chassis'
     AuroraChassis = 'aurora_chassis'

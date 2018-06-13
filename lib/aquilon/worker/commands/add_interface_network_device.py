@@ -16,52 +16,16 @@
 # limitations under the License.
 """ Contains the logic for `aq add interface --network_device`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import NetworkDevice
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
-                                                 check_netdev_iftype)
-from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_interface import CommandAddInterface
 
 
-class CommandAddInterfaceNetworkDevice(BrokerCommand):
+class CommandAddInterfaceNetworkDevice(CommandAddInterface):
+
     requires_plenaries = True
-
     required_parameters = ["interface", "network_device", "iftype"]
-    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor",
-                          "bus_address"]
+    invalid_parameters = ["automac", "pg", "autopg", "bus_address"]
 
-    def render(self, session, logger, plenaries, interface, network_device,
-               mac, iftype, comments, user, justification, reason, **arguments):
-        for arg in self.invalid_parameters:
-            if arguments.get(arg) is not None:
-                raise ArgumentError("Cannot use argument --%s when adding an "
-                                    "interface to a network device." % arg)
-
-        check_netdev_iftype(iftype)
-
-        dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
-
-        # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
-        cm.consider(dbnetdev)
-        cm.validate()
-
-        oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
-
-        get_or_create_interface(session, dbnetdev, name=interface, mac=mac,
-                                interface_type=iftype, comments=comments,
-                                preclude=True)
-
-        session.flush()
-
-        plenaries.add(dbnetdev)
-        plenaries.add(dbnetdev.host)
-
-        with plenaries.transaction():
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.update_host(dbnetdev, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
-
-        return
+    def get_plenaries(self, dbhw_ent, plenaries):
+        plenaries.add(dbhw_ent)
+        plenaries.add(dbhw_ent.host)

@@ -367,7 +367,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
         command = ["update_interface", "--boot", "--interface=xge49",
                    "--network_device=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "cannot use the --boot option.", command)
+        self.matchoutput(out, "Argument --boot is not allowed for switch.",
+                         command)
 
     def test_200_fail_no_interface(self):
         command = ["update_interface", "--interface=xge1",
@@ -382,16 +383,18 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
     def test_200_fail_switch_model(self):
         command = ["update", "interface", "--network_device", "ut3gd1r01",
                    "--interface", "xge49", "--model", "e1000"]
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out, "update_interface --network_device cannot use the "
-                         "--model option.", command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Model/vendor can not be set for a physical interface.",
+                         command)
 
     def test_200_fail_chassis_model(self):
         command = ["update", "interface", "--chassis", "ut3c5",
                    "--interface", "oa", "--model", "e1000"]
-        out = self.unimplementederrortest(command)
-        self.matchoutput(out, "update_interface --chassis cannot use the "
-                         "--model option.", command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Model/vendor can not be set for a on-board admin interface.",
+                         command)
 
     def test_200_not_a_machine(self):
         command = ["update", "interface", "--interface", "xge49",
@@ -416,8 +419,8 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
         command = ["update", "interface", "--chassis", "ut3c5",
                    "--interface", "oa", "--autopg"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "update_interface --chassis cannot use the "
-                         "--autopg option.", command)
+        self.matchoutput(out, "Argument --autopg is not allowed for chassis.",
+                         command)
 
     def test_200_rename_existing(self):
         command = ["update", "interface", "--machine", "ut3c5n10",

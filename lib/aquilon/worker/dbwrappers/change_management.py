@@ -29,7 +29,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareE
                                 EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
                                 MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
                                 HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
-                                ResourceGroup, BundleResource, Chassis, Location, Rack,
+                                ResourceGroup, BundleResource, Chassis, ConsoleServer, Location, Rack,
                                 Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment,
                                 Fqdn, ARecord, ReservedName, AddressAlias, DnsDomain, DnsRecord, NsRecord,
                                 SrvRecord, DynamicStub, Organization, Hub, Continent, Country, Campus, City,
@@ -490,6 +490,18 @@ class ChangeManagement(object):
             if slot.network_device and slot.network_device.host:
                 self.validate_host(slot.network_device.host)
 
+    def validate_console_server(self, console_server):
+        """
+        Validate if given console_server object has hosts in any port
+        Args:
+            console_server: single console_server object
+        Returns: None
+        """
+        for port in console_server.ports:
+            dbhw_ent = console_server.ports[port].client
+            if dbhw_ent and dbhw_ent.host:
+                self.validate_host(dbhw_ent.host)
+
     def validate_resource_holder(self, resource_holder):
         session = object_session(resource_holder)
         CR = aliased(ClusterResource)
@@ -648,6 +660,7 @@ ChangeManagement.handlers[Machine] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[NetworkDevice] = ChangeManagement.validate_hardware_entity
 ChangeManagement.handlers[Network] = ChangeManagement.validate_prod_network
 ChangeManagement.handlers[Chassis] = ChangeManagement.validate_chassis
+ChangeManagement.handlers[ConsoleServer] = ChangeManagement.validate_console_server
 ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
 ChangeManagement.handlers[Organization] = ChangeManagement.validate_location
 ChangeManagement.handlers[Hub] = ChangeManagement.validate_location
