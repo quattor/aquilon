@@ -104,7 +104,7 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'create\("hardware/harddisk/generic/cciss",\s*'
                           r'"boot", true,\s*'
                           r'"bus", "pci:0000:01:00.0",\s*'
-                          r'"capacity", 34\*1024,\s*'
+                          r'"capacity", 34\*GB,\s*'
                           r'"interface", "cciss",\s*'
                           r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
                           command)
@@ -113,7 +113,7 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'create\("hardware/harddisk/generic/sata",\s*'
                           r'"address", "0:0:0:0",\s*'
                           r'"bus", "pci:0000:02:00.0",\s*'
-                          r'"capacity", 50\*1024,\s*'
+                          r'"capacity", 50\*GB,\s*'
                           r'"interface", "sata"\s*\);',
                           command)
         self.matchclean(out, "c0d0", command)
@@ -167,7 +167,7 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'"harddisks/{sda}" = nlist\(\s*'
                           r'"address", "0:1",\s*'
                           r'"boot", true,\s*'
-                          r'"capacity", 45\*1024,\s*'
+                          r'"capacity", 45\*GB,\s*'
                           r'"filesystemname", "disk_update_test",\s*'
                           r'"interface", "scsi",\s*'
                           r'"iopslimit", 30,\s*'
@@ -211,7 +211,7 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'"harddisks/{sda}" = nlist\(\s*'
                           r'"address", "0:0",\s*'
                           r'"boot", true,\s*'
-                          r'"capacity", 45\*1024,\s*'
+                          r'"capacity", 45\*GB,\s*'
                           r'"interface", "scsi",\s*'
                           r'"iopslimit", 30,\s*'
                           r'"mountpoint", "/vol/lnn30f1v1/utecl5_share",\s*'
@@ -261,7 +261,7 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'"harddisks/{sdb}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
                           r'"address", "0:0:1:0",\s*'
-                          r'"capacity", 34\*1024,\s*'
+                          r'"capacity", 34\*GB,\s*'
                           r'"interface", "scsi",\s*'
                           r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
                           command)

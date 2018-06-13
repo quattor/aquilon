@@ -108,6 +108,10 @@ gzip_output = false
 transparent_gzip = true
 template_extension = .pan
 
+# Include a preface template in the object template if true
+object_declarations_template = true
+
+
 ###############################################################################
 
 [site]

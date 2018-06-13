@@ -346,7 +346,7 @@ gzip_output = false
 # only used if gzip_output = true
 transparent_gzip = true
 template_extension = .tpl
-include_pan = True
+object_declarations_template = false
 
 [tool_timeout]
 # If set to True, timeout will be set to 'default_value' for any tools run via subprocess
