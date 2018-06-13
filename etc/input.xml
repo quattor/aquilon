@@ -4334,8 +4334,6 @@
 	<optgroup>
 	    <optgroup fields="one">
 		<option name="rack" type="string">Rack name</option>
-		<option name="room" type="string">Room name</option>
-		<option name="building" type="string">Building name</option>
 	    </optgroup>
 	    <option name="ip" type="ip">IP address</option>
 	    <option name="model" type="string">Model</option>
