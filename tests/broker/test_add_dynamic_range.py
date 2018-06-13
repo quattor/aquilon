@@ -132,7 +132,7 @@ class TestAddDynamicRange(TestBrokerCommand):
     def test_105_verify_network(self):
         command = "show_network --ip %s" % self.net["dyndhcp0"].ip
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Dynamic Ranges: %s-%s" %
+        self.matchoutput(out, "Dynamic Ranges: %s-%s (vm)" %
                          (self.net["dyndhcp0"].usable[2],
                           self.net["dyndhcp0"].usable[-3]), command)
 
@@ -184,6 +184,13 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.assertEqual(dyn_range.start, str(start))
         self.assertEqual(dyn_range.end, str(end))
         self.assertEqual(dyn_range.range_class, range_class)
+
+    def test_106_verify_network_range_class(self):
+        command = "show network --ip %s" % self.net["dyndhcp5"].ip
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Dynamic Ranges: %s-%s (fab)" %
+                         (self.net["dyndhcp5"].usable[2],
+                          self.net["dyndhcp5"].usable[-3]), command)
 
     def test_106_verify_network_proto_range_class(self):
         command = "show_network --ip %s --format proto" % self.net["dyndhcp5"].ip
@@ -248,7 +255,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp3"]
         command = ["show_network", "--ip", net.ip]
         out = self.commandtest(command)
-        self.matchoutput(out, "Dynamic Ranges: %s-%s" %
+        self.matchoutput(out, "Dynamic Ranges: %s-%s (vm)" %
                          (net.usable[0], net.usable[-1]),
                          command)
 
@@ -273,7 +280,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp3"]
         command = ["show_network", "--ip", net.ip]
         out = self.commandtest(command)
-        self.matchoutput(out, "Dynamic Ranges: %s-%s, %s-%s" %
+        self.matchoutput(out, "Dynamic Ranges: %s-%s (vm), %s-%s (vm)" %
                          (net.usable[0], net.usable[4],
                           net.usable[6], net.usable[-1]),
                          command)
