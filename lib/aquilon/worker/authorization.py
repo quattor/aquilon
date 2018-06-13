@@ -171,8 +171,11 @@ class AuthorizationBroker(object):
             return self.check_commands_role(session, to_check)
 
         else:
-            c = ['{}_{}'.format(command, option)]
-            return self.check_commands_role(session, c)
+            c = '{}_{}'.format(command, option)
+            if c not in self.cregistry._commands_cache.keys():
+                raise ArgumentError("{} option does not exist in {} command"
+                                    .format(option, command))
+            return self.check_commands_role(session, [c])
 
     def check_commands_role(self, session, commands):
         """This function returns all roles that are allowed to use at least one
