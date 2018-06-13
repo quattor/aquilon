@@ -44,15 +44,14 @@ def get_or_create_rack(session, rackrow, rackcolumn, building=None,
         if not rackid_numeric.isdigit():
             raise ArgumentError("Invalid rack name {}. Correct name format: "
                                 "building name + numeric rack ID.".format(force_rackid))
-        rack_name = force_rackid
         # Allow to fill in rack name gaps without resetting the next_rackid
         if dbbuilding.next_rackid <= int(rackid_numeric):
             dbbuilding.next_rackid = int(rackid_numeric) + 1
     else:
         rackid_numeric = dbbuilding.next_rackid
-        rack_name = dbbuilding.name + str(rackid_numeric)
         dbbuilding.next_rackid += 1
 
+    rack_name = dbbuilding.name + str(rackid_numeric)
     try:
         dbrack = session.query(Rack).filter_by(name=rack_name).one()
         if rackrow is not None and rackrow != dbrack.rack_row:
