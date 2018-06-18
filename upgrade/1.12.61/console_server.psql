@@ -7,7 +7,7 @@ CREATE TABLE console_server (
 CREATE TABLE console_port (
 	console_server_id INTEGER CONSTRAINT console_port_consrv_id_nn NOT NULL,
 	client_id INTEGER CONSTRAINT console_port_client_id_nn NOT NULL,
-	client_port VARCHAR2(16) CONSTRAINT console_port_client_port_nn NOT NULL,
+	client_port VARCHAR(16) CONSTRAINT console_port_client_port_nn NOT NULL,
 	creation_date TIMESTAMP WITHOUT TIME ZONE CONSTRAINT console_port_creation_date_nn NOT NULL,
 	port_number INTEGER CONSTRAINT console_port_port_number_nn NOT NULL,
 	CONSTRAINT console_port_client_port_uk UNIQUE (client_id, client_port),
