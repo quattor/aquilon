@@ -19,7 +19,7 @@
 
 from subprocess import call
 import unittest
-
+import os
 from aquilon.config import Config
 from aqdb.utils import copy_sqldb
 from broker.test_stop import TestBrokerStop
@@ -61,9 +61,16 @@ class VerboseTextTestResult(unittest._TextTestResult):
             tests = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStop)
             suite.addTest(tests)
             unittest.TextTestRunner(verbosity=self.verbosity).run(suite)
-            print('UnitTests failed: fix and re-start tests from failed one by '
-              'passing option: --start {}.{}'.format(test.__class__.__name__,
-                                                     test._testMethodName))
+            if "TRAIN_TEST_TYPE" in os.environ:
+                print(
+                    "UnitTests failed: fix and re-start tests from here with "
+                    "'train test -t restart' command. Last test failed: {}.{}"
+                    .format(test.__class__.__name__, test._testMethodName))
+            else:
+                print(
+                    'UnitTests failed: fix and re-start tests from failed one '
+                    'by passing option: --start {}.{}'
+                    .format(test.__class__.__name__, test._testMethodName))
 
     def addError(self, test, err):
         self.printModule(test)
