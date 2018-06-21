@@ -127,7 +127,7 @@ class TestAddRack(TestBrokerCommand):
         command = "add rack --force_rackid ut12-66-1 --building ut --row g --column 4"
         err = self.badrequesttest(command.split(" "))
         self.matchoutput(err, "Invalid rack name ut12-66-1. Correct name format: "
-                              "building name + numeric rack ID.", command)
+                              "building name + numeric rack ID (integer without leading 0)", command)
 
     def test_149_add_rack_fail_option(self):
         command = "add rack --rackid ut12-66-1 --building ut --row g --column 4"
@@ -138,6 +138,12 @@ class TestAddRack(TestBrokerCommand):
         command = "add rack --building ut --row g --column 4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut10", command)
+
+    def test_151_add_rack_fail_name_format(self):
+        command = "add rack --force_rackid 012 --building ut --row g --column 4"
+        err = self.badrequesttest(command.split(" "))
+        self.matchoutput(err, "Invalid rack name 012. Correct name format: "
+                              "building name + numeric rack ID (integer without leading 0).", command)
 
     def test_155_addut11(self):
         # Test that if next_rackid == force_rackid this next_rackid is incremented by 1
