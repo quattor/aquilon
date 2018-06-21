@@ -16,11 +16,16 @@
 # limitations under the License.
 """Utility/creation wrapper to avoid duplicating code."""
 
+import re
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Rack
 from aquilon.worker.dbwrappers.location import get_location
+
+
+RACK_ID_REGEX = re.compile(r'^[1-9][0-9]*$')
 
 
 def get_or_create_rack(session, rackrow, rackcolumn, building=None,
@@ -41,9 +46,9 @@ def get_or_create_rack(session, rackrow, rackcolumn, building=None,
 
     if force_rackid is not None:
         rackid_numeric = force_rackid.replace(dbbuilding.name, '')
-        if not rackid_numeric.isdigit():
+        if not RACK_ID_REGEX.search(rackid_numeric):
             raise ArgumentError("Invalid rack name {}. Correct name format: "
-                                "building name + numeric rack ID.".format(force_rackid))
+                                "building name + numeric rack ID (integer without leading 0).".format(force_rackid))
         # Allow to fill in rack name gaps without resetting the next_rackid
         if dbbuilding.next_rackid <= int(rackid_numeric):
             dbbuilding.next_rackid = int(rackid_numeric) + 1
