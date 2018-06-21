@@ -121,9 +121,10 @@ class TestSearchRack(TestBrokerCommand):
     def test_115_search_rack(self):
         command = ["update_rack", "--rack", "np3", "--fullname", "TEST FULLname", "--uri", "TEST uri"]
         self.noouttest(command)
-        command = ["search_rack", "--fullname", "TEST FULLname"]
+        command = ["search_rack", "--fullname", "TEST FULLname", "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "np3", command)
+        self.matchoutput(out, "Location URI: TEST uri", command)
 
     def test_116_search_rack(self):
         command = ["search_rack", "--fullname", "TEST"]

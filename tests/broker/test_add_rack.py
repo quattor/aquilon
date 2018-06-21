@@ -149,9 +149,12 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Next Rack ID: 12", command)
 
     def test_160_addut12(self):
-        command = "add rack --building ut --row k --column 2"
+        command = "add rack --building ut --row k --column 2 --uri TESTURI"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut12", command)
+        command = "show rack --rack ut12"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Location URI: TESTURI", command)
 
     def test_165_addnp7(self):
         command = "update building --building np --next_rackid 7"

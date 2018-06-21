@@ -25,7 +25,7 @@ from aquilon.worker.dbwrappers.location import get_location
 
 def get_or_create_rack(session, rackrow, rackcolumn, building=None,
                        room=None, bunker=None, fullname=None, comments=None,
-                       force_rackid=None, preclude=False):
+                       uri=None, force_rackid=None, preclude=False):
     dblocation = get_location(session, building=building, room=room,
                               bunker=bunker, compel=True)
     dbbuilding = dblocation.building
@@ -71,7 +71,7 @@ def get_or_create_rack(session, rackrow, rackcolumn, building=None,
     if fullname is None:
         fullname = rack_name
 
-    dbrack = Rack(name=rack_name, fullname=fullname, parent=dblocation,
+    dbrack = Rack(name=rack_name, fullname=fullname, parent=dblocation, uri=uri,
                   rack_row=rackrow, rack_column=rackcolumn, comments=comments)
     session.add(dbrack, dbbuilding)
     return dbrack

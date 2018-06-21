@@ -26,11 +26,11 @@ class CommandAddRack(BrokerCommand):
     required_parameters = ["building", "row", "column"]
 
     def render(self, session, logger, fullname, building, room, bunker, row, column,
-               comments, force_rackid, **args):
+               comments, uri, force_rackid, **args):
         dbrack = get_or_create_rack(session=session, rackrow=row,
                                    rackcolumn=column, building=building, room=room,
                                    bunker=bunker, fullname=fullname, comments=comments,
-                                   force_rackid=force_rackid, preclude=True)
+                                   uri=uri, force_rackid=force_rackid, preclude=True)
 
         session.flush()
         dsdb_runner = DSDBRunner(logger=logger)
