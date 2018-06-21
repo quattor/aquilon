@@ -43,7 +43,8 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
         self.verifychassis("ut3c5.aqd-unittest.ms.com", "hp", "c-class",
                            "ut3", "a", "3", "ABC5678",
                            comments="Some new chassis comments",
-                           ip=self.net["unknown0"].usable[6])
+                           ip=self.net["unknown0"].usable[6],
+                           grn="grn:/ms/ei/aquilon/aqd")
 
     def test_200_update_bad_ip(self):
         ip = self.net["unknown0"].usable[6]
@@ -85,6 +86,44 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                          "DNS Record ut3gd1r01.aqd-unittest.ms.com is already "
                          "used as the primary name of switch ut3gd1r01.",
                          command)
+
+    def test_300_update_chassis_grn(self):
+        command = ["update_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/ut2"]
+        self.noouttest(command)
+
+    def test_310_verify_update_chassis_grn(self):
+        command = ["show_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: ut3c5.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/ut2", command)
+
+    def test_320_update_chassis_eon_id(self):
+        command = ["update_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
+                   "--eon_id", "3"]
+        self.noouttest(command)
+
+    def test_330_verify_update_chassis_eon_id(self):
+        command = ["show_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: ut3c5.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+
+    def test_340_update_chassis_clear_grn(self):
+        command = ["update_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
+                   "--clear_grn"]
+        self.noouttest(command)
+
+    def test_350_verify_update_chassis_clear_grn(self):
+        command = ["show_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Primary Name: ut3c5.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
 
 
 if __name__ == '__main__':

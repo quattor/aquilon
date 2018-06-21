@@ -35,6 +35,26 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.utils import first_of
 
 
+def get_default_chassis_grn_eonid(config):
+    eon_id = grn = None
+
+    default_eonid_section = ['hardware_chassis', 'default_eonid']
+    if config.has_option(*default_eonid_section):
+        try:
+            eon_id = config.getint(*default_eonid_section)
+        except ValueError:  # This is not an EonID, maybe a GRN?
+            grn = config.get(*default_eonid_section)
+            if not grn.startswith('grn:/'):
+                grn = None
+
+    if not grn and not eon_id:
+        raise ArgumentError("Cannot determine the GRN/EonID for "
+                            "the chassis.  Please specify "
+                            "--grn / --eon_id.")
+
+    return grn, eon_id
+
+
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  subquery=False,
                                  model=None, vendor=None, machine_type=None,

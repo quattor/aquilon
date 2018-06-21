@@ -31,6 +31,10 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_host import CommandAddHost
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.hardware_entity import (
+    get_default_chassis_grn_eonid,
+)
 from aquilon.worker.dbwrappers.machine import create_machine
 
 
@@ -106,6 +110,12 @@ class CommandAddAuroraHost(CommandAddHost):
                     dbdns_rec = ReservedName(fqdn=dbfqdn)
                     session.add(dbdns_rec)
                     dbchassis.primary_name = dbdns_rec
+
+                    grn, eon_id = get_default_chassis_grn_eonid(self.config)
+                    dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                                       config=self.config)
+                    dbchassis.owner_grn = dbgrn
+
                 dbslot = session.query(MachineChassisSlot).filter_by(
                     chassis=dbchassis, slot_number=nodenum).first()
                 # Note: Could be even more persnickity here and check that

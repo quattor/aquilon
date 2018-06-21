@@ -22,10 +22,15 @@ from aquilon.aqdb.model import Chassis, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.hardware_entity import (
+    get_default_chassis_grn_eonid,
+    update_primary_ip,
+)
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_ip_restrictions,
                                                  assign_address)
+from aquilon.worker.dbwrappers.location import get_location
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.processes import DSDBRunner
 
@@ -35,7 +40,8 @@ class CommandAddChassis(BrokerCommand):
     required_parameters = ["chassis", "rack", "model"]
 
     def render(self, session, logger, chassis, label, rack, model, vendor,
-               ip, interface, mac, serial, comments, exporter, **_):
+               ip, interface, mac, serial, comments, grn, eon_id, exporter,
+               **_):
         dbdns_rec, _ = grab_address(session, chassis, ip,
                                     allow_restricted_domain=True,
                                     allow_reserved=True, preclude=True,
@@ -63,6 +69,14 @@ class CommandAddChassis(BrokerCommand):
                             serial_no=serial, comments=comments)
         session.add(dbchassis)
         dbchassis.primary_name = dbdns_rec
+
+        # Set the GRN for the chassis
+        if not grn and not eon_id:
+            grn, eon_id = get_default_chassis_grn_eonid(self.config)
+
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                           config=self.config)
+        dbchassis.owner_grn = dbgrn
 
         # FIXME: get default name from the model
         if not interface:

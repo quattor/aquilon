@@ -241,6 +241,9 @@ location_uri_validator = /ms/dist/aquilon/PROJ/aqd-scripts/prod/bin/location_uri
 [location_feeds]
 building_feed = /v/campus/ny/appl/aquilon/aqd/data/manhattan_ingress/Building_IT_code.csv
 
+[hardware_chassis]
+default_eonid = 47599
+
 [hardware_network_device]
 default_archetype = netinfra
 
@@ -401,4 +404,4 @@ precreated_compartments_only = False
 ignore_network_compartments_regex =
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.43/common/lib/python/
+directory = /ms/dist/aquilon/PROJ/protocols/1.44/common/lib/python/

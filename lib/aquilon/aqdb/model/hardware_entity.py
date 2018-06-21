@@ -27,7 +27,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
-from aquilon.aqdb.model import Base, Location, Model, DnsRecord
+from aquilon.aqdb.model import Base, DnsRecord, Grn, Location, Model
 from aquilon.aqdb.column_types import AqStr
 from aquilon.config import Config
 
@@ -56,6 +56,9 @@ class HardwareEntity(Base):
                                         name='%s_pri_name_fk' % _TN),
                              nullable=True)
 
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
+                          nullable=True)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
@@ -65,6 +68,7 @@ class HardwareEntity(Base):
 
     location = relation(Location, innerjoin=True)
     model = relation(Model, innerjoin=True)
+    owner_grn = relation(Grn)
 
     # When working with machines the primary name always crops up, so load it
     # eagerly

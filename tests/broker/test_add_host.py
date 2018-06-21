@@ -845,6 +845,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                 Model Type: chassis
               Serial: ABC5678
               Comments: Some new chassis comments
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
               Interface: oa %s
                 Type: oa
                 Network Environment: internal
