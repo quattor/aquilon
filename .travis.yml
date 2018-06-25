@@ -8,7 +8,7 @@ before_script:
   - cd /tmp && git clone https://github.com/quattor/aquilon-protocols.git && cd aquilon-protocols && git checkout upstream && ./setup.py build && sudo ./setup.py install --install-lib /usr/local/lib/aquilon/protocols/lib/python
   - cd $TRAVIS_BUILD_DIR/tools/bootstrap_ms && python setup.py install
 script:
-  - cd $TRAVIS_BUILD_DIR && tests/runtests.py -c tests/unittest.conf.travis -f --assume_yes
+  - cd $TRAVIS_BUILD_DIR && tests/runtests.py -c tests/unittest.conf.travis --assume_yes
 after_script:
   - tail -n 64 /var/tmp/travis/aqtest/quattor/logs/aqd.log
 addons:
