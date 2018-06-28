@@ -50,17 +50,18 @@ config = Config()
 
 DSDB_ENABLED = config.getboolean("dsdb", "enable")
 
-if DSDB_ENABLED:
-    # FIXME - this needs to be moved to depends.py after
-    # refactoring runtests.py and Config to allow override
-    # sys.path for python modules when running tests
-    # DSDB python client
+try:
     import ms.version
+except ImportError:
+    pass
+else:
+    ms.version.addpkg('setuptools', '0.6c11')
     ms.version.addpkg("requests", "2.7.0")
     ms.version.addpkg("requests-kerberos", "0.5-ms2")
     ms.version.addpkg("kerberos", "1.1.5")
     ms.version.addpkg("dns", "1.10.0")
     ms.version.addpkg('ms.dsdb', '6.0.30')
+if DSDB_ENABLED:
     import ms.dsdb.client
 
 # subprocess.Popen is not thread-safe in Python 2, so we need locking
