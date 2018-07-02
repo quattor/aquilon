@@ -239,7 +239,7 @@ ant = %(ant_home)s/bin/ant
 location_uri_validator = /ms/dist/aquilon/PROJ/aqd-scripts/prod/bin/location_uri_validator
 
 [location_feeds]
-building_feed = /v/campus/ny/appl/aquilon/aqd/data/manhattan_ingress/Building_IT_code.csv
+building_feed = /v/campus/ny/appl/aquilon/aqd/data/qa/manhattan_ingress_qa/Building_IT_code.csv
 
 [hardware_chassis]
 default_eonid = 47599
