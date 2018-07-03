@@ -112,6 +112,10 @@ template_extension = .pan
 object_declarations_template = true
 
 
+# Include a preface template in the object template if true
+object_declarations_template = true
+
+
 ###############################################################################
 
 [site]
