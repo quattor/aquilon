@@ -1,4 +1,2 @@
 ALTER TABLE hardware_entity DROP CONSTRAINT hardware_entity_owner_grn_fk;
 ALTER TABLE hardware_entity DROP COLUMN owner_eon_id;
-
-QUIT;
