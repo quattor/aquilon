@@ -127,7 +127,7 @@ class PersonalityTestMixin(object):
                          command)
 
         if config_override:
-            self.matchoutput(out, 'include { "features/personality/config_override/config" };',
+            self.matchoutput(out, 'include "features/personality/config_override/config";',
                              command)
         else:
             self.matchclean(out, 'config_override', command)

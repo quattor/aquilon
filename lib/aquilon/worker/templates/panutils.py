@@ -133,13 +133,13 @@ def pan_append(lines, path, value):
 def pan_include(lines, templates):
     if not isinstance(templates, list):
         templates = [templates]
-    lines.extend('include { "%s" };' % tpl for tpl in templates)
+    lines.extend('include "%s";' % tpl for tpl in templates)
 
 
 def pan_include_if_exists(lines, templates):
     if not isinstance(templates, list):
         templates = [templates]
-    lines.extend('include { if_exists("%s") };' % tpl for tpl in templates)
+    lines.extend('include if_exists("%s");' % tpl for tpl in templates)
 
 
 def pan_variable(lines, variable, value, final=False):

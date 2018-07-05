@@ -172,7 +172,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, '"location" = "ut.ny.na";', command)
             self.matchoutput(out,
-                             'include { "hardware/machine/utvendor/utmedium" };',
+                             'include "hardware/machine/utvendor/utmedium";',
                              command)
             self.searchoutput(out,
                               r'"ram" = list\(\s*'
@@ -227,7 +227,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template clusters/utecl1;", command)
         self.searchoutput(out,
-                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
+                          r'include "service/esx_management_server/ut.[ab]/client/config";',
                           command)
 
     def test_130_cat_utecl1_resources(self):
@@ -462,7 +462,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, """"location" = "ut.ny.na";""", command)
             self.matchoutput(out,
-                             'include { "hardware/machine/utvendor/utmedium" };',
+                             'include "hardware/machine/utvendor/utmedium";',
                              command)
             self.searchoutput(out,
                               r'"ram" = list\(\s*'

@@ -171,7 +171,7 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         'include { "hardware/machine/virtual/utmedium" }',
+                         'include "hardware/machine/virtual/utmedium"',
                          command)
 
     def test_330_restore(self):
@@ -189,7 +189,7 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["cat", "--machine=evm1"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         'include { "hardware/machine/utvendor/utmedium" }',
+                         'include "hardware/machine/utvendor/utmedium"',
                          command)
 
     def test_340_evm1_utlarge(self):

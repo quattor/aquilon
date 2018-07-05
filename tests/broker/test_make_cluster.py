@@ -60,7 +60,7 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
                                                                 "vulcan-10g-server-prod",
                                                                 metacluster="utmc1")
         self.searchoutput(obj,
-                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
+                          r'include "service/esx_management_server/ut.[ab]/client/config";',
                           obj_cmd)
 
         self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 2;',
@@ -155,7 +155,7 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
                                                                 metacluster="utmc1")
 
         self.searchoutput(obj,
-                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
+                          r'include "service/esx_management_server/ut.[ab]/client/config";',
                           obj_cmd)
 
         self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 1;',

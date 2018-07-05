@@ -232,7 +232,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template servicedata/utsvc/utsi1/config;",
                          command)
-        self.matchoutput(out, 'include { "servicedata/utsvc/config" };',
+        self.matchoutput(out, 'include "servicedata/utsvc/config";',
                          command)
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
@@ -245,7 +245,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out,
                          '"/system/services/utsvc" = create("servicedata/utsvc/utsi1/config");',
                          command)
-        self.matchoutput(out, 'include { "service/utsvc/client/config" };',
+        self.matchoutput(out, 'include "service/utsvc/client/config";',
                          command)
 
     def test_300_cat_utsi1_server(self):
@@ -267,7 +267,7 @@ class TestAddService(TestBrokerCommand):
                          '"/system/provides/utsvc" = create("servicedata/utsvc/utsi1/srvconfig");',
                          command)
         self.matchoutput(out,
-                         'include { "service/utsvc/server/config" };',
+                         'include "service/utsvc/server/config";',
                          command)
 
     def test_300_cat_utsi2(self):
@@ -276,7 +276,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template servicedata/utsvc/utsi2/config;",
                          command)
-        self.matchoutput(out, 'include { "servicedata/utsvc/config" };',
+        self.matchoutput(out, 'include "servicedata/utsvc/config";',
                          command)
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
@@ -289,7 +289,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out,
                          '"/system/services/utsvc" = create("servicedata/utsvc/utsi2/config");',
                          command)
-        self.matchoutput(out, 'include { "service/utsvc/client/config" };',
+        self.matchoutput(out, 'include "service/utsvc/client/config";',
                          command)
 
     def test_300_cat_utsvc(self):

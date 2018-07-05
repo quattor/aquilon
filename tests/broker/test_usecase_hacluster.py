@@ -218,7 +218,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/cluster/name" = "hacl1";', command)
         self.searchoutput(out,
-                          r'include { if_exists\("features/" \+ value\("/system/archetype/name"\) \+ "/hacluster/hapersonality/config"\) };',
+                          r'include if_exists\("features/" \+ value\("/system/archetype/name"\) \+ "/hacluster/hapersonality/config"\);',
                           command)
         self.searchoutput(out,
                           r'"/system/cluster/resources/resourcegroup" = append\(create\("resource/cluster/hacl1/resourcegroup/hacl1g1/config"\)\);',
