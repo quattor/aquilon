@@ -19,6 +19,7 @@
 
 import argparse
 import logging
+import os
 import re
 import sys
 from subprocess import Popen, PIPE
@@ -26,9 +27,14 @@ from subprocess import Popen, PIPE
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('aqdb.add_role')
 
-import utils
-utils.load_classpath()
+SBINDIR = os.path.dirname(os.path.realpath(__file__))
+LIBDIR = os.path.join(os.path.dirname(SBINDIR), "lib")
 
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+
+import aquilon.aqdb.depends  # pylint: disable=W0611
+import aquilon.worker.depends  # pylint: disable=W0611
 from aquilon.config import Config
 from aquilon.aqdb.model import Base, UserPrincipal, Role, Realm
 from aquilon.aqdb.db_factory import DbFactory
