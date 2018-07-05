@@ -69,7 +69,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/cluster/name" = "utvcs1";', command)
         self.searchoutput(out,
-                          r'include { if_exists\("features/" \+ value\("/system/archetype/name"\) \+ "/hacluster/hapersonality/config"\) };',
+                          r'include if_exists\("features/" \+ value\("/system/archetype/name"\) \+ "/hacluster/hapersonality/config"\);',
                           command)
 
     def test_20_fail_add_existing(self):

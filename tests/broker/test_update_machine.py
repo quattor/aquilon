@@ -53,7 +53,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "USN99C5553";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853" };',
+                         'include "hardware/machine/ibm/hs21-8853";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -121,7 +121,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "99C5553";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853" };',
+                         'include "hardware/machine/ibm/hs21-8853";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -175,7 +175,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "USNKPDZ407";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853" };',
+                         'include "hardware/machine/ibm/hs21-8853";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -471,7 +471,7 @@ class TestUpdateMachine(EventsTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/utvendor/utlarge" };',
+                         'include "hardware/machine/utvendor/utlarge";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'

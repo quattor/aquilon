@@ -1,5 +1,5 @@
 template archetype/base;
 
-include { "quattor/schema" };
+include "quattor/schema";
 
 "/system/archetype/name" = "aquilon";

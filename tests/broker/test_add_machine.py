@@ -80,7 +80,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "99C5553";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853" };',
+                         'include "hardware/machine/ibm/hs21-8853";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -256,7 +256,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"slot" = 3;', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ406";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853" };',
+                         'include "hardware/machine/ibm/hs21-8853";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -294,7 +294,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ407";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853" };',
+                         'include "hardware/machine/ibm/hs21-8853";',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -327,7 +327,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/hp/utccissmodel" };',
+                         'include "hardware/machine/hp/utccissmodel";',
                          command)
         self.matchoutput(out,
                          '"harddisks/{cciss/c0d0}" = '
