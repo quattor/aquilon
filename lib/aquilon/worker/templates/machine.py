@@ -36,12 +36,24 @@ LOGGER = logging.getLogger(__name__)
 
 class PlenaryMachineInfo(StructurePlenary):
     prefix = "machine"
+    rack_name_is_fullname = Plenary.config.getboolean("panc", "machine_ns_rack_fullname")
+
+    @classmethod
+    def get_rack_name(cls, dbmachine):
+        # A machine doesn't necessarily have a defined racc
+        if dbmachine.location.rack:
+            if cls.rack_name_is_fullname:
+                return dbmachine.location.rack.fullname.lower()
+            else:
+                return dbmachine.location.rack.name
+
+        return None
 
     @classmethod
     def template_name(cls, dbmachine):
         loc = dbmachine.location
         return "%s/%s/%s/%s/%s" % (cls.prefix, loc.hub.fullname.lower(),
-                                   loc.building, loc.rack, dbmachine.label)
+                                   loc.building, cls.get_rack_name(dbmachine), dbmachine.label)
 
     def __init__(self, dbobj, **kwargs):
         super(PlenaryMachineInfo, self).__init__(dbobj, **kwargs)
@@ -158,7 +170,7 @@ class PlenaryMachineInfo(StructurePlenary):
                     interfaces[interface.name] = StructureTemplate(path, ifinfo)
 
         # Firstly, location
-        add_location_info(lines, self.dbobj.location)
+        add_location_info(lines, self.dbobj.location, use_rack_fullname=PlenaryMachineInfo.rack_name_is_fullname)
         pan_assign(lines, "location", self.dbobj.location.sysloc())
 
         # And a chassis location?

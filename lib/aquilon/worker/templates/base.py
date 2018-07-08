@@ -628,7 +628,7 @@ class PlenaryCollection(object):
                 raise
 
 
-def add_location_info(lines, dblocation, prefix=""):
+def add_location_info(lines, dblocation, prefix="", use_rack_fullname=False):
     # FIXME: sort out hub/region
     for parent_type in ["continent", "country", "city", "campus", "building",
                         "bunker"]:
@@ -637,7 +637,11 @@ def add_location_info(lines, dblocation, prefix=""):
             pan_assign(lines, prefix + "sysloc/" + parent_type, dbparent.name)
 
     if dblocation.rack:
-        pan_assign(lines, prefix + "rack/name", dblocation.rack.name)
+        # If use_rack_fullname is True, use the rack_fullname instead of the generated rack name
+        if use_rack_fullname:
+            pan_assign(lines, prefix + "rack/name", dblocation.rack.fullname.lower())
+        else:
+            pan_assign(lines, prefix + "rack/name", dblocation.rack.name)
         if dblocation.rack_row:
             pan_assign(lines, prefix + "rack/row", dblocation.rack_row)
         if dblocation.rack_column:

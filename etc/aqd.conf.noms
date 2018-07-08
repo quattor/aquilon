@@ -111,6 +111,9 @@ template_extension = .pan
 # Include a preface template in the object template if true
 object_declarations_template = true
 
+# Use rack fullname in machine namespace
+machine_ns_rack_fullname = True
+
 
 ###############################################################################
 

@@ -353,6 +353,8 @@ gzip_output = false
 transparent_gzip = true
 template_extension = .tpl
 object_declarations_template = false
+# Use rack name in machine namespace
+machine_ns_rack_fullname = False
 
 [tool_timeout]
 # If set to True, timeout will be set to 'default_value' for any tools run via subprocess
