@@ -1,4 +1,4 @@
-language: python
+language: shell-script
 
 train_version: 1.0
 
@@ -17,3 +17,6 @@ test_types:
     - test_type:
          name: restart
          test: ./tests/restarttests.sh
+    - test_type:
+         name: jenkins
+         test: ./tests/jenkinstest.sh
