@@ -40,7 +40,8 @@ class CommandEntry(object):
         self.name = name
         self.trigger = trigger
 
-    def add_option(self, option_name, paramtype, enumtype=None):
+    def add_option(self, option_name, paramtype, enumtype=None,
+                   actiontype=None):
         """Add an option to a command.
 
         This function is called for each option tag found within a
@@ -108,7 +109,9 @@ class CommandRegistry(object):
                     option_name = option.attrib["name"]
                     paramtype = option.attrib["type"]
                     enumtype = option.attrib.get("enum")
-                    entry.add_option(option_name, paramtype, enumtype)
+                    actiontype = option.attrib.get("action")
+                    entry.add_option(option_name, paramtype, enumtype,
+                                     actiontype)
 
                 for format in command.getiterator("format"):
                     if "name" not in format.attrib:
