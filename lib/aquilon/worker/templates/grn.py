@@ -23,6 +23,7 @@ from aquilon.worker.templates import (
     Plenary,
     PlenaryParameterized,
 )
+from aquilon.worker.templates.entitlementutils import flatten_entitlements
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class PlenaryParameterizedGrn(PlenaryParameterized):
             dbobj.location.name)
 
     def body(self, lines):
-        pass
+        flatten_entitlements(lines, self.dbobj, prefix='/')
 
 
 Plenary.handlers[ParameterizedGrn] = PlenaryParameterizedGrn

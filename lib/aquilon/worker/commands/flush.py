@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,16 +26,48 @@ from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import PartialError, IncompleteError
-from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
-                                PersonalityStage, Archetype, Cluster, City,
-                                Rack, Bunker, Building, Resource, HostResource,
-                                ClusterResource, BundleResource, VirtualMachine,
-                                Filesystem, ServiceAddress, Share, Disk, Model,
-                                Interface, AddressAssignment, Network,
-                                NetworkEnvironment, NetworkCompartment,
-                                ServiceInstance, HardwareEntity, NetworkDevice,
-                                RouterAddress, VirtualSwitch,
-                                PortGroup, ParamDefHolder, Feature)
+from aquilon.aqdb.model import (
+    AddressAssignment,
+    Archetype,
+    Building,
+    BundleResource,
+    Bunker,
+    Chassis,
+    City,
+    Cluster,
+    ClusterResource,
+    Disk,
+    Entitlement,
+    Feature,
+    Filesystem,
+    Grn,
+    HardwareEntity,
+    Host,
+    HostEnvironment,
+    HostResource,
+    Interface,
+    Location,
+    Machine,
+    Model,
+    Network,
+    NetworkCompartment,
+    NetworkDevice,
+    NetworkEnvironment,
+    ParamDefHolder,
+    Parameterized,
+    Personality,
+    PersonalityStage,
+    PortGroup,
+    Rack,
+    Resource,
+    RouterAddress,
+    Service,
+    ServiceAddress,
+    ServiceInstance,
+    Share,
+    VirtualMachine,
+    VirtualSwitch,
+)
 from aquilon.aqdb.data_sync.storage import StormapParser
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary
@@ -125,8 +157,8 @@ class CommandFlush(BrokerCommand):
                                     interfaces_by_id.get(iface.parent_id, None))
 
     def render(self, session, logger, services, personalities, machines,
-               clusters, hosts, locations, resources, networks, network_devices,
-               virtual_switches, all, **_):
+               clusters, hosts, locations, resources, networks,
+               network_devices, virtual_switches, archetypes, grns, all, **_):
         if all:
             services = True
             personalities = True
@@ -138,6 +170,8 @@ class CommandFlush(BrokerCommand):
             network_devices = True
             virtual_switches = True
             networks = True
+            archetypes = True
+            grns = True
 
         with CompileKey(logger=logger):
             logger.client_info("Loading data.")
@@ -277,6 +311,85 @@ class CommandFlush(BrokerCommand):
                         written += plenary_info._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(persst, e))
+                        continue
+
+                logger.client_info("Flushing parameterized personalities.")
+
+                # Search for the matching entitlements
+                q = session.query(Personality, Location)
+                q = q.join(Entitlement,
+                           Entitlement.personality_id == Personality.id)
+                q = q.join(Location,
+                           Location.id == Entitlement.location_id)
+
+                progress = ProgressReport(logger, q.count(),
+                                          'parameterized personality')
+                for dbpersonality, dblocation in q:
+                    progress.step()
+                    paramperso = Parameterized.get(dbpersonality,
+                                                   dblocation)
+                    try:
+                        plenary_info = Plenary.get_plenary(paramperso,
+                                                           logger=logger)
+                        written += plenary_info._write()
+                    except Exception as e:
+                        failed.append("{0} failed: {1}".format(paramperso, e))
+                        continue
+
+            if grns:
+                logger.client_info("Flushing parameterized GRNs.")
+
+                # Search for the matching entitlements
+                q = session.query(Grn, HostEnvironment, Location)
+                q = q.join(Entitlement,
+                           Entitlement.eon_id == Grn.eon_id)
+                q = q.join(HostEnvironment,
+                           HostEnvironment.id ==
+                           Entitlement.host_environment_id)
+                q = q.join(Location,
+                           Location.id == Entitlement.location_id)
+
+                progress = ProgressReport(logger, q.count(),
+                                          'parameterized GRN')
+                for dbgrn, dbenv, dblocation in q:
+                    progress.step()
+                    paramgrn = Parameterized.get(dbgrn,
+                                                 dbenv,
+                                                 dblocation)
+                    try:
+                        plenary_info = Plenary.get_plenary(paramgrn,
+                                                           logger=logger)
+                        written += plenary_info._write()
+                    except Exception as e:
+                        failed.append("{0} failed: {1}".format(paramgrn, e))
+                        continue
+
+            if archetypes:
+                logger.client_info("Flushing parameterized archetypes.")
+
+                # Search for the matching entitlements
+                q = session.query(Archetype, HostEnvironment, Location)
+                q = q.join(Entitlement,
+                           Entitlement.archetype_id == Archetype.id)
+                q = q.join(HostEnvironment,
+                           HostEnvironment.id ==
+                           Entitlement.host_environment_id)
+                q = q.join(Location,
+                           Location.id == Entitlement.location_id)
+
+                progress = ProgressReport(logger, q.count(),
+                                          'parameterized archetype')
+                for dbarchetype, dbenv, dblocation in q:
+                    progress.step()
+                    paramarch = Parameterized.get(dbarchetype,
+                                                  dbenv,
+                                                  dblocation)
+                    try:
+                        plenary_info = Plenary.get_plenary(paramarch,
+                                                           logger=logger)
+                        written += plenary_info._write()
+                    except Exception as e:
+                        failed.append("{0} failed: {1}".format(paramgrn, e))
                         continue
 
             if machines:

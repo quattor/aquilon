@@ -133,6 +133,8 @@
             <option name="networks" type="flag">Flush templates related to networks</option>
             <option name="network_devices" type="flag">Flush templates related to network devices</option>
             <option name="virtual_switches" type="flag">Flush templates of virtual switches</option>
+            <option name="archetypes" type="flag">Flush the archetype templates</option>
+            <option name="grns" type="flag">Flush the GRN templates</option>
             <option name="all" type="flag">Flush all templates</option>
         </optgroup>
         <optgroup>

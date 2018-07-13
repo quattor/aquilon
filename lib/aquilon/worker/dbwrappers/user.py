@@ -24,6 +24,7 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError, PartialError
 from aquilon.aqdb.model import (
+    Entitlement,
     Personality,
     User,
     UserType,
@@ -157,6 +158,22 @@ class UserSync(object):
                 personality.root_users.remove(dbuser)
 
             updated_plenaries.update(personality.stages.values())
+
+        # Check for any entitlement for the given users
+        q = self._session.query(Entitlement)
+        q = q.filter(Entitlement.user_id.in_(
+            dbuser.id for dbuser in userchunk))
+        for entit in q:
+            if entit.host_id:
+                updated_plenaries.add(entit.host)
+            elif entit.cluster_id:
+                updated_plenaries.add(entit.cluster)
+            elif entit.personality_id:
+                updated_plenaries.add(entit.personality.stages.values())
+            elif entit.archetype_id:
+                updated_plenaries.add(entit.archetype)
+            elif entit.target_eon_id:
+                updated_plenaries.add(entit.target_grn)
 
         return updated_plenaries
 

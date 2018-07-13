@@ -37,6 +37,7 @@ from aquilon.aqdb.model import (
     VlanInterface,
 )
 from aquilon.aqdb.model.feature import nonhost_features
+from aquilon.utils import nlist_key_re
 from aquilon.worker.locks import CompileKey, PlenaryKey
 from aquilon.worker.templates import (
     ObjectPlenary,
@@ -58,7 +59,7 @@ from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_include,
                                                pan_include_if_exists,
                                                pan_variable)
-from aquilon.utils import nlist_key_re
+from aquilon.worker.templates.entitlementutils import flatten_entitlements
 
 LOGGER = logging.getLogger(__name__)
 
@@ -297,6 +298,8 @@ class PlenaryHostData(StructurePlenary):
             pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
 
         pan_assign(lines, "system/owner_eon_id", self.dbobj.effective_owner_grn.eon_id)
+
+        flatten_entitlements(lines, self.dbobj)
 
         if self.dbobj.cluster:
             pan_assign(lines, "system/cluster/name", self.dbobj.cluster.name)

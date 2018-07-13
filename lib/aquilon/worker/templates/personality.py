@@ -35,6 +35,7 @@ from aquilon.worker.templates import (
     PlenaryParameterized,
     StructurePlenary,
 )
+from aquilon.worker.templates.entitlementutils import flatten_entitlements
 from aquilon.worker.templates.panutils import (
     pan_append,
     pan_assign,
@@ -87,7 +88,7 @@ class PlenaryParameterizedPersonality(PlenaryParameterized):
             dbobj.location.name)
 
     def body(self, lines):
-        pass
+        flatten_entitlements(lines, self.dbobj, prefix='/')
 
 
 Plenary.handlers[ParameterizedPersonality] = PlenaryParameterizedPersonality
