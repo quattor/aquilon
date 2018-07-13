@@ -40,7 +40,7 @@ class PlenaryMachineInfo(StructurePlenary):
     @classmethod
     def template_name(cls, dbmachine):
         loc = dbmachine.location
-        return "%s/%s/%s/%s/%s" % (cls.prefix, loc.hub.fullname.lower(),
+        return "%s/%s/%s/%s/%s" % (cls.prefix, loc.continent.name,
                                    loc.building, loc.rack, dbmachine.label)
 
     def __init__(self, dbobj, **kwargs):

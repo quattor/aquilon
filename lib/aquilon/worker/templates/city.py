@@ -30,7 +30,7 @@ class PlenaryCity(Plenary):
 
     @classmethod
     def template_name(cls, dbcity):
-        return "%s/%s/%s/config" % (cls.prefix, dbcity.hub.fullname.lower(),
+        return "%s/%s/%s/config" % (cls.prefix, dbcity.continent.name,
                                     dbcity.name)
 
     def body(self, lines):
