@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015  Contributor
+# Copyright (C) 2015,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ class CommandSearchService(BrokerCommand):
 
     def render(self, session, service, instance,
                server_hostname, server_cluster, server_metacluster,
-               client_hostname, client_cluster, client_metacluster, has_clients,
+               server_exact_location,
+               client_hostname, client_cluster, client_metacluster,
+               has_clients, client_exact_location,
                fullinfo, style, **arguments):
         q = session.query(ServiceInstance)
         if instance:
@@ -47,14 +49,10 @@ class CommandSearchService(BrokerCommand):
         q = q.options(contains_eager('service'))
         q = q.reset_joinpoint()
 
-        location_args = {'server_': {}, 'client_': {}}
-        for prefix, values in location_args.items():
-            for k, v in arguments.items():
-                if k.startswith(prefix):
-                    values[k.replace(prefix, '')] = v
-
-        dbserver_loc = get_location(session, **location_args['server_'])
-        dbclient_loc = get_location(session, **location_args['client_'])
+        dbserver_loc = get_location(
+            session, locfunc=lambda x: 'server_{}'.format(x), **arguments)
+        dbclient_loc = get_location(
+            session, locfunc=lambda x: 'client_{}'.format(x), **arguments)
 
         if server_hostname or server_cluster or server_metacluster:
             q = q.join(ServiceInstance.servers, aliased=True)
@@ -89,7 +87,7 @@ class CommandSearchService(BrokerCommand):
             q = q.outerjoin((HostHw,
                              HostHw.c.hardware_entity_id == SISAlias.host_id))
 
-            if location_args['server_']['exact_location']:
+            if server_exact_location:
                 q = q.filter(or_(ClAlias.location_constraint == dbserver_loc,
                                  HostHw.c.location_id == dbserver_loc.id))
             else:
@@ -123,7 +121,7 @@ class CommandSearchService(BrokerCommand):
             q = q.outerjoin(HostHw, ServiceInstance.clients)
             q = q.outerjoin(ClAlias, ServiceInstance.cluster_clients)
 
-            if location_args['client_']['exact_location']:
+            if client_exact_location:
                 q = q.filter(or_(ClAlias.location_constraint == dbclient_loc,
                                  HostHw.c.location_id == dbclient_loc.id))
             else:

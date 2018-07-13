@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2010-2015,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq search cluster`."""
+"""Contains the logic for `aq search metacluster`."""
 
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import or_
@@ -30,7 +30,7 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 
 
-class CommandSearchCluster(BrokerCommand):
+class CommandSearchMetaCluster(BrokerCommand):
 
     required_parameters = []
 
@@ -38,6 +38,7 @@ class CommandSearchCluster(BrokerCommand):
                domain, sandbox, branch, sandbox_author, buildstatus,
                allowed_archetype, allowed_personality, max_members,
                member_archetype, member_cluster, member_personality,
+               member_exact_location, metacluster_exact_location,
                metacluster, service, instance, share,
                fullinfo, style, **arguments):
 
@@ -88,30 +89,21 @@ class CommandSearchCluster(BrokerCommand):
             dbbuildstatus = ClusterLifecycle.get_instance(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
 
-        # Go through the arguments and make special dicts for each
-        # specific set of location arguments that are stripped of the
-        # given prefix.
-        location_args = {'metacluster_': {}, 'member_': {}}
-        for prefix in location_args.keys():
-            for (k, v) in arguments.items():
-                if k.startswith(prefix):
-                    # arguments['cluster_building'] = 'dd'
-                    # becomes
-                    # location_args['cluster_']['building'] = 'dd'
-                    location_args[prefix][k.replace(prefix, '')] = v
-
-        dblocation = get_location(session, **location_args['metacluster_'])
+        dblocation = get_location(
+            session, locfunc=lambda x: 'metacluster_{}'.format(x), **arguments)
         if dblocation:
-            if location_args['metacluster_']['exact_location']:
+            if metacluster_exact_location:
                 q = q.filter_by(location_constraint=dblocation)
             else:
                 childids = dblocation.offspring_ids()
                 q = q.filter(MetaCluster.location_constraint_id.in_(childids))
-        dblocation = get_location(session, **location_args['member_'])
+
+        dblocation = get_location(
+            session, locfunc=lambda x: 'member_{}'.format(x), **arguments)
         if dblocation:
             CAlias = aliased(Cluster)
             q = q.join(CAlias, MetaCluster.members)
-            if location_args['member_']['exact_location']:
+            if member_exact_location:
                 q = q.filter_by(location_constraint=dblocation)
             else:
                 childids = dblocation.offspring_ids()
