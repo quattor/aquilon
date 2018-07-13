@@ -6260,6 +6260,219 @@
         <transport method="put" path="entitlement/type/%(type)s"/>
     </command>
 
+    <command name="add_entitlement">
+        Add entitlements for a given (or list of given) GRN and/or User to
+        a Host, Cluster, Personality, Archetype or GRN.
+
+        The affected host(s) (directly or indirectly) must be recompiled for
+        the changes to take effect.
+        <optgroup mandatory="True" fields="all">
+            <option name="type" type="string">Entitlement type</option>
+            <optgroup>
+                <option name="to_grn" type="string" action="extend">GRN as string</option>
+                <option name="to_eon_id" type="int" action="extend">Numeric EON ID</option>
+                <option name="to_user" type="string" action="extend">Username</option>
+
+                <option name="to_grn_list" type="list">List of GRNs as string</option>
+                <option name="to_eon_id_list" type="list">List of Numeric EON IDs</option>
+                <option name="to_user_list" type="list">List of Usernames</option>
+            </optgroup>
+            <optgroup fields="one">
+                <optgroup>
+                    <option name="on_hostname" type="string" action="extend">Host</option>
+                    <option name="on_hostname_list" type="list">List of Hosts</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_cluster" type="string" action="extend">Cluster</option>
+                    <option name="on_cluster_list" type="list">List of Clusters</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_personality" type="string" action="extend">Personality</option>
+                    <option name="on_personality_list" type="list">List of Personalities</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_archetype" requires="on_host_environment" type="string" action="extend">Archetype</option>
+                    <option name="on_archetype_list" type="list">List of Archetypes</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_eon_id" requires="on_host_environment" type="int" action="extend">Numeric EON ID</option>
+                    <option name="on_eon_id_list" type="list">List of Numeric EON IDs</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_grn" requires="on_host_environment" type="string" action="extend">GRN as string</option>
+                    <option name="on_grn_list" type="list">List of GRNs as string</option>
+                </optgroup>
+            </optgroup>
+        </optgroup>
+        <optgroup>
+            <optgroup requires="on_personality on_archetype on_eon_id on_grn">
+                <option name="on_organization" type="string" action="extend">Organization</option>
+                <option name="on_hub" type="string" action="extend">Hub</option>
+                <option name="on_continent" type="string" action="extend">Continent</option>
+                <option name="on_country" type="string" action="extend">Country</option>
+                <option name="on_campus" type="string" action="extend">Campus</option>
+                <option name="on_city" type="string" action="extend">City</option>
+                <option name="on_building" type="string" action="extend">Building</option>
+                <option name="on_room" type="string" action="extend">Room</option>
+                <option name="on_bunker" type="string" action="extend">Bunker</option>
+                <option name="on_rack" type="string" action="extend">Rack</option>
+                <option name="on_desk" type="string" action="extend">Desk</option>
+            </optgroup>
+            <option name="on_host_environment" requires="on_archetype on_eon_id on_grn" type="string" action="extend">Host environment</option>
+
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">String to be specified if justification='emergency'</option>
+        </optgroup>
+        <transport method="post" path="entitlement"/>
+    </command>
+
+    <command name="del_entitlement">
+        Delete entitlements for a given (or list of given) GRN and/or User to
+        a Host, Cluster, Personality, Archetype or GRN.
+
+        The affected host(s) (directly or indirectly) must be recompiled for
+        the changes to take effect.
+        <optgroup mandatory="True" fields="all">
+            <option name="type" type="string">Entitlement type</option>
+            <optgroup>
+                <option name="to_grn" type="string" action="extend">GRN as string</option>
+                <option name="to_eon_id" type="int" action="extend">Numeric EON ID</option>
+                <option name="to_user" type="string" action="extend">Username</option>
+
+                <option name="to_grn_list" type="list">List of GRNs as string</option>
+                <option name="to_eon_id_list" type="list">List of Numeric EON IDs</option>
+                <option name="to_user_list" type="list">List of Usernames</option>
+            </optgroup>
+            <optgroup fields="one">
+                <optgroup>
+                    <option name="on_hostname" type="string" action="extend">Host</option>
+                    <option name="on_hostname_list" type="list">List of Hosts</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_cluster" type="string" action="extend">Cluster</option>
+                    <option name="on_cluster_list" type="list">List of Clusters</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_personality" type="string" action="extend">Personality</option>
+                    <option name="on_personality_list" type="list">List of Personalities</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_archetype" requires="on_host_environment" type="string" action="extend">Archetype</option>
+                    <option name="on_archetype_list" type="list">List of Archetypes</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_eon_id" requires="on_host_environment" type="int" action="extend">Numeric EON ID</option>
+                    <option name="on_eon_id_list" type="list">List of Numeric EON IDs</option>
+                </optgroup>
+                <optgroup>
+                    <option name="on_grn" requires="on_host_environment" type="string" action="extend">GRN as string</option>
+                    <option name="on_grn_list" type="list">List of GRNs as string</option>
+                </optgroup>
+            </optgroup>
+        </optgroup>
+        <optgroup>
+            <optgroup requires="on_personality on_archetype on_eon_id on_grn">
+                <option name="on_organization" type="string" action="extend">Organization</option>
+                <option name="on_hub" type="string" action="extend">Hub</option>
+                <option name="on_continent" type="string" action="extend">Continent</option>
+                <option name="on_country" type="string" action="extend">Country</option>
+                <option name="on_campus" type="string" action="extend">Campus</option>
+                <option name="on_city" type="string" action="extend">City</option>
+                <option name="on_building" type="string" action="extend">Building</option>
+                <option name="on_room" type="string" action="extend">Room</option>
+                <option name="on_bunker" type="string" action="extend">Bunker</option>
+                <option name="on_rack" type="string" action="extend">Rack</option>
+                <option name="on_desk" type="string" action="extend">Desk</option>
+            </optgroup>
+            <option name="on_host_environment" requires="on_archetype on_eon_id on_grn" type="string" action="extend">Host environment</option>
+
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">String to be specified if justification='emergency'</option>
+        </optgroup>
+        <transport method="delete" path="entitlement"/>
+    </command>
+
+    <command name="show_entitlement">
+        Given a host, will return all the entitlements that applies on that
+        host (either directly or by inheritance)
+        <optgroup mandatory="True">
+            <option name="on_hostname" type="string">Host</option>
+        </optgroup>
+        <optgroup>
+            <option name="type" type="string">Entitlement type</option>
+            <optgroup>
+                <option name="to_grn" type="string" action="extend">GRN as string</option>
+                <option name="to_eon_id" type="int" action="extend">Numeric EON ID</option>
+                <option name="to_user" type="string" action="extend">Username</option>
+            </optgroup>
+        </optgroup>
+        <transport method="get" path="entitlement/host/%(on_hostname)s"/>
+    </command>
+
+    <command name="search_entitlement">
+        Search any entitlements for a given (or list of given) GRN and/or User to
+        a Host, Cluster, Personality, Archetype or GRN.
+        <p/>
+        Note that location searches are inclusive.  That is, searching for a
+        building will include all racks, rooms, etc. inside the building.  The
+        --on_exact_location option can be used to override this behavior.
+        <optgroup mandatory="True">
+            <option name="type" type="string">Entitlement type</option>
+            <optgroup>
+                <option name="to_grn" type="string" action="extend">GRN as string</option>
+                <option name="to_eon_id" type="int" action="extend">Numeric EON ID</option>
+                <option name="to_user" type="string" action="extend">Username</option>
+
+                <option name="to_grn_list" type="list">List of GRNs as string</option>
+                <option name="to_eon_id_list" type="list">List of Numeric EON IDs</option>
+                <option name="to_user_list" type="list">List of Usernames</option>
+
+                <option name="to_any_grn" type="flag" conflicts="to_grn to_eon_id to_grn_list to_eon_id_list">Any GRN</option>
+                <option name="to_any_user" type="flag" conflicts="to_user to_user_list">Any User</option>
+                <option name="to_any_user_of_type" type="string" action="extend" conflicts="to_any_user">Any User of the given type</option>
+            </optgroup>
+            <optgroup>
+                <option name="on_hostname" type="string" action="extend">Host</option>
+                <option name="on_cluster" type="string" action="extend">Cluster</option>
+                <option name="on_personality" type="string" action="extend">Personality</option>
+                <option name="on_archetype" type="string" action="extend">Archetype</option>
+                <option name="on_eon_id" type="int" action="extend">Numeric EON ID</option>
+                <option name="on_grn" type="string" action="extend">GRN as string</option>
+
+                <option name="on_hostname_list" type="list">List of Hosts</option>
+                <option name="on_cluster_list" type="list">List of Clusters</option>
+                <option name="on_personality_list" type="list">List of Personalities</option>
+                <option name="on_archetype_list" type="list">List of Archetypes</option>
+                <option name="on_eon_id_list" type="list">List of Numeric EON IDs</option>
+                <option name="on_grn_list" type="list">List of GRNs as string</option>
+
+                <option name="on_any_host" type="flag" conflicts="on_hostname on_hostname_list">Any Host</option>
+                <option name="on_any_cluster" type="flag" conflicts="on_cluster on_cluster_list">Any Cluster</option>
+                <option name="on_any_personality" type="flag" conflicts="on_personality on_personality_list">Any Personality</option>
+                <option name="on_any_archetype" type="flag" conflicts="on_archetype on_archetype_list">Any Archetype</option>
+                <option name="on_any_grn" type="flag" conflicts="on_eon_id on_grn on_eon_id_list on_grn_list">Any GRN</option>
+            </optgroup>
+        </optgroup>
+        <optgroup>
+            <optgroup>
+                <option name="on_organization" type="string" action="extend">Organization</option>
+                <option name="on_hub" type="string" action="extend">Hub</option>
+                <option name="on_continent" type="string" action="extend">Continent</option>
+                <option name="on_country" type="string" action="extend">Country</option>
+                <option name="on_campus" type="string" action="extend">Campus</option>
+                <option name="on_city" type="string" action="extend">City</option>
+                <option name="on_building" type="string" action="extend">Building</option>
+                <option name="on_room" type="string" action="extend">Room</option>
+                <option name="on_bunker" type="string" action="extend">Bunker</option>
+                <option name="on_rack" type="string" action="extend">Rack</option>
+                <option name="on_desk" type="string" action="extend">Desk</option>
+            </optgroup>
+            <option name="on_exact_location" type="flag" requires="on_organization on_hub on_continent on_country on_campus on_city on_building on_room on_bunker on_rack on_desk">Match the location exactly</option>
+            <option name="on_host_environment" type="string" action="extend">Host environment</option>
+        </optgroup>
+        <transport method="get" path="entitlement"/>
+    </command>
+
     <command name="map_grn">
         Map a given GRN to a host or a personality. The affected host(s) must be
         recompiled for the changes to take effect.

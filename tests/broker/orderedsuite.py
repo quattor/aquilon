@@ -58,6 +58,7 @@ from .test_add_dns_domain import TestAddDnsDomain
 from .test_add_dns_environment import TestAddDnsEnvironment
 from .test_add_domain import TestAddDomain
 from .test_add_dynamic_range import TestAddDynamicRange
+from .test_add_entitlement import TestAddEntitlement
 from .test_add_entitlement_type import TestAddEntitlementType
 from .test_add_esx_cluster import TestAddESXCluster
 from .test_add_feature import TestAddFeature
@@ -167,6 +168,7 @@ from .test_del_dns_domain import TestDelDnsDomain
 from .test_del_dns_environment import TestDelDnsEnvironment
 from .test_del_domain import TestDelDomain
 from .test_del_dynamic_range import TestDelDynamicRange
+from .test_del_entitlement import TestDelEntitlement
 from .test_del_entitlement_type import TestDelEntitlementType
 from .test_del_esx_cluster import TestDelESXCluster
 from .test_del_feature import TestDelFeature
@@ -354,7 +356,6 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestAddUserType, TestAddUser, TestShowPermission,
                  TestAddEntitlementType,
                  TestUpdateEntitlementType,
-                 TestDelEntitlementType,
                  TestAddSandbox, TestAddDomain, TestUpdateBranch,
                  TestCMLogger,
                  TestGet, TestPublishSandbox, TestDeployDomain,
@@ -483,6 +484,9 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestPxeswitch, TestManage, TestManageValidateBranch,
                  TestManageList,
                  TestRefreshUser, TestRootAccess,
+                 TestAddEntitlement,
+                 TestDelEntitlement,
+                 TestDelEntitlementType,
                  TestUsecaseDatabase, TestUsecaseHACluster,
                  TestUsecaseAnycast,
                  TestUsecaseNetworks,

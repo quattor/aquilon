@@ -39,6 +39,16 @@ _table_abbrev = {
     'dns_record': 'dnsrec',
     'entit_type': 'ent_typ',
     'entit_type_user_type_map': 'entyp_usrtyp_map',
+    'entit_archetype_grn_map': 'ent_arch_grn_map',
+    'entit_archetype_user_map': 'ent_arch_usr_map',
+    'entit_cluster_grn_map': 'ent_clstr_grn_map',
+    'entit_cluster_user_map': 'ent_clstr_usr_map',
+    'entit_grn_grn_map': 'ent_grn_grn_map',
+    'entit_grn_user_map': 'ent_grn_usr_map',
+    'entit_host_grn_map': 'ent_host_grn_map',
+    'entit_host_user_map': 'ent_host_usr_map',
+    'entit_personality_grn_map': 'ent_pers_grn_map',
+    'entit_personality_user_map': 'ent_pers_usr_map',
     'hardware_entity': 'hw_ent',
     'host_cluster_member': 'host_clstr_mmbr',
     'host_environment': 'host_env',
@@ -79,6 +89,11 @@ _col_abbrev = {
     'location_constraint_id': 'loc_constr_id',
     'rebuild_required': 'rebld_req',
     'requires_change_manager': 'req_chg_mgr',
+
+    'target_eon_id': 'tgrn',
+    'user_id': 'usr',
+    'host_environment_id': 'hostenv',
+    'location_id': 'loc',
 }
 
 

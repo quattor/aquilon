@@ -16,7 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq del_entitlement_type`."""
 
-from aquilon.aqdb.model import EntitlementType
+from aquilon.aqdb.model import (
+    Entitlement,
+    EntitlementType,
+)
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -26,5 +30,9 @@ class CommandDelEntitlementType(BrokerCommand):
 
     def render(self, session, type, **_):
         dbtype = EntitlementType.get_unique(session, type, compel=True)
+        if session.query(Entitlement).filter_by(type_id=dbtype.id).count():
+            raise ArgumentError('Entitlement type {} is still in use '
+                                'by at least one entitlement.'.format(
+                                    dbtype.name))
         session.delete(dbtype)
         session.flush()

@@ -17,6 +17,25 @@
 """Entitlement formatter."""
 
 from aquilon.aqdb.model import (
+    EntitlementArchetypeGrnMap,
+    EntitlementArchetypeUserMap,
+    EntitlementClusterGrnMap,
+    EntitlementClusterUserMap,
+    EntitlementGrnGrnMap,
+    EntitlementGrnUserMap,
+    EntitlementHostGrnMap,
+    EntitlementHostUserMap,
+    EntitlementOnArchetype,
+    EntitlementOnCluster,
+    EntitlementOnGrn,
+    EntitlementOnHost,
+    EntitlementOnHostEnvironment,
+    EntitlementOnLocation,
+    EntitlementOnPersonality,
+    EntitlementPersonalityGrnMap,
+    EntitlementPersonalityUserMap,
+    EntitlementToGrn,
+    EntitlementToUser,
     EntitlementType,
 )
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -46,3 +65,54 @@ class EntitlementTypeFormatter(ObjectFormatter):
 
 
 ObjectFormatter.handlers[EntitlementType] = EntitlementTypeFormatter()
+
+
+class EntitlementFormatter(ObjectFormatter):
+    def format_raw(self, entit, indent="", embedded=True, indirect_attrs=True):
+        details = []
+
+        def add(txt):
+            details.append('{}{}'.format(indent, txt))
+
+        add('Entitlement: {}'.format(entit.type.name))
+
+        if isinstance(entit, EntitlementToGrn):
+            add('  To {0:c}: {0.grn}'.format(entit.grn))
+        elif isinstance(entit, EntitlementToUser):
+            add('  To {type} {0:c}: {0.name}'.format(
+                entit.user, type=entit.user.type.name.title()))
+
+        if isinstance(entit, EntitlementOnHost):
+            add('  On {0:c}: {0.hardware_entity.primary_name.fqdn.fqdn}'
+                .format(entit.host))
+        elif isinstance(entit, EntitlementOnCluster):
+            add('  On {0:c}: {0.name}'.format(entit.cluster))
+        elif isinstance(entit, EntitlementOnPersonality):
+            add('  On {0:c}: {0.name}'.format(entit.personality))
+        elif isinstance(entit, EntitlementOnArchetype):
+            add('  On {0:c}: {0.name}'.format(entit.archetype))
+        elif isinstance(entit, EntitlementOnGrn):
+            add('  On {0:c}: {0.grn}'.format(entit.target_grn))
+
+        if isinstance(entit, EntitlementOnHostEnvironment):
+            add('  On {0:c}: {0.name}'.format(entit.host_environment))
+
+        if isinstance(entit, EntitlementOnLocation):
+            add('  On {0:c}: {0.name}'.format(entit.location))
+
+        return '\n'.join(details)
+
+
+for cls in [
+    EntitlementArchetypeGrnMap,
+    EntitlementArchetypeUserMap,
+    EntitlementClusterGrnMap,
+    EntitlementClusterUserMap,
+    EntitlementGrnGrnMap,
+    EntitlementGrnUserMap,
+    EntitlementHostGrnMap,
+    EntitlementHostUserMap,
+    EntitlementPersonalityGrnMap,
+    EntitlementPersonalityUserMap,
+]:
+    ObjectFormatter.handlers[cls] = EntitlementFormatter()

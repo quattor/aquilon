@@ -157,6 +157,26 @@ from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 
 # ENTITLEMENTS
 from aquilon.aqdb.model.entitlement import (
+    Entitlement,
+    EntitlementArchetypeGrnMap,
+    EntitlementArchetypeUserMap,
+    EntitlementClusterGrnMap,
+    EntitlementClusterUserMap,
+    EntitlementGrnGrnMap,
+    EntitlementGrnUserMap,
+    EntitlementHostGrnMap,
+    EntitlementHostUserMap,
+    EntitlementOnArchetype,
+    EntitlementOnCluster,
+    EntitlementOnGrn,
+    EntitlementOnHost,
+    EntitlementOnHostEnvironment,
+    EntitlementOnLocation,
+    EntitlementOnPersonality,
+    EntitlementPersonalityGrnMap,
+    EntitlementPersonalityUserMap,
+    EntitlementToGrn,
+    EntitlementToUser,
     EntitlementType,
     EntitlementTypeUserTypeMap,
 )

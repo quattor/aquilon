@@ -51,6 +51,16 @@ class TestDelEntitlementType(TestBrokerCommand):
         self.matchoutput(
             out, 'EntitlementType etype_does_not_exist not found', command)
 
+    def test_250_del_in_use(self):
+        command = [
+            'del_entitlement_type',
+            '--type', 'etype_all',
+        ]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         'Entitlement type etype_all is still in use by '
+                         'at least one entitlement.', command)
+
     def test_300_show_all(self):
         command = [
             'show_entitlement_type',
