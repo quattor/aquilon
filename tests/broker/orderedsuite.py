@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ from .test_add_dns_domain import TestAddDnsDomain
 from .test_add_dns_environment import TestAddDnsEnvironment
 from .test_add_domain import TestAddDomain
 from .test_add_dynamic_range import TestAddDynamicRange
+from .test_add_entitlement_type import TestAddEntitlementType
 from .test_add_esx_cluster import TestAddESXCluster
 from .test_add_feature import TestAddFeature
 from .test_add_filesystem import TestAddFilesystem
@@ -166,6 +167,7 @@ from .test_del_dns_domain import TestDelDnsDomain
 from .test_del_dns_environment import TestDelDnsEnvironment
 from .test_del_domain import TestDelDomain
 from .test_del_dynamic_range import TestDelDynamicRange
+from .test_del_entitlement_type import TestDelEntitlementType
 from .test_del_esx_cluster import TestDelESXCluster
 from .test_del_feature import TestDelFeature
 from .test_del_filesystem import TestDelFilesystem
@@ -302,6 +304,7 @@ from .test_update_cluster_systemlist import TestUpdateClusterSystemList
 from .test_update_console_server import TestUpdateConsoleServer
 from .test_update_disk import TestUpdateDisk
 from .test_update_dns_environment import TestUpdateDnsEnvironment
+from .test_update_entitlement_type import TestUpdateEntitlementType
 from .test_update_esx_cluster import TestUpdateESXCluster
 from .test_update_feature import TestUpdateFeature
 from .test_update_filesystem import TestUpdateFilesystem
@@ -349,6 +352,9 @@ class BrokerTestSuite(unittest.TestSuite):
     test_list = [TestAddRole, TestPermission,
                  TestAddDnsDomain, TestAddDnsEnvironment,
                  TestAddUserType, TestAddUser, TestShowPermission,
+                 TestAddEntitlementType,
+                 TestUpdateEntitlementType,
+                 TestDelEntitlementType,
                  TestAddSandbox, TestAddDomain, TestUpdateBranch,
                  TestCMLogger,
                  TestGet, TestPublishSandbox, TestDeployDomain,

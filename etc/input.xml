@@ -6202,6 +6202,64 @@
         <transport method="post" path="command/refresh_grns"/>
     </command>
 
+    <command name="add_entitlement_type">
+        Create an entitlement type definition.
+        <optgroup mandatory="True" fields="all">
+            <option name="type" type="string">The name of the entitlement type</option>
+        </optgroup>
+        <optgroup fields="any">
+            <option name="enable_to_user_type" type="string" action="extend">Enable the entitlement type to be used to entitle a given type of users</option>
+            <option name="enable_to_grn" type="flag">Enable the entitlement type to be used to entitle GRNs</option>
+        </optgroup>
+        <optgroup>
+            <option name="comments" type="string">Comments</option>
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">Human readable description of why the operation was performed</option>
+        </optgroup>
+        <transport method="post" path="entitlement/type"/>
+    </command>
+
+    <command name="del_entitlement_type">
+        Remove an entitlement type definition.
+        <optgroup mandatory="True" fields="all">
+            <option name="type" type="string">The name of the entitlement type</option>
+        </optgroup>
+        <optgroup>
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">Human readable description of why the operation was performed</option>
+        </optgroup>
+        <transport method="delete" path="entitlement/type/%(type)s"/>
+    </command>
+
+    <command name="show_entitlement_type">
+        Show currently defined entitlement types.
+        <optgroup mandatory="True" fields="one">
+            <option name="type" type="string">The name of the entitlement type</option>
+            <option name="all" type="flag">Show all entitlement_types</option>
+        </optgroup>
+        <transport trigger="type" method="get" path="entitlement/type/%(type)s"/>
+        <transport trigger="all" method="get" path="entitlement/type"/>
+    </command>
+
+    <command name="update_entitlement_type">
+        Update an entitlement type definition.
+        <optgroup mandatory="True" fields="all">
+            <option name="type" type="string">The name of the entitlement type</option>
+        </optgroup>
+        <optgroup mandatory="True" fields="any">
+            <option name="enable_to_user_type" type="string" action="extend">Enable the entitlement type to be used to entitle a given type of users</option>
+            <option name="disable_to_user_type" type="string" action="extend">Disable the entitlement type to be used to entitle a given type of users</option>
+            <option name="enable_to_grn" type="flag" conflicts="disable_to_grn">Enable the entitlement type to be used to entitle GRNs</option>
+            <option name="disable_to_grn" type="flag" conflicts="enable_to_grn">Disable the entitlement type to be used to entitle GRNs</option>
+            <option name="comments" type="string">Comments</option>
+        </optgroup>
+        <optgroup>
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">Human readable description of why the operation was performed</option>
+        </optgroup>
+        <transport method="put" path="entitlement/type/%(type)s"/>
+    </command>
+
     <command name="map_grn">
         Map a given GRN to a host or a personality. The affected host(s) must be
         recompiled for the changes to take effect.
