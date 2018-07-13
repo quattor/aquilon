@@ -215,7 +215,30 @@ class ChangeManagement(object):
         if obj.requires_change_manager:
             self.enforce_validation = True
 
-    def validate_prod_personality(self, personality_stage):
+    def validate_prod_personality(self, personality):
+        session = object_session(personality)
+        if personality.is_cluster:
+            q = session.query(Cluster)
+            q = q.filter(Cluster.personality_stage.has(
+                PersonalityStage.personality == personality))
+            q = q.join(ClusterLifecycle)
+        else:
+            q = session.query(Host)
+            q = q.filter(Host.personality_stage.has(
+                PersonalityStage.personality == personality))
+            q = q.join(HostLifecycle)
+        q = q.options(contains_eager('status'))
+        q = q.join(PersonalityStage, Personality, HostEnvironment)
+        q = q.options(contains_eager('personality_stage.personality.host_environment'))
+
+        if isinstance(q.first(), Cluster):
+            for cluster in q.all():
+                self.validate_cluster(cluster)
+        else:
+            for host in q.all():
+                self.validate_host(host)
+
+    def validate_prod_personality_stage(self, personality_stage):
         session = object_session(personality_stage)
         if personality_stage.personality.is_cluster:
             q = session.query(Cluster)
@@ -639,7 +662,8 @@ ChangeManagement.handlers[StorageCluster] = ChangeManagement.validate_cluster
 ChangeManagement.handlers[EsxCluster] = ChangeManagement.validate_cluster
 ChangeManagement.handlers[HostClusterMember] = ChangeManagement.validate_cluster
 ChangeManagement.handlers[MetaCluster] = ChangeManagement.validate_cluster
-ChangeManagement.handlers[PersonalityStage] = ChangeManagement.validate_prod_personality
+ChangeManagement.handlers[Personality] = ChangeManagement.validate_prod_personality
+ChangeManagement.handlers[PersonalityStage] = ChangeManagement.validate_prod_personality_stage
 ChangeManagement.handlers[InterfaceFeature] = ChangeManagement.validate_prod_feature
 ChangeManagement.handlers[HardwareFeature] = ChangeManagement.validate_prod_feature
 ChangeManagement.handlers[HostFeature] = ChangeManagement.validate_prod_feature
