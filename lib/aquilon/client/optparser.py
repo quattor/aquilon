@@ -355,14 +355,20 @@ class OptGroup(Element):
             conflicts[conflict] = self.name
         return conflicts
 
-    def getAllRequires(self, found):
+    def getAllRequires(self, found, inherit=None):
         requires = {}
-        for o in self.options:
-            r = o.getAllRequires(found)
-            requires.update(r)
 
         if self.requires:
             requires[self.name] = self.requires
+            if inherit:
+                inherit = set(inherit).union(set(self.requires))
+            else:
+                inherit = set(self.requires)
+
+        for o in self.options:
+            r = o.getAllRequires(found, inherit=inherit)
+            requires.update(r)
+
         return requires
 
     def shortHelp(self):
@@ -509,10 +515,13 @@ class Option(Element):
                 conflicts[conflict] = self.name
         return conflicts
 
-    def getAllRequires(self, found):
+    def getAllRequires(self, found, inherit=None):
         requires = {}
-        if self.name in found and self.requires:
-            requires[self.name] = self.requires
+        if self.name in found and (inherit or self.requires):
+            r = set(self.requires)
+            if inherit:
+                r.update(set(inherit))
+            requires[self.name] = sorted(r)
         return requires
 
     def shortHelp(self):
