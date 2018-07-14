@@ -68,15 +68,10 @@ def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
 
     # The broker has no control over the extension used, so we check for
     # everything panc accepts
-    for ext in ('pan', 'tpl'):
-        for feature_dir in feature_template_dirs:
+    for feature_dir in feature_template_dirs:
+        for ext in ('pan', 'tpl'):
             if os.path.exists("{}/config.{}" .format(feature_dir, ext)):
                 return
-
-        # Legacy path for hardware features
-        if os.path.exists("%s/%s/%s.%s" % (basedir, dbarchetype.name,
-                                           dbfeature.cfg_path, ext)):
-            return
 
     raise ArgumentError("{0} does not have templates present in {1:l} "
                         "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
