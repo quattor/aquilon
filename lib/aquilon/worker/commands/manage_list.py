@@ -181,7 +181,7 @@ class CommandManageList(BrokerCommand):
 
                 for dbarch, featureset in features.items():
                     for dbfeature in featureset:
-                        check_feature_template(self.config, dbarch, dbfeature,
+                        check_feature_template(self.config, logger, dbarch, dbfeature,
                                                dbbranch)
 
         for dbobj in objects:

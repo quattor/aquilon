@@ -350,6 +350,9 @@ gzip_output = false
 transparent_gzip = true
 template_extension = .tpl
 object_declarations_template = false
+# When true, only display a warning if a feature template doesn't
+# exist in a domain Git repository
+relaxed_feature_template_check = False
 
 [tool_timeout]
 # If set to True, timeout will be set to 'default_value' for any tools run via subprocess

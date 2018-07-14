@@ -27,7 +27,6 @@ from aquilon.aqdb.model import (FeatureLink, Personality, PersonalityStage,
 from aquilon.worker.templates import PlenaryHost, PlenaryPersonality
 from aquilon.worker.templates.domain import template_branch_basedir
 
-
 def add_link(session, logger, dbfeature, params):
     FeatureLink.get_unique(session, feature=dbfeature, preclude=True,
                            **params)
@@ -59,7 +58,7 @@ def add_link(session, logger, dbfeature, params):
     dbfeature.links.append(FeatureLink(**params))
 
 
-def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
+def check_feature_template(config, logger, dbarchetype, dbfeature, dbdomain):
     basedir = template_branch_basedir(config, dbdomain)
     # Features can be defined either in the archetype directory or as
     # features shared by all the archetypes if they are defined in basedir
@@ -73,8 +72,12 @@ def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
             if os.path.exists("{}/config.{}" .format(feature_dir, ext)):
                 return
 
-    raise ArgumentError("{0} does not have templates present in {1:l} "
-                        "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
+    if config.getboolean("panc", "relaxed_feature_template_check"):
+        logger.client_info("WARNING: {0} templates not present in {1:l} for {2:l} "
+                           "(assumed to be present in plenary templates).".format(dbfeature, dbdomain, dbarchetype))
+    else:
+        raise ArgumentError("{0} does not have templates present in {1:l} "
+                            "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
 
 
 def get_affected_plenaries(session, dbfeature, plenaries,

@@ -84,7 +84,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
         pre, post = host_features(dbstage)
         hw_features = hardware_features(dbstage, dbhw.model)
         for dbfeature in pre | post | hw_features:
-            check_feature_template(config, dbarchetype, dbfeature, dbbranch)
+            check_feature_template(config, logger, dbarchetype, dbfeature, dbbranch)
 
     if not osname:
         if config.has_option(section, "default_osname"):
