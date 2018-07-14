@@ -63,6 +63,9 @@ class CommandPXESwitchList(BrokerCommand):
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log" % logdir)
+        # If installfe_cdburl option is defined, pass it to aii-installfe/shellfe
+        if self.config.has_value("broker", "installfe_cdburl"):
+            args.extend(['--cdburl', self.config.get("broker", "installfe_cdburl")])
 
         dbservice = Service.get_unique(session, "bootserver", compel=True)
         dbhosts = hostlist_to_hosts(session, list)
