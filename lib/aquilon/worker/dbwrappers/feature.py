@@ -61,13 +61,17 @@ def add_link(session, logger, dbfeature, params):
 
 def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
     basedir = template_branch_basedir(config, dbdomain)
+    # Features can be defined either in the archetype directory or as
+    # features shared by all the archetypes if they are defined in basedir
+    feature_template_dirs = ['{}/{}/{}'.format(basedir, dbarchetype.name, dbfeature.cfg_path),
+                             '{}/{}'.format(basedir, dbfeature.cfg_path)]
 
     # The broker has no control over the extension used, so we check for
     # everything panc accepts
     for ext in ('pan', 'tpl'):
-        if os.path.exists("%s/%s/%s/config.%s" % (basedir, dbarchetype.name,
-                                                  dbfeature.cfg_path, ext)):
-            return
+        for feature_dir in feature_template_dirs:
+            if os.path.exists("{}/config.{}" .format(feature_dir, ext)):
+                return
 
         # Legacy path for hardware features
         if os.path.exists("%s/%s/%s.%s" % (basedir, dbarchetype.name,
