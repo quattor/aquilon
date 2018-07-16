@@ -1,0 +1,6 @@
+ALTER TABLE userinfo DROP CONSTRAINT userinfo_user_type_fk;
+ALTER TABLE userinfo DROP COLUMN type_id;
+
+DROP TABLE user_type;
+DROP SEQUENCE user_type_id_seq;
+

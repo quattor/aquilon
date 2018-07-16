@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016,2017  Contributor
+# Copyright (C) 2014-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,11 @@ from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.util import KeyedTuple
 
 from aquilon.exceptions_ import ArgumentError, PartialError
-from aquilon.aqdb.model import User, Personality
+from aquilon.aqdb.model import (
+    Personality,
+    User,
+    UserType,
+)
 from aquilon.worker.templates import PlenaryPersonality
 from aquilon.utils import chunk
 
@@ -32,6 +36,7 @@ class UserSync(object):
 
     def __init__(self, config, session, logger, plenaries, incremental=False,
                  ignore_delete_limit=False):
+        self.config = config
         self.session = session
         self.logger = logger
         self.plenaries = plenaries
@@ -52,8 +57,22 @@ class UserSync(object):
         else:
             self.limit = config.getint("broker", "user_delete_limit")
 
+        self._default_user_type = None
+
+    @property
+    def default_user_type(self):
+        if not self._default_user_type:
+            self._default_user_type = UserType.get_unique(
+                self.session,
+                name=get_default_user_type(self.config),
+                compel=True)
+        return self._default_user_type
+
     def commit_if_needed(self, msg):
         if self.incremental:
+            # Clear the default user type object as a commit attempt
+            # invalidates the database object
+            self._default_user_type = None
             try:
                 self.session.commit()
                 self.logger.debug(msg)
@@ -78,11 +97,13 @@ class UserSync(object):
 
     def add_new(self, details):
         dbuser = User(name=details.name, uid=details.uid, gid=details.gid,
-                      full_name=details.full_name, home_dir=details.home_dir)
+                      full_name=details.full_name, home_dir=details.home_dir,
+                      type=self.default_user_type)
         self.session.add(dbuser)
 
-        added = self.commit_if_needed("Adding user %s (uid: %s, gid: %s)" %
-                                      (details.name, details.uid, details.gid))
+        added = self.commit_if_needed("Adding %s user %s (uid: %s, gid: %s)" %
+                                      (dbuser.type.name, details.name,
+                                       details.uid, details.gid))
         self.added += added
         return dbuser
 
@@ -101,8 +122,9 @@ class UserSync(object):
                 setattr(dbuser, attr, new)
 
         if update_msg:
-            updated = self.commit_if_needed("Updating user %s (%s)" %
-                                            (dbuser.name, "; ".join(update_msg)))
+            updated = self.commit_if_needed(
+                "Updating %s user %s (%s)" % (dbuser.type.name, dbuser.name,
+                                              "; ".join(update_msg)))
             self.updated += updated
 
     def delete_gone(self, userlist):
@@ -161,58 +183,63 @@ class UserSync(object):
             by_name[dbuser.name] = dbuser
             by_uid[dbuser.uid] = dbuser
 
-        for line in open(self.fname):
-            try:
-                user_name, rest = line.split('\t')
-            except ValueError:
-                self.logger.info("Failed to unpack, skipping line: %s", line)
-                continue
-
-            if user_name.startswith("YP_"):
-                continue
-
-            fields = rest.split(':')
-            if len(fields) != len(self.labels):
-                self.logger.info("Unexpected number of fields, "
-                                 "skipping line: %s", line)
-                continue
-
-            try:
-                fields[2] = int(fields[2])
-            except ValueError:
-                self.logger.info("UID is not a number, skipping line: %s", line)
-                continue
-
-            try:
-                fields[3] = int(fields[3])
-            except ValueError:
-                self.logger.info("GID is not a number, skipping line: %s", line)
-                continue
-
-            details = KeyedTuple(fields, labels=self.labels)
-
-            if details.name not in by_name:
-                if details.uid in by_uid:
-                    self.report_duplicate_uid(details, by_uid[details.uid])
+        with open(self.fname, 'r') as f:
+            for line in f:
+                try:
+                    user_name, rest = line.split('\t')
+                except ValueError:
+                    self.logger.info("Failed to unpack, skipping line: %s",
+                                     line)
                     continue
 
-                dbuser = self.add_new(details)
-                if dbuser:
-                    by_uid[dbuser.uid] = dbuser
-            else:
-                dbuser = by_name[details.name]
+                if user_name.startswith("YP_"):
+                    continue
 
-                if details.uid != dbuser.uid:
+                fields = rest.split(':')
+                if len(fields) != len(self.labels):
+                    self.logger.info("Unexpected number of fields, "
+                                     "skipping line: %s", line)
+                    continue
+
+                try:
+                    fields[2] = int(fields[2])
+                except ValueError:
+                    self.logger.info("UID is not a number, skipping line: %s",
+                                     line)
+                    continue
+
+                try:
+                    fields[3] = int(fields[3])
+                except ValueError:
+                    self.logger.info("GID is not a number, skipping line: %s",
+                                     line)
+                    continue
+
+                details = KeyedTuple(fields, labels=self.labels)
+
+                if details.name not in by_name:
                     if details.uid in by_uid:
                         self.report_duplicate_uid(details, by_uid[details.uid])
                         continue
 
-                    del by_uid[dbuser.uid]
-                    by_uid[details.uid] = dbuser
+                    dbuser = self.add_new(details)
+                    if dbuser:
+                        by_uid[dbuser.uid] = dbuser
+                else:
+                    dbuser = by_name[details.name]
 
-                del by_name[dbuser.name]
+                    if details.uid != dbuser.uid:
+                        if details.uid in by_uid:
+                            self.report_duplicate_uid(
+                                details, by_uid[details.uid])
+                            continue
 
-                self.check_update_existing(dbuser, details)
+                        del by_uid[dbuser.uid]
+                        by_uid[details.uid] = dbuser
+
+                    del by_name[dbuser.name]
+
+                    self.check_update_existing(dbuser, details)
 
         self.delete_gone(by_name.values())
 
@@ -227,3 +254,17 @@ class UserSync(object):
                                     (self.added, self.deleted, self.updated))
 
         return
+
+
+def get_default_user_type(config):
+    user_type = None
+
+    default_user_type_section = ['broker', 'default_user_type']
+    if config.has_value(*default_user_type_section):
+        user_type = config.get(*default_user_type_section)
+
+    if not user_type:
+        raise ArgumentError("Cannot determine the type of the user.  "
+                            "Please specify --type.")
+
+    return user_type

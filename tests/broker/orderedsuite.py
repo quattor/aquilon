@@ -95,6 +95,7 @@ from .test_add_share import TestAddShare
 from .test_add_srv_record import TestAddSrvRecord
 from .test_add_static_route import TestAddStaticRoute
 from .test_add_user import TestAddUser
+from .test_add_user_type import TestAddUserType
 from .test_add_vendor import TestAddVendor
 from .test_add_virtual_hardware import TestAddVirtualHardware
 from .test_add_virtual_switch import TestAddVirtualSwitch
@@ -202,6 +203,7 @@ from .test_del_share import TestDelShare
 from .test_del_srv_record import TestDelSrvRecord
 from .test_del_static_route import TestDelStaticRoute
 from .test_del_user import TestDelUser
+from .test_del_user_type import TestDelUserType
 from .test_del_vendor import TestDelVendor
 from .test_del_virtual_hardware import TestDelVirtualHardware
 from .test_del_virtual_switch import TestDelVirtualSwitch
@@ -346,7 +348,7 @@ class BrokerTestSuite(unittest.TestSuite):
                     TestPing, TestStatus]
     test_list = [TestAddRole, TestPermission,
                  TestAddDnsDomain, TestAddDnsEnvironment,
-                 TestAddUser, TestShowPermission,
+                 TestAddUserType, TestAddUser, TestShowPermission,
                  TestAddSandbox, TestAddDomain, TestUpdateBranch,
                  TestCMLogger,
                  TestGet, TestPublishSandbox, TestDeployDomain,
@@ -516,7 +518,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestDelPersonality, TestDelOS, TestDelArchetype,
                  TestDelService,
                  TestDelDomain, TestDelSandbox,
-                 TestDelUser,
+                 TestDelUser, TestDelUserType,
                  TestDelDnsEnvironment, TestDelDnsDomain, TestDelRole,
                  TestClientFailure, TestAudit, TestShowActiveCommands,
                  TestDocumentation, TestBrokerStop]

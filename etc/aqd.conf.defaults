@@ -122,6 +122,7 @@ database_section = database_sqlite
 
 [broker]
 default_organization = ms
+default_user_type = human
 servername = %(hostname)s
 umask = 0022
 kncport = 6900
