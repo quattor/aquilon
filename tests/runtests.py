@@ -77,6 +77,9 @@ parser.add_argument('-q', '--quiet', dest='verbose', action='store_const',
 parser.add_argument('-c', '--config', dest='config',
                     default=default_configfile,
                     help='supply an alternate config file')
+parser.add_argument('--no-interactive', dest='interactive',
+                    action='store_false', default=True,
+                    help='automatically send yes to queries')
 parser.add_argument('--coverage', action='store_true',
                     help='generate code coverage metrics for the broker in '
                          'logs/coverage')
@@ -101,11 +104,12 @@ if not os.path.exists(opts.config):
 
 if os.environ.get("AQDCONF") and \
    os.path.realpath(opts.config) != os.path.realpath(os.environ["AQDCONF"]):
-    force_yes("""Will ignore AQDCONF variable value:
-%s
-and use
-%s
-instead.""" % (os.environ["AQDCONF"], opts.config))
+    if opts.interactive:
+        force_yes("""Will ignore AQDCONF variable value:
+    %s
+    and use
+    %s
+    instead.""" % (os.environ["AQDCONF"], opts.config))
 
 config = Config(configfile=opts.config)
 if not config.has_section("unittest"):
@@ -181,7 +185,8 @@ with open(makefile) as f:
 # with the current running python_version.
 if prod_python and sys.executable.find(prod_python) < 0:
     print("\n")
-    force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
+    if opts.interactive:
+        force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
 
 # Execute this every run... the man page says that it should do the right
 # thing in terms of not contacting the kdc very often. Don't abort the tests if
@@ -209,8 +214,9 @@ if not opts.start:
 existing_dirs = [d for d in dirs if os.path.exists(d)]
 
 if existing_dirs:
-    force_yes("About to remove the following directories:\n%s\n" %
-              "\n\t".join(existing_dirs))
+    if opts.interactive:
+        force_yes("About to remove the following directories:\n%s\n" %
+                  "\n\t".join(existing_dirs))
 
 for dirname in existing_dirs:
     if os.path.exists(dirname):

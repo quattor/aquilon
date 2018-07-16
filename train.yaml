@@ -1,0 +1,22 @@
+language: shell-script
+
+train_version: 1.0
+
+tools:
+   - msde/git/2.9.5
+   - python/core/2.7.9-64
+   - msde/msdlbuild/prod
+
+test_types:
+    - test_type:
+         name: all
+         test: ./tests/runtests.py --config=./tests/unittest.conf --no-interactive | tee ./tests/aqdtests.log
+    - test_type:
+         name: failfast
+         test: ./tests/runtests.py --config=./tests/unittest.conf --failfast --no-interactive | tee ./tests/aqdtests.log
+    - test_type:
+         name: restart
+         test: ./tests/restarttests.sh
+    - test_type:
+         name: jenkins
+         test: ./tests/jenkinstest.sh
