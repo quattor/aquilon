@@ -112,7 +112,7 @@ def main(*args, **kw):
 
         env = os.environ.copy()
         env['AQDCONF'] = config.baseconfig
-        rc = subprocess.call([os.path.join(BINDIR, 'set_role.py'),
+        rc = subprocess.call([os.path.join(os.path.dirname(os.path.dirname(BINDIR)), 'sbin', 'aqdb_set_role.py'),
                               '--role', 'aqd_admin'],
                              env=env, stdout=1, stderr=2)
         if rc != 0:

@@ -861,7 +861,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def promote_current_user(self):
         srcdir = self.config.get("broker", "srcdir")
-        set_role = os.path.join(srcdir, "tests", "aqdb", "set_role.py")
+        set_role = os.path.join(srcdir, "sbin", "aqdb_set_role.py")
         env = os.environ.copy()
         env['AQDCONF'] = self.config.baseconfig
         p = Popen([set_role, '--role', 'aqd_admin'],
