@@ -29,7 +29,7 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
 from aquilon.worker.templates import (PlenaryHostData,
-                                      PlenaryServiceInstanceToplevel)
+                                      PlenaryServiceInstanceData)
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
@@ -325,7 +325,7 @@ class CommandUpdateMachine(BrokerCommand):
             if dbmachine.host:
                 for srv in dbmachine.host.services_provided:
                     si = srv.service_instance
-                    plenaries.add(si, cls=PlenaryServiceInstanceToplevel)
+                    plenaries.add(si, cls=PlenaryServiceInstanceData)
             update_primary_ip(session, logger, dbmachine, ip)
 
         if dbmachine.location != old_location and dbmachine.host:

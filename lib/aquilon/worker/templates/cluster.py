@@ -25,6 +25,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryResource,
                                       PlenaryServiceInstanceClientDefault,
+                                      PlenaryServiceInstanceData,
                                       PlenaryServiceInstanceServerDefault,
                                       PlenaryPersonalityBase, add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
@@ -188,6 +189,14 @@ class PlenaryClusterObject(ObjectPlenary):
         return CompileKey.merge(keylist)
 
     def body(self, lines):
+        # Collect configuration of used services
+        services = []
+        services_data = {}
+        for si in self.dbobj.services_used:
+            services.append(PlenaryServiceInstanceClientDefault.template_name(si))
+            services_data[si.service.name] = PlenaryServiceInstanceData.template_name(si)
+        services.sort()
+
         # Allow settings such as loadpath to be modified by the archetype before anything else happens
         # Included only if object_declarations_template option is true
         # It the option is true, the template MUST exist
@@ -203,6 +212,12 @@ class PlenaryClusterObject(ObjectPlenary):
         pan_assign(lines, "/",
                    StructureTemplate(path,
                                      {"metadata": PanValue("/metadata")}))
+
+        # Include service data
+        for service_name in sorted(services_data.keys()):
+            pan_assign(lines, "/system/services/%s" % service_name,
+                       StructureTemplate(services_data[service_name]))
+
         pan_include(lines, "archetype/base")
 
         for servinst in sorted(self.dbobj.services_used,

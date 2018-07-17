@@ -26,11 +26,11 @@ from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.network import PlenaryNetwork
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.templates.service import (PlenaryService,
-                                              PlenaryServiceToplevel,
+                                              PlenaryServiceData,
                                               PlenaryServiceClientDefault,
                                               PlenaryServiceServerDefault,
                                               PlenaryServiceInstance,
-                                              PlenaryServiceInstanceToplevel,
+                                              PlenaryServiceInstanceData,
                                               PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServer,
                                               PlenaryServiceInstanceServerDefault)

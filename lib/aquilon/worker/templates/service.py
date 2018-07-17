@@ -37,8 +37,8 @@ class PlenaryService(PlenaryCollection):
         super(PlenaryService, self).__init__(logger=logger,
                                              allow_incomplete=allow_incomplete)
 
-        self.append(PlenaryServiceToplevel.get_plenary(dbservice,
-                                                       allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceData.get_plenary(dbservice,
+                                                   allow_incomplete=allow_incomplete))
         self.append(PlenaryServiceClientDefault.get_plenary(dbservice,
                                                             allow_incomplete=allow_incomplete))
         self.append(PlenaryServiceServerDefault.get_plenary(dbservice,
@@ -48,7 +48,7 @@ class PlenaryService(PlenaryCollection):
 Plenary.handlers[Service] = PlenaryService
 
 
-class PlenaryServiceToplevel(StructurePlenary):
+class PlenaryServiceData(StructurePlenary):
     """
     The top-level service template does nothing. It is really
     a placeholder which can be overridden by the library
@@ -128,8 +128,8 @@ class PlenaryServiceInstance(SIHelperMixin, PlenaryCollection):
                                                      allow_incomplete=allow_incomplete)
         self.dbobj = dbinstance
 
-        self.append(PlenaryServiceInstanceToplevel.get_plenary(dbinstance,
-                                                               allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceInstanceData.get_plenary(dbinstance,
+                                                           allow_incomplete=allow_incomplete))
         self.append(PlenaryServiceInstanceClientDefault.get_plenary(dbinstance,
                                                                     allow_incomplete=allow_incomplete))
         self.append(PlenaryServiceInstanceServer.get_plenary(dbinstance,
@@ -140,7 +140,7 @@ class PlenaryServiceInstance(SIHelperMixin, PlenaryCollection):
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 
 
-class PlenaryServiceInstanceToplevel(SIHelperMixin, StructurePlenary):
+class PlenaryServiceInstanceData(SIHelperMixin, StructurePlenary):
     """
     This structure template provides information for the template
     specific to the service instance and for use by the client.
@@ -159,7 +159,7 @@ class PlenaryServiceInstanceToplevel(SIHelperMixin, StructurePlenary):
 
     def body(self, lines):
         pan_include(lines,
-                    PlenaryServiceToplevel.template_name(self.dbobj.service))
+                    PlenaryServiceData.template_name(self.dbobj.service))
         lines.append("")
         pan_assign(lines, "instance", self.dbobj.name)
 
@@ -201,8 +201,9 @@ class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):
     included from within the host.tpl. This may
     be overridden within the template library, but this plenary
     should typically be sufficient without override.
-    This template defines configuration for clients only, and
-    is specific to the instance.
+    This template defines configuration specific to the instance
+    for clients only but the instance data has to be loaded before
+    (the broker does it earlier in host object template).
     """
 
     prefix = "service"
@@ -213,10 +214,6 @@ class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):
                                            dbinstance.name)
 
     def body(self, lines):
-        path = PlenaryServiceInstanceToplevel.template_name(self.dbobj)
-        pan_assign(lines, "/system/services/%s" % self.dbobj.service,
-                   StructureTemplate(path))
-
         path = PlenaryServiceClientDefault.template_name(self.dbobj.service)
         pan_include(lines, path)
 
