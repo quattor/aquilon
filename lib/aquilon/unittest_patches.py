@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 import re
 import socket
@@ -50,26 +51,30 @@ config = Config(configfile=configpath)
 def fake_gethostbyname(hostname):
     try:
         host_ip = None
-
         # for templates/index.py
         if hostname == config.get("broker", "bind_address"):
             host_ip = gethostbyname_orig(hostname)
         else:
             # faking hostip
-            fake_hosts = config.get('unittest', 'fake_hosts_location')
-            hostfilename = fake_hosts + hostname
+            fake_hosts_file = config.get('unittest', 'fake_hosts_location')
+            fake_hosts = {}
+            with open(fake_hosts_file, 'r') as f:
+                fake_hosts = json.load(f)
 
+            dsdb_host = fake_hosts.get(hostname, [])
             # strip domain part
-            if not os.path.exists(hostfilename) and hostname.find(".") > -1:
-                hostfilename = fake_hosts + hostname[:hostname.find(".")]
+            if not dsdb_host and hostname.find(".") > -1:
+                dsdb_host = fake_hosts.get(hostname[:hostname.find(".")])
 
-            hostfile = open(hostfilename).readlines()
-            primary_name = hostfile[0].split()[2]
-            ip_re = re.compile(r'^\s*([a-z0-9]+)\s+[a-z0-9]+\s+([0-9\.]+)')
-            for line in hostfile:
-                m = ip_re.search(line)
-                if m and primary_name == m.group(1):
-                    host_ip = m.group(2)
+            if len(dsdb_host) == 1:
+                dsdb_host = dsdb_host[0]
+            else:
+                raise socket.gaierror(-2, "Name or service not known")
+
+            primary_name = dsdb_host["primary_hostname"]
+            for interf in dsdb_host["interfaces"]:
+                if interf["interface_hostname"] == primary_name and interf["IP_address"]:
+                    host_ip = interf["IP_address"]
                     break
 
         if not host_ip:

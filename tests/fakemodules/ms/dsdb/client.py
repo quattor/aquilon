@@ -16,7 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
+
+# Keeping DSDB module isolated in its dir and not loading config here
+DSDB_HOST_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dsdb_host_data.json')
 
 
 class DSDB(object):
@@ -32,6 +36,9 @@ class DSDB(object):
 
     def show_rack(self, rack_name):
         return DSDBRackData(rack_name)
+
+    def show_host(self, host_name):
+        return DSDBHostData(host_name)
 
     def add_rack(self, id, building, floor, comp_room, row, column, comments=None):
         rack_name = building+id
@@ -70,3 +77,22 @@ class DSDBRackData(object):
 
     def results(self):
         return self.dsdb_host_data.get(self.rack_name, [])
+
+
+class DSDBHostData(object):
+    """
+    DSDB Host Data Description
+    used by DSDB Interface class
+    if no DSDB module loaded
+    """
+
+    dsdb_host_data = {}
+    with open(DSDB_HOST_FILE, 'r') as f:
+        dsdb_host_data = json.load(f)
+    side_effect = []
+
+    def __init__(self, host_name):
+        self.host_name = host_name
+
+    def results(self):
+        return self.dsdb_host_data.get(self.host_name, [])

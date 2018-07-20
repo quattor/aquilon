@@ -87,7 +87,7 @@ template_king_host = localhost
 template_base = git://%(template_king_host)s/quattor/template-king
 
 template_alternate_prod =
-fake_hosts_location = %(srcdir)s/tests/fakebin/dsdb.d/show_host_-host_name_
+fake_hosts_location = %(srcdir)s/tests/fakemodules/ms/dsdb/dsdb_host_data.json
 datadir = %(srcdir)s/tests/broker/data
 
 # Alternative tool locations outside MS

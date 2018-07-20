@@ -992,19 +992,17 @@ class DSDBRunner(object):
     def show_rack(self, rackname):
         rack_data = self.dsdbclient.show_rack(rack_name=rackname).results()
         fields = {}
+        if len(rack_data) > 1:
+            raise ValueError("Multiple racks with the same name {} "
+                             "prefix found.".format(rackname))
         if rack_data:
             fields = {"rack_row": rack_data[0]["row"],
                       "rack_col": rack_data[0]["column"]}
 
         if not fields or not fields["rack_row"] or not fields["rack_col"]:
-            raise ValueError("Rack %s is not found in DSDB or missing "
-                             "row and/or col data")
+            raise ValueError("Rack {} is not found in DSDB or missing "
+                             "row and/or col data.".format(rackname))
         return fields
-
-    primary_re = re.compile(r'^\s*Primary Name:\s*\b([-\w]+)\b$', re.M)
-    node_re = re.compile(r'^\s*Node:\s*\b([-\w]+)\b$', re.M)
-    dns_re = re.compile(r'^\s*DNS Domain:\s*\b([-\w\.]+)\b$', re.M)
-    state_re = re.compile(r'^\s*State:\s*\b(\d+)\b$', re.M)
 
     def show_host(self, hostname):
         (short, dot, dns_domain) = hostname.partition(".")
@@ -1022,20 +1020,18 @@ class DSDBRunner(object):
             fields["fqdn"] = hostname
             fields["dsdb_lookup"] = short
 
-        out = run_command(["dsdb", "show_host",
-                           "-host_name", fields["dsdb_lookup"]],
-                          env=self.getenv())
-        primary = self.primary_re.search(out)
-        node = self.node_re.search(out)
-        dns = self.dns_re.search(out)
-        state = self.state_re.search(out)
-        fields["primary_name"] = primary and primary.group(1) or None
-        fields["node"] = node and node.group(1) or None
-        fields["dns"] = dns and dns.group(1) or None
-        if state:
-            fields["state"] = int(state.group(1))
+        host_data = self.dsdbclient.show_host(host_name=fields["dsdb_lookup"]).results()
+        if len(host_data) > 1:
+            raise ValueError("Multiple hosts with same name {} "
+                             "prefix found in DSDB".format(fields["dsdb_lookup"]))
+        if host_data:
+            fields["primary_name"] = host_data[0].get("primary_hostname")
+            fields["node"] = host_data[0].get("nodename")
+            fields["dns"] = host_data[0].get("DNS_domain")
+            fields["state"] = host_data[0].get("state")
         else:
-            fields["state"] = None
+            raise ValueError("Host {} is not found in DSDB or "
+                             "multiple hosts with same name prefix found in DSDB".format(fields["dsdb_lookup"]))
         return fields
 
     def add_alias(self, alias, target, comments):

@@ -1,0 +1,112 @@
+{
+  "nyaqd1": [
+    {
+      "nodename": "ny00l4as01",
+      "interfaces": [
+        {
+          "status": "static",
+          "interface_device": "le0",
+          "IP_address": "4.2.7.249",
+          "interface_hostname": "ny00l4as01",
+          "dhcp_template_name": ""
+        }
+      ],
+      "DNS_domain": "ms.com",
+      "state": 0,
+      "comments": "First production AQD Broker in NY, VCS Service group for hn/np732c1n14",
+      "primary_hostname": "ny00l4as01",
+      "aliases": [
+        "nyaqd1"
+      ]
+    }
+  ],
+  "oy604c2n6": [
+    {
+      "nodename": "oy604c2n6",
+      "interfaces": [
+        {
+          "status": "manual",
+          "interface_device": "e0",
+          "IP_address": "4.2.26.170",
+          "interface_hostname": "oy604c2n6",
+          "dhcp_template_name": "lx"
+        },
+        {
+          "status": "static",
+          "interface_device": "e1",
+          "IP_address": "4.2.27.170",
+          "interface_hostname": "oy604c2n6-e1",
+          "dhcp_template_name": ""
+        },
+        {
+          "status": "static",
+          "interface_device": "vip",
+          "IP_address": "4.2.28.178",
+          "interface_hostname": "oy604c2n6-vip",
+          "dhcp_template_name": ""
+        }
+      ],
+      "DNS_domain": "ms.com",
+      "state": 0,
+      "comments": "UNIXOPS-LN blade server prod2",
+      "primary_hostname": "oy604c2n6-vip",
+      "aliases": [
+        "oyias1616",
+        "oyidb1622"
+      ]
+    }
+  ],
+  "oy605c2n6": [
+    {}
+  ],
+  "test-aurora-default-os": [
+    {
+      "nodename": "",
+      "interfaces": [],
+      "DNS_domain": "ms.com",
+      "comments": "",
+      "primary_hostname": "test_aurora_default_os",
+      "aliases": []
+    }
+  ],
+  "test-aurora-default-os-v0": [
+    {}
+  ],
+  "pissp1": [
+    {
+      "nodename": "",
+      "interfaces": [
+        {
+          "status": "static",
+          "interface_device": "ge0",
+          "IP_address": "4.2.4.99",
+          "interface_hostname": "pissp1",
+          "dhcp_template_name": ""
+        }
+      ],
+      "DNS_domain": "ms.com",
+      "state": 0,
+      "comments": "perfdata e4500 server prod0",
+      "primary_hostname": "pissp1",
+      "aliases": []
+    }
+  ],
+  "oy1c1%": [
+    {
+      "nodename": "",
+      "interfaces": [],
+      "DNS_domain": "ms.com",
+      "comments": "",
+      "primary_hostname": "oy1c1n1",
+      "aliases": []
+    },
+    {
+      "nodename": "",
+      "interfaces": [],
+      "DNS_domain": "ms.com",
+      "comments": "",
+      "primary_hostname": "oy1c1n2",
+      "aliases": []
+    }
+  ]
+}

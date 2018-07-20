@@ -356,7 +356,7 @@ class CommandUpdateMachine(BrokerCommand):
             if dbmachine.host and dbmachine.host.archetype.name == 'aurora':
                 try:
                     dsdb_runner.show_host(dbmachine.fqdn)
-                except ProcessException as e:
+                except ValueError as e:
                     raise ArgumentError("Could not find host in DSDB: "
                                         "%s" % e)
             else:

@@ -35,11 +35,17 @@ class TestAddAuroraHost(TestBrokerCommand):
         cls.linux_version_prev = cls.config.get("unittest", "linux_version_prev")
 
     def test_100_add_aurora_with_node(self):
-        self.dsdb_expect("show_host -host_name %s" % self.aurora_with_node)
         self.noouttest(["add", "aurora", "host",
                         "--osname", "linux", "--osversion", self.linux_version_prev,
                         "--hostname", self.aurora_with_node, "--buildstatus", "build"])
-        self.dsdb_verify()
+
+    def test_105_add_aurora_host_fail_multiple(self):
+        command = ["add", "aurora", "host",
+                        "--osname", "linux", "--osversion", self.linux_version_prev,
+                        "--hostname", "oy1c1%", "--buildstatus", "build"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Multiple hosts with same name oy1c1% "
+                              "prefix found in DSDB", command)
 
     def test_110_verify_add_aurora_with_node(self):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
@@ -87,12 +93,10 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.assertEqual(host.ip, "")
 
     def test_200_add_aurora_without_node(self):
-        self.dsdb_expect("show_host -host_name %s" % self.aurora_without_node)
         command = ["add", "aurora", "host",
-                        "--osname", "linux", "--osversion", self.linux_version_prev,
-                        "--hostname", self.aurora_without_node] + self.valid_just_tcm
+                    "--osname", "linux", "--osversion", self.linux_version_prev,
+                    "--hostname", self.aurora_without_node] + self.valid_just_tcm
         self.noouttest(command)
-        self.dsdb_verify()
 
     def test_210_verify_add_aurora_without_node(self):
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
@@ -117,34 +121,28 @@ class TestAddAuroraHost(TestBrokerCommand):
                          command)
 
     def test_300_dsdb_missing(self):
-        self.dsdb_expect("show_host -host_name not-in-dsdb", fail=True)
         command = ["add", "aurora", "host", "--hostname", "not-in-dsdb",
                    "--osname", "linux", "--osversion", self.linux_version_prev]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
-        self.dsdb_verify()
 
     def test_310_dsdb_rack_missing(self):
-        self.dsdb_expect("show_host -host_name %s" % self.aurora_without_rack)
         command = ["add", "aurora", "host",
                    "--hostname", self.aurora_without_rack,
                    "--osname", "linux", "--osversion", self.linux_version_prev] + self.valid_just_tcm
         out = self.statustest(command)
         self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
-        self.dsdb_verify()
 
     def test_320_verify_dsdb_rack_missing(self):
-        command = "show host --hostname %s.ms.com" % self.aurora_with_node
+        command = "show host --hostname %s.ms.com" % self.aurora_without_rack
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: oy", command)
 
     def test_400_add_nyaqd1(self):
-        self.dsdb_expect("show_host -host_name nyaqd1")
         command = ["add", "aurora", "host", "--hostname", "nyaqd1",
                         "--osname", "linux",
                         "--osversion", self.linux_version_prev] + self.valid_just_tcm
         self.noouttest(command)
-        self.dsdb_verify()
 
     def test_410_verify_add_nyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"

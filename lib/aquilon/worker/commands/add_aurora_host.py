@@ -50,7 +50,7 @@ class CommandAddAuroraHost(CommandAddHost):
         dsdb_runner = DSDBRunner(logger=logger)
         try:
             fields = dsdb_runner.show_host(hostname)
-        except ProcessException as e:
+        except ValueError as e:
             raise ArgumentError("Could not find %s in DSDB: %s" %
                                 (hostname, e))
         fqdn = fields["fqdn"]
@@ -61,7 +61,6 @@ class CommandAddAuroraHost(CommandAddHost):
             machine = fields["primary_name"]
         else:
             machine = dsdb_lookup
-
         # Create a machine
         dbmodel = Model.get_unique(session, name="aurora_model",
                                    vendor="aurora_vendor", compel=True)
