@@ -1,4 +1,4 @@
-language: shell-script
+language: python
 
 train_version: 1.0
 
@@ -6,6 +6,15 @@ tools:
    - msde/git/2.9.5
    - python/core/2.7.9-64
    - msde/msdlbuild/prod
+
+build_types:
+   - build_type:
+      name: release
+      build:
+         - script: msdlbuild clean
+         - script: make clean
+         - script: make install
+         - script: msdlbuild metadata
 
 test_types:
     - test_type:
