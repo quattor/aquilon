@@ -432,6 +432,27 @@ class TestBrokerCommand(unittest.TestCase):
                          (command, err))
         return err
 
+    def deprecatednotimplementederrortest(self, command, **kwargs):
+        (p, out, err) = self.runcommand(command, **kwargs)
+        err_splited = err.splitlines()
+        self.assertEqual(p.returncode, 5,
+                         "Return code for %s was %d instead of %d"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@" %
+                         (command, p.returncode, 5, out, err))
+        self.assertEqual(out, "",
+                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
+                         (command, out))
+        self.assertTrue(
+            "Command {} is deprecated".format(command[0]) in err_splited[0],
+            "'Command {} is deprecated' not in {}".format(command[0],
+                                                          err_splited[0]))
+        self.assertTrue(err_splited[1].startswith("Not Implemented"),
+                        "STDERR 2nd line for %s did not start with "
+                        "Not Implemented:\n@@@\n'%s'\n@@@\n" %
+                        (command, err))
+        return err
+
     # Test for conflicting or invalid aq client options.
     def badoptiontest(self, command, exit_code=2, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
