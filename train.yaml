@@ -1,4 +1,4 @@
-language: shell-script
+language: python
 
 train_version: 1.0
 
@@ -10,10 +10,10 @@ tools:
 test_types:
     - test_type:
          name: all
-         test: ./tests/runtests.py --config=./tests/unittest.conf --no-interactive | tee ./tests/aqdtests.log
+         test: set -o pipefail; ./tests/runtests.py --config=./tests/unittest.conf --no-interactive | tee ./tests/aqdtests.log
     - test_type:
          name: failfast
-         test: ./tests/runtests.py --config=./tests/unittest.conf --failfast --no-interactive | tee ./tests/aqdtests.log
+         test: set -o pipefail; ./tests/runtests.py --config=./tests/unittest.conf --failfast --no-interactive | tee ./tests/aqdtests.log
     - test_type:
          name: restart
          test: ./tests/restarttests.sh

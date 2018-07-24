@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/ms/dist/fsf/PROJ/bash/4.3/bin/bash
 #
 # Copyright (C) 2008,2009,2010,2011,2013,2016,2018  Contributor
 #
@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -o pipefail
 DIR="$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)"
 restart_from=$(grep -oP "(?<='train test -t restart' command. Last test failed: ).*$" $DIR/aqdtests.log)
 if [ -z "$restart_from" ]; then
