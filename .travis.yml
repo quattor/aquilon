@@ -6,7 +6,9 @@ before_script:
   - curl https://raw.githubusercontent.com/jrha/krb5-travis/master/install_knc | bash
   - wget https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip -O /tmp/protoc.zip && cd /tmp && unzip /tmp/protoc.zip && sudo cp bin/protoc /usr/bin/ && sudo chmod ugo+x /usr/bin/protoc
   - cd /tmp && git clone https://github.com/quattor/aquilon-protocols.git && cd aquilon-protocols && git checkout upstream && ./setup.py build && sudo ./setup.py install --install-lib /usr/local/lib/aquilon/protocols/lib/python
-  - cd $TRAVIS_BUILD_DIR/tools/bootstrap_ms && python setup.py install
+  - cd $TRAVIS_BUILD_DIR/tools/bootstrap_ms && python setup.py sdist && pip install dist/*.tar.gz
+  - cd $TRAVIS_BUILD_DIR && cp -R tests/fakemodules/ms/dsdb /home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/ms/; echo $?
+  - ls /home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/ms/
 script:
   - cd $TRAVIS_BUILD_DIR && tests/runtests.py -c tests/unittest.conf.travis --assume_yes
 after_script:
