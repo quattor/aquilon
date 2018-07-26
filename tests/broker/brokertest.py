@@ -723,6 +723,8 @@ class TestBrokerCommand(unittest.TestCase):
             filename = DSDB_EXPECT_SUCCESS_FILE
 
         expected_name = os.path.join(self.dsdb_coverage_dir, filename)
+        print expected_name
+
         with open(expected_name, "a") as fp:
             if isinstance(command, list):
                 fp.write(" ".join(str(cmd) for cmd in command))

@@ -14,13 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+echo "HELLO" >> /tmp/fake_dsdb.log
+
 DATADIR=$(dirname "$0")/dsdb.d
 
 if [ -z "$AQTEST_SCRATCHDIR" ]; then
+    echo "WHOOPS" >> /tmp/fake_dsdb.log
 	exit 0
 fi
 
+echo "AQTEST_SCRATCHDIR=$AQTEST_SCRATCHDIR" >> /tmp/fake_dsdb.log
+
 AQTEST_DSDB_COVERAGE_DIR="$AQTEST_SCRATCHDIR/dsdb_coverage"
+
+echo "AQTEST_DSDB_COVERAGE_DIR=$AQTEST_DSDB_COVERAGE_DIR" >> /tmp/fake_dsdb.log
 
 echo "$*" >> "${AQTEST_DSDB_COVERAGE_DIR}/issued_dsdb_cmds"
 

@@ -12,10 +12,13 @@ before_script:
 script:
   - cd $TRAVIS_BUILD_DIR && tests/runtests.py -c tests/unittest.conf.travis --assume_yes
 after_script:
-  - tail -n 128 /var/tmp/travis/aqtest/quattor/logs/aqd.log
+  - cat /tmp/fake_dsdb.log
+  - cat /var/tmp/travis/aqtest/quattor/logs/aqd.log
   - ls /var/tmp/travis/aqtest/scratch
   - ls /var/tmp/travis/aqtest/scratch/dsdb_coverage
+  - tail -n 128 /var/tmp/travis/aqtest/scratch/dsdb_coverage/expected_dsdb_cmds
   - tail -n 128 /var/tmp/travis/aqtest/scratch/dsdb_coverage/issued_dsdb_cmds
+  - tail -n 128 /var/tmp/travis/aqtest/scratch/dsdb_coverage/failed_dsdb_cmds
 addons:
   hosts:
     - travis.dev
