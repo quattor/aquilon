@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008-2015,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.worker.templates.base import (Plenary, StructurePlenary,
-                                           ObjectPlenary, PlenaryCollection,
-                                           add_location_info)
+from aquilon.worker.templates.base import (
+    add_location_info,
+    ObjectPlenary,
+    Plenary,
+    PlenaryCollection,
+    PlenaryParameterized,
+    StructurePlenary,
+)
 from aquilon.worker.templates.city import PlenaryCity
 from aquilon.worker.templates.personality import (PlenaryPersonality,
                                                   PlenaryPersonalityBase)
@@ -34,6 +39,7 @@ from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServer,
                                               PlenaryServiceInstanceServerDefault)
+from aquilon.worker.templates.grn import PlenaryParameterizedGrn
 from aquilon.worker.templates.metacluster import (PlenaryMetaCluster,
                                                   PlenaryMetaClusterData,
                                                   PlenaryMetaClusterObject)
@@ -41,8 +47,12 @@ from aquilon.worker.templates.cluster import (PlenaryCluster,
                                               PlenaryClusterData,
                                               PlenaryClusterObject,
                                               PlenaryClusterClient)
-from aquilon.worker.templates.host import (PlenaryHost, PlenaryHostData,
-                                           PlenaryHostObject)
+from aquilon.worker.templates.host import (
+    PlenaryHost,
+    PlenaryHostData,
+    PlenaryHostGrn,
+    PlenaryHostObject,
+)
 from aquilon.worker.templates.network_device import PlenaryNetworkDeviceInfo
 from aquilon.worker.templates.virtual_switch import PlenaryVirtualSwitchData
 from aquilon.worker.templates.domain import TemplateDomain

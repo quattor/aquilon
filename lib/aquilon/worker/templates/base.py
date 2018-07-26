@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ class Plenary(object):
         except IOError as e:
             # Unable to open the file
             if e.errno == errno.ENOENT:
-                raise NotFoundException("Pleanary file %s not found" %
+                raise NotFoundException("Plenary file %s not found" %
                                         self.old_path)
             else:
                 raise int_error(e)
@@ -332,6 +332,19 @@ class Plenary(object):
 
     def set_logger(self, logger):
         self.logger = logger
+
+
+class PlenaryParameterized(Plenary):
+
+    def is_deleted(self):
+        session = object_session(self.dbobj.main_object)
+        return any(dbobj in session.deleted or inspect(dbobj).deleted
+                   for dbobj in self.dbobj.all_objects)
+
+    def is_dirty(self):
+        session = object_session(self.dbobj.main_object)
+        return any(dbobj in session.dirty
+                   for dbobj in self.dbobj.all_objects)
 
 
 class StructurePlenary(Plenary):
@@ -578,13 +591,14 @@ class PlenaryCollection(object):
         if not cls:
             cls = Plenary
 
-        if isinstance(dbobj_or_iterable, Base):
-            self.append(cls.get_plenary(dbobj_or_iterable,
-                                        allow_incomplete=allow_incomplete))
-        else:
+        if hasattr(dbobj_or_iterable, '__iter__') and \
+                not isinstance(dbobj_or_iterable, Base):
             for dbobj in dbobj_or_iterable:
                 self.append(cls.get_plenary(dbobj,
                                             allow_incomplete=allow_incomplete))
+        else:
+            self.append(cls.get_plenary(dbobj_or_iterable,
+                                        allow_incomplete=allow_incomplete))
 
     def flatten(self):
         """

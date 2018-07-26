@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,15 +27,27 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, lazyload, subqueryload
 
 from aquilon.exceptions_ import InternalError, IncompleteError
-from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
-                                BridgeInterface)
+from aquilon.aqdb.model import (
+    BondingInterface,
+    BridgeInterface,
+    Host,
+    ParameterizedGrn,
+    VlanInterface,
+)
 from aquilon.aqdb.model.feature import nonhost_features
 from aquilon.worker.locks import CompileKey, PlenaryKey
-from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
-                                      PlenaryCollection, PlenaryClusterClient,
-                                      PlenaryResource, PlenaryPersonalityBase,
-                                      PlenaryServiceInstanceClientDefault,
-                                      PlenaryServiceInstanceServerDefault)
+from aquilon.worker.templates import (
+    ObjectPlenary,
+    Plenary,
+    PlenaryClusterClient,
+    PlenaryCollection,
+    PlenaryParameterizedGrn,
+    PlenaryPersonalityBase,
+    PlenaryResource,
+    PlenaryServiceInstanceClientDefault,
+    PlenaryServiceInstanceServerDefault,
+    StructurePlenary,
+)
 from aquilon.worker.templates.personality import get_parameters_by_feature
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
@@ -94,10 +107,12 @@ class PlenaryHost(PlenaryCollection):
         if not isinstance(dbhost, Host):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
-        self.append(PlenaryHostObject.get_plenary(dbhost,
-                                                  allow_incomplete=allow_incomplete))
-        self.append(PlenaryHostData.get_plenary(dbhost,
-                                                allow_incomplete=allow_incomplete))
+        self.append(PlenaryHostObject.get_plenary(
+            dbhost, allow_incomplete=allow_incomplete))
+        self.append(PlenaryHostData.get_plenary(
+            dbhost, allow_incomplete=allow_incomplete))
+        self.append(PlenaryHostGrn.get_plenary(
+            dbhost, allow_incomplete=allow_incomplete))
 
     @classmethod
     def query_options(cls, prefix=""):
@@ -418,6 +433,8 @@ class PlenaryHostObject(ObjectPlenary):
         pan_include(lines, services)
         pan_include(lines, provides)
 
+        pan_include(lines, PlenaryHostGrn.template_name(self.dbobj))
+
         path = PlenaryPersonalityBase.template_name(dbstage)
         pan_include(lines, path)
 
@@ -429,3 +446,29 @@ class PlenaryHostObject(ObjectPlenary):
                                   "run 'aq cluster'."
                                   .format(dbstage.personality))
         pan_include(lines, "archetype/final")
+
+
+class PlenaryHostGrn(Plenary):
+    """A plenary template for a host's GRN
+
+    This includes all parameterized plenaries for that GRN,
+    relating to that host
+    """
+
+    @classmethod
+    def template_name(cls, dbhost):
+        hostname = str(dbhost.fqdn)
+        hostdir = '/'.join(reversed(
+            hostname.split('.', hostname.count('.') - 1)[1:]))
+        return 'host/{}/{}/eon_id/config'.format(hostdir, hostname)
+
+    def body(self, lines):
+        dbhw_ent = self.dbobj.hardware_entity
+        dblocations = dbhw_ent.location.parents + [dbhw_ent.location]
+        dbenv = self.dbobj.personality.host_environment
+
+        dbgrn = self.dbobj.effective_owner_grn
+        for dblocation in dblocations:
+            dbobj = ParameterizedGrn(dbgrn, dbenv, dblocation)
+            path = PlenaryParameterizedGrn.template_name(dbobj)
+            pan_include_if_exists(lines, path)

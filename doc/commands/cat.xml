@@ -38,6 +38,7 @@
             <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
             <group>
                 <arg choice="plain"><option>--data</option></arg>
+                <arg choice="plain"><option>--host_grn</option></arg>
                 <arg choice="plain">
                     <arg><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
                     <group>
@@ -145,6 +146,21 @@
             <arg><option>--generate</option></arg>
         </cmdsynopsis>
         <cmdsynopsis>
+            <command>aq cat</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+            </group>
+            <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+            <group choice="req">
+                <synopfragmentref linkend="location-options">Location options</synopfragmentref>
+            </group>
+            <arg><option>--generate</option></arg>
+        </cmdsynopsis>
+        <cmdsynopsis>
             <command></command>
             <xi:include href="../common/global_options.xml"/>
             <synopfragment xml:id="resource-options" xmlns="http://docbook.org/ns/docbook">
@@ -160,6 +176,7 @@
                     <arg choice="plain"><option>--virtual_machine <replaceable>NAME</replaceable></option></arg>
                 </group>
             </synopfragment>
+            <xi:include href="../common/location_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
 
@@ -262,6 +279,18 @@
                     <para>
                         In case of clusters, display the plenary template which all members of the cluster
                         include.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--host_grn</option>
+                </term>
+                <listitem>
+                    <para>
+                        In case of host, display the plenary template that the host include to load
+                        all that is related to its Grn, including all the applicable parameterized
+                        Grn (per-environment and per-location).
                     </para>
                 </listitem>
             </varlistentry>
@@ -458,6 +487,26 @@
                 </listitem>
             </varlistentry>
         </variablelist>
+        <variablelist>
+            <title>Looking at GRN plenaries</title>
+            <varlistentry>
+                <term>
+                    {
+                        <option>--grn <replaceable>GRN</replaceable></option> |
+                        <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                    }
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                    --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Display the plenary of the named GRN, parameterized with
+                        the named host environment and named location.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/location_options_desc.xml"/>
         <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
@@ -502,6 +551,13 @@ aq cat --hostname foo --hostlink bar
             <title>Look at the plenary listing the clients of a service instance</title>
             <programlisting>
 aq cat --service foo --instance bar --server
+            </programlisting>
+        </example>
+
+        <example>
+            <title>Look at the plenary of a parameterized GRN at the Organization level</title>
+            <programlisting>
+aq cat --grn grn:/foo/bar/baz --host_environment alice --organization bob
             </programlisting>
         </example>
     </refsect1>
