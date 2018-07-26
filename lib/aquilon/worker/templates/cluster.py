@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2009-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,9 +28,14 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryServiceInstanceClientDefault,
                                       PlenaryServiceInstanceServerDefault,
                                       PlenaryPersonalityBase, add_location_info)
-from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
-                                               pan_assign, pan_include,
-                                               pan_append)
+from aquilon.worker.templates.panutils import (
+    pan_append,
+    pan_assign,
+    pan_include,
+    pan_include_if_exists,
+    PanValue,
+    StructureTemplate,
+)
 from aquilon.worker.dbwrappers.cluster import get_cluster_location_preference
 from aquilon.worker.locks import CompileKey, PlenaryKey
 
@@ -252,3 +258,6 @@ class PlenaryClusterClient(Plenary):
                            resource.resource_type, StructureTemplate(res_path))
         lines.append('include if_exists("features/" + value("/system/archetype/name") + "/%s/%s/config");'
                      % (self.dbobj.archetype.name, self.dbobj.personality.name))
+
+        pan_include_if_exists(lines, "archetype/{}/config".format(
+            self.dbobj.archetype.name))

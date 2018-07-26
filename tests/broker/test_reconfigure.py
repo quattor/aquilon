@@ -490,6 +490,39 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          '"hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
                          command)
 
+    def test_1105_verify_plenary_host_archetype(self):
+        command = [
+            'cat',
+            '--hostname', 'aquilon87.aqd-unittest.ms.com',
+            '--host_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/aqd-unittest/'
+             'aquilon87.aqd-unittest.ms.com/archetype/config;',),
+            ('include if_exists("archetype/aquilon/dev/'
+             'organization/ms/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'hub/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'continent/na/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'country/us/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'campus/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'city/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'building/ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'room/utroom2/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'bunker/bucket2.ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'rack/ut9/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
     def test_1105_verify_plenary_host_grn(self):
         command = [
             'cat',
@@ -544,6 +577,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
             ('include "personality/inventory/config";',),
             ('include "host/ms.com/aqd-unittest/aquilon87.aqd-unittest.ms.com/'
              'eon_id/config";',),
+            ('include "host/ms.com/aqd-unittest/aquilon87.aqd-unittest.ms.com/'
+             'archetype/config";',),
             ('include "archetype/final";',),
         ]]
         self.output_unordered_equals(out, expected_out, command,

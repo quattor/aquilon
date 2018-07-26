@@ -39,6 +39,7 @@ from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceInstanceClientDefault,
                                               PlenaryServiceInstanceServer,
                                               PlenaryServiceInstanceServerDefault)
+from aquilon.worker.templates.archetype import PlenaryParameterizedArchetype
 from aquilon.worker.templates.grn import PlenaryParameterizedGrn
 from aquilon.worker.templates.metacluster import (PlenaryMetaCluster,
                                                   PlenaryMetaClusterData,
@@ -49,6 +50,7 @@ from aquilon.worker.templates.cluster import (PlenaryCluster,
                                               PlenaryClusterClient)
 from aquilon.worker.templates.host import (
     PlenaryHost,
+    PlenaryHostArchetype,
     PlenaryHostData,
     PlenaryHostGrn,
     PlenaryHostObject,

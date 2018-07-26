@@ -38,6 +38,7 @@
             <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
             <group>
                 <arg choice="plain"><option>--data</option></arg>
+                <arg choice="plain"><option>--host_archetype</option></arg>
                 <arg choice="plain"><option>--host_grn</option></arg>
                 <arg choice="plain">
                     <arg><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
@@ -143,6 +144,18 @@
             </group>
             <arg choice="plain"><option>--virtual_switch <replaceable>NAME</replaceable></option></arg>
             <arg choice="plain"><option>--data</option></arg>
+            <arg><option>--generate</option></arg>
+        </cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq cat</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+            <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+            <group choice="req">
+                <synopfragmentref linkend="location-options">Location options</synopfragmentref>
+            </group>
             <arg><option>--generate</option></arg>
         </cmdsynopsis>
         <cmdsynopsis>
@@ -279,6 +292,18 @@
                     <para>
                         In case of clusters, display the plenary template which all members of the cluster
                         include.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--host_archetype</option>
+                </term>
+                <listitem>
+                    <para>
+                        In case of host, display the plenary template that the host include to load
+                        all that is related to its archetype, including all of the applicable
+                        parameterized Archetype (per-environment and per-location).
                     </para>
                 </listitem>
             </varlistentry>
@@ -483,6 +508,22 @@
                         Display the plenary of the named virtual switch. Virtual switches are currently
                         not compileable, but may be in the future, therefore the <option>--data</option> option
                         is mandatory.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <variablelist>
+            <title>Looking at archetype plenaries</title>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                    --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Display the plenary of the named archetype, parameterized with
+                        the named host environment and named location.
                     </para>
                 </listitem>
             </varlistentry>

@@ -140,6 +140,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
             ('include "personality/compileserver/config";',),
             ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
              'eon_id/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'archetype/config";',),
             ('include "archetype/final";',),
             ('"/metadata/template/branch/name" = "unittest";',),
             ('"/metadata/template/branch/type" = "domain";',),
@@ -147,6 +149,38 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+            '--host_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'archetype/config;',),
+            ('include if_exists("archetype/aquilon/dev/'
+             'organization/ms/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'hub/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'continent/na/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'country/us/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'campus/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'city/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'building/ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'room/utroom1/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
 
         command = [
             'cat',
@@ -316,6 +350,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
             ('include "personality/compileserver/config";',),
             ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
              'eon_id/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'archetype/config";',),
             ('include "archetype/final";',),
             ('"/metadata/template/branch/name" = "unittest";',),
             ('"/metadata/template/branch/type" = "domain";',),
@@ -323,6 +359,38 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+            '--host_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'archetype/config;',),
+            ('include if_exists("archetype/aquilon/dev/'
+             'organization/ms/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'hub/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'continent/na/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'country/us/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'campus/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'city/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'building/ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'room/utroom1/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
 
         command = [
             'cat',

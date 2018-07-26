@@ -31,6 +31,7 @@ from aquilon.aqdb.model import (
     BondingInterface,
     BridgeInterface,
     Host,
+    ParameterizedArchetype,
     ParameterizedGrn,
     VlanInterface,
 )
@@ -41,6 +42,7 @@ from aquilon.worker.templates import (
     Plenary,
     PlenaryClusterClient,
     PlenaryCollection,
+    PlenaryParameterizedArchetype,
     PlenaryParameterizedGrn,
     PlenaryPersonalityBase,
     PlenaryResource,
@@ -110,6 +112,8 @@ class PlenaryHost(PlenaryCollection):
         self.append(PlenaryHostObject.get_plenary(
             dbhost, allow_incomplete=allow_incomplete))
         self.append(PlenaryHostData.get_plenary(
+            dbhost, allow_incomplete=allow_incomplete))
+        self.append(PlenaryHostArchetype.get_plenary(
             dbhost, allow_incomplete=allow_incomplete))
         self.append(PlenaryHostGrn.get_plenary(
             dbhost, allow_incomplete=allow_incomplete))
@@ -434,6 +438,11 @@ class PlenaryHostObject(ObjectPlenary):
         pan_include(lines, provides)
 
         pan_include(lines, PlenaryHostGrn.template_name(self.dbobj))
+        pan_include(lines, PlenaryHostArchetype.template_name(self.dbobj))
+
+        dbarchetype = self.dbobj.personality.archetype
+        pan_include_if_exists(lines, "archetype/{}/config".format(
+            dbarchetype.name))
 
         path = PlenaryPersonalityBase.template_name(dbstage)
         pan_include(lines, path)
@@ -446,6 +455,32 @@ class PlenaryHostObject(ObjectPlenary):
                                   "run 'aq cluster'."
                                   .format(dbstage.personality))
         pan_include(lines, "archetype/final")
+
+
+class PlenaryHostArchetype(Plenary):
+    """A plenary template for a host's archetype
+
+    This includes all parameterized plenaries for that archetype,
+    relating to that host
+    """
+
+    @classmethod
+    def template_name(cls, dbhost):
+        hostname = str(dbhost.fqdn)
+        hostdir = '/'.join(reversed(
+            hostname.split('.', hostname.count('.') - 1)[1:]))
+        return 'host/{}/{}/archetype/config'.format(hostdir, hostname)
+
+    def body(self, lines):
+        dbhw_ent = self.dbobj.hardware_entity
+        dblocations = dbhw_ent.location.parents + [dbhw_ent.location]
+        dbenv = self.dbobj.personality.host_environment
+
+        dbarchetype = self.dbobj.personality.archetype
+        for dblocation in dblocations:
+            dbobj = ParameterizedArchetype(dbarchetype, dbenv, dblocation)
+            path = PlenaryParameterizedArchetype.template_name(dbobj)
+            pan_include_if_exists(lines, path)
 
 
 class PlenaryHostGrn(Plenary):
