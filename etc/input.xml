@@ -2806,7 +2806,7 @@
 	<optgroup>
 	    <option name="generate" type="flag">Show the plenary template as it would be generated</option>
 	    <option name="data" type="flag" requires="hostname cluster metacluster network_device virtual_switch">Show the data template for the host/cluster</option>
-	    <option name="client" type="flag" requires="cluster">Show the data template for the host/cluster</option>
+	    <option name="client" type="flag" requires="cluster">Show the client template for the cluster</option>
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" requires="personality" type="string">Archetype</option>
