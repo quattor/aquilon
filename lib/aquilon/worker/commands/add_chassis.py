@@ -16,22 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq add chassis`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.types import ChassisType
-from aquilon.aqdb.model import Chassis, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.dbwrappers.hardware_entity import (
-    get_default_chassis_grn_eonid,
-    update_primary_ip,
-)
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_ip_restrictions,
                                                  assign_address)
-from aquilon.worker.dbwrappers.location import get_location
-from aquilon.exceptions_ import NotFoundException
+from aquilon.worker.dbwrappers.hardware_entity import get_or_create_chassis
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -46,37 +37,11 @@ class CommandAddChassis(BrokerCommand):
                                     allow_restricted_domain=True,
                                     allow_reserved=True, preclude=True,
                                     exporter=exporter, require_grn=False)
-        if not label:
-            label = dbdns_rec.fqdn.name
-            try:
-                Chassis.check_label(label)
-            except ArgumentError:
-                raise ArgumentError("Could not deduce a valid hardware label "
-                                    "from the chassis name.  Please specify "
-                                    "--label.")
 
-        dblocation = get_location(session, rack=rack)
-        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   model_type=ChassisType.Chassis)
-        if not dbmodel:
-            dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type=ChassisType.AuroraChassis)
-        if not dbmodel:
-            raise NotFoundException("Model {}, model_type chassis or aurora_chassis not found.".format(model))
-
-        # FIXME: Precreate chassis slots?
-        dbchassis = Chassis(label=label, location=dblocation, model=dbmodel,
-                            serial_no=serial, comments=comments)
-        session.add(dbchassis)
-        dbchassis.primary_name = dbdns_rec
-
-        # Set the GRN for the chassis
-        if not grn and not eon_id:
-            grn, eon_id = get_default_chassis_grn_eonid(self.config)
-
-        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                           config=self.config)
-        dbchassis.owner_grn = dbgrn
+        dbchassis = get_or_create_chassis(session, logger, model, self.config,
+                                          rack, vendor, dbdns_rec, label=label,
+                                          serial_no=serial, comments=comments, grn=grn,
+                                          eon_id=eon_id, clear_grn=None, preclude=True)
 
         # FIXME: get default name from the model
         if not interface:
@@ -91,8 +56,9 @@ class CommandAddChassis(BrokerCommand):
 
         session.flush()
 
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.add_chassis(dbchassis)
         if ip:
-            dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbchassis, None)
-            dsdb_runner.commit_or_rollback("Could not add chassis to DSDB")
+        dsdb_runner.commit_or_rollback("Could not add chassis to DSDB")
         return

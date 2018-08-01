@@ -18,21 +18,64 @@
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import aliased, contains_eager, joinedload
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import and_, or_
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
 from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName, Network,
                                 AddressAssignment, ARecord, Fqdn, Interface,
-                                VlanInfo, PortGroup, NetworkEnvironment, Host)
+                                VlanInfo, PortGroup, NetworkEnvironment, Host, Chassis)
+from aquilon.aqdb.types import ChassisType
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
 from aquilon.worker.dbwrappers.network import get_network_byip
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.utils import first_of
+
+
+def get_or_create_chassis(session, logger, model, config, rack, vendor, dbdns_rec,
+                          label=None, serial_no=None, comments=None, grn=None, eon_id=None,
+                          clear_grn=None, preclude=False):
+    if not label:
+        label = dbdns_rec.fqdn.name
+
+    dblocation = get_location(session, rack=rack)
+    dbmodel = None
+    if model:
+        dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                   model_type=ChassisType.Chassis)
+        if not dbmodel:
+            dbmodel = Model.get_unique(session, name=model, vendor=vendor,
+                                       model_type=ChassisType.AuroraChassis)
+        if not dbmodel:
+            raise NotFoundException("Model {}, model_type chassis or "
+                                    "aurora_chassis not found.".format(model))
+    try:
+        # FIXME: Precreate chassis slots?
+        dbchassis = session.query(Chassis).filter_by(label=label).one()
+        if preclude:
+            raise ArgumentError("{0} already exists.".format(dbchassis))
+    except NoResultFound:
+        pass
+    dbchassis = Chassis(label=label, location=dblocation, model=dbmodel,
+                        serial_no=serial_no, comments=comments)
+    session.add(dbchassis)
+    dbchassis.primary_name = dbdns_rec
+
+    # Set the GRN for the chassis
+    if not grn and not eon_id or clear_grn:
+        grn, eon_id = get_default_chassis_grn_eonid(config)
+
+    dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                       config=config)
+    dbchassis.owner_grn = dbgrn
+
+    return dbchassis
 
 
 def get_default_chassis_grn_eonid(config):

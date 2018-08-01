@@ -632,6 +632,10 @@ class DSDBRunner(object):
                          'comments': dbrack.comments}
         return snapshot_rack
 
+    def snapshot_chassis(self, dbchassis):
+        snapshot_chassis = {'comments': dbchassis.comments}
+        return snapshot_chassis
+
     def add_rack(self, dbrack):
         dsdb_client_command_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
                                                  'building': dbrack.building.name,
@@ -673,6 +677,33 @@ class DSDBRunner(object):
         # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
         self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False, error_filter=True,
                         ignore_msg="Delete rack {} in DSDB failed, proceeding in AQDB.".format(dbrack.name))
+
+    def add_chassis(self, dbchassis):
+        dsdb_client_command_dict = {'add_chassis': {'id': dbchassis.label.replace(dbchassis.location.rack.name + 'c', ''),
+                                                    'rack': dbchassis.location.rack.name,
+                                                    'comments': dbchassis.comments}}
+        dsdb_client_rollback_dict = {'delete_chassis': {'chassis_name': dbchassis.label}}
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False)
+
+    def update_chassis(self, dbchassis, snapshot_chassis):
+        if dbchassis.comments:
+            dsdb_client_command_dict = {'update_chassis': {'chassis': dbchassis.label,
+                                                           'comments': dbchassis.comments}}
+            dsdb_client_rollback_dict = {'update_chassis': {'chassis': dbchassis.label,
+                                                            'comments': snapshot_chassis['comments']}}
+            # Ignoring DSDB failures for updates now, as many chassis do not exist in DSDB
+            self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False,
+                            error_filter=True, ignore_msg="Update chassis {} in DSDB failed, "
+                                                          "proceeding in AQDB.".format(dbchassis.label))
+
+    def delete_chassis(self, dbchassis):
+        dsdb_client_command_dict = {'delete_chassis': {'chassis_name': dbchassis.label}}
+        dsdb_client_rollback_dict = {'add_chassis': {'id': dbchassis.label.replace(dbchassis.location.rack.name + 'c', ''),
+                                                     'rack': dbchassis.location.rack.name,
+                                                     'comments': dbchassis.comments}}
+        # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False, error_filter=True,
+                        ignore_msg="Delete chassis {} in DSDB failed, proceeding in AQDB.".format(dbchassis.label))
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                          comments=None, **_):
@@ -1085,3 +1116,4 @@ def build_mako_lookup(config, kind, **kwargs):
 
 
 DSDBRunner.snapshot_handlers['rack'] = DSDBRunner.snapshot_rack
+DSDBRunner.snapshot_handlers['chassis'] = DSDBRunner.snapshot_chassis

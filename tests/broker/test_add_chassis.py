@@ -30,13 +30,13 @@ from chassistest import VerifyChassisMixin
 class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
     def test_100_add_ut3c5(self):
         command = ["add", "chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
-                   "--rack", "np3", "--model", "utchassis",
+                   "--rack", "ut3", "--model", "utchassis",
                    "--serial", "ABC1234", "--comments", "Some chassis comments"]
         self.noouttest(command)
 
     def test_105_verify_ut3c5(self):
         self.verifychassis("ut3c5.aqd-unittest.ms.com", "aurora_vendor",
-                           "utchassis", "np3", "a", "3", "ABC1234",
+                           "utchassis", "ut3", "a", "3", "ABC1234",
                            comments="Some chassis comments",
                            grn="grn:/ms/ei/aquilon/aqd")
 
@@ -54,8 +54,8 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         self.assertEqual(chassis.model.vendor, 'aurora_vendor')
 
         self.assertEqual(chassis.location.location_type, 'rack')
-        self.assertEqual(chassis.location.name, 'np3')
-        self.assertEqual(chassis.location.fullname, 'np3')
+        self.assertEqual(chassis.location.name, 'ut3')
+        self.assertEqual(chassis.location.fullname, 'ut3')
         self.assertEqual(chassis.location.col, '3')
         self.assertEqual(chassis.location.row, 'a')
 
@@ -84,6 +84,14 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
 
+    def test_119_add_ut3c2_dsdb_fail(self):
+        command = ["add_chassis", "--chassis", "ut3c2.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "aurora_chassis_model"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Chassis ut3c2 is already defined", command)
+        self.matchoutput(err, "DSDB command failed: add_chassis", command)
+        self.matchoutput(err, "Bad Request: Could not add chassis to DSDB", command)
+
     def test_120_add_ut9_chassis(self):
         for i in range(1, 8):
             ip = self.net["ut9_chassis"].usable[i]
@@ -95,6 +103,13 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
                        "--ip", ip, "--mac", ip.mac, "--interface", "oa"]
             self.noouttest(command)
         self.dsdb_verify()
+
+    def test_121_add_chassis_wrong_name_format(self):
+        command = ["add_chassis", "--chassis", "testchassis.aqd-unittest.ms.com",
+                   "--rack", "ut3", "--model", "aurora_chassis_model"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Invalid chassis name 'testchassis'. Correct name format: "
+                              "rack ID + 'c' + numeric chassis ID (integer without leading 0).", command)
 
     def test_125_verify_ut9_chassis(self):
         for i in range(1, 6):
@@ -112,14 +127,18 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
         command = ["add", "chassis", "--chassis", "not-alnum.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "utchassis"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Could not deduce a valid hardware label",
+        self.matchoutput(out, "Invalid chassis name 'not-alnum'. "
+                              "Correct name format: rack ID + 'c' + "
+                              "numeric chassis ID (integer without leading 0).",
                          command)
 
     def test_200_reject_bad_label_explicit(self):
         command = ["add", "chassis", "--chassis", "ut3c6.aqd-unittest.ms.com",
                    "--label", "not-alnum", "--rack", "ut3", "--model", "utchassis"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
+        self.matchoutput(out, "Invalid chassis name 'not-alnum'. "
+                              "Correct name format: rack ID + 'c' + numeric "
+                              "chassis ID (integer without leading 0).",
                          command)
 
     def test_300_verifychassisall(self):

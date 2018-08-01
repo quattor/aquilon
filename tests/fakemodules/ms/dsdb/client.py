@@ -41,7 +41,7 @@ class DSDB(object):
         return DSDBHostData(host_name)
 
     def add_rack(self, id, building, floor, comp_room, row, column, comments=None):
-        rack_name = building+id
+        rack_name = '{}{}'.format(building, id)
         dsdb_racks = DSDBRackData(rack_name)
         if dsdb_racks.results() or rack_name in dsdb_racks.side_effect:
             raise Exception('Rack {} is already defined'.format(rack_name))
@@ -55,6 +55,40 @@ class DSDB(object):
         dsdb_racks = DSDBRackData(rack)
         if rack in dsdb_racks.side_effect:
             raise Exception('Rack {} update in DSDB failed!'.format(rack))
+
+    def add_chassis(self, id, rack, comments=None):
+        chassis_name = '{}c{}'.format(rack, id)
+        dsdb_chassis = DSDBChassisData(chassis_name)
+        if chassis_name in dsdb_chassis.dsdb_chassis_data.keys():
+            raise Exception('Chassis {} is already defined'.format(chassis_name))
+
+    def delete_chassis(self, chassis_name):
+        dsdb_chassis = DSDBChassisData(chassis_name)
+        if chassis_name in dsdb_chassis.delete_side_effect:
+            raise Exception('Chassis {} delete in DSDB failed!'.format(chassis_name))
+
+    def update_chassis(self, chassis, **kwargs):
+        dsdb_chassis = DSDBChassisData(chassis)
+        if chassis in dsdb_chassis.update_side_effect:
+            raise Exception('Chassis {} update in DSDB failed!'.format(chassis))
+
+
+class DSDBChassisData(object):
+    """
+    DSDB Chassis Data Description
+    used by DSDB Interface class
+    if no DSDB module loaded
+    """
+    update_side_effect = ["ut3c1"]
+    delete_side_effect = []
+    dsdb_chassis_data = {"ut3c2": [{u'rack': u'ut3',
+                                    u'comment': u'test'}]}
+
+    def __init__(self, chassis):
+        self.chassis = chassis
+
+    def results(self):
+        return self.dsdb_chassis_data.get(self.chassis, [])
 
 
 class DSDBRackData(object):

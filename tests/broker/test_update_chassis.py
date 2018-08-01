@@ -87,6 +87,20 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                          "used as the primary name of switch ut3gd1r01.",
                          command)
 
+    def test_201_update_dsdb_fail(self):
+        command = ["update", "chassis", "--comment", "TEST DSDB FAIL",
+                   "--chassis", "ut3c1.aqd-unittest.ms.com"]
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Chassis ut3c1 update in DSDB failed!", command)
+        self.matchoutput(err, "Update chassis ut3c1 in DSDB failed, "
+                              "proceeding in AQDB.", command)
+
+    def test_202_update_dsdb_verify(self):
+        command = ["show_chassis", "--chassis", "ut3c1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Comments: TEST DSDB FAIL",
+                         command)
+
     def test_300_update_chassis_grn(self):
         command = ["update_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com",
                    "--grn", "grn:/ms/ei/aquilon/ut2"]
