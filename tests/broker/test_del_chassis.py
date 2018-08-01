@@ -79,7 +79,6 @@ class TestDelChassis(TestBrokerCommand):
 
     def test_140_del_aurora_chassis(self):
         self.noouttest(["del_chassis", "--chassis", "oy604c2.ms.com"])
-        self.noouttest(["del_chassis", "--chassis", "oy605c2.ms.com"])
 
 
 if __name__ == '__main__':

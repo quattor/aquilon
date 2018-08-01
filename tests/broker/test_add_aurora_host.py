@@ -130,13 +130,14 @@ class TestAddAuroraHost(TestBrokerCommand):
         command = ["add", "aurora", "host",
                    "--hostname", self.aurora_without_rack,
                    "--osname", "linux", "--osversion", self.linux_version_prev] + self.valid_just_tcm
-        out = self.statustest(command)
+        out = self.badrequesttest(command)
         self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
 
     def test_320_verify_dsdb_rack_missing(self):
-        command = "show host --hostname %s.ms.com" % self.aurora_without_rack
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Building: oy", command)
+        command = ["show_host", "--hostname", "{}.ms.com".format(self.aurora_without_rack)]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Not Found: Host {}.ms.com "
+                              "not found".format(self.aurora_without_rack), command)
 
     def test_400_add_nyaqd1(self):
         command = ["add", "aurora", "host", "--hostname", "nyaqd1",

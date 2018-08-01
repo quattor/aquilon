@@ -104,9 +104,6 @@ class TestDelMachine(EventsTestMixin, TestBrokerCommand):
     def testdelaurorawithoutnode(self):
         self.noouttest(["del_machine", "--machine", self.aurora_without_node])
 
-    def testdelaurorawithoutrack(self):
-        self.noouttest(["del_machine", "--machine", self.aurora_without_rack])
-
     def testaddut3s01p2(self):
         self.noouttest(["del", "machine", "--machine", "ut3s01p2"])
 

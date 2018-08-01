@@ -79,18 +79,17 @@ class CommandAddAuroraHost(CommandAddHost):
                                         "machine manually and follow with "
                                         "add_host." % (building, machine))
                 rack = building + rid
-                dbrack = session.query(Rack).filter_by(name=rack).first()
-                if not dbrack:
+                dblocation = session.query(Rack).filter_by(name=rack).first()
+                if not dblocation:
                     try:
                         rack_fields = dsdb_runner.show_rack(rack)
-                        dbrack = Rack(name=rack, fullname=rack,
+                        dblocation = Rack(name=rack, fullname=rack,
                                       parent=dbbuilding,
                                       rack_row=rack_fields["rack_row"],
                                       rack_column=rack_fields["rack_col"])
-                        session.add(dbrack)
+                        session.add(dblocation)
                     except (ProcessException, ValueError) as e:
-                        logger.client_info("Rack %s not defined in DSDB." % rack)
-                dblocation = dbrack or dbbuilding
+                        raise ArgumentError("Rack %s not defined in DSDB." % rack)
                 chassis = rack + "c" + cid
                 dbdns_domain = session.query(DnsDomain).filter_by(
                     name="ms.com").first()

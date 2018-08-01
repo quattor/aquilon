@@ -102,18 +102,6 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         command = "show host --hostname %s.ms.com" % self.aurora_without_node
         self.notfoundtest(command.split(" "))
 
-    def test_130_del_aurora_without_rack(self):
-        command = ["del_host", "--hostname", "{}.ms.com".format(self.aurora_without_rack)] + self.valid_just_tcm
-        err = self.statustest(command)
-        self.matchoutput(err,
-                         "WARNING: removing host %s.ms.com from AQDB "
-                         "and *not* changing DSDB." % self.aurora_without_rack,
-                         command)
-
-    def test_131_verify_del_aurora_without_rack(self):
-        command = "show host --hostname %s.ms.com" % self.aurora_without_rack
-        self.notfoundtest(command.split(" "))
-
     def test_140_del_nyaqd1(self):
         command = ["del_host", "--hostname", "nyaqd1.ms.com"] + self.valid_just_tcm
         self.statustest(command)
