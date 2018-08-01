@@ -20,12 +20,14 @@ import re
 
 from sqlalchemy.orm.exc import NoResultFound
 
+from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Rack
 from aquilon.worker.dbwrappers.location import get_location
 
+_config = Config()
 
-RACK_ID_REGEX = re.compile(r'^[1-9][0-9]*$')
+DSDB_ID_REGEX = re.compile(_config.get("site", "dsdb_name_regex")) if _config.has_value("site", "dsdb_name_regex") else None
 
 
 def get_or_create_rack(session, rackrow, rackcolumn, building=None,
@@ -45,18 +47,24 @@ def get_or_create_rack(session, rackrow, rackcolumn, building=None,
         rackcolumn = str(rackcolumn).strip().lower()
 
     if force_rackid is not None:
-        rackid_numeric = force_rackid.replace(dbbuilding.name, '')
-        if not RACK_ID_REGEX.search(rackid_numeric):
-            raise ArgumentError("Invalid rack name {}. Correct name format: "
-                                "building name + numeric rack ID (integer without leading 0).".format(force_rackid))
-        # Allow to fill in rack name gaps without resetting the next_rackid
-        if dbbuilding.next_rackid <= int(rackid_numeric):
-            dbbuilding.next_rackid = int(rackid_numeric) + 1
+        if DSDB_ID_REGEX:
+            if not force_rackid.startswith(dbbuilding.name):
+                force_rackid = dbbuilding.name + force_rackid
+            m = DSDB_ID_REGEX.search(force_rackid)
+            if not m or m.group('loc') != dbbuilding.name:
+                raise ArgumentError("Invalid rack name {}. Correct name format: "
+                                    "building name + numeric rack ID (integer without leading 0).".format(force_rackid))
+            rackid_numeric = m.group('id')
+            # Allow to fill in rack name gaps without resetting the next_rackid
+            if dbbuilding.next_rackid <= int(rackid_numeric):
+                dbbuilding.next_rackid = int(rackid_numeric) + 1
+            rack_name = dbbuilding.name + str(rackid_numeric)
+        else:
+            rack_name = force_rackid
     else:
         rackid_numeric = dbbuilding.next_rackid
         dbbuilding.next_rackid += 1
-
-    rack_name = dbbuilding.name + str(rackid_numeric)
+        rack_name = dbbuilding.name + str(rackid_numeric)
     try:
         dbrack = session.query(Rack).filter_by(name=rack_name).one()
         if rackrow is not None and rackrow != dbrack.rack_row:

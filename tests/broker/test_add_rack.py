@@ -142,7 +142,7 @@ class TestAddRack(TestBrokerCommand):
     def test_151_add_rack_fail_name_format(self):
         command = "add rack --force_rackid 012 --building ut --row g --column 4"
         err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err, "Invalid rack name 012. Correct name format: "
+        self.matchoutput(err, "Invalid rack name ut012. Correct name format: "
                               "building name + numeric rack ID (integer without leading 0).", command)
 
     def test_155_addut11(self):
