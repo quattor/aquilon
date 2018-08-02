@@ -1,6 +1,6 @@
 #!/ms/dist/fsf/PROJ/bash/4.3/bin/bash
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2016,2018  Contributor
+# Copyright (C) 2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
