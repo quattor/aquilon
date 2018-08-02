@@ -191,8 +191,6 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut01ga2s02.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "ut01ga2s03.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "ut01ga2s04.aqd-unittest.ms.com", command)
 
         # Not a ToR switch
         self.matchclean(out, "ut3gd1r01.aqd-unittest.ms.com", command)

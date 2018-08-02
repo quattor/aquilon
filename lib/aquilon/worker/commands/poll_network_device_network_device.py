@@ -17,7 +17,7 @@
 """Contains the logic for `aq poll network_device --network_device`."""
 
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.poll_network_device import CommandPollNetworkDevice
 from aquilon.aqdb.model import NetworkDevice
@@ -28,6 +28,8 @@ class CommandPollNetworkDeviceNetworkDevice(CommandPollNetworkDevice):
     required_parameters = ["network_device"]
 
     def render(self, session, logger, network_device, type, clear, vlan, **_):
+        if vlan:
+            raise UnimplementedError("vlan argument is no longer available")
         NetworkDevice.check_type(type)
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
         if type is not None and dbnetdev.switch_type != type:

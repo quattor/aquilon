@@ -4287,7 +4287,7 @@
 	<optgroup>
 	    <option name="type" type="string">If polling a rack, poll only this type of network device</option>
 	    <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
-	    <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
+	    <option name="vlan" type="boolean">[Deprecated] Additionally poll for vlan/subnet mappings</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -4304,7 +4304,7 @@
 	<optgroup>
 	    <option name="type" type="string">If polling a rack, poll only this type of switch</option>
 	    <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
-	    <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
+	    <option name="vlan" type="boolean">[Deprecated] Additionally poll for vlan/subnet mapping</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

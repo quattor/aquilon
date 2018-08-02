@@ -118,6 +118,14 @@ class TestDeprecatedSwitch(TestBrokerCommand):
         self.matchoutput(err, "Command del_switch is deprecated.", command)
         self.dsdb_verify()
 
+    def test_630_poll_switch_vlan_rack(self):
+        command = ["poll_switch", "--rack", "ut3", "--vlan"]
+        err = self.deprecatednotimplementederrortest(command)
+
+    def test_701_poll_switch_vlan_switch(self):
+        command = ["poll_switch", "--switch",
+                   "ut01ga2s02.aqd-unittest.ms.com", "--vlan"]
+        err = self.deprecatednotimplementederrortest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeprecatedSwitch)

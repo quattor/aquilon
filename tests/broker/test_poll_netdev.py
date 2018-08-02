@@ -23,7 +23,7 @@ import re
 import socket
 from collections import defaultdict
 from time import sleep
-
+import subprocess
 import unittest
 
 if __name__ == "__main__":
@@ -34,6 +34,25 @@ from brokertest import TestBrokerCommand
 
 
 class TestPollNetworkDevice(TestBrokerCommand):
+    def inject_vlan_data(self, network_device):
+        full_network_device = "{}.aqd-unittest.ms.com".format(network_device)
+        toBind = { 701: self.net["vm_storage_net"].ip,
+                   702: self.net["vmotion_net"].ip,
+                   710: self.net['{}_v710'.format(network_device)].ip,
+                   711: self.net['{}_v711'.format(network_device)].ip,
+                   712: self.net['{}_v712'.format(network_device)].ip,
+                   713: self.net['{}_v713'.format(network_device)].ip }
+
+        testenv = os.environ.copy()
+        testenv['AQDCONF'] = '../unittest.conf'
+        testdir_broker = os.path.dirname(os.path.realpath(__file__))
+        data_injection = (os.path.join(testdir_broker, "..", "aqdb",
+                          "inject_network_device_vlan.py"))
+        command = [data_injection, '--network_device', full_network_device]
+        for k, v in toBind.iteritems():
+            command.extend(['--vlan', str(k), str(v)])
+        subprocess.check_output(command, env=testenv)
+
     def getmacdata(self, switchfile):
         dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(dir, "..", "fakebin", "macdata.d",
@@ -114,19 +133,9 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          (m.group(1), m.group(2), out))
 
     def test_210_poll_ut01ga2s01(self):
-        command = ["poll", "network_device", "--vlan", "--network_device",
+        command = ["poll", "network_device", "--network_device",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         err = self.statustest(command)
-        net = self.net["vmotion_net"]
-        self.matchoutput(err,
-                         "Switch ut01ga2s01.aqd-unittest.ms.com: VLAN 5 is not "
-                         "defined in AQDB. Please use add_vlan to add it.",
-                         command)
-        self.matchoutput(err,
-                         "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
-                         "714, because network bitmask value 24 differs from "
-                         "prefixlen 26 of network %s [%s]." % (net.name, net),
-                         command)
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,
                          "Using jump host nyaqd1.ms.com from service instance "
@@ -134,6 +143,11 @@ class TestPollNetworkDevice(TestBrokerCommand):
                          "for switch ut01ga2s01.aqd-unittest.ms.com." %
                          (service),
                          command)
+
+    def test_210_poll_ut01ga2s01_inject_vlan(self):
+        self.successtest(["poll_network_device", "--network_device",
+                          "ut01ga2s01.aqd-unittest.ms.com"])
+        self.inject_vlan_data("ut01ga2s01")
 
     def test_215_verify_ut01ga2s01(self):
         command = "show network_device --network_device ut01ga2s01.aqd-unittest.ms.com"
@@ -155,9 +169,11 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
         self.matchclean(out, "VLAN 714", command)
 
-    def test_220_poll_ut01ga2s02(self):
-        self.successtest(["poll", "network_device", "--vlan",
+
+    def test_220_poll_ut01ga2s02_inject_vlan(self):
+        self.successtest(["poll", "network_device",
                           "--network_device", "ut01ga2s02.aqd-unittest.ms.com"])
+        self.inject_vlan_data("ut01ga2s02")
 
     def test_225_verify_ut01ga2s02(self):
         command = "show network_device --network_device ut01ga2s02.aqd-unittest.ms.com"
@@ -178,57 +194,24 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s02_v712"].ip, command)
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s02_v713"].ip, command)
 
-    def test_230_poll_ut01ga2s03(self):
-        # Tell fake_vlan2net to return an alternate output
-        scratchfile = self.writescratch("vlan2net_tag", "relabel")
-        try:
-            self.statustest(["poll", "network_device", "--vlan",
-                             "--network_device", "ut01ga2s03.aqd-unittest.ms.com"])
-        finally:
-            # Don't leave the file lying around to avoid surprises
-            os.unlink(scratchfile)
+    def test_226_poll_ut01ga2s02_vlan(self):
+        command = ["poll_network_device", "--vlan",
+                   "--network_device", "ut01ga2s02.aqd-unittest.ms.com"]
+        err = self.unimplementederrortest(command)
+        self.matchoutput(
+            err, "Not Implemented: vlan argument is no longer available",
+            command)
 
-    def test_231_verify_alt_tag(self):
-        command = ["show_network_device", "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "VLAN 717: %s" % self.net["ut01ga2s01_v712"].ip, command)
-        self.matchoutput(out, "VLAN 718: %s" % self.net["ut01ga2s01_v713"].ip, command)
-        self.matchclean(out, "VLAN 712", command)
-        self.matchclean(out, "VLAN 713", command)
+    def test_230_poll_ut01ga2s03_inject_vlan(self):
+        self.successtest(["poll", "network_device",
+                          "--network_device",
+                          "ut01ga2s03.aqd-unittest.ms.com"])
 
-    def test_235_poll_ut01ga2s03_real(self):
-        # Second poll without a tag file, simulating the re-tagging of VLANs
-        command = ["poll", "network_device", "--vlan",
-                   "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
-        out = self.statustest(command)
-        net = self.net["ut01ga2s01_v712"]
-        self.matchoutput(out,
-                         "ut01ga2s03.aqd-unittest.ms.com: "
-                         "network %s [%s/%s] updated to VLAN 712, type user" %
-                         (net.name, net.ip, net.prefixlen),
-                         command)
-
-    def test_236_verify_real_tag(self):
-        command = ["show_network_device", "--network_device", "ut01ga2s03.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "VLAN 712: %s" % self.net["ut01ga2s01_v712"].ip, command)
-        self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
-        self.matchclean(out, "VLAN 717", command)
-        self.matchclean(out, "VLAN 718", command)
 
     def test_240_poll_ut01ga2s04(self):
-        self.successtest(["poll", "network_device", "--vlan",
-                          "--network_device", "ut01ga2s04.aqd-unittest.ms.com"])
-
-    def test_300_poll_bor(self):
-        command = ["poll", "network_device", "--vlan",
-                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
-        err = self.statustest(command)
-        self.matchoutput(err,
-                         "Skipping VLAN probing on switch "
-                         "ut3gd1r01.aqd-unittest.ms.com, it's "
-                         "not a ToR network device.",
-                         command)
+        self.successtest(["poll", "network_device",
+                          "--network_device",
+                          "ut01ga2s04.aqd-unittest.ms.com"])
 
     def test_305_poll_type(self):
         # We make use of poll_switch reporting the (lack of the) jump host for
@@ -256,6 +239,14 @@ class TestPollNetworkDevice(TestBrokerCommand):
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown switch type 'no-such-type'.", command)
+
+    def test_311_rack_and_vlan_option(self):
+        command = ["poll", "network_device", "--rack", "ut3", "--type",
+                   "bor","--vlan"]
+        err = self.unimplementederrortest(command)
+        self.matchoutput(
+            err, "Not Implemented: vlan argument is no longer available",
+            command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPollNetworkDevice)
