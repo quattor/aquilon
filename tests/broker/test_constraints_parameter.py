@@ -145,7 +145,7 @@ class TestParameterConstraints(TestBrokerCommand):
         command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--personality", "utpers-dev", "--personality_stage", "next"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "'/system/personality/esp/function' does not have an associated value", command)
+        self.matchoutput(err, "(/system/personality/esp/function) doesn't exist", command)
         self.matchoutput(err, "BUILD FAILED", command)
 
     def test_145_verify_stage_diff(self):
