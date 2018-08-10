@@ -607,6 +607,10 @@ class TestBrokerCommand(unittest.TestCase):
             # Some reasonable defaults...
             path = ["/bin", "/usr/bin"]
 
+        # Allow tests running in a CI environment (e.g. travis) to find local git config
+        if "HOME" not in newenv:
+            newenv["HOME"] = os.environ.get("HOME", "/home/%(USER)s" % newenv)
+
         # The 'aq' command need to run some external tools, so make sure those
         # will be found
         for exe in [sys.executable,
@@ -629,6 +633,7 @@ class TestBrokerCommand(unittest.TestCase):
             args = [command]
         args.insert(0, self.config.lookup_tool("git"))
         env = self.gitenv(kwargs.pop("env", None))
+
         p = Popen(args, stdout=PIPE, stderr=PIPE, env=env, **kwargs)
         return p
 
@@ -718,6 +723,8 @@ class TestBrokerCommand(unittest.TestCase):
             filename = DSDB_EXPECT_SUCCESS_FILE
 
         expected_name = os.path.join(self.dsdb_coverage_dir, filename)
+        print expected_name
+
         with open(expected_name, "a") as fp:
             if isinstance(command, list):
                 fp.write(" ".join(str(cmd) for cmd in command))

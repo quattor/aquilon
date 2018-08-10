@@ -1,0 +1,12 @@
+Twisted >= 12.2.0
+coverage
+ipaddress
+jsonschema
+lxml
+mako
+psycopg2 >= 2.5.1
+python-dateutil
+six >= 1.7.3
+sqlalchemy >= 0.9.7
+zope-interface
+protobuf >= 3.6.0
