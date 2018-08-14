@@ -155,7 +155,7 @@ def multi_col_constraint_name(table_name, columns, suffix):
         return name
 
     raise AquilonError("Cannot abbreviate (%s, %s)" %
-                       (table_name, ", ".join(list(columns.keys))))
+                       (table_name, ", ".join(list(columns.keys()))))
 
 
 def rename_non_null_check_constraints(db):
