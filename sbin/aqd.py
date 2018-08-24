@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,5 +35,14 @@ from twisted.scripts import twistd
 from aquilon.twisted_patches import updated_application_run
 
 
-twistd._SomeApplicationRunner.run = updated_application_run
-twistd.run()
+def run():
+    twistd._SomeApplicationRunner.run = updated_application_run
+    twistd.run()
+
+
+def init():
+    if __name__ == '__main__':
+        run()
+
+
+init()
