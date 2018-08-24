@@ -98,7 +98,7 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template servicedata/utsvc/utsi1/config;",
                          command)
-        self.matchoutput(out, 'include { "servicedata/utsvc/config" };',
+        self.matchoutput(out, 'include "servicedata/utsvc/config";',
                          command)
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out,
@@ -161,7 +161,7 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out,
                          "structure template servicedata/utsvc/utsi2/config;",
                          command)
-        self.matchoutput(out, 'include { "servicedata/utsvc/config" };',
+        self.matchoutput(out, 'include "servicedata/utsvc/config";',
                          command)
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out,
@@ -279,10 +279,10 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, "object template unittest00.one-nyp.ms.com",
                          command)
         self.matchoutput(out,
-                         'include { "service/utsvc/utsi1/server/config" };',
+                         'include "service/utsvc/utsi1/server/config";',
                          command)
         self.matchoutput(out,
-                         'include { "service/utsvc/utsi2/server/config" };',
+                         'include "service/utsvc/utsi2/server/config";',
                          command)
 
     def test_300_show_unittest00(self):
@@ -330,7 +330,7 @@ class TestBindServer(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         'include { "service/utsvc/utsi2/server/config" };',
+                         'include "service/utsvc/utsi2/server/config";',
                          command)
 
     def test_300_show_unittest20(self):

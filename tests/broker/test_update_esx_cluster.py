@@ -115,7 +115,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", original_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         """include { "personality/vulcan-10g-server-prod/config" };""",
+                         """include "personality/vulcan-10g-server-prod/config";""",
                          command)
 
         # FIXME: This is a no-op for now, due to using the prod templates
@@ -137,7 +137,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", updated_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         """include { "os/esxi/5.0.0/config" };""",
+                         """include "os/esxi/5.0.0/config";""",
                          command)
 
         command = ["reconfigure", "--membersof=utecl1",

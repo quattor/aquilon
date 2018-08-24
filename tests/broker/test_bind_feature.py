@@ -66,7 +66,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'include { "features/pre_host/config" };\s*',
+                          r'include "features/pre_host/config";\s*',
                           command)
         self.searchoutput(out,
                           r'"/metadata/features" = append\("features/pre_host/config"\);',
@@ -124,7 +124,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'include { "features/post_host/config" };',
+                          r'include "features/post_host/config";',
                           command)
         self.searchoutput(out,
                           r'"/metadata/features" = append\("features/post_host/config"\);',
@@ -220,10 +220,10 @@ class TestBindFeature(TestBrokerCommand):
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         'include { if_exists("features/hardware/bios_setup/config") };',
+                         'include if_exists("features/hardware/bios_setup/config");',
                          command)
         self.matchoutput(out,
-                         'include { if_exists("features/hardware/bios_setup") };',
+                         'include if_exists("features/hardware/bios_setup");',
                          command)
 
     def test_140_bind_nic_model_interface(self):
@@ -298,11 +298,11 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchclean(out,
                          r'variable CURRENT_INTERFACE = "eth0";\s*'
-                         r'include { "features/interface/src_route/config" };',
+                         r'include "features/interface/src_route/config";',
                          command)
         self.searchoutput(out,
                           r'variable CURRENT_INTERFACE = "eth1";\s*'
-                          r'include { "features/interface/src_route/config" };',
+                          r'include "features/interface/src_route/config";',
                           command)
 
     def test_141_verify_cat_unittest00(self):
@@ -370,7 +370,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'variable CURRENT_INTERFACE = "bond0";\s*'
-                          r'include { "features/interface/src_route/config" };',
+                          r'include "features/interface/src_route/config";',
                           command)
         self.matchclean(out, 'CURRENT_INTERFACE = "eth0"', command)
         self.matchclean(out, 'CURRENT_INTERFACE = "eth1"', command)
