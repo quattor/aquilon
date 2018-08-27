@@ -121,7 +121,7 @@ class TestShowPermission(TestBrokerCommand):
 
     def test_315_username_realm(self):
         command = ["show_permission", "--username", getpass.getuser(),
-                   "--realm", "is1.morgan"]
+                   "--realm", self.realm]
         out = self.commandtest(command)
         self.matchoutput(out, "show_city", command)
 

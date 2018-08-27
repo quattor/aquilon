@@ -19,6 +19,7 @@ database_section = database_sqlite
 disable_fsync = yes
 
 [broker]
+authorization_rules = %(srcdir)s/tests/unittest_authorization.conf
 servername = %(hostname)s
 umask = 0022
 kncport = 6902
@@ -69,7 +70,7 @@ switch_discover = %(srcdir)s/tests/fakebin/fake_switchdata
 get_camtable = %(srcdir)s/tests/fakebin/fake_macdata
 checkedm = %(srcdir)s/tests/fakebin/fake_checkedm
 aqd_checkedm = %(srcdir)s/tests/fakebin/fake_aqd_checkedm
-location_uri_validator = %(srcdir)s/tests/fakebin/location_uri_validator
+location_uri_validator = %(srcdir)s/tests/fakebin/fake_location_uri_validator
 git = /usr/bin/git
 klist = /usr/bin/klist
 knc = /usr/local/bin/knc
@@ -95,8 +96,8 @@ template_alternate_prod =
 fake_hosts_location = %(srcdir)s/tests/fakebin/dsdb.d/show_host_-host_name_
 datadir = %(srcdir)s/tests/broker/data
 
-# Alternative tool locations outside MS
-real_panc_location = /usr/lib/panc.jar
+real_panc_location = /tmp/panc-10.7-jar-with-dependencies.jar
+
 
 # Versions for the Linux models. These are used both for Aquilon and Aurora.
 linux_version_curr = 6.1-x86_64
@@ -153,4 +154,7 @@ ipfromtype = True
 directory = /usr/local/lib/aquilon/protocols/lib/python
 
 [dsdb]
-enable = False
+enable = True
+
+[hardware_chassis]
+default_eonid = 2

@@ -152,7 +152,8 @@ class TestAddDnsDomain(TestBrokerCommand):
         # If the local host is under .ms.com, then we don't want to add it again
         p, _, _ = self.runcommand(["show", "dns", "domain",
                                    "--dns_domain", domain])
-        if domain and p.returncode == 4:
+        # Do not add travis local domain (dev): adding top-level DNS is not permited
+        if domain and p.returncode == 4 and not hostname == 'travis.dev':
             self.dsdb_expect("add_dns_domain -domain_name %s -comments " % domain)
             command = ["add", "dns", "domain", "--dns_domain", domain] + self.valid_just_tcm
             self.noouttest(command)

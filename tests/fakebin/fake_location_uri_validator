@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (C) 2017  Contributor
 #
@@ -14,11 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-echo "$1" | egrep -q "^assetinventory://[0-9]+$"
+echo "$2" | egrep -q "^[a-z]+://[0-9]+$"
 if [ $? -eq 0 ]; then
-  echo "success"
+  nb="$(echo $2 | cut -d/ -f3)"
+  if [ "$nb" == "003427" ] && [ "$6" != "cards" ]; then
+    echo "Location URI not valid: Building name and URI do not match"
+    exit 1
+  elif [ "$nb" == "005555" ]; then
+    echo "Warning: 'IT_CODE' in '(.*)' is empty for URI 'assetinventory://005555'! Proceeding without validation."
+    exit 0
+  fi
   exit 0
 else
-  echo "unknown system" >&2
+  echo "URI '$2' is not formatted correctly. It must be of the form 'string://012345' where the number contains 6 digits and is zero-padded."
   exit 1
 fi

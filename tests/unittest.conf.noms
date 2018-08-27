@@ -67,7 +67,7 @@ switch_discover = %(srcdir)s/tests/fakebin/fake_switchdata
 get_camtable = %(srcdir)s/tests/fakebin/fake_macdata
 checkedm = %(srcdir)s/tests/fakebin/fake_checkedm
 aqd_checkedm = %(srcdir)s/tests/fakebin/fake_aqd_checkedm
-location_uri_validator = %(srcdir)s/tests/fakebin/location_uri_validator
+location_uri_validator = %(srcdir)s/tests/fakebin/fake_location_uri_validator
 
 # Alternative tool locations outside MS
 git_daemon = /usr/libexec/git-core/git-daemon
