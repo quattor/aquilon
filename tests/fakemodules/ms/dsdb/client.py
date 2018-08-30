@@ -27,7 +27,7 @@ class DSDB(object):
     Used if no DSDB module imported.
     """
 
-    def __init__(self, plant='test', debug=True):
+    def __init__(self, plant='test', verbosity=None, debug=True, kerberos=True, timeout=10):
         pass
 
     def show_rack(self, rack_name):
