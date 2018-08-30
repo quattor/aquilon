@@ -69,6 +69,7 @@ class TestAddNetworkCompartment(TestBrokerCommand):
                    "--network_compartment", "perimeter.ut", "--format", "proto"]
         compartment = self.protobuftest(command, expect=1)[0]
         self.assertEqual(compartment.name, "perimeter.ut")
+        self.assertEqual(compartment.comments, "Unit-test Permiter DMZ")
 
     def test_209_show_nonexistant(self):
         command = ["show", "network", "compartment",
