@@ -432,8 +432,13 @@ class DSDBEnabledMeta(type):
         if DSDB_ENABLED:
             if instance.dsdb_use_testdb:
                 os.environ['DSDB_USE_TESTDB'] = "1"
+
+            # a timeout of zero in the broker config means "no timeout";  for ms.dsdb,
+            # zero means immediate timeout (i.e. non-blocking operation).
+            use_timeout = config.lookup_tool_timeout('dsdb') or None
+
             instance.dsdbclient = ms.dsdb.client.DSDB(plant='prod',
-                                                      timeout=config.lookup_tool_timeout('dsdb'))
+                                                      timeout=use_timeout)
         return instance
 
 
