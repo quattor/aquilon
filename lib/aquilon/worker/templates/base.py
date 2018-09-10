@@ -552,7 +552,7 @@ class PlenaryCollection(object):
                 self.restore_stash()
             raise
         finally:
-            if not locked:
+            if not locked and key:
                 lock_queue.release(key)
 
         if verbose and self.plenaries:
