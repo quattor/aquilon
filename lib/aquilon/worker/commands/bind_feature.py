@@ -141,7 +141,7 @@ class CommandBindFeature(BrokerCommand):
         q = q.filter(or_(*filters))
 
         for dbdomain in q:
-            check_feature_template(self.config, dbarchetype, dbfeature,
+            check_feature_template(self.config, logger, dbarchetype, dbfeature,
                                    dbdomain)
 
         add_link(session, logger, dbfeature, params)
