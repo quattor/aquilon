@@ -19,9 +19,11 @@
 
 from __future__ import print_function
 
+import json
 import sys
 import os
 from optparse import OptionParser, OptionValueError
+from optparse import Option as OPOption
 import re
 from subprocess import Popen
 import textwrap
@@ -90,10 +92,75 @@ def normalize_help(data):
     return asciidata
 
 
+class ExtendedOption(OPOption):
+    """
+    This class is based on the example from
+    https://docs.python.org/2/library/optparse.html#adding-new-actions
+
+    Small tweaks have been made to store the extend results into a JSON
+    string, so it can be passed properly to the broker
+    """
+
+    ACTIONS = OPOption.ACTIONS + ('extend',)
+    STORE_ACTIONS = OPOption.STORE_ACTIONS + ('extend',)
+    TYPED_ACTIONS = OPOption.TYPED_ACTIONS + ('extend',)
+    ALWAYS_TYPED_ACTIONS = OPOption.ALWAYS_TYPED_ACTIONS + ('extend',)
+
+    def __init__(self, *opts, **attrs):
+        action = attrs.get('action')
+        if action == 'extend':
+            valtype = attrs.get('type')
+            if valtype == 'int':
+                self._type = {
+                    'name': 'integer',
+                    'convert': int,
+                    'check': lambda x: all(c in '0123456789' for c in x),
+                }
+                attrs['type'] = 'string'
+            elif valtype == 'float':
+                self._type = {
+                    'name': 'float',
+                    'convert': float,
+                    'check': lambda x: (
+                        x.count('.') < 2 and
+                        all(c in '0123456789.' for c in x)),
+                }
+                attrs['type'] = 'string'
+
+        OPOption.__init__(self, *opts, **attrs)
+
+    def take_action(self, action, dest, opt, value, values, parser):
+        if action == 'extend':
+            # Split the received value using the comma in case multiple
+            # values have been provided
+            lvalue = value.split(',')
+            if hasattr(self, '_type'):
+                for i, lv in enumerate(lvalue):
+                    if not self._type['check'](lv):
+                        parser.error('option {}: invalid {} '
+                                     'value: \'{}\''.format(
+                                         opt, self._type['name'], lv))
+                lvalue[i] = self._type['convert'](lv)
+
+            # Get the current list of values
+            current = json.loads(getattr(values, dest) or '[]')
+
+            # Extend it with the new values
+            current.extend(lvalue)
+
+            # Store back the list in the JSON format
+            setattr(values, dest, json.dumps(current))
+        else:
+            OPOption.take_action(
+                self, action, dest, opt, value, values, parser)
+
+
 class CustomParser(OptionParser):
 
     def __init__(self, command, *args, **kwargs):
         self.command = command
+        if not 'option_class' in kwargs:
+            kwargs['option_class'] = ExtendedOption
         # OptionParser is an old-style class, so super() does not work
         OptionParser.__init__(self, *args, **kwargs)
 
@@ -355,14 +422,20 @@ class OptGroup(Element):
             conflicts[conflict] = self.name
         return conflicts
 
-    def getAllRequires(self, found):
+    def getAllRequires(self, found, inherit=None):
         requires = {}
-        for o in self.options:
-            r = o.getAllRequires(found)
-            requires.update(r)
 
         if self.requires:
             requires[self.name] = self.requires
+            if inherit:
+                inherit = set(inherit).union(set(self.requires))
+            else:
+                inherit = set(self.requires)
+
+        for o in self.options:
+            r = o.getAllRequires(found, inherit=inherit)
+            requires.update(r)
+
         return requires
 
     def shortHelp(self):
@@ -394,6 +467,11 @@ class Option(Element):
 
     def __init__(self, node):
         Element.__init__(self, node)
+
+        if "action" in node.attrib:
+            self.action = node.attrib["action"]
+        else:
+            self.action = None
 
         if "type" in node.attrib:
             self.type = node.attrib["type"]
@@ -484,13 +562,16 @@ class Option(Element):
             parser.add_option(*names, dest=self.name, action="store_true",
                               **extra_args)
         elif self.type in ['string', 'ip', 'mac', 'json', 'enum', 'uuid']:
-            parser.add_option(*names, dest=self.name, action="store",
+            parser.add_option(*names, dest=self.name,
+                              action=self.action or "store",
                               **extra_args)
         elif self.type == 'int':
-            parser.add_option(*names, dest=self.name, action="store",
+            parser.add_option(*names, dest=self.name,
+                              action=self.action or "store",
                               type="int", **extra_args)
         elif self.type == 'float':
-            parser.add_option(*names, dest=self.name, action="store",
+            parser.add_option(*names, dest=self.name,
+                              action=self.action or "store",
                               type="float", **extra_args)
         elif self.type == 'file' or self.type == 'list':
             # Need type?
@@ -509,10 +590,13 @@ class Option(Element):
                 conflicts[conflict] = self.name
         return conflicts
 
-    def getAllRequires(self, found):
+    def getAllRequires(self, found, inherit=None):
         requires = {}
-        if self.name in found and self.requires:
-            requires[self.name] = self.requires
+        if self.name in found and (inherit or self.requires):
+            r = set(self.requires)
+            if inherit:
+                r.update(set(inherit))
+            requires[self.name] = sorted(r)
         return requires
 
     def shortHelp(self):

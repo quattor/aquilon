@@ -427,11 +427,14 @@ class ResourcesCommandEntry(CommandEntry):
         # Checks for specific parameters, filled in by add_option
         self.parameter_checks = {}
 
-    def add_option(self, option_name, paramtype, enumtype=None):
+    def add_option(self, option_name, paramtype, enumtype=None,
+                   actiontype=None):
         # If this argument was not specified directly by the instance of
         # BrokerCommand then record it as optional (FIXME)
         if option_name not in self.argument_requirements:
             self.argument_requirements[option_name] = False
+
+        type_handler = None
 
         # Fill in the parameter checker for this option
         if paramtype == 'enum':
@@ -441,16 +444,31 @@ class ResourcesCommandEntry(CommandEntry):
                 return
             try:
                 enum_class = StringEnum(enumtype)
-                self.parameter_checks[option_name] = enum_class.from_argument
+                type_handler = enum_class.from_argument
             except ValueError as e:
                 log.msg("Unknown Enum: %s" % e)
                 return
         else:
             if paramtype in self._type_handler:
-                self.parameter_checks[option_name] = self._type_handler[paramtype]
+                type_handler = self._type_handler[paramtype]
             else:
                 log.msg("Warning: unknown option type %s for %s.%s" %
                         (paramtype, self.broker_command.command, option_name))
+
+        if actiontype == 'extend':
+            # If the function did not have a type handler, just add one that
+            # does nothing
+            if not type_handler:
+                type_handler = lambda label, value: value
+
+            # Patch the function to convert the data to a list from the JSON
+            # list, and apply the type convertion to each member of the list
+            def extend_type(label, value):
+                return [type_handler(label, v)
+                        for v in force_json(label, value)]
+            self.parameter_checks[option_name] = extend_type
+        elif type_handler:
+            self.parameter_checks[option_name] = type_handler
 
     def check_arguments(self, arguments):
         """Check for the required and optional arguments.
