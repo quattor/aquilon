@@ -2651,7 +2651,7 @@
     </command>
 
     <command name="show_review">
-	<optgroup fields="one">
+	<optgroup mandatory="True" fields="one">
 	    <optgroup fields="all">
 		<option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
 		<option name="target" type="string">Name of the target domain</option>
