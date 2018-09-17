@@ -23,11 +23,11 @@ from subprocess import Popen, PIPE
 
 import unittest
 
+from brokertest import TestBrokerCommand
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
-
-from brokertest import TestBrokerCommand
 
 
 class TestPublishSandbox(TestBrokerCommand):
@@ -40,49 +40,17 @@ class TestPublishSandbox(TestBrokerCommand):
         testdir = os.path.join(cls.sandboxdir, "changetest1", "t")
         if os.path.exists(os.path.join(testdir, "Makefile")):
             p = Popen(('/usr/bin/make', 'clean'),
-                      cwd=testdir, env=cls.gitenv(env={'PATH': '/bin:/usr/bin'}),
+                      cwd=testdir, env=cls.gitenv(
+                    env={'PATH': '/bin:/usr/bin'}),
                       stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
             cls.assertEqual(p.returncode, 0,
-                            "Non-zero return code running make clean in sandbox,"
-                            " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
-                            % (out, err))
+                            "Non-zero return code running "
+                            "make clean in sandbox, "
+                            "STDOUT:\n@@@'{}'\n@@@\nSTDERR:\n@@@'{}'@@@\n"
+                            .format(out, err))
 
-    def testmakechange(self):
-        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
-        template = self.find_template("aquilon", "archetype", "base",
-                                      sandbox="changetest1")
-        with open(template) as f:
-            contents = f.readlines()
-        contents.append("#Added by unittest\n")
-
-        with open(template, 'w') as f:
-            f.writelines(contents)
-
-        self.gitcommand(["commit", "-a", "-m", "added unittest comment"],
-                        cwd=sandboxdir)
-
-    def testpublishchangetest1sandbox(self):
-        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
-        self.successtest(["publish", "--branch", "changetest1"],
-                         env=self.gitenv(), cwd=sandboxdir)
-        # FIXME: Check the branch on the broker directly?
-
-    def testverifychangetest1(self):
-        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
-        p = Popen(["/bin/rm", "-rf", sandboxdir], stdout=1, stderr=2)
-        p.wait()
-        self.successtest(["get", "--sandbox", "changetest1"])
-        self.assertTrue(os.path.exists(sandboxdir))
-        template = self.find_template("aquilon", "archetype", "base",
-                                      sandbox="changetest1")
-        self.assertTrue(os.path.exists(template),
-                        "aq get did not retrive '%s'" % template)
-        with open(template) as f:
-            contents = f.readlines()
-        self.assertEqual(contents[-1], "#Added by unittest\n")
-
-    def testaddutfiles(self):
+    def test_100_add_ut_files(self):
         src_dir = os.path.join(self.config.get("unittest", "datadir"),
                                "utsandbox")
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
@@ -98,7 +66,33 @@ class TestPublishSandbox(TestBrokerCommand):
         self.gitcommand(["commit", "-a", "-m", "Added unittest files"],
                         cwd=sandboxdir)
 
-    def testpublishutsandbox(self):
+    def test_110_make_change(self):
+        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest1")
+        with open(template) as f:
+            contents = f.readlines()
+        contents.append("#Added by unittest\n")
+
+        with open(template, 'w') as f:
+            f.writelines(contents)
+
+        self.gitcommand(["commit", "-a", "-m", "added unittest comment"],
+                        cwd=sandboxdir)
+
+    def test_120_publish_changetest1_sandbox(self):
+        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
+        self.successtest(["publish", "--branch", "changetest1"],
+                         env=self.gitenv(), cwd=sandboxdir)
+        # FIXME: Check the branch on the broker directly?
+
+    def test_130_publish_changetest1_sandbox_no_review_created(self):
+        command = ["show_review",
+                   "--source", "changetest1",
+                   "--target", "prod"]
+        self.notfoundtest(command)
+
+    def test_140_publish_ut_sandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         command = ["publish", "--sandbox", "utsandbox"]
         _, err = self.successtest(command, env=self.gitenv(), cwd=sandboxdir)
@@ -110,12 +104,13 @@ class TestPublishSandbox(TestBrokerCommand):
                          "unittest-xml...", command)
         # FIXME: verify that changes made it to unittest
 
-    def testpublishutsandboxuser(self):
+    def test_150_publish_ut_sandbox_user(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        self.ignoreoutputtest(["publish", "--sandbox", "%s/utsandbox" % self.user],
+        self.ignoreoutputtest(["publish",
+                               "--sandbox", "{}/utsandbox".format(self.user)],
                               env=self.gitenv(), cwd=sandboxdir)
 
-    def testrebase(self):
+    def test_160_rebase(self):
         utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         self.gitcommand(["rev-list", "--skip=1", "--max-count=1", "HEAD"],
                         cwd=utsandboxdir)
@@ -150,7 +145,7 @@ class TestPublishSandbox(TestBrokerCommand):
         command.append("--rebase")
         self.ignoreoutputtest(command, env=self.gitenv(), cwd=sandboxdir)
 
-    def testrebasetoomuch(self):
+    def test_170_rebase_too_much(self):
         utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         prod_head, _ = self.gitcommand(["rev-parse", "origin/prod"],
                                        cwd=utsandboxdir)
@@ -159,8 +154,9 @@ class TestPublishSandbox(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "rebasetest2")
 
         # Rewrite history going beyond the starting point of the sandbox
-        self.gitcommand(["filter-branch", "--msg-filter", "tr a-z A-Z", "--force",
-                         prod_head.strip() + "^..HEAD"], cwd=sandboxdir)
+        self.gitcommand(["filter-branch", "--msg-filter", "tr a-z A-Z",
+                         "--force", prod_head.strip() + "^..HEAD"],
+                        cwd=sandboxdir)
 
         # Try to publish it
         command = ["publish", "--sandbox", "rebasetest2", "--rebase"]
@@ -170,7 +166,21 @@ class TestPublishSandbox(TestBrokerCommand):
         self.matchoutput(out, "The published branch no longer contains",
                          command)
 
-    def testzzcleanup(self):
+    def test_180_verify_changetest1(self):
+        sandboxdir = os.path.join(self.sandboxdir, "changetest1")
+        p = Popen(["/bin/rm", "-rf", sandboxdir], stdout=1, stderr=2)
+        p.wait()
+        self.successtest(["get", "--sandbox", "changetest1"])
+        self.assertTrue(os.path.exists(sandboxdir))
+        template = self.find_template("aquilon", "archetype", "base",
+                                      sandbox="changetest1")
+        self.assertTrue(os.path.exists(template),
+                        "aq get did not retrive '%s'" % template)
+        with open(template) as f:
+            contents = f.readlines()
+        self.assertEqual(contents[-1], "#Added by unittest\n")
+
+    def test_190_cleanup(self):
         self.statustest(["del_sandbox", "--sandbox", "rebasetest"])
         sandboxdir = os.path.join(self.sandboxdir, "rebasetest")
         rmtree(sandboxdir, ignore_errors=True)
@@ -178,6 +188,7 @@ class TestPublishSandbox(TestBrokerCommand):
         self.statustest(["del_sandbox", "--sandbox", "rebasetest2"])
         sandboxdir = os.path.join(self.sandboxdir, "rebasetest2")
         rmtree(sandboxdir, ignore_errors=True)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPublishSandbox)

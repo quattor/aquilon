@@ -233,6 +233,8 @@ knc = /ms/dist/kerberos/PROJ/knc/prod/bin/knc
 krb5_keytab = /ms/dist/kerberos/PROJ/krb5_keytab/prod/sbin/krb5_keytab
 klist = /ms/dist/aurora/bin/klist
 aqd_checkedm = /ms/dist/aquilon/PROJ/edmtools/prod/bin/aqd_checkedm
+gerrit_trigger = /ms/dist/aquilon/PROJ/templates-ci/prod/bin/gerrit_trigger
+gerrit_push_branch = /ms/dist/aquilon/PROJ/templates-ci/prod/bin/gerrit_push_branch
 
 java_home = /ms/dist/msjava/PROJ/oraclejdk/1.8.0_121
 ant_home = /ms/dist/ossjava/PROJ/ant/1.9.4
@@ -353,6 +355,8 @@ gzip_output = false
 transparent_gzip = true
 template_extension = .tpl
 object_declarations_template = false
+# For publish review target branch
+default_target_branch = prod
 
 [tool_timeout]
 # If set to True, timeout will be set to 'default_value' for any tools run via subprocess
