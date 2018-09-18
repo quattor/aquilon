@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2008-2014,2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,12 @@ from sqlalchemy import Column, Integer, DateTime, Sequence, String, Boolean
 from sqlalchemy.orm import deferred
 
 from aquilon.exceptions_ import UnimplementedError
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import (
+    Base,
+    HostEnvironment,
+    Location,
+    Parameterized,
+)
 from aquilon.aqdb.column_types import AqStr
 
 _TN = 'archetype'
@@ -51,3 +56,19 @@ class Archetype(Base):
         if not self.is_compileable:
             raise UnimplementedError("{0} is not compileable, {1!s}."
                                      .format(self, msg))
+
+
+class ParameterizedArchetype(Parameterized):
+    _objects = {
+        'main': Archetype,
+        'host_environment': HostEnvironment,
+        'location': Location,
+    }
+
+    @property
+    def resholder(self):
+        for resholder in self._main.resholders:
+            if resholder.host_environment == self.host_environment and \
+                    resholder.location == self.location:
+                return resholder
+        return None

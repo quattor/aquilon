@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2009-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,8 +28,16 @@ from sqlalchemy.util import memoized_property
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.column_types import AqStr, Enum
-from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
-                                User, NetGroupWhiteList)
+from aquilon.aqdb.model import (
+    Archetype,
+    Base,
+    Grn,
+    HostEnvironment,
+    Location,
+    NetGroupWhiteList,
+    Parameterized,
+    User,
+)
 
 _TN = 'personality'
 _PGN = 'personality_grn_map'
@@ -313,3 +321,17 @@ class __PersonalityRootNetGroup(Base):
 Personality.root_netgroups = relation(NetGroupWhiteList,
                                       secondary=__PersonalityRootNetGroup.__table__,
                                       passive_deletes=True)
+
+
+class ParameterizedPersonality(Parameterized):
+    _objects = {
+        'main': Personality,
+        'location': Location,
+    }
+
+    @property
+    def resholder(self):
+        for resholder in self._main.resholders:
+            if resholder.location == self.location:
+                return resholder
+        return None
