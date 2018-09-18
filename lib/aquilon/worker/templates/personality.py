@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,15 +21,27 @@ from operator import attrgetter
 
 from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.aqdb.model import (PersonalityStage, PersonalityParameter,
-                                ArchetypeParamDef)
+from aquilon.aqdb.model import (
+    ArchetypeParamDef,
+    ParameterizedPersonality,
+    PersonalityParameter,
+    PersonalityStage,
+)
 from aquilon.aqdb.model.feature import host_features
 from aquilon.worker.locks import NoLockKey, PlenaryKey
-from aquilon.worker.templates.base import (Plenary, StructurePlenary,
-                                           PlenaryCollection)
-from aquilon.worker.templates.panutils import (pan_include, pan_variable,
-                                               pan_assign, pan_append,
-                                               pan_include_if_exists)
+from aquilon.worker.templates import (
+    Plenary,
+    PlenaryCollection,
+    PlenaryParameterized,
+    StructurePlenary,
+)
+from aquilon.worker.templates.panutils import (
+    pan_append,
+    pan_assign,
+    pan_include,
+    pan_include_if_exists,
+    pan_variable,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,6 +73,24 @@ def staged_path(prefix, dbstage, suffix):
     else:
         return "%s/%s+%s/%s" % (prefix, dbstage.personality.name,
                                 dbstage.name, suffix)
+
+
+class PlenaryParameterizedPersonality(PlenaryParameterized):
+    prefix = "personality"
+
+    @classmethod
+    def template_name(cls, dbobj):
+        return "{}/{}/{}/{}/config".format(
+            cls.prefix,
+            dbobj.name,
+            dbobj.location.location_type,
+            dbobj.location.name)
+
+    def body(self, lines):
+        pass
+
+
+Plenary.handlers[ParameterizedPersonality] = PlenaryParameterizedPersonality
 
 
 class PlenaryPersonality(PlenaryCollection):

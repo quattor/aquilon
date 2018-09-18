@@ -33,6 +33,7 @@ from aquilon.aqdb.model import (
     Host,
     ParameterizedArchetype,
     ParameterizedGrn,
+    ParameterizedPersonality,
     VlanInterface,
 )
 from aquilon.aqdb.model.feature import nonhost_features
@@ -44,6 +45,7 @@ from aquilon.worker.templates import (
     PlenaryCollection,
     PlenaryParameterizedArchetype,
     PlenaryParameterizedGrn,
+    PlenaryParameterizedPersonality,
     PlenaryPersonalityBase,
     PlenaryResource,
     PlenaryServiceInstanceClientDefault,
@@ -116,6 +118,8 @@ class PlenaryHost(PlenaryCollection):
         self.append(PlenaryHostArchetype.get_plenary(
             dbhost, allow_incomplete=allow_incomplete))
         self.append(PlenaryHostGrn.get_plenary(
+            dbhost, allow_incomplete=allow_incomplete))
+        self.append(PlenaryHostPersonality.get_plenary(
             dbhost, allow_incomplete=allow_incomplete))
 
     @classmethod
@@ -439,13 +443,7 @@ class PlenaryHostObject(ObjectPlenary):
 
         pan_include(lines, PlenaryHostGrn.template_name(self.dbobj))
         pan_include(lines, PlenaryHostArchetype.template_name(self.dbobj))
-
-        dbarchetype = self.dbobj.personality.archetype
-        pan_include_if_exists(lines, "archetype/{}/config".format(
-            dbarchetype.name))
-
-        path = PlenaryPersonalityBase.template_name(dbstage)
-        pan_include(lines, path)
+        pan_include(lines, PlenaryHostPersonality.template_name(self.dbobj))
 
         if self.dbobj.cluster:
             pan_include(lines,
@@ -506,4 +504,32 @@ class PlenaryHostGrn(Plenary):
         for dblocation in dblocations:
             dbobj = ParameterizedGrn(dbgrn, dbenv, dblocation)
             path = PlenaryParameterizedGrn.template_name(dbobj)
+            pan_include_if_exists(lines, path)
+
+
+class PlenaryHostPersonality(Plenary):
+    """A plenary template for a host's personality
+
+    This includes all parameterized plenaries for that personality,
+    relating to that host
+    """
+
+    @classmethod
+    def template_name(cls, dbhost):
+        hostname = str(dbhost.fqdn)
+        hostdir = '/'.join(reversed(
+            hostname.split('.', hostname.count('.') - 1)[1:]))
+        return 'host/{}/{}/personality/config'.format(hostdir, hostname)
+
+    def body(self, lines):
+        dbhw_ent = self.dbobj.hardware_entity
+        dblocations = dbhw_ent.location.parents + [dbhw_ent.location]
+
+        dbstage = self.dbobj.personality_stage
+        pan_include(lines, PlenaryPersonalityBase.template_name(dbstage))
+
+        dbpersonality = self.dbobj.personality
+        for dblocation in dblocations:
+            dbobj = ParameterizedPersonality(dbpersonality, dblocation)
+            path = PlenaryParameterizedPersonality.template_name(dbobj)
             pan_include_if_exists(lines, path)

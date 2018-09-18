@@ -24,8 +24,6 @@ from aquilon.worker.templates.base import (
     StructurePlenary,
 )
 from aquilon.worker.templates.city import PlenaryCity
-from aquilon.worker.templates.personality import (PlenaryPersonality,
-                                                  PlenaryPersonalityBase)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 from aquilon.worker.templates.machine import PlenaryMachineInfo
 from aquilon.worker.templates.network import PlenaryNetwork
@@ -41,6 +39,11 @@ from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceInstanceServerDefault)
 from aquilon.worker.templates.archetype import PlenaryParameterizedArchetype
 from aquilon.worker.templates.grn import PlenaryParameterizedGrn
+from aquilon.worker.templates.personality import (
+    PlenaryParameterizedPersonality,
+    PlenaryPersonality,
+    PlenaryPersonalityBase,
+)
 from aquilon.worker.templates.metacluster import (PlenaryMetaCluster,
                                                   PlenaryMetaClusterData,
                                                   PlenaryMetaClusterObject)
@@ -54,6 +57,7 @@ from aquilon.worker.templates.host import (
     PlenaryHostData,
     PlenaryHostGrn,
     PlenaryHostObject,
+    PlenaryHostPersonality,
 )
 from aquilon.worker.templates.network_device import PlenaryNetworkDeviceInfo
 from aquilon.worker.templates.virtual_switch import PlenaryVirtualSwitchData

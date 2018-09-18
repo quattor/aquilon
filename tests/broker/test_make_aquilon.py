@@ -137,11 +137,12 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
             ('include "service/bootserver/unittest/client/config";',),
             ('include "service/dns/unittest/client/config";',),
             ('include "service/ntp/pa.ny.na/client/config";',),
-            ('include "personality/compileserver/config";',),
             ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
              'eon_id/config";',),
             ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
              'archetype/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'personality/config";',),
             ('include "archetype/final";',),
             ('"/metadata/template/branch/name" = "unittest";',),
             ('"/metadata/template/branch/type" = "domain";',),
@@ -149,6 +150,39 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'personality/config;',),
+            ('include "personality/compileserver/config";',),
+            ('include if_exists("personality/compileserver/'
+             'organization/ms/config");',
+             'include if_exists("personality/compileserver/'
+             'hub/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'continent/na/config");',
+             'include if_exists("personality/compileserver/'
+             'country/us/config");',
+             'include if_exists("personality/compileserver/'
+             'campus/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'city/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'building/ut/config");',
+             'include if_exists("personality/compileserver/'
+             'room/utroom1/config");',
+             'include if_exists("personality/compileserver/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("personality/compileserver/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
 
         command = [
             'cat',
@@ -347,11 +381,12 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
             ('include "service/bootserver/unittest/client/config";',),
             ('include "service/dns/unittest/client/config";',),
             ('include "service/ntp/pa.ny.na/client/config";',),
-            ('include "personality/compileserver/config";',),
             ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
              'eon_id/config";',),
             ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
              'archetype/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'personality/config";',),
             ('include "archetype/final";',),
             ('"/metadata/template/branch/name" = "unittest";',),
             ('"/metadata/template/branch/type" = "domain";',),
@@ -359,6 +394,39 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'personality/config;',),
+            ('include "personality/compileserver/config";',),
+            ('include if_exists("personality/compileserver/'
+             'organization/ms/config");',
+             'include if_exists("personality/compileserver/'
+             'hub/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'continent/na/config");',
+             'include if_exists("personality/compileserver/'
+             'country/us/config");',
+             'include if_exists("personality/compileserver/'
+             'campus/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'city/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'building/ut/config");',
+             'include if_exists("personality/compileserver/'
+             'room/utroom1/config");',
+             'include if_exists("personality/compileserver/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("personality/compileserver/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
 
         command = [
             'cat',

@@ -26,6 +26,7 @@ from aquilon.worker.templates import (
     PlenaryHostData,
     PlenaryHostGrn,
     PlenaryHostObject,
+    PlenaryHostPersonality,
     PlenaryResource,
 )
 
@@ -37,8 +38,8 @@ class CommandCatHostname(BrokerCommand):
     # We do not lock the plenary while reading it
     _is_lock_free = True
 
-    def render(self, session, logger, hostname, data, host_archetype,
-               host_grn, generate, **arguments):
+    def render(self, session, logger, hostname, data, host_personality,
+               host_archetype, host_grn, generate, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbresource = get_resource(session, dbhost, **arguments)
         if dbresource:
@@ -50,6 +51,8 @@ class CommandCatHostname(BrokerCommand):
         else:
             if data:
                 cls = PlenaryHostData
+            elif host_personality:
+                cls = PlenaryHostPersonality
             elif host_archetype:
                 cls = PlenaryHostArchetype
             elif host_grn:

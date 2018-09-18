@@ -2822,7 +2822,7 @@
                     <option name="grn" type="string" requires="location+host_environment city+host_environment">GRN as string</option>
                     <option name="eon_id" type="int" requires="location+host_environment city+host_environment">Numeric EON ID</option>
                     <optgroup fields="any">
-                        <option name="personality" type="string" conflicts="city">Name of personality</option>
+                        <option name="personality" type="string">Name of personality</option>
                         <option name="archetype" type="string" requires="personality location+host_environment city+host_environment">Archetype</option>
                     </optgroup>
                 </optgroup>
@@ -2834,12 +2834,13 @@
         <optgroup fields="one" conflicts="resources">
             <option name="data" type="flag" requires="hostname cluster metacluster network_device virtual_switch">Show the data template for the host/cluster</option>
             <option name="client" type="flag" requires="cluster">Show the client template for the cluster</option>
+            <option name="host_personality" type="flag" requires="hostname">Show the personality template for the host</option>
             <option name="host_archetype" type="flag" requires="hostname">Show the archetype template for the host</option>
             <option name="host_grn" type="flag" requires="hostname">Show the GRN template for the host</option>
         </optgroup>
         <optgroup>
-            <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
-            <option name="param_tmpl" requires="personality" type="string">Param templates</option>
+            <option name="personality_stage" requires="personality" type="string" conflicts="location city">Personality stage to use, defaults to 'current'.</option>
+            <option name="param_tmpl" requires="personality" type="string" conflicts="location city resources">Param templates</option>
         </optgroup>
         <optgroup>
             <option name="instance" type="string" requires="service">Name of the service instance</option>
@@ -2864,7 +2865,7 @@
             <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
             <option name="network_environment" type="string" requires="networkip">Network environment (default: internal)</option>
         </optgroup>
-        <optgroup name="location" requires="archetype eon_id grn" fields="one" conflicts="city">
+        <optgroup name="location" requires="personality archetype eon_id grn" fields="one" conflicts="city">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
             <option name="continent" type="string">Continent</option>

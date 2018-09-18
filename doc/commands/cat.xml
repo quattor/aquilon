@@ -38,6 +38,7 @@
             <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
             <group>
                 <arg choice="plain"><option>--data</option></arg>
+                <arg choice="plain"><option>--host_personality</option></arg>
                 <arg choice="plain"><option>--host_archetype</option></arg>
                 <arg choice="plain"><option>--host_grn</option></arg>
                 <arg choice="plain">
@@ -130,11 +131,18 @@
                 <synopfragmentref linkend="global-options">Global options</synopfragmentref>
             </group>
             <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-            <arg choice="plain">
-                <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
-                <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-                <arg><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
-            </arg>
+            <group>
+                <arg choice="plain">
+                    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+                    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+                    <arg><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
+                </arg>
+                <arg choice="plain">
+                    <group choice="req">
+                        <synopfragmentref linkend="location-options">Location options</synopfragmentref>
+                    </group>
+                </arg>
+            </group>
             <arg><option>--generate</option></arg>
         </cmdsynopsis>
         <cmdsynopsis>
@@ -292,6 +300,18 @@
                     <para>
                         In case of clusters, display the plenary template which all members of the cluster
                         include.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--host_personality</option>
+                </term>
+                <listitem>
+                    <para>
+                        In case of host, display the plenary template that the host include to load
+                        all that is related to its personality, including all of the applicable
+                        parameterized Personality (per-location).
                     </para>
                 </listitem>
             </varlistentry>
@@ -462,7 +482,7 @@
                     <para>
                         Display the plenary of the given personality. If no other options are specified, the default
                         top-level plenary is displayed. Use option <option>--param_tmpl</option> to select other related
-                        templates.
+                        templates. Use <replaceable>Location options</replaceable> to select the parameterized templates.
                     </para>
                 </listitem>
             </varlistentry>
@@ -493,6 +513,16 @@
                 <listitem>
                     <para>
                         Display the named parameter template.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                </term>
+                <listitem>
+                    <para>
+                        Display the parameterized personality template for the named location.
                     </para>
                 </listitem>
             </varlistentry>
@@ -599,6 +629,13 @@ aq cat --service foo --instance bar --server
             <title>Look at the plenary of a parameterized GRN at the Organization level</title>
             <programlisting>
 aq cat --grn grn:/foo/bar/baz --host_environment alice --organization bob
+            </programlisting>
+        </example>
+
+        <example>
+            <title>Look at the plenary of a parameterized Personality at the City level</title>
+            <programlisting>
+aq cat --personality foo --city bar
             </programlisting>
         </example>
     </refsect1>
