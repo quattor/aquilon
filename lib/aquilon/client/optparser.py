@@ -448,12 +448,13 @@ class OptGroup(Element):
             else:
                 help = "Requires %s of these options:\n" % self.fields
         else:
+            name = ' "{}"'.format(self.name) if self.name else ''
             if self.fields == 'all':
-                help = "Optional, but must use all or none:\n"
+                help = "Optional{}, but must use all or none:\n".format(name)
             elif self.fields == 'one':
-                help = "Optional, use at most one:\n"
+                help = "Optional{}, use at most one:\n".format(name)
             else:
-                help = "Optional:\n"
+                help = "Optional{}:\n".format(name)
 
         whitespace = " " * (4 * (indentlevel))
         res = whitespace + help
