@@ -10,6 +10,7 @@ before_script:
   - cd $TRAVIS_BUILD_DIR/tools/bootstrap_ms && python setup.py sdist && pip install dist/*.tar.gz
   - cd $TRAVIS_BUILD_DIR && cp -R tests/fakemodules/ms/dsdb /home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/ms/; echo $?
   - ls /home/travis/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/ms/
+  - cd /tmp && wget https://search.maven.org/remotecontent?filepath=ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar -O ant-contrib.jar
 script:
   - cd $TRAVIS_BUILD_DIR && tests/runtests.py -c tests/unittest.conf.travis --assume_yes
 after_script:

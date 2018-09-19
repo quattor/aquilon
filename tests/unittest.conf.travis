@@ -77,7 +77,10 @@ knc = /usr/local/bin/knc
 
 # Alternative tool locations outside MS
 git_daemon = /usr/lib/git-core/git-daemon
-ant_contrib_jar = /usr/share/java/ant/ant-contrib.jar
+java_home = /usr/lib/jvm/java-8-oracle/jre
+ant_home =
+ant = /usr/bin/ant
+ant_contrib_jar = /tmp/ant-contrib.jar
 
 [location_feeds]
 building_feed = %(srcdir)s/tests/fakebin/user-data/location_feed.csv

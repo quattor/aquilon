@@ -318,7 +318,7 @@ class DummyNetworks(object):
         testsuite.noouttest(command)
 
         with open(statefile, "wb") as f:
-            pickle.dump(result, f)
+            pickle.dump(result, f, -1)
 
         self.networks[name] = result
 
