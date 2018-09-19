@@ -34,5 +34,7 @@ class NetworkCompartmentFormatter(ObjectFormatter):
     def fill_proto(self, network_compartment, skeleton, embedded=True,
                    indirect_attrs=True):
         skeleton.name = network_compartment.name
+        if network_compartment.comments:
+            skeleton.comments = network_compartment.comments
 
 ObjectFormatter.handlers[NetworkCompartment] = NetworkCompartmentFormatter()

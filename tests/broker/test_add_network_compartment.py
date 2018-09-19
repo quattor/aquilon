@@ -48,6 +48,11 @@ class TestAddNetworkCompartment(TestBrokerCommand):
                    "--comments", "Unit-test Interior"] + self.valid_just_tcm
         self.noouttest(command)
 
+    def test_103_add_nocomment(self):
+        command = ["add", "network", "compartment",
+                "--network_compartment", "interior.nocomment"] + self.valid_just_tcm
+        self.noouttest(command)
+
     def test_109_add_utint_again(self):
         command = ["add", "network", "compartment",
                    "--network_compartment", "interior.ut"]
@@ -69,6 +74,14 @@ class TestAddNetworkCompartment(TestBrokerCommand):
                    "--network_compartment", "perimeter.ut", "--format", "proto"]
         compartment = self.protobuftest(command, expect=1)[0]
         self.assertEqual(compartment.name, "perimeter.ut")
+        self.assertEqual(compartment.comments, "Unit-test Permiter DMZ")
+
+    def test_203_show_nocomment_proto(self):
+        command = ["show", "network", "compartment",
+                   "--network_compartment", "interior.nocomment", "--format", "proto"]
+        compartment = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(compartment.name, "interior.nocomment")
+        self.assertEqual(compartment.comments, '')
 
     def test_209_show_nonexistant(self):
         command = ["show", "network", "compartment",

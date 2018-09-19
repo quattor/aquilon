@@ -155,6 +155,9 @@ plenarydir = %(cfgdir)s/plenary
 service = %(user)s
 keytab = /var/spool/keytabs/%(service)s
 installfe_user = %(user)s
+# Define installfe_cdburl to the URL used to serve broker profiles
+# if you want Aquilon to manage AII cdburl
+installfe_cdburl =
 server_notifications =
 client_notifications = yes
 sharedata = /ms/dist/storage/etc/nasobjects.cdb
@@ -404,4 +407,4 @@ precreated_compartments_only = False
 ignore_network_compartments_regex =
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.44/common/lib/python/
+directory = /ms/dist/aquilon/PROJ/protocols/1.45/common/lib/python/

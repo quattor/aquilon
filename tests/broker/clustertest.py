@@ -50,7 +50,7 @@ class ClusterTestMixin(object):
                             '"/metadata/template/branch/author"',
                             object_command)
 
-        self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
+        self.matchoutput(object, 'include "personality/%s/config";' % persona,
                          object_command)
 
         data_command = ["cat", "--cluster", name, "--data"]

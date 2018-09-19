@@ -129,29 +129,29 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out,
-                         """include { "archetype/base" };""",
+                         """include "archetype/base";""",
                          command)
         self.matchoutput(out,
-                         'include { "os/linux/%s/config" };' %
+                         'include "os/linux/%s/config";' %
                          self.linux_version_prev,
                          command)
         self.matchoutput(out,
-                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         """include "service/afs/q.ny.ms.com/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/unittest/client/config" };""",
+                         """include "service/bootserver/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/unittest/client/config" };""",
+                         """include "service/dns/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         """include "service/ntp/pa.ny.na/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "personality/compileserver/config" };""",
+                         """include "personality/compileserver/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "archetype/final" };""",
+                         """include "archetype/final";""",
                          command)
 
         self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
@@ -284,29 +284,29 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         """include { "archetype/base" };""",
+                         """include "archetype/base";""",
                          command)
         self.matchoutput(out,
-                         'include { "os/linux/%s/config" };' %
+                         'include "os/linux/%s/config";' %
                          self.linux_version_prev,
                          command)
         self.matchoutput(out,
-                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         """include "service/afs/q.ny.ms.com/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/unittest/client/config" };""",
+                         """include "service/bootserver/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/unittest/client/config" };""",
+                         """include "service/dns/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         """include "service/ntp/pa.ny.na/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "personality/compileserver/config" };""",
+                         """include "personality/compileserver/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "archetype/final" };""",
+                         """include "archetype/final";""",
                          command)
         self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
                          command)

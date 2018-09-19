@@ -43,7 +43,7 @@ _mylocal = threading.local()
 
 
 class Plenary(object):
-    template_type = ""
+    template_type = "unique"
     """ Specifies the PAN template type to generate """
 
     handlers = {}

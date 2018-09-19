@@ -230,32 +230,32 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           command)
 
         self.matchoutput(out,
-                         """include { "archetype/base" };""",
+                         """include "archetype/base";""",
                          command)
         self.matchoutput(out,
                          """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
                          command)
         self.matchoutput(out,
-                         'include { "os/linux/%s/config" };' %
+                         'include "os/linux/%s/config";' %
                          self.linux_version_prev,
                          command)
         self.matchoutput(out,
-                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         """include "service/afs/q.ny.ms.com/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/unittest/client/config" };""",
+                         """include "service/bootserver/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/unittest/client/config" };""",
+                         """include "service/dns/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         """include "service/ntp/pa.ny.na/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "personality/compileserver/config" };""",
+                         """include "personality/compileserver/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "archetype/final" };""",
+                         """include "archetype/final";""",
                          command)
 
     def test_1056_clear_comments(self):
@@ -339,32 +339,32 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         """include { "archetype/base" };""",
+                         """include "archetype/base";""",
                          command)
         self.matchoutput(out,
                          """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
                          command)
         self.matchoutput(out,
-                         'include { "os/linux/%s/config" };' %
+                         'include "os/linux/%s/config";' %
                          self.linux_version_prev,
                          command)
         self.matchoutput(out,
-                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         """include "service/afs/q.ny.ms.com/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/unittest/client/config" };""",
+                         """include "service/bootserver/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/unittest/client/config" };""",
+                         """include "service/dns/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         """include "service/ntp/pa.ny.na/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "personality/compileserver/config" };""",
+                         """include "personality/compileserver/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "archetype/final" };""",
+                         """include "archetype/final";""",
                          command)
 
     def test_1070_reconfigure_windows_status(self):
@@ -498,34 +498,34 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(out, "chooser2", command)
         self.matchclean(out, "chooser3", command)
         self.matchoutput(out,
-                         """include { "archetype/base" };""",
+                         """include "archetype/base";""",
                          command)
         self.matchoutput(out,
                          """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
                          command)
         self.matchoutput(out,
-                         'include { "os/linux/%s/config" };' % osversion,
+                         'include "os/linux/%s/config";' % osversion,
                          command)
         self.matchoutput(out,
-                         """include { "service/aqd/ny-prod/client/config" };""",
+                         """include "service/aqd/ny-prod/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/ntp/pa.ny.na/client/config" };""",
+                         """include "service/ntp/pa.ny.na/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/bootserver/unittest/client/config" };""",
+                         """include "service/bootserver/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/afs/q.ny.ms.com/client/config" };""",
+                         """include "service/afs/q.ny.ms.com/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "service/dns/unittest/client/config" };""",
+                         """include "service/dns/unittest/client/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "personality/inventory/config" };""",
+                         """include "personality/inventory/config";""",
                          command)
         self.matchoutput(out,
-                         """include { "archetype/final" };""",
+                         """include "archetype/final";""",
                          command)
 
     def test_1110_reconfigure_debug(self):
@@ -600,7 +600,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["cat", "--hostname", "aquilon69.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         'include { "service/ips/northamerica/client/config" };',
+                         'include "service/ips/northamerica/client/config";',
                          command)
 
     def test_2000_windows_wrong_os(self):

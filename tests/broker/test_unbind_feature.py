@@ -52,7 +52,7 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'include { "features/pre_host/config" };',
+                          r'include "features/pre_host/config";',
                           command)
         self.matchclean(out, "system/features/pre_host", command)
 
@@ -107,7 +107,7 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'include { "features/post_host/config" };',
+                          r'include "features/post_host/config";',
                           command)
 
     def test_115_unbind_personality(self):

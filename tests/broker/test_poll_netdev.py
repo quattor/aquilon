@@ -44,7 +44,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
                    713: self.net['{}_v713'.format(network_device)].ip }
 
         testenv = os.environ.copy()
-        testenv['AQDCONF'] = '../unittest.conf'
+        testenv['AQDCONF'] = self.config.baseconfig
         testdir_broker = os.path.dirname(os.path.realpath(__file__))
         data_injection = (os.path.join(testdir_broker, "..", "aqdb",
                           "inject_network_device_vlan.py"))

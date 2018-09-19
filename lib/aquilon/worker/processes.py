@@ -60,8 +60,8 @@ else:
     ms.version.addpkg("requests-kerberos", "0.5-ms2")
     ms.version.addpkg("kerberos", "1.1.5")
     ms.version.addpkg("dns", "1.10.0")
-    ms.version.addpkg('ms.dsdb', '6.0.30')
 if DSDB_ENABLED:
+    ms.version.addpkg('ms.dsdb', '6.0.32')
     import ms.dsdb.client
 
 # subprocess.Popen is not thread-safe in Python 2, so we need locking
@@ -433,7 +433,13 @@ class DSDBEnabledMeta(type):
         if DSDB_ENABLED:
             if instance.dsdb_use_testdb:
                 os.environ['DSDB_USE_TESTDB'] = "1"
-            instance.dsdbclient = ms.dsdb.client.DSDB(plant='prod')
+
+            # a timeout of zero in the broker config means "no timeout";  for ms.dsdb,
+            # zero means immediate timeout (i.e. non-blocking operation).
+            use_timeout = config.lookup_tool_timeout('dsdb') or None
+
+            instance.dsdbclient = ms.dsdb.client.DSDB(plant='prod',
+                                                      timeout=use_timeout)
         return instance
 
 

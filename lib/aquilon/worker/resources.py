@@ -437,7 +437,7 @@ class ResourcesCommandEntry(CommandEntry):
         if paramtype == 'enum':
             if not enumtype:
                 log.msg("Warning: argument missing enum attribute for %s.%s" %
-                        (self.command, option_name))
+                        (self.broker_command.command, option_name))
                 return
             try:
                 enum_class = StringEnum(enumtype)
@@ -450,7 +450,7 @@ class ResourcesCommandEntry(CommandEntry):
                 self.parameter_checks[option_name] = self._type_handler[paramtype]
             else:
                 log.msg("Warning: unknown option type %s for %s.%s" %
-                        (paramtype, self.command, option_name))
+                        (paramtype, self.broker_command.command, option_name))
 
     def check_arguments(self, arguments):
         """Check for the required and optional arguments.
