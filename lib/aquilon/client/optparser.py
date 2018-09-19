@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -236,33 +236,44 @@ class Command(Element):
 
     def check(self, options):
         result = {}
+        optgroups = []
         for optgroup in self.optgroups:
             try:
                 res, _ = optgroup.check(options)
+                if res and optgroup.name:
+                    optgroups.append(optgroup.name)
             except ParsingError as e:
                 e.help = self.recursiveHelp(0, width=get_term_width())
                 raise e
             result.update(res)
 
-        # Check dependencies
+        # Check dependencies and conflicts
         requires = self.getAllRequires(result)
-        for item in result:
-            if item not in requires:
-                continue
-            for dep in requires[item]:
-                if dep in result:
-                    break
-            else:
-                raise ParsingError("Option or option group %s can only be used "
-                                   "together with one of: %s."
-                                   % (item, ", ".join(requires[item])))
-        # Check for conflicts
         conflicts = self.getAllConflicts(result)
-        for conflict, option in conflicts.items():
-            if conflict in result:
-                raise ParsingError("Option or option group %s "
-                                   "conflicts with %s" %
-                                   (option, conflict))
+        for item in result.keys() + optgroups:
+            # If the item has requirements
+            if requires.get(item):
+                for dep in requires[item]:
+                    # If this is a joined condition, we need to test all
+                    deps = dep.split('+')
+                    if all(d in result or d in optgroups for d in deps):
+                        break
+                else:
+                    raise ParsingError(
+                        "Option or option group {} can only be used together "
+                        "with one of: {}.".format(item, ", ".join(
+                            ' AND '.join(sorted(d.split('+')))
+                            for d in requires[item])))
+
+            # And if it has conflicts
+            if conflicts.get(item):
+                for dep in conflicts[item]:
+                    # If this is a joined condition, we need to test all
+                    deps = dep.split('+')
+                    if all(d in result or d in optgroups for d in deps):
+                        raise ParsingError("Option or option group {} "
+                                           "conflicts with {}".format(
+                                                item, ' AND '.join(deps)))
 
         transport = None
         for t in self.transports:
@@ -413,24 +424,25 @@ class OptGroup(Element):
         for o in self.options:
             o.genOptions(parser)
 
-    def getAllConflicts(self, found):
+    def getAllConflicts(self, found, inherit=None):
         conflicts = {}
+
+        inherit = set(self.conflicts or []).union(set(inherit or []))
+        if self.name and inherit:
+            conflicts[self.name] = inherit
+
         for o in self.options:
-            c = o.getAllConflicts(found)
-            conflicts.update(c)
-        for conflict in self.conflicts:
-            conflicts[conflict] = self.name
+            r = o.getAllConflicts(found, inherit=inherit)
+            conflicts.update(r)
+
         return conflicts
 
     def getAllRequires(self, found, inherit=None):
         requires = {}
 
-        if self.requires:
-            requires[self.name] = self.requires
-            if inherit:
-                inherit = set(inherit).union(set(self.requires))
-            else:
-                inherit = set(self.requires)
+        inherit = set(self.requires or []).union(set(inherit or []))
+        if self.name and inherit:
+            requires[self.name] = inherit
 
         for o in self.options:
             r = o.getAllRequires(found, inherit=inherit)
@@ -586,12 +598,13 @@ class Option(Element):
         else:
             raise ParsingError('Invalid option type: ' + self.type)
 
-    def getAllConflicts(self, found):
-        """Return any conflicts(keys) and the original option (values)."""
+    def getAllConflicts(self, found, inherit=None):
         conflicts = {}
-        if self.name in found:
-            for conflict in self.conflicts:
-                conflicts[conflict] = self.name
+        if self.name in found and (inherit or self.conflicts):
+            r = set(self.conflicts)
+            if inherit:
+                r.update(set(inherit))
+            conflicts[self.name] = sorted(r)
         return conflicts
 
     def getAllRequires(self, found, inherit=None):
