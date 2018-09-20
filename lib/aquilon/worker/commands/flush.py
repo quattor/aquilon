@@ -58,6 +58,7 @@ from aquilon.aqdb.model import (
     ParamDefHolder,
     Parameterized,
     Personality,
+    PersonalityResource,
     PersonalityStage,
     PortGroup,
     Rack,
@@ -318,12 +319,21 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing parameterized personalities.")
 
                 # Search for the matching entitlements
-                q = session.query(Personality, Location)
-                q = q.join(Entitlement,
-                           Entitlement.personality_id == Personality.id)
-                q = q.join(Location,
-                           Location.id == Entitlement.location_id)
+                q1 = session.query(Personality, Location)
+                q1 = q1.join(Entitlement,
+                             Entitlement.personality_id == Personality.id)
+                q1 = q1.join(Location,
+                             Location.id == Entitlement.location_id)
 
+                # Search for the matching resources
+                q2 = session.query(Personality, Location)
+                q2 = q2.join(PersonalityResource,
+                             PersonalityResource.personality_id ==
+                             Personality.id)
+                q2 = q2.join(Location,
+                             Location.id == PersonalityResource.location_id)
+
+                q = q1.union(q2)
                 progress = ProgressReport(logger, q.count(),
                                           'parameterized personality')
                 for dbpersonality, dblocation in q:

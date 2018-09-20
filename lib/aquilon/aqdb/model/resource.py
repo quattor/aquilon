@@ -43,6 +43,7 @@ from aquilon.aqdb.model import (
     HostEnvironment,
     Location,
     Parameterized,
+    Personality,
 )
 
 _TN = 'resource'
@@ -148,6 +149,42 @@ class ResourceHolderWithLocation(ResourceHolder):
         return relation(Location, lazy=False)
 
 
+class PersonalityResource(ResourceHolderWithLocation):
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=True)
+    personality = relation(Personality, lazy=False)
+
+    __mapper_args__ = {'polymorphic_identity': 'personality'}
+
+    @property
+    def holder_name(self):
+        return self.personality.name
+
+    @property
+    def holder_object(self):
+        return Parameterized.get(self.personality, self.location)
+
+    @property
+    def template_name(self):
+        return '{holdtype}/{personality.name}/{loctype}/{locname}'.format(
+            holdtype=self.holder_type,
+            personality=self.personality,
+            loctype=self.location.location_type.lower(),
+            locname=self.location.name,
+        )
+
+
+CheckConstraint(or_(PersonalityResource.holder_type != 'personality',
+                    PersonalityResource.location_id.isnot(None)),
+                name='{}_personality_ck'.format(
+                    PersonalityResource.__tablename__))
+# This is a one-to-multi relationship, given that there might be multiple
+# locations specified
+Personality.resholders = relation(PersonalityResource,
+                                  cascade='all, delete-orphan',
+                                  passive_deletes=True)
+
+
 class ResourceHolderWithLocationAndHostEnvironment(ResourceHolderWithLocation):
 
     @declared_attr
@@ -245,6 +282,7 @@ Grn.resholders = relation(GrnResource,
 UniqueConstraint(
     HostResource.host_id,
     ClusterResource.cluster_id,
+    PersonalityResource.personality_id,
     ArchetypeResource.archetype_id,
     GrnResource.eon_id,
     ResourceHolderWithLocationAndHostEnvironment.host_environment_id,

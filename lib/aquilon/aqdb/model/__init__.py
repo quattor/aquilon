@@ -156,6 +156,7 @@ from aquilon.aqdb.model.resource import (
     ClusterResource,
     GrnResource,
     HostResource,
+    PersonalityResource,
     Resource,
     ResourceHolder,
 )

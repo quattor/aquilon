@@ -141,6 +141,9 @@
                     <group choice="req">
                         <synopfragmentref linkend="location-options">Location options</synopfragmentref>
                     </group>
+                    <group>
+                        <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+                    </group>
                 </arg>
             </group>
             <arg><option>--generate</option></arg>
@@ -529,6 +532,17 @@
                 <listitem>
                     <para>
                         Display the parameterized personality template for the named location.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--hostlink <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Display the plenary of the named resource, when used together
+                        with one of the <replaceable>Location options</replaceable>.
                     </para>
                 </listitem>
             </varlistentry>

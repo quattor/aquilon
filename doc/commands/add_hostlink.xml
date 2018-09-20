@@ -44,11 +44,16 @@
                 <arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
                 <arg choice="plain">
                     <group choice="req">
-                        <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
-                        <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
-                        <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+                        <arg choice="plain">
+                            <group choice="req">
+                                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                                <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+                                <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+                            </group>
+                            <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+                        </arg>
+                        <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
                     </group>
-                    <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
                     <group>
                         <synopfragmentref linkend="location-options">Location options</synopfragmentref>
                     </group>
@@ -162,6 +167,20 @@
                     <para>
                         The information of the target parameterized
                         Archetype for the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+                    [
+                        --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                    ]
+                </term>
+                <listitem>
+                    <para>
+                        The information of the target parameterized
+                        Personality for the hostlink.
                     </para>
                 </listitem>
             </varlistentry>

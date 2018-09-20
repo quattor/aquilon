@@ -28,8 +28,8 @@ class CommandSearchResource(BrokerCommand):
     resource_name = None
 
     def render(self, session, logger, hostname, cluster, metacluster,
-               archetype=None, grn=None, eon_id=None, host_environment=None,
-               **kwargs):
+               personality=None, archetype=None, grn=None, eon_id=None,
+               host_environment=None, **kwargs):
 
         # resourcegroup is special, because it's both a holder and a resource
         # itself
@@ -48,12 +48,12 @@ class CommandSearchResource(BrokerCommand):
         if name:
             q = q.filter_by(name=name)
 
-        if hostname or cluster or resourcegroup or archetype or \
-                grn or eon_id:
+        if hostname or cluster or resourcegroup or personality or \
+                archetype or grn or eon_id:
             try:
                 who = get_resource_holder(session, logger, hostname, cluster,
                                           metacluster, resourcegroup,
-                                          archetype, grn, eon_id,
+                                          personality, archetype, grn, eon_id,
                                           host_environment, config=self.config,
                                           **kwargs)
             except NotFoundException:

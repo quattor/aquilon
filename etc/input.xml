@@ -2853,7 +2853,7 @@
             <option name="resourcegroup" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
             <option name="application" type="string" requires="hostname cluster metacluster">Name of an application</option>
             <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
-            <option name="hostlink" type="string" requires="hostname cluster metacluster archetype eon_id grn">Name of a hostlink</option>
+            <option name="hostlink" type="string" requires="hostname cluster metacluster personality archetype eon_id grn">Name of a hostlink</option>
             <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
             <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
             <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
@@ -5927,6 +5927,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="personality" type="string">Personality to apply resource</option>
                     <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
@@ -5938,7 +5939,7 @@
             <option name="owner" type="string">Username to be owner of the target directory</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="archetype eon_id grn">
+            <optgroup name="location" fields="one" requires="personality archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -5972,6 +5973,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="personality" type="string">Personality to apply resource</option>
                     <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
@@ -5981,7 +5983,7 @@
             <option name="hostlink" type="string">Name</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="archetype eon_id grn">
+            <optgroup name="location" fields="one" requires="personality archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -6010,6 +6012,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="personality" type="string">Personality to apply resource</option>
                     <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
@@ -6020,7 +6023,7 @@
             <option name="all" type="flag" conflicts="holder hostlink">List all hostlinks</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="archetype eon_id grn">
+            <optgroup name="location" fields="one" requires="personality archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -6050,6 +6053,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="personality" type="string">Personality to apply resource</option>
                     <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
@@ -6059,7 +6063,7 @@
             <option name="hostlink" type="string">Hostlink name</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="archetype eon_id grn">
+            <optgroup name="location" fields="one" requires="personality archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>

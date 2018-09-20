@@ -174,6 +174,51 @@ class TestAddHostlink(TestBrokerCommand):
         self.matchoutput(out, "owner_group cannot contain the ':' character",
                          command)
 
+    def test_300_add_hostlink_personality(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_personality',
+            '--target', '/var/spool/hostlinks/app_personality',
+            '--personality', 'compileserver',
+            '--country', 'us',
+            '--owner', 'testuser1',
+            '--group', 'testgroup1',
+            '--comments', 'A hostlink set at the personality level',
+        ]
+        self.successtest(command)
+
+    def test_302_show_hostlink_personality(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_personality',
+                       '  Comments: A hostlink set at the personality level',
+                       '  Bound to: Personality aquilon/compileserver, '
+                       'Country us',
+                       '  Target Path: /var/spool/hostlinks/app_personality',
+                       '  Owner: testuser1',
+                       '  Group: testgroup1'))
+        self.output_equals(out, expected_out, command)
+
+    def test_304_cat_personality(self):
+        command = [
+            'cat',
+            '--personality', 'compileserver',
+            '--country', 'us',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/personality/compileserver'
+             '/country/us'
+             '/hostlink/app_personality'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
     def test_310_add_hostlink_archetype(self):
         command = [
             'add_hostlink', '--hostlink', 'app_archetype',

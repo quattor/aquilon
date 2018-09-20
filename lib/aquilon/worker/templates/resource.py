@@ -31,6 +31,7 @@ from aquilon.aqdb.model import (
     Intervention,
     ParameterizedArchetype,
     ParameterizedGrn,
+    ParameterizedPersonality,
     RebootIntervention,
     RebootSchedule,
     ResourceGroup,
@@ -65,6 +66,13 @@ class PlenaryResource(StructurePlenary):
             from aquilon.worker.templates import PlenaryClusterObject
 
             self.profile = PlenaryClusterObject.template_name(holder_object)
+        elif isinstance(holder_object, ParameterizedPersonality):
+            # Avoid circular dependency
+            from aquilon.worker.templates import \
+                PlenaryParameterizedPersonality
+
+            self.profile = PlenaryParameterizedPersonality.template_name(
+                holder_object)
         elif isinstance(holder_object, ParameterizedArchetype):
             # Avoid circular dependency
             from aquilon.worker.templates import PlenaryParameterizedArchetype

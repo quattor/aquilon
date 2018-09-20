@@ -33,6 +33,7 @@ from aquilon.worker.templates import (
     Plenary,
     PlenaryCollection,
     PlenaryParameterized,
+    PlenaryResource,
     StructurePlenary,
 )
 from aquilon.worker.templates.entitlementutils import flatten_entitlements
@@ -42,6 +43,7 @@ from aquilon.worker.templates.panutils import (
     pan_include,
     pan_include_if_exists,
     pan_variable,
+    StructureTemplate,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -89,6 +91,19 @@ class PlenaryParameterizedPersonality(PlenaryParameterized):
 
     def body(self, lines):
         flatten_entitlements(lines, self.dbobj, prefix='/')
+
+        for resholder in self.dbobj.resholders:
+            if resholder.location != self.dbobj.location:
+                continue
+
+            lines.append("")
+            for resource in sorted(resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
+                pan_append(
+                    lines,
+                    '/system/resources/{}'.format(resource.resource_type),
+                    StructureTemplate(res_path))
 
 
 Plenary.handlers[ParameterizedPersonality] = PlenaryParameterizedPersonality

@@ -63,6 +63,26 @@ class TestDelHostlink(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Hostlink", command)
 
+    def test_300_del_hostlink_personality(self):
+        path = [
+            'resource',
+            'personality', 'compileserver',
+            'country', 'us',
+            'hostlink', 'app_personality',
+            'config',
+        ]
+        self.check_plenary_exists(*path)
+
+        command = [
+            'del_hostlink',
+            '--hostlink', 'app_personality',
+            '--personality', 'compileserver',
+            '--country', 'us',
+        ]
+        self.successtest(command)
+
+        self.check_plenary_gone(*path, directory_gone=True)
+
     def test_300_del_hostlink_archetype(self):
         path = [
             'resource',

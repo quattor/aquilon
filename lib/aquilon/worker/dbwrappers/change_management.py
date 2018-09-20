@@ -73,6 +73,7 @@ from aquilon.aqdb.model import (
     OperatingSystem,
     Organization,
     Personality,
+    PersonalityResource,
     PersonalityStage,
     Rack,
     Realm,
@@ -608,6 +609,8 @@ class ChangeManagement(object):
             self.validate_cluster(dbobj)
         elif isinstance(dbobj, Host):
             self.validate_host(dbobj)
+        elif isinstance(dbobj, Personality):
+            self.validate_prod_personality(dbobj)
 
     def validate_host_environment(self, host_environment):
         if host_environment.name == 'prod':
@@ -739,6 +742,8 @@ ChangeManagement.handlers[Desk] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[PersonalityResource] = \
+    ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ArchetypeResource] = \
     ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[GrnResource] = \

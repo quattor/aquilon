@@ -33,8 +33,8 @@ class CommandUpdateResource(BrokerCommand):
 
     def render(self, session, logger, plenaries, hostname, cluster,
                metacluster, comments, user, justification, reason,
-               archetype=None, grn=None, eon_id=None, host_environment=None,
-               **kwargs):
+               personality=None, archetype=None, grn=None, eon_id=None,
+               host_environment=None, **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -49,7 +49,7 @@ class CommandUpdateResource(BrokerCommand):
             name = self.resource_class.__mapper__.polymorphic_identity
 
         holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup,
+                                     metacluster, resourcegroup, personality,
                                      archetype, grn, eon_id, host_environment,
                                      compel=False, config=self.config,
                                      **kwargs)
