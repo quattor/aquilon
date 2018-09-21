@@ -164,6 +164,9 @@
             <group choice="req">
                 <synopfragmentref linkend="location-options">Location options</synopfragmentref>
             </group>
+            <group>
+                <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+            </group>
             <arg><option>--generate</option></arg>
         </cmdsynopsis>
         <cmdsynopsis>
@@ -560,6 +563,16 @@
                     </para>
                 </listitem>
             </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--hostlink <replaceable>NAME</replaceable></option>,
+                </term>
+                <listitem>
+                    <para>
+                        Display the plenary of the named resource.
+                    </para>
+                </listitem>
+            </varlistentry>
         </variablelist>
         <variablelist>
             <title>Looking at GRN plenaries</title>
@@ -642,6 +655,13 @@ aq cat --service foo --instance bar --server
             <title>Look at the plenary of a parameterized GRN at the Organization level</title>
             <programlisting>
 aq cat --grn grn:/foo/bar/baz --host_environment alice --organization bob
+            </programlisting>
+        </example>
+
+        <example>
+            <title>Look at the plenary of a hostlink set for a parameterized Archetype at the Hub level</title>
+            <programlisting>
+aq cat --archetype foo --host_environment alice --hub bob --hostlink bar
             </programlisting>
         </example>
 

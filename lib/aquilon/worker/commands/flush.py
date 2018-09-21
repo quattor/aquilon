@@ -29,6 +29,7 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 from aquilon.aqdb.model import (
     AddressAssignment,
     Archetype,
+    ArchetypeResource,
     Building,
     BundleResource,
     Bunker,
@@ -380,15 +381,26 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing parameterized archetypes.")
 
                 # Search for the matching entitlements
-                q = session.query(Archetype, HostEnvironment, Location)
-                q = q.join(Entitlement,
-                           Entitlement.archetype_id == Archetype.id)
-                q = q.join(HostEnvironment,
-                           HostEnvironment.id ==
-                           Entitlement.host_environment_id)
-                q = q.join(Location,
-                           Location.id == Entitlement.location_id)
+                q1 = session.query(Archetype, HostEnvironment, Location)
+                q1 = q1.join(Entitlement,
+                             Entitlement.archetype_id == Archetype.id)
+                q1 = q1.join(HostEnvironment,
+                             HostEnvironment.id ==
+                             Entitlement.host_environment_id)
+                q1 = q1.join(Location,
+                             Location.id == Entitlement.location_id)
 
+                # Search for the matching resources
+                q2 = session.query(Archetype, HostEnvironment, Location)
+                q2 = q2.join(ArchetypeResource,
+                             ArchetypeResource.archetype_id == Archetype.id)
+                q2 = q2.join(HostEnvironment,
+                             HostEnvironment.id ==
+                             ArchetypeResource.host_environment_id)
+                q2 = q2.join(Location,
+                             Location.id == ArchetypeResource.location_id)
+
+                q = q1.union(q2)
                 progress = ProgressReport(logger, q.count(),
                                           'parameterized archetype')
                 for dbarchetype, dbenv, dblocation in q:

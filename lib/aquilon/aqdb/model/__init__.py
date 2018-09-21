@@ -152,6 +152,7 @@ from aquilon.aqdb.model.xtn import Xtn, XtnDetail, XtnEnd
 
 # Resources
 from aquilon.aqdb.model.resource import (
+    ArchetypeResource,
     ClusterResource,
     GrnResource,
     HostResource,

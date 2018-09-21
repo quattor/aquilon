@@ -35,6 +35,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (
+    Archetype,
     Base,
     Cluster,
     Grn,
@@ -161,6 +162,46 @@ class ResourceHolderWithLocationAndHostEnvironment(ResourceHolderWithLocation):
         return relation(HostEnvironment, lazy=False)
 
 
+class ArchetypeResource(ResourceHolderWithLocationAndHostEnvironment):
+    archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
+                          nullable=True)
+    archetype = relation(Archetype, lazy=False)
+
+    __mapper_args__ = {'polymorphic_identity': 'archetype'}
+
+    @property
+    def holder_name(self):
+        return self.archetype.name
+
+    @property
+    def holder_object(self):
+        return Parameterized.get(self.archetype,
+                                 self.host_environment,
+                                 self.location)
+
+    @property
+    def template_name(self):
+        return '{holdtype}/{archetype.name}/{env}/{loctype}/{locname}'.format(
+            holdtype=self.holder_type,
+            archetype=self.archetype,
+            env=self.host_environment.name,
+            loctype=self.location.location_type.lower(),
+            locname=self.location.name,
+        )
+
+
+CheckConstraint(or_(ArchetypeResource.holder_type != 'archetype',
+                    and_(ArchetypeResource.host_environment_id.isnot(None),
+                         ArchetypeResource.location_id.isnot(None))),
+                name='{}_archetype_ck'.format(
+                    ArchetypeResource.__tablename__))
+# This is a one-to-multi relationship, given that there might be multiple
+# locations or host_environment specified
+Archetype.resholders = relation(ArchetypeResource,
+                                cascade='all, delete-orphan',
+                                passive_deletes=True)
+
+
 class GrnResource(ResourceHolderWithLocationAndHostEnvironment):
     eon_id = Column(ForeignKey(Grn.eon_id, ondelete='CASCADE'),
                     nullable=True)
@@ -204,6 +245,7 @@ Grn.resholders = relation(GrnResource,
 UniqueConstraint(
     HostResource.host_id,
     ClusterResource.cluster_id,
+    ArchetypeResource.archetype_id,
     GrnResource.eon_id,
     ResourceHolderWithLocationAndHostEnvironment.host_environment_id,
     ResourceHolderWithLocation.location_id,

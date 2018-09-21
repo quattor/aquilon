@@ -28,6 +28,7 @@ from aquilon.aqdb.model import (
     AddressAssignment,
     Alias,
     Archetype,
+    ArchetypeResource,
     ARecord,
     Building,
     BundleResource,
@@ -738,6 +739,8 @@ ChangeManagement.handlers[Desk] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[ArchetypeResource] = \
+    ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[GrnResource] = \
     ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[Fqdn] = ChangeManagement.validate_fqdn

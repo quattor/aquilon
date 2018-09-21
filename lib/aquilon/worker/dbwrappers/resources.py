@@ -23,6 +23,8 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (
+    Archetype,
+    ArchetypeResource,
     BundleResource,
     Cluster,
     ClusterResource,
@@ -43,7 +45,7 @@ from aquilon.worker.dbwrappers.location import get_location
 
 def get_resource_holder(session, logger, hostname=None, cluster=None,
                         metacluster=None, resgroup=None,
-                        grn=None, eon_id=None,
+                        archetype=None, grn=None, eon_id=None,
                         host_environment=None, compel=True, config=None,
                         **arguments):
 
@@ -85,7 +87,9 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
         else:
             set_committed_value(who, 'cluster', dbmeta)
 
-    if grn is not None or eon_id is not None:
+    # If we need to deal with archetype or grn, we need to have a
+    # location and environment ready
+    if archetype is not None or grn is not None or eon_id is not None:
         dbloc = get_location(session, **arguments) or \
                 Organization.get_unique(
                     session, config.get('broker', 'default_organization'),
@@ -94,6 +98,29 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
         dbenv = HostEnvironment.get_unique(
             session, host_environment, compel=True)
 
+    if archetype is not None:
+        dbarch = Archetype.get_unique(session, archetype, compel=True)
+
+        for resholder in dbarch.resholders:
+            if resholder.host_environment == dbenv and \
+                    resholder.location == dbloc:
+                who = resholder
+                break
+
+        if who is None:
+            if compel:
+                raise NotFoundException(
+                    "{0}, {1}, {2} has no resources.".format(
+                        dbarch, dbenv, dbloc))
+            resholder = ArchetypeResource(archetype=dbarch,
+                                          host_environment=dbenv,
+                                          location=dbloc)
+            dbarch.resholders.append(resholder)
+            who = resholder
+        else:
+            set_committed_value(who, 'archetype', dbarch)
+
+    if grn is not None or eon_id is not None:
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger, config=config)
 
         for resholder in dbgrn.resholders:

@@ -27,7 +27,8 @@ class CommandShowResource(BrokerCommand):
     resource_name = None
 
     def render(self, session, logger, hostname, cluster, metacluster, all,
-               grn=None, eon_id=None, host_environment=None, **kwargs):
+               archetype=None, grn=None, eon_id=None, host_environment=None,
+               **kwargs):
 
         # resourcegroup is special, because it's both a holder and a resource
         # itself
@@ -48,10 +49,11 @@ class CommandShowResource(BrokerCommand):
             if name:
                 q = q.filter_by(name=name)
 
-            if hostname or cluster or resourcegroup or grn or eon_id:
+            if hostname or cluster or resourcegroup or archetype or \
+                    grn or eon_id:
                 who = get_resource_holder(session, logger, hostname, cluster,
                                           metacluster, resourcegroup,
-                                          grn, eon_id,
+                                          archetype, grn, eon_id,
                                           host_environment, config=self.config,
                                           **kwargs)
                 q = q.filter_by(holder=who)

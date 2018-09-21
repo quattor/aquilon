@@ -1,11 +1,14 @@
+ALTER TABLE resholder DROP CONSTRAINT resholder_archetype_ck;
 ALTER TABLE resholder DROP CONSTRAINT resholder_grn_ck;
 
 ALTER TABLE resholder DROP CONSTRAINT resholder_holder_uk;
 
+ALTER TABLE resholder DROP CONSTRAINT resholder_archetype_fk;
 ALTER TABLE resholder DROP CONSTRAINT resholder_grn_fk;
 ALTER TABLE resholder DROP CONSTRAINT resholder_location_fk;
 ALTER TABLE resholder DROP CONSTRAINT resholder_host_environment_fk;
 
+ALTER TABLE resholder DROP COLUMN archetype_id;
 ALTER TABLE resholder DROP COLUMN eon_id;
 ALTER TABLE resholder DROP COLUMN location_id;
 ALTER TABLE resholder DROP COLUMN host_environment_id;

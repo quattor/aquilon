@@ -174,6 +174,54 @@ class TestAddHostlink(TestBrokerCommand):
         self.matchoutput(out, "owner_group cannot contain the ':' character",
                          command)
 
+    def test_310_add_hostlink_archetype(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_archetype',
+            '--target', '/var/spool/hostlinks/app_archetype',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+            '--owner', 'testuser2',
+            '--group', 'testgroup2',
+            '--comments', 'A hostlink set at the archetype level',
+        ]
+        self.successtest(command)
+
+    def test_312_show_hostlink_archetype(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_archetype',
+                       '  Comments: A hostlink set at the archetype level',
+                       '  Bound to: Archetype aquilon, Host Environment dev, '
+                       'Hub ny',
+                       '  Target Path: /var/spool/hostlinks/app_archetype',
+                       '  Owner: testuser2',
+                       '  Group: testgroup2'))
+        self.output_equals(out, expected_out, command)
+
+    def test_314_cat_archetype(self):
+        command = [
+            'cat',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/archetype/aquilon'
+             '/dev'
+             '/hub/ny'
+             '/hostlink/app_archetype'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
     def test_320_add_hostlink_grn(self):
         command = [
             'add_hostlink', '--hostlink', 'app_grn',

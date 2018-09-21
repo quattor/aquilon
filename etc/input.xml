@@ -2853,7 +2853,7 @@
             <option name="resourcegroup" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
             <option name="application" type="string" requires="hostname cluster metacluster">Name of an application</option>
             <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
-            <option name="hostlink" type="string" requires="hostname cluster metacluster eon_id grn">Name of a hostlink</option>
+            <option name="hostlink" type="string" requires="hostname cluster metacluster archetype eon_id grn">Name of a hostlink</option>
             <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
             <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
             <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
@@ -5927,6 +5927,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
                 </optgroup>
@@ -5937,7 +5938,7 @@
             <option name="owner" type="string">Username to be owner of the target directory</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="eon_id grn">
+            <optgroup name="location" fields="one" requires="archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -5950,7 +5951,7 @@
                 <option name="rack" type="string">Rack</option>
                 <option name="desk" type="string">Desk</option>
             </optgroup>
-            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
+            <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
 
             <option name="group" type="string">Group owner of the target directory</option>
             <option name="mode" type="string">Mode (octal) to apply on hostlink target</option>
@@ -5971,6 +5972,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
                 </optgroup>
@@ -5979,7 +5981,7 @@
             <option name="hostlink" type="string">Name</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="eon_id grn">
+            <optgroup name="location" fields="one" requires="archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -5992,7 +5994,7 @@
                 <option name="rack" type="string">Rack</option>
                 <option name="desk" type="string">Desk</option>
             </optgroup>
-            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
+            <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
 
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -6008,6 +6010,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
                 </optgroup>
@@ -6017,7 +6020,7 @@
             <option name="all" type="flag" conflicts="holder hostlink">List all hostlinks</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="eon_id grn">
+            <optgroup name="location" fields="one" requires="archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -6030,7 +6033,7 @@
                 <option name="rack" type="string">Rack</option>
                 <option name="desk" type="string">Desk</option>
             </optgroup>
-            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
+            <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
         </optgroup>
         <transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s"/>
         <transport method="get" path="resource/hostlink"/>
@@ -6047,6 +6050,7 @@
                     <option name="hostname" type="string">Hostname to apply resource</option>
                     <option name="cluster" type="string">Cluster to apply resource</option>
                     <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="archetype" requires="host_environment" type="string">Archetype to apply resource</option>
                     <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
                     <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
                 </optgroup>
@@ -6055,7 +6059,7 @@
             <option name="hostlink" type="string">Hostlink name</option>
         </optgroup>
         <optgroup>
-            <optgroup name="location" fields="one" requires="eon_id grn">
+            <optgroup name="location" fields="one" requires="archetype eon_id grn">
                 <option name="organization" type="string">Organization</option>
                 <option name="hub" type="string">Hub</option>
                 <option name="continent" type="string">Continent</option>
@@ -6068,7 +6072,7 @@
                 <option name="rack" type="string">Rack</option>
                 <option name="desk" type="string">Desk</option>
             </optgroup>
-            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
+            <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
         </optgroup>
         <transport method="get" path="find/resource/hostlink"/>
         <format name="proto" >
