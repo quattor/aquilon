@@ -26,4 +26,4 @@ from aquilon.exceptions_ import ArgumentError
 class CommandShowPermission(BrokerCommand):
 
     def render(self, session, dbuser, **arguments):
-        return self.az.check_role_permission(session, dbuser.role.name)
+        return self.az.check_role_permission(dbuser.role.name)

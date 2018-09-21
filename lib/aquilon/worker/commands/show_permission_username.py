@@ -39,4 +39,4 @@ class CommandShowPermissionUser(BrokerCommand):
                                 "REALM.".format(username))
         elif not q.count():
             raise ArgumentError("User {} not found".format(username))
-        return self.az.check_role_permission(session, str(q.first().role))
+        return self.az.check_role_permission(str(q.first().role))

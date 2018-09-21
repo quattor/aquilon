@@ -31,4 +31,4 @@ class CommandShowPermissionRole(BrokerCommand):
 
         if not session.query(Role).filter(Role.name == role).count():
             raise ArgumentError("{} role doesn't exist".format(role))
-        return self.az.check_role_permission(session, role)
+        return self.az.check_role_permission(role)
