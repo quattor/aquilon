@@ -17,13 +17,19 @@
 
 
 import logging
+from operator import attrgetter
 
 from aquilon.aqdb.model import ParameterizedGrn
 from aquilon.worker.templates import (
     Plenary,
     PlenaryParameterized,
+    PlenaryResource,
 )
 from aquilon.worker.templates.entitlementutils import flatten_entitlements
+from aquilon.worker.templates.panutils import (
+    pan_append,
+    StructureTemplate,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +48,20 @@ class PlenaryParameterizedGrn(PlenaryParameterized):
 
     def body(self, lines):
         flatten_entitlements(lines, self.dbobj, prefix='/')
+
+        for resholder in self.dbobj.resholders:
+            if resholder.host_environment != self.dbobj.host_environment or \
+                    resholder.location != self.dbobj.location:
+                continue
+
+            lines.append("")
+            for resource in sorted(resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
+                res_path = PlenaryResource.template_name(resource)
+                pan_append(
+                    lines,
+                    '/system/resources/{}'.format(resource.resource_type),
+                    StructureTemplate(res_path))
 
 
 Plenary.handlers[ParameterizedGrn] = PlenaryParameterizedGrn

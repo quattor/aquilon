@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -173,6 +173,102 @@ class TestAddHostlink(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "owner_group cannot contain the ':' character",
                          command)
+
+    def test_320_add_hostlink_grn(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_grn',
+            '--target', '/var/spool/hostlinks/app_grn',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+            '--city', 'ln',
+            '--owner', 'testuser3',
+            '--group', 'testgroup3',
+            '--comments', 'A hostlink set at the GRN level',
+        ]
+        self.successtest(command)
+
+    def test_322_show_hostlink_grn(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_grn',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_grn',
+                       '  Comments: A hostlink set at the GRN level',
+                       '  Bound to: GRN grn:/ms/ei/aquilon/ut2, '
+                       'Host Environment dev, City ln',
+                       '  Target Path: /var/spool/hostlinks/app_grn',
+                       '  Owner: testuser3',
+                       '  Group: testgroup3'))
+        self.output_equals(out, expected_out, command)
+
+    def test_324_cat_grn(self):
+        command = [
+            'cat',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+            '--city', 'ln',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/eon_id/4'
+             '/dev'
+             '/city/ln'
+             '/hostlink/app_grn'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_330_add_hostlink_eon_id(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_eon_id',
+            '--target', '/var/spool/hostlinks/app_eon_id',
+            '--eon_id', 3,
+            '--host_environment', 'dev',
+            '--organization', 'ms',
+            '--owner', 'testuser4',
+            '--group', 'testgroup4',
+            '--comments', 'A hostlink set at the GRN level (eon_id)',
+        ]
+        self.successtest(command)
+
+    def test_332_show_hostlink_eon_id(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_eon_id',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_eon_id',
+                       '  Comments: A hostlink set at the GRN level (eon_id)',
+                       '  Bound to: GRN grn:/ms/ei/aquilon/unittest, '
+                       'Host Environment dev, Organization ms',
+                       '  Target Path: /var/spool/hostlinks/app_eon_id',
+                       '  Owner: testuser4',
+                       '  Group: testgroup4'))
+        self.output_equals(out, expected_out, command)
+
+    def test_334_cat_eon_id(self):
+        command = [
+            'cat',
+            '--eon_id', 3,
+            '--host_environment', 'dev',
+            '--organization', 'ms',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/eon_id/3'
+             '/dev'
+             '/organization/ms'
+             '/hostlink/app_eon_id'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHostlink)

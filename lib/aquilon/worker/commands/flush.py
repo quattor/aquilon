@@ -41,6 +41,7 @@ from aquilon.aqdb.model import (
     Feature,
     Filesystem,
     Grn,
+    GrnResource,
     HardwareEntity,
     Host,
     HostEnvironment,
@@ -340,15 +341,26 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing parameterized GRNs.")
 
                 # Search for the matching entitlements
-                q = session.query(Grn, HostEnvironment, Location)
-                q = q.join(Entitlement,
-                           Entitlement.eon_id == Grn.eon_id)
-                q = q.join(HostEnvironment,
-                           HostEnvironment.id ==
-                           Entitlement.host_environment_id)
-                q = q.join(Location,
-                           Location.id == Entitlement.location_id)
+                q1 = session.query(Grn, HostEnvironment, Location)
+                q1 = q1.join(Entitlement,
+                             Entitlement.eon_id == Grn.eon_id)
+                q1 = q1.join(HostEnvironment,
+                             HostEnvironment.id ==
+                             Entitlement.host_environment_id)
+                q1 = q1.join(Location,
+                             Location.id == Entitlement.location_id)
 
+                # Search for the matching resources
+                q2 = session.query(Grn, HostEnvironment, Location)
+                q2 = q2.join(GrnResource,
+                             GrnResource.eon_id == Grn.eon_id)
+                q2 = q2.join(HostEnvironment,
+                             HostEnvironment.id ==
+                             GrnResource.host_environment_id)
+                q2 = q2.join(Location,
+                             Location.id == GrnResource.location_id)
+
+                q = q1.union(q2)
                 progress = ProgressReport(logger, q.count(),
                                           'parameterized GRN')
                 for dbgrn, dbenv, dblocation in q:

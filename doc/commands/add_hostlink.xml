@@ -42,6 +42,16 @@
                 <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
                 <arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
                 <arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+                <arg choice="plain">
+                    <group choice="req">
+                        <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                        <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+                    </group>
+                    <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+                    <group>
+                        <synopfragmentref linkend="location-options">Location options</synopfragmentref>
+                    </group>
+                </arg>
             </group>
             <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
             <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
@@ -51,6 +61,7 @@
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
+            <xi:include href="../common/location_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
 
@@ -122,6 +133,24 @@
             </varlistentry>
             <varlistentry>
                 <term>
+                    {
+                        <option>--grn <replaceable>GRN</replaceable></option> |
+                        <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                    }
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                    [
+                        --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                    ]
+                </term>
+                <listitem>
+                    <para>
+                        The information of the target parameterized GRN
+                        for the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
                     <option>--group <replaceable>GROUP</replaceable></option>
                 </term>
                 <listitem>
@@ -187,6 +216,7 @@
                 </listitem>
             </varlistentry>
         </variablelist>
+        <xi:include href="../common/location_options_desc.xml"/>
         <xi:include href="../common/change_management_desc.xml"/>
         <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>

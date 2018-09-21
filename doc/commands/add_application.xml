@@ -38,8 +38,8 @@
             </group>
             <arg choice="plain"><option>--application <replaceable>NAME</replaceable></option></arg>
             <group choice="req">
-                <arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
-                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg choice="plain"><option>--app_eon_id <replaceable>EONID</replaceable></option></arg>
+                <arg choice="plain"><option>--app_grn <replaceable>GRN</replaceable></option></arg>
             </group>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
@@ -115,8 +115,8 @@
 
             <varlistentry>
                 <term>
-                    <option>--eon_id <replaceable>EONID</replaceable></option>,
-                    <option>--grn <replaceable>GRN</replaceable></option>
+                    <option>--app_eon_id <replaceable>EONID</replaceable></option>,
+                    <option>--app_grn <replaceable>GRN</replaceable></option>
                 </term>
                 <listitem>
                     <para>

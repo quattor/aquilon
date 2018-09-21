@@ -2853,7 +2853,7 @@
             <option name="resourcegroup" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
             <option name="application" type="string" requires="hostname cluster metacluster">Name of an application</option>
             <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
-            <option name="hostlink" type="string" requires="hostname cluster metacluster">Name of a hostlink</option>
+            <option name="hostlink" type="string" requires="hostname cluster metacluster eon_id grn">Name of a hostlink</option>
             <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
             <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
             <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
@@ -5851,8 +5851,8 @@
             </optgroup>
             <option name="application" type="string">Name of applicaiton</option>
             <optgroup fields="one">
-                <option name="eon_id" type="int">EON identity</option>
-                <option name="grn" type="string">GRN</option>
+                <option name="app_eon_id" altnames="eon_id" type="int">EON identity</option>
+                <option name="app_grn" altnames="grn" type="string">GRN</option>
             </optgroup>
         </optgroup>
         <optgroup>
@@ -5922,10 +5922,14 @@
     <command name="add_hostlink">
         Add a new hostlink resource.
         <optgroup mandatory="True" fields="all">
-            <optgroup>
-                <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-                <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-                <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+            <optgroup name="holder">
+                <optgroup fields="one">
+                    <option name="hostname" type="string">Hostname to apply resource</option>
+                    <option name="cluster" type="string">Cluster to apply resource</option>
+                    <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
+                    <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
+                </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
             <option name="hostlink" type="string">Name of hostlink</option>
@@ -5933,9 +5937,26 @@
             <option name="owner" type="string">Username to be owner of the target directory</option>
         </optgroup>
         <optgroup>
+            <optgroup name="location" fields="one" requires="eon_id grn">
+                <option name="organization" type="string">Organization</option>
+                <option name="hub" type="string">Hub</option>
+                <option name="continent" type="string">Continent</option>
+                <option name="country" type="string">Country</option>
+                <option name="campus" type="string">Campus</option>
+                <option name="city" type="string">City</option>
+                <option name="building" type="string">Building</option>
+                <option name="room" type="string">Room</option>
+                <option name="bunker" type="string">Bunker</option>
+                <option name="rack" type="string">Rack</option>
+                <option name="desk" type="string">Desk</option>
+            </optgroup>
+            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
+
             <option name="group" type="string">Group owner of the target directory</option>
             <option name="mode" type="string">Mode (octal) to apply on hostlink target</option>
+
             <option name="comments" type="string">Comments</option>
+
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
         </optgroup>
@@ -5945,15 +5966,34 @@
     <command name="del_hostlink">
         Delete an hostlink resource.
         <optgroup mandatory="True" fields="all">
-            <optgroup>
-                <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-                <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-                <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+            <optgroup name="holder">
+                <optgroup fields="one">
+                    <option name="hostname" type="string">Hostname to apply resource</option>
+                    <option name="cluster" type="string">Cluster to apply resource</option>
+                    <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
+                    <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
+                </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
             <option name="hostlink" type="string">Name</option>
         </optgroup>
         <optgroup>
+            <optgroup name="location" fields="one" requires="eon_id grn">
+                <option name="organization" type="string">Organization</option>
+                <option name="hub" type="string">Hub</option>
+                <option name="continent" type="string">Continent</option>
+                <option name="country" type="string">Country</option>
+                <option name="campus" type="string">Campus</option>
+                <option name="city" type="string">City</option>
+                <option name="building" type="string">Building</option>
+                <option name="room" type="string">Room</option>
+                <option name="bunker" type="string">Bunker</option>
+                <option name="rack" type="string">Rack</option>
+                <option name="desk" type="string">Desk</option>
+            </optgroup>
+            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
+
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
         </optgroup>
@@ -5963,14 +6003,34 @@
     <command name="show_hostlink">
         Show a hostlink resource.
         <optgroup mandatory="True">
-            <optgroup>
-                <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-                <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-                <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+            <optgroup name="holder">
+                <optgroup fields="one">
+                    <option name="hostname" type="string">Hostname to apply resource</option>
+                    <option name="cluster" type="string">Cluster to apply resource</option>
+                    <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
+                    <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
+                </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
             <option name="hostlink" type="string">Hostlink name</option>
-            <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup hostlink">List all hostlinks</option>
+            <option name="all" type="flag" conflicts="holder hostlink">List all hostlinks</option>
+        </optgroup>
+        <optgroup>
+            <optgroup name="location" fields="one" requires="eon_id grn">
+                <option name="organization" type="string">Organization</option>
+                <option name="hub" type="string">Hub</option>
+                <option name="continent" type="string">Continent</option>
+                <option name="country" type="string">Country</option>
+                <option name="campus" type="string">Campus</option>
+                <option name="city" type="string">City</option>
+                <option name="building" type="string">Building</option>
+                <option name="room" type="string">Room</option>
+                <option name="bunker" type="string">Bunker</option>
+                <option name="rack" type="string">Rack</option>
+                <option name="desk" type="string">Desk</option>
+            </optgroup>
+            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
         </optgroup>
         <transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s"/>
         <transport method="get" path="resource/hostlink"/>
@@ -5982,13 +6042,33 @@
     <command name="search_hostlink">
         Search a hostlink resource.
         <optgroup mandatory="True">
-            <optgroup>
-                <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-                <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-                <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+            <optgroup name="holder">
+                <optgroup fields="one">
+                    <option name="hostname" type="string">Hostname to apply resource</option>
+                    <option name="cluster" type="string">Cluster to apply resource</option>
+                    <option name="metacluster" type="string">Metacluster to apply resource</option>
+                    <option name="eon_id" requires="host_environment" type="int">Numeric EON ID to apply resource</option>
+                    <option name="grn" requires="host_environment" type="string">GRN as string to apply resource</option>
+                </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
             <option name="hostlink" type="string">Hostlink name</option>
+        </optgroup>
+        <optgroup>
+            <optgroup name="location" fields="one" requires="eon_id grn">
+                <option name="organization" type="string">Organization</option>
+                <option name="hub" type="string">Hub</option>
+                <option name="continent" type="string">Continent</option>
+                <option name="country" type="string">Country</option>
+                <option name="campus" type="string">Campus</option>
+                <option name="city" type="string">City</option>
+                <option name="building" type="string">Building</option>
+                <option name="room" type="string">Room</option>
+                <option name="bunker" type="string">Bunker</option>
+                <option name="rack" type="string">Rack</option>
+                <option name="desk" type="string">Desk</option>
+            </optgroup>
+            <option name="host_environment" requires="eon_id grn" type="string">Host environment</option>
         </optgroup>
         <transport method="get" path="find/resource/hostlink"/>
         <format name="proto" >

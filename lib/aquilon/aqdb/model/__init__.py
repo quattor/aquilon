@@ -151,8 +151,13 @@ from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.xtn import Xtn, XtnDetail, XtnEnd
 
 # Resources
-from aquilon.aqdb.model.resource import (Resource, ResourceHolder,
-                                         HostResource, ClusterResource)
+from aquilon.aqdb.model.resource import (
+    ClusterResource,
+    GrnResource,
+    HostResource,
+    Resource,
+    ResourceHolder,
+)
 from aquilon.aqdb.model.filesystem import Filesystem
 from aquilon.aqdb.model.application import Application
 from aquilon.aqdb.model.hostlink import Hostlink

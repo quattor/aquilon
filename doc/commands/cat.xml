@@ -179,6 +179,9 @@
             <group choice="req">
                 <synopfragmentref linkend="location-options">Location options</synopfragmentref>
             </group>
+            <group>
+                <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+            </group>
             <arg><option>--generate</option></arg>
         </cmdsynopsis>
         <cmdsynopsis>
@@ -573,6 +576,16 @@
                     <para>
                         Display the plenary of the named GRN, parameterized with
                         the named host environment and named location.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--hostlink <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Display the plenary of the named resource.
                     </para>
                 </listitem>
             </varlistentry>
