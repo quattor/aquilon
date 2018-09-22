@@ -4,121 +4,121 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_building_preference"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_add_building_preference</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_add_building_preference</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq add building preference</refname>
-	<refpurpose>
-	    Add a new building preference
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq add building preference</refname>
+        <refpurpose>
+            Add a new building preference
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq add building preference</command>
-	    <arg choice="plain"><option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option></arg>
-	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+        <cmdsynopsis>
+            <command>aq add building preference</command>
+            <arg choice="plain"><option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option></arg>
+            <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
             <arg choice="plain"><option>--prefer <replaceable>PREFER</replaceable></option></arg>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq add building preference</command> command adds
+        <title>Description</title>
+        <para>
+            The <command>aq add building preference</command> command adds
             a new preference that will be used in determining the default
             hot-side of clusters, based on the members' location.
-	</para>
-	<para>
+        </para>
+        <para>
             When given a <replaceable>BUILDING_PAIR</replaceable>, which
-	    is a comma-separated pair of building codes, clusters of the given
-	    <replaceable>ARCHETYPE</replaceable> that
+            is a comma-separated pair of building codes, clusters of the given
+            <replaceable>ARCHETYPE</replaceable> that
             span the two buildings will be configured to prefer the building
             code identified by <replaceable>PREFER</replaceable>.
         </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Indicates that this is a building-level preference and
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--building_pair <replaceable>BUILDING_PAIR</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Indicates that this is a building-level preference and
                         provides a comma-separated pair of building codes
                         identifying which buildings the cluster nodes should
                         reside in for the rule to apply, e.g. "aa,bb".
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Cluster archetype which this preference is valid for.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--prefer <replaceable>PREFER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Building code that should be preferred.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Cluster archetype which this preference is valid for.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--prefer <replaceable>PREFER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Building code that should be preferred.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>Examples</title>
-	<example>
-	    <title>Setting a global preference</title>
+        <title>Examples</title>
+        <example>
+            <title>Setting a global preference</title>
             <para>
-		For all clusters of archetype "hacluster" that span the two
-		buildings aa and bb, the following would set aa as the
-		preferred side:
+                For all clusters of archetype "hacluster" that span the two
+                buildings aa and bb, the following would set aa as the
+                preferred side:
             </para>
-	    <programlisting>
+            <programlisting>
 aq add building preference --building_pair aa,bb --archetype hacluster --prefer aa
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_update_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_del_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_search_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_update_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_del_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_search_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_building_preference</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+        </para>
     </refsect1>
 </refentry>
 

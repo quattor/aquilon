@@ -4,164 +4,164 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_reboot_schedule"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_add_reboot_schedule</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_add_reboot_schedule</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq add reboot schedule</refname>
-	<refpurpose>
-	    Add a reboot schedule resource onto a host or cluster.
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq add reboot schedule</refname>
+        <refpurpose>
+            Add a reboot schedule resource onto a host or cluster.
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq add reboot schedule</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <group choice="req">
-		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    </group>
-	    <arg choice="plain"><option>--week <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="plain"><option>--day <replaceable>WHEN</replaceable></option></arg>
-	    <arg><option>--time <replaceable>WHEN</replaceable></option></arg>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq add reboot schedule</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+                <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            </group>
+            <arg choice="plain"><option>--week <replaceable>WHEN</replaceable></option></arg>
+            <arg choice="plain"><option>--day <replaceable>WHEN</replaceable></option></arg>
+            <arg><option>--time <replaceable>WHEN</replaceable></option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq add_reboot_schedule</command> command adds a
-	    reboot schedule onto a host or a cluster.
-	</para>
-	<para>
-	    NOTE: Templates may impose policies on the allowable time of
-	    the reboot. Therefore it is important to remember to compile
-	    the host/cluster to validate the schedule as well as deploy it
-	    to the host.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq add_reboot_schedule</command> command adds a
+            reboot schedule onto a host or a cluster.
+        </para>
+        <para>
+            NOTE: Templates may impose policies on the allowable time of
+            the reboot. Therefore it is important to remember to compile
+            the host/cluster to validate the schedule as well as deploy it
+            to the host.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Templates</title>
-	<para>
-	    This command will add the reboot schedule under
-	    /system/resources/reboot_schedule for the host or
-	    cluster. Implementation of the scheduled reboot is delegated
-	    to PAN templates and Quattor configuration (NCM) components.
-	</para>
+        <title>Templates</title>
+        <para>
+            This command will add the reboot schedule under
+            /system/resources/reboot_schedule for the host or
+            cluster. Implementation of the scheduled reboot is delegated
+            to PAN templates and Quattor configuration (NCM) components.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
-		</term>
-		<listitem>
-		    <para>
-			Specify the target host for the reboot schedule.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the target cluster for the reboot schedule.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--week <replaceable>WHEN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			A comma separated list of weeks where valid values
-			are the numbers 1 through 4 and the string "all".
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--day <replaceable>WHEN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Day of the week as a three letter character code
-			(Sun, Mon, Tue, Wed, Thu, Fri, Sat) matching the
-			maintenance work window.  This defaults to Sunday
-			if not given.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--time <replaceable>WHEN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Preferred time local to the host. If not specified then
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+                </term>
+                <listitem>
+                    <para>
+                        Specify the target host for the reboot schedule.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target cluster for the reboot schedule.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--week <replaceable>WHEN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        A comma separated list of weeks where valid values
+                        are the numbers 1 through 4 and the string "all".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--day <replaceable>WHEN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Day of the week as a three letter character code
+                        (Sun, Mon, Tue, Wed, Thu, Fri, Sat) matching the
+                        maintenance work window.  This defaults to Sunday
+                        if not given.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--time <replaceable>WHEN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Preferred time local to the host. If not specified then
             PAN templates must fill in a default value when processing
             the resource.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--comments <replaceable>WHY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Any additional notes for the reboot schedule.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>WHY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Any additional notes for the reboot schedule.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>Examples</title>
-	<example>
-	    <title>Adding a reboot schedule</title>
-	    <programlisting>
+        <title>Examples</title>
+        <example>
+            <title>Adding a reboot schedule</title>
+            <programlisting>
 aq add reboot schedule --hostname foo.example.com --week 1 day Sun
-	    </programlisting>
-	    <para>
-		Add a reboot schedule for foo.example.com for the first
-		Sunday of the month.
-	    </para>
-	</example>
+            </programlisting>
+            <para>
+                Add a reboot schedule for foo.example.com for the first
+                Sunday of the month.
+            </para>
+        </example>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_del_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_del_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

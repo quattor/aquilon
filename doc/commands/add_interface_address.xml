@@ -4,282 +4,282 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_interface_address"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_add_interface_address</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_add_interface_address</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq add interface address</refname>
-	<refpurpose>
-	    Assign an IP address to an interface
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq add interface address</refname>
+        <refpurpose>
+            Assign an IP address to an interface
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq add interface address</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <group choice="req">
-		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-		<arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
-		<arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
-		<arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
-		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
-		<arg choice="plain"><option>--console_server <replaceable>CONSRV</replaceable></option></arg>
-	    </group>
-	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
-		<arg choice="plain"><option>--shortname <replaceable>NAME</replaceable></option></arg>
-	    </group>
-	    <arg><option>--label <replaceable>LABEL</replaceable></option></arg>
-	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-	    <group>
-		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
-	    </group>
-	    <group>
-		<arg choice="plain"><option>--map_to_primary</option></arg>
-		<arg choice="plain"><option>--nomap_to_primary</option></arg>
-		<arg><option>--shared</option></arg>
-		<arg choice="plain"><option>--priority <replaceable>PRIO</replaceable></option></arg>
-	    </group>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	    <xi:include href="../common/ip_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq add interface address</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+                <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+                <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
+                <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+                <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
+                <arg choice="plain"><option>--console_server <replaceable>CONSRV</replaceable></option></arg>
+            </group>
+            <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
+                <arg choice="plain"><option>--shortname <replaceable>NAME</replaceable></option></arg>
+            </group>
+            <arg><option>--label <replaceable>LABEL</replaceable></option></arg>
+            <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+            <group>
+                <synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
+            </group>
+            <group>
+                <arg choice="plain"><option>--map_to_primary</option></arg>
+                <arg choice="plain"><option>--nomap_to_primary</option></arg>
+                <arg><option>--shared</option></arg>
+                <arg choice="plain"><option>--priority <replaceable>PRIO</replaceable></option></arg>
+            </group>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+            <xi:include href="../common/ip_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq add interface address</command> command assigns an IP address to
-	    an interface.
-	</para>
-	<para>
-	    Note that you cannot add the primary IP address of a hardware entity using this command.
-	    Primary addresses are created by the <command>add network device</command>, <command>add
-		chassis</command>, and <command>add host</command> commands.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq add interface address</command> command assigns an IP address to
+            an interface.
+        </para>
+        <para>
+            Note that you cannot add the primary IP address of a hardware entity using this command.
+            Primary addresses are created by the <command>add network device</command>, <command>add
+                chassis</command>, and <command>add host</command> commands.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
-		    <option>--machine <replaceable>MACHINE</replaceable></option>,
-		    <option>--chassis <replaceable>CHASSIS</replaceable></option>,
-		    <option>--switch <replaceable>SWITCH</replaceable></option>,
-		    <option>--network_device <replaceable>NETDEV</replaceable></option>,
-		    <option>--console_server <replaceable>CONSRV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Specify the hardware entity you wish to add the IP address to. You can use either
-			the hardware label or the primary name as the argument.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--interface <replaceable>IFACE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name of the interface where the IP address should be added.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--fqdn <replaceable>FQDN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name to assign to the IP address in DNS. If you specify the
-			<option>--fqdn</option> option only, and none of the IP options, then
-			<replaceable>FQDN</replaceable> must refer to an existing address in DNS,
-			and the IP address of this address is added to the interface. If you specify
-			both <option>--fqdn</option> and an IP option, then a new DNS record will be
-			created.
-		    </para>
-		    <para>
-			If the <option>--network_environment</option> is also specified, then the
-			FQDN will be looked up/created in the DNS environment bound to
-			<replaceable>NETENV</replaceable>. Otherwise the default DNS environment is
-			used.
-		    </para>
-		    <para>
-			If <option>--fqdn</option> is not specified, then the value is generated from the local part of the primary name of the
-			hardware and the name of the interface separated by a dash, in the same DNS domain as the primary name of the hardware.
-			Alternatively, if <replaceable>IFACE</replaceable> is a management interface, then the value is generated by
-			appending the letter "r" to the relative hostname, using the same DNS domain as the primary name.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--shortname <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Short (relative) name Name to assign to the IP address in DNS. The DNS domain
-			will either be the same as the primary name of the device if it already has one, or the default DNS domain
-			assigned to the location of the device.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--label <replaceable>LABEL</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The label (alias) of the address. Every interface may have exactly
-			one address with no label. Every subsequent address must have a
-			label that is unique on that interface. See <xref linkend="virtual-iface"/>
-			for further information.
-		    </para>
-		    <para>
-			The <literal>hostname</literal> label is reserved for the primary IP
-			address when the host uses Zebra.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--network_environment <replaceable>NETENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Register the address in <replaceable>NETENV</replaceable> instead of the
-			default network environment. A network containing the address must already
-			exist in the given environment.
-		    </para>
-		    <para>
-			Specifying <option>--network_environment</option> also sets the DNS
-			environment where <replaceable>FQDN</replaceable> is looked up or created.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--map_to_primary</option>, <option>--nomap_to_primary</option>
-		</term>
-		<listitem>
-		    <para>
-			Flag to control if the reverse PTR record of the address should point to the
-			primary name instead the name given in <replaceable>FQDN</replaceable>. Default
-			is to point to the primary name.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--shared</option>
-		</term>
-		<listitem>
-		    <para>
-			Indicate that the address assigned to this interface can also be assinged
-			to other interfaces.  This is primary inteded for HSRP/VRRP addresses which
-			can exist on more than one network device at a time.  Specifying this option
-			requires <option>--priority</option>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--priority <replaceable>PRIO</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Specify the relative priority of a shared address.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/ip_options_desc.xml"/>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+                    <option>--machine <replaceable>MACHINE</replaceable></option>,
+                    <option>--chassis <replaceable>CHASSIS</replaceable></option>,
+                    <option>--switch <replaceable>SWITCH</replaceable></option>,
+                    <option>--network_device <replaceable>NETDEV</replaceable></option>,
+                    <option>--console_server <replaceable>CONSRV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Specify the hardware entity you wish to add the IP address to. You can use either
+                        the hardware label or the primary name as the argument.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--interface <replaceable>IFACE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of the interface where the IP address should be added.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--fqdn <replaceable>FQDN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name to assign to the IP address in DNS. If you specify the
+                        <option>--fqdn</option> option only, and none of the IP options, then
+                        <replaceable>FQDN</replaceable> must refer to an existing address in DNS,
+                        and the IP address of this address is added to the interface. If you specify
+                        both <option>--fqdn</option> and an IP option, then a new DNS record will be
+                        created.
+                    </para>
+                    <para>
+                        If the <option>--network_environment</option> is also specified, then the
+                        FQDN will be looked up/created in the DNS environment bound to
+                        <replaceable>NETENV</replaceable>. Otherwise the default DNS environment is
+                        used.
+                    </para>
+                    <para>
+                        If <option>--fqdn</option> is not specified, then the value is generated from the local part of the primary name of the
+                        hardware and the name of the interface separated by a dash, in the same DNS domain as the primary name of the hardware.
+                        Alternatively, if <replaceable>IFACE</replaceable> is a management interface, then the value is generated by
+                        appending the letter "r" to the relative hostname, using the same DNS domain as the primary name.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--shortname <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Short (relative) name Name to assign to the IP address in DNS. The DNS domain
+                        will either be the same as the primary name of the device if it already has one, or the default DNS domain
+                        assigned to the location of the device.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--label <replaceable>LABEL</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The label (alias) of the address. Every interface may have exactly
+                        one address with no label. Every subsequent address must have a
+                        label that is unique on that interface. See <xref linkend="virtual-iface"/>
+                        for further information.
+                    </para>
+                    <para>
+                        The <literal>hostname</literal> label is reserved for the primary IP
+                        address when the host uses Zebra.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--network_environment <replaceable>NETENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Register the address in <replaceable>NETENV</replaceable> instead of the
+                        default network environment. A network containing the address must already
+                        exist in the given environment.
+                    </para>
+                    <para>
+                        Specifying <option>--network_environment</option> also sets the DNS
+                        environment where <replaceable>FQDN</replaceable> is looked up or created.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--map_to_primary</option>, <option>--nomap_to_primary</option>
+                </term>
+                <listitem>
+                    <para>
+                        Flag to control if the reverse PTR record of the address should point to the
+                        primary name instead the name given in <replaceable>FQDN</replaceable>. Default
+                        is to point to the primary name.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--shared</option>
+                </term>
+                <listitem>
+                    <para>
+                        Indicate that the address assigned to this interface can also be assinged
+                        to other interfaces.  This is primary inteded for HSRP/VRRP addresses which
+                        can exist on more than one network device at a time.  Specifying this option
+                        requires <option>--priority</option>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--priority <replaceable>PRIO</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Specify the relative priority of a shared address.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/ip_options_desc.xml"/>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1 xml:id="virtual-iface">
-	<title>Labels and virtual interfaces</title>
-	<para>
-	    Using the <option>--label</option> option will cause the IP address to show up as a
-	    virtual interface on Linux. For example, if <replaceable>IFACE</replaceable> is
-	    <literal>eth0</literal> and <replaceable>LABEL</replaceable> is <literal>e0</literal>,
-	    then <command>ifconfig</command> will show you an interface called
-	    <literal>eth0:e0</literal>. The combined length of <replaceable>IFACE</replaceable> and
-	    <replaceable>LABEL</replaceable> must therefore be at most 15, one less than the maximum
-	    length of the name of a network interface.
-	</para>
-	<para>
-	    Also note that such virtual interfaces are only emulated for some legacy tools like
-	    <command>ifconfig</command>. New style tools like <command>ip addr list</command> will show you
-	    just one interface with multiple addresses, and <replaceable>LABEL</replaceable> will
-	    show up as the label of the given IP address.
-	</para>
+        <title>Labels and virtual interfaces</title>
+        <para>
+            Using the <option>--label</option> option will cause the IP address to show up as a
+            virtual interface on Linux. For example, if <replaceable>IFACE</replaceable> is
+            <literal>eth0</literal> and <replaceable>LABEL</replaceable> is <literal>e0</literal>,
+            then <command>ifconfig</command> will show you an interface called
+            <literal>eth0:e0</literal>. The combined length of <replaceable>IFACE</replaceable> and
+            <replaceable>LABEL</replaceable> must therefore be at most 15, one less than the maximum
+            length of the name of a network interface.
+        </para>
+        <para>
+            Also note that such virtual interfaces are only emulated for some legacy tools like
+            <command>ifconfig</command>. New style tools like <command>ip addr list</command> will show you
+            just one interface with multiple addresses, and <replaceable>LABEL</replaceable> will
+            show up as the label of the given IP address.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Examples</title>
-	<example>
-	    <title>Add an auxiliary address to the second interface of host foo</title>
-	    <programlisting>
+        <title>Examples</title>
+        <example>
+            <title>Add an auxiliary address to the second interface of host foo</title>
+            <programlisting>
 aq add interface address --machine foo.one-nyp.ms.com \
     --interface eth1 \
     --fqdn foo-e1.one-nyp.ms.com \
     --ip 10.10.1.10
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>Add a second auxiliary address to the same interface</title>
-	    <programlisting>
+        <example>
+            <title>Add a second auxiliary address to the same interface</title>
+            <programlisting>
 aq add interface address --machine foo.one-nyp.ms.com \
     --interface eth1 \
     --label bar \
     --fqdn foo-e1-bar.one-nyp.ms.com \
     --ip 10.10.1.11
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>Let the broker auto-generate the DNS entry</title>
-	    <programlisting>
+        <example>
+            <title>Let the broker auto-generate the DNS entry</title>
+            <programlisting>
 aq add interface address --network_device foo.one-nyp.ms.com \
     --interface vlan110 \
     --ip 10.10.1.1
-	    </programlisting>
-	    <para>
-		The broker will add foo-vlan110.one-nyp.ms.com to the DNS using IP address 10.10.1.1.
-	    </para>
-	</example>
+            </programlisting>
+            <para>
+                The broker will add foo-vlan110.one-nyp.ms.com to the DNS using IP address 10.10.1.1.
+            </para>
+        </example>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_poll_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_poll_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

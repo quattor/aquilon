@@ -4,252 +4,252 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_bind_feature"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_bind_feature</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_bind_feature</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq bind feature</refname>
-	<refpurpose>
-	    Bind a feature to a model/archetype/personality
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq bind feature</refname>
+        <refpurpose>
+            Bind a feature to a model/archetype/personality
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq bind feature</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--feature <replaceable>FEATURE</replaceable></option></arg>
-	    <arg><option>--model <replaceable>MODEL</replaceable></option></arg>
-	    <arg><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
-		<arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
-	    </group>
-	    <arg><option>--archetype <replaceable>ARCH</replaceable></option></arg>
-	    <arg><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq bind feature</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--feature <replaceable>FEATURE</replaceable></option></arg>
+            <arg><option>--model <replaceable>MODEL</replaceable></option></arg>
+            <arg><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
+                <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+            </group>
+            <arg><option>--archetype <replaceable>ARCH</replaceable></option></arg>
+            <arg><option>--interface <replaceable>IFACE</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq bind feature</command> command governs when a given feature should be
-	    activated by binding a feature to various objects like model, archetype or personality. If the
-	    parameters of a host or interface match the binding parameters, then the feature is activated. If
-	    the binding specifies multiple matching criteria, then the host or interface must match all.
-	</para>
-	<para>
-	    The same feature may be bound to multiple objects simultaneously (like both to the personality and
-	    the archetype of a host). Even if that's the case, the feature template will be included only
-	    once. The <command>aq bind feature</command> will also warn if you want to create a binding that
-	    is redundant.
-	</para>
-	<para>
-	    The <command>aq bind feature</command> command verifies that the required templates
-	    exist in any domains used by any hosts or clusters affected by the new binding. Note
-	    that this check merely tests the existence of the templates - no functional testing is
-	    performed. Hosts or clusters in sandboxes are not checked, expecting the owners of such
-	    sandboxes to take care about any potential problems themselves.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq bind feature</command> command governs when a given feature should be
+            activated by binding a feature to various objects like model, archetype or personality. If the
+            parameters of a host or interface match the binding parameters, then the feature is activated. If
+            the binding specifies multiple matching criteria, then the host or interface must match all.
+        </para>
+        <para>
+            The same feature may be bound to multiple objects simultaneously (like both to the personality and
+            the archetype of a host). Even if that's the case, the feature template will be included only
+            once. The <command>aq bind feature</command> will also warn if you want to create a binding that
+            is redundant.
+        </para>
+        <para>
+            The <command>aq bind feature</command> command verifies that the required templates
+            exist in any domains used by any hosts or clusters affected by the new binding. Note
+            that this check merely tests the existence of the templates - no functional testing is
+            performed. Hosts or clusters in sandboxes are not checked, expecting the owners of such
+            sandboxes to take care about any potential problems themselves.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--feature <replaceable>FEATURE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the feature to bind.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--model <replaceable>MODEL</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name of a hardware model. If the model refers to a machine, then
-			<replaceable>FEATURE</replaceable> must be a hardware feature. If the model refers to
-			a network interface, then <replaceable>FEATURE</replaceable> must be an interface
-			feature.
-		    </para>
-		    <para>
-			Binding a feature to a model globally is not allowed, you must also specify either
-			<option>--archetype</option> or <option>--personality</option>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--vendor <replaceable>VENDOR</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name of the vendor, if <replaceable>MODEL</replaceable> is not unique.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality <replaceable>PERS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name of a personality. <replaceable>FEATURE</replaceable> must be a host feature,
-			unless <option>--model</option> or <option>--interface</option> is also specified,
-			in which case the rules for the respective option apply.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Select the stage of the personality to use. Defaults to <literal>next</literal>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--archetype <replaceable>ARCH</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name of an archetype. If <option>--personality</option> is used, then
-			this option is used as a qualifier to select the right archetype if
-			the name of the personality is not unique. If this option is used without
-			<option>--personality</option>, then it specifies the archetype to bind to.
-		    </para>
-		    <para>
-			Binding a feature to an archetype is subject to change management control
-			and requires the use of option <option>--justification</option>. The only
-			exception is when the archetype has no hosts (i.e. when it is still under
-			development); in this case <option>--justification</option> is not needed.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--interface <replaceable>IFACE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Name of a network interface. <replaceable>FEATURE</replaceable> must be
-			an interface feature, and it gets activated only for interfaces named
-			<replaceable>IFACE</replaceable>.
-		    </para>
-		    <para>
-			It is not allowed to specify an archetype-wide interface binding, you
-			must also specify option <option>--personality</option>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--feature <replaceable>FEATURE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the feature to bind.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--model <replaceable>MODEL</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of a hardware model. If the model refers to a machine, then
+                        <replaceable>FEATURE</replaceable> must be a hardware feature. If the model refers to
+                        a network interface, then <replaceable>FEATURE</replaceable> must be an interface
+                        feature.
+                    </para>
+                    <para>
+                        Binding a feature to a model globally is not allowed, you must also specify either
+                        <option>--archetype</option> or <option>--personality</option>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--vendor <replaceable>VENDOR</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of the vendor, if <replaceable>MODEL</replaceable> is not unique.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of a personality. <replaceable>FEATURE</replaceable> must be a host feature,
+                        unless <option>--model</option> or <option>--interface</option> is also specified,
+                        in which case the rules for the respective option apply.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Select the stage of the personality to use. Defaults to <literal>next</literal>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCH</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of an archetype. If <option>--personality</option> is used, then
+                        this option is used as a qualifier to select the right archetype if
+                        the name of the personality is not unique. If this option is used without
+                        <option>--personality</option>, then it specifies the archetype to bind to.
+                    </para>
+                    <para>
+                        Binding a feature to an archetype is subject to change management control
+                        and requires the use of option <option>--justification</option>. The only
+                        exception is when the archetype has no hosts (i.e. when it is still under
+                        development); in this case <option>--justification</option> is not needed.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--interface <replaceable>IFACE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of a network interface. <replaceable>FEATURE</replaceable> must be
+                        an interface feature, and it gets activated only for interfaces named
+                        <replaceable>IFACE</replaceable>.
+                    </para>
+                    <para>
+                        It is not allowed to specify an archetype-wide interface binding, you
+                        must also specify option <option>--personality</option>.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>Examples</title>
+        <title>Examples</title>
 
-	<example>
-	    <title>Bind a host feature to a personality</title>
-	    <programlisting>
+        <example>
+            <title>Bind a host feature to a personality</title>
+            <programlisting>
 aq bind feature --feature foo --personality unixeng-test
-	    </programlisting>
-	    <para>
-		After executing the above command, all hosts in the <literal>unixeng-test</literal>
-		personality will have the following line added to the host plenary template:
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                After executing the above command, all hosts in the <literal>unixeng-test</literal>
+                personality will have the following line added to the host plenary template:
+            </para>
+            <programlisting>
 include { "features/foo/config" };
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>Bind a host feature to an archetype</title>
-	    <programlisting>
+        <example>
+            <title>Bind a host feature to an archetype</title>
+            <programlisting>
 aq bind feature --feature foo --archetype aquilon --justification tcm=600123456
-	    </programlisting>
-	    <para>
-		After executing the above command, all Aquilon hosts will have the following line added to the
-		host plenary template:
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                After executing the above command, all Aquilon hosts will have the following line added to the
+                host plenary template:
+            </para>
+            <programlisting>
 include { "features/foo/config" };
-	    </programlisting>
-	    <para>
-		Note that modifying an archetype requires a valid TCM, and executing the above command can
-		take a significant time.
-	    </para>
-	</example>
+            </programlisting>
+            <para>
+                Note that modifying an archetype requires a valid TCM, and executing the above command can
+                take a significant time.
+            </para>
+        </example>
 
-	<example>
-	    <title>Bind a hardware feature to a personality and model</title>
-	    <programlisting>
+        <example>
+            <title>Bind a hardware feature to a personality and model</title>
+            <programlisting>
 aq bind feature --feature foo --model dx320-6388ac1 --personality unixeng-test
-	    </programlisting>
-	    <para>
-		After executing the above command, all <literal>dx320-6388ac1</literal> hosts in the
-		<literal>unixeng-test</literal> personality will have the following line added to the
-		host plenary, just after the OS template:
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                After executing the above command, all <literal>dx320-6388ac1</literal> hosts in the
+                <literal>unixeng-test</literal> personality will have the following line added to the
+                host plenary, just after the OS template:
+            </para>
+            <programlisting>
 include { "features/hardware/foo/config" };
-	    </programlisting>
-	    <para>
-		Note that the presence of the <option>--model</option> means that <literal>foo</literal> is
-		treated as a hardware feature.
-	    </para>
-	</example>
+            </programlisting>
+            <para>
+                Note that the presence of the <option>--model</option> means that <literal>foo</literal> is
+                treated as a hardware feature.
+            </para>
+        </example>
 
-	<example>
-	    <title>Bind an interface feature to a personality</title>
-	    <programlisting>
+        <example>
+            <title>Bind an interface feature to a personality</title>
+            <programlisting>
 aq bind feature --feature foo --personality unixeng-test --interface bond1
-	    </programlisting>
-	    <para>
-		After executing the above command, all hosts in the <literal>unixeng-test</literal>
-		personality that have an interface named <literal>bond1</literal> will have the following
-		lines added to the host plenary:
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                After executing the above command, all hosts in the <literal>unixeng-test</literal>
+                personality that have an interface named <literal>bond1</literal> will have the following
+                lines added to the host plenary:
+            </para>
+            <programlisting>
 variable CURRENT_INTERFACE = "bond1";
 include { "features/interface/foo/config" };
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_unbind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_del_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_unbind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_del_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

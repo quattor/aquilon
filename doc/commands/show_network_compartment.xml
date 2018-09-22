@@ -4,80 +4,80 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_show_network_compartment"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_show_network_compartment</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_show_network_compartment</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq show network compartment</refname>
-	<refpurpose>
-	    Show the parameters of one or all network compartments
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq show network compartment</refname>
+        <refpurpose>
+            Show the parameters of one or all network compartments
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq show network compartment</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group choice="req">
-		<arg choice="plain"><option>--network_compartment <replaceable>NETCOMP</replaceable></option></arg>
-		<arg choice="plain"><option>--all</option></arg>
-	    </group>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq show network compartment</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--network_compartment <replaceable>NETCOMP</replaceable></option></arg>
+                <arg choice="plain"><option>--all</option></arg>
+            </group>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq show network compartment</command> command shows the parameters of
-	    either a single or all network compartments.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq show network compartment</command> command shows the parameters of
+            either a single or all network compartments.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--network_compartment <replaceable>NETCOMP</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Show the parameters of just the named compartment.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--all</option>
-		</term>
-		<listitem>
-		    <para>
-			Show all network compartments.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--network_compartment <replaceable>NETCOMP</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Show the parameters of just the named compartment.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--all</option>
+                </term>
+                <listitem>
+                    <para>
+                        Show all network compartments.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_add_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_del_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_update_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_add_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_del_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_update_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+        </para>
     </refsect1>
 </refentry>
 

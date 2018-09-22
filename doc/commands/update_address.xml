@@ -4,176 +4,176 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_address"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_update_address</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_update_address</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq update address</refname>
-	<refpurpose>
-	    Update an IP address (A record) in the DNS
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq update address</refname>
+        <refpurpose>
+            Update an IP address (A record) in the DNS
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq update address</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--fqdn <replaceable>ADDRESS</replaceable></option></arg>
-	    <arg><option>--ip <replaceable>IPADDR</replaceable></option></arg>
-	    <arg><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--ttl <replaceable>TTL</replaceable></option></arg>
-		<arg choice="plain"><option>--clear_ttl</option></arg>
-	    </group>
-	    <group>
-		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
-		<arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
-	    </group>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
-	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq update address</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--fqdn <replaceable>ADDRESS</replaceable></option></arg>
+            <arg><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+            <arg><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--ttl <replaceable>TTL</replaceable></option></arg>
+                <arg choice="plain"><option>--clear_ttl</option></arg>
+            </group>
+            <group>
+                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+            </group>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <arg><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
+            <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq update address</command> command updates the
-	    definition of an address (A record) in the DNS.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq update address</command> command updates the
+            definition of an address (A record) in the DNS.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--fqdn <replaceable>ADDRESS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the address to update.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--ip <replaceable>IPADDR</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Set the IP address associated with <replaceable>ADDRESS</replaceable> to
-			<replaceable>IPADDR</replaceable>. The IP address of a record can be updated
-			only if the current IP address is not assigned to any network interface.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--reverse_ptr <replaceable>FQDN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Defines where the reverse PTR record should point to.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--ttl <replaceable>TTL</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The TTL of the record in number of seconds. Use "0" to unset the TTL of the record.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--clear_ttl</option>
-		</term>
-		<listitem>
-		    <para>
-			Clear the customized TTL value.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Short description of the purpose of the address.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--grn <replaceable>GRN</replaceable></option>,
-		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The owner GRN of the personality to be created. Scripts should use the
-			numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
-			more suitable for humans.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--network_environment <replaceable>NETENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Defines the network environment where this address is valid. The default is
-			defined by the <literal>default_network_environment</literal> key in the
-			<literal>site</literal> section of the broker's configuration.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--dns_environment <replaceable>DNSENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the DNS environment where the address should be created. The
-			default is the DNS environment associated with the network environment
-			<replaceable>NETENV</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--fqdn <replaceable>ADDRESS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the address to update.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--ip <replaceable>IPADDR</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Set the IP address associated with <replaceable>ADDRESS</replaceable> to
+                        <replaceable>IPADDR</replaceable>. The IP address of a record can be updated
+                        only if the current IP address is not assigned to any network interface.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--reverse_ptr <replaceable>FQDN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Defines where the reverse PTR record should point to.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--ttl <replaceable>TTL</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The TTL of the record in number of seconds. Use "0" to unset the TTL of the record.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--clear_ttl</option>
+                </term>
+                <listitem>
+                    <para>
+                        Clear the customized TTL value.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Short description of the purpose of the address.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--grn <replaceable>GRN</replaceable></option>,
+                    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The owner GRN of the personality to be created. Scripts should use the
+                        numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
+                        more suitable for humans.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--network_environment <replaceable>NETENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Defines the network environment where this address is valid. The default is
+                        defined by the <literal>default_network_environment</literal> key in the
+                        <literal>site</literal> section of the broker's configuration.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--dns_environment <replaceable>DNSENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the DNS environment where the address should be created. The
+                        default is the DNS environment associated with the network environment
+                        <replaceable>NETENV</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_add_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_del_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_fqdn</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_add_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_del_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_fqdn</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

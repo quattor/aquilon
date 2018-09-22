@@ -4,151 +4,151 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_alias"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_add_alias</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_add_alias</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq add alias</refname>
-	<refpurpose>
-	    Add a DNS alias
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq add alias</refname>
+        <refpurpose>
+            Add a DNS alias
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq add alias</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--fqdn <replaceable>ALIAS</replaceable></option></arg>
-	    <arg choice="plain"><option>--target <replaceable>TARGET</replaceable></option></arg>
-	    <arg><option>--ttl <replaceable>TTL</replaceable></option></arg>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
-	    <arg><option>--target_environment <replaceable>ENV</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
-		<arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
-	    </group>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq add alias</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--fqdn <replaceable>ALIAS</replaceable></option></arg>
+            <arg choice="plain"><option>--target <replaceable>TARGET</replaceable></option></arg>
+            <arg><option>--ttl <replaceable>TTL</replaceable></option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <arg><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
+            <arg><option>--target_environment <replaceable>ENV</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+            </group>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq add alias</command> command creates a DNS alias (CNAME record).
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq add alias</command> command creates a DNS alias (CNAME record).
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--fqdn <replaceable>ALIAS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the alias to create.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--target <replaceable>TARGET</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the target the alias should point to. If the target does not exist,
-			and the DNS domain of the target is marked as restricted, then a placeholder
-			entry will be created. In all other cases, the target must exist prior to
-			invoking the <command>aq add alias</command> command.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--dns_environment <replaceable>ENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the DNS environment where the alias should be created. It is possible to create
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--fqdn <replaceable>ALIAS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the alias to create.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--target <replaceable>TARGET</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target the alias should point to. If the target does not exist,
+                        and the DNS domain of the target is marked as restricted, then a placeholder
+                        entry will be created. In all other cases, the target must exist prior to
+                        invoking the <command>aq add alias</command> command.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--dns_environment <replaceable>ENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the DNS environment where the alias should be created. It is possible to create
       an alias for a target in a different DNS environment by using --target_environment.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--target_environment <replaceable>ENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the DNS environment where the target lives if it is different from where the
-			alias is created. The target would be in the same dns enviornment as the alias if it is
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--target_environment <replaceable>ENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the DNS environment where the target lives if it is different from where the
+                        alias is created. The target would be in the same dns enviornment as the alias if it is
       not specified.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--ttl <replaceable>TTL</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The TTL of the record in number of seconds.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Short description of the purpose of the alias.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--grn <replaceable>GRN</replaceable></option>,
-		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The owner GRN of the personality to be created. Scripts should use the
-			numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
-			more suitable for humans.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--ttl <replaceable>TTL</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The TTL of the record in number of seconds.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Short description of the purpose of the alias.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--grn <replaceable>GRN</replaceable></option>,
+                    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The owner GRN of the personality to be created. Scripts should use the
+                        numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
+                        more suitable for humans.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_del_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_update_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_del_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_update_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_alias</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

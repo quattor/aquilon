@@ -4,261 +4,261 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_cluster"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_update_cluster</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_update_cluster</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq update cluster</refname>
-	<refpurpose>
-	    Update parameters of a cluster
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq update cluster</refname>
+        <refpurpose>
+            Update parameters of a cluster
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq update cluster</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    <arg><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
-	    <arg><option>--metacluster <replaceable>NAME</replaceable></option></arg>
-	    <arg><option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option></arg>
-	    <arg><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
-	    <arg><option>--max_members <replaceable>NUMBER</replaceable></option></arg>
-	    <arg><option>--switch <replaceable>SWITCH</replaceable></option></arg>
-	    <arg><option>--virtual_switch <replaceable>VSWITCH</replaceable></option></arg>
-	    <arg><option>--fix_location</option></arg>
-	    <group>
-		<arg choice="plain"><option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option></arg>
-		<arg choice="plain"><option>--clear_group</option></arg>
-	    </group>
-	    <group>
-		<arg choice="plain"><option>--preferred_building <replaceable>BUILDING</replaceable></option></arg>
-		<arg choice="plain"><option>--clear_location_preference</option></arg>
-	    </group>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/location_options.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq update cluster</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            <arg><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+            <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+            <arg><option>--metacluster <replaceable>NAME</replaceable></option></arg>
+            <arg><option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option></arg>
+            <arg><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
+            <arg><option>--max_members <replaceable>NUMBER</replaceable></option></arg>
+            <arg><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+            <arg><option>--virtual_switch <replaceable>VSWITCH</replaceable></option></arg>
+            <arg><option>--fix_location</option></arg>
+            <group>
+                <arg choice="plain"><option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option></arg>
+                <arg choice="plain"><option>--clear_group</option></arg>
+            </group>
+            <group>
+                <arg choice="plain"><option>--preferred_building <replaceable>BUILDING</replaceable></option></arg>
+                <arg choice="plain"><option>--clear_location_preference</option></arg>
+            </group>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/location_options.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq update cluster</command> command updates the parameters of a cluster.
-	    If called without any options, the command will just refresh the plenary templates of the cluster.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq update cluster</command> command updates the parameters of a cluster.
+            If called without any options, the command will just refresh the plenary templates of the cluster.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the cluster to update.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Change the personality of the cluster to <replaceable>PERSONALITY</replaceable>. Changing the
-			archetype of a cluster is not supported.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			If used without <option>--personality</option>, then make the cluster use stage <replaceable>STAGE</replaceable>
-			of its current personality. If <option>--personality</option> is also specified, then select stage
-			<replaceable>STAGE</replaceable> of that personality.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--metacluster <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Change the metacluster this cluster belongs to. If <replaceable>NAME</replaceable> is the empty string,
-			then the cluster is removed from the current metacluster.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Number of hosts that can go down without impacting the availability of the cluster.
-			<replaceable>THRESHOLD</replaceable> can be either an absolute number, or a percentage if it ends with
-			the percent sign.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--maint_threshold <replaceable>THRESHOLD</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Number of hosts that can go down without triggering alerts during the cluster's maintenance window.
-			<replaceable>THRESHOLD</replaceable> can be either an absolute number, or a percentage if it ends with
-			the percent sign.
-		    </para>
-		    <para>
-			The maintenance threshold is expected to be higher than the normal down hosts threshold, however that
-			is not enforced.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--max_members <replaceable>NUMBER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Maximum number of members the cluster may have. If <replaceable>NUMBER</replaceable> is
-			negative, then there will be no restrictions on the number of members.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--switch <replaceable>SWITCH</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Update the switch associated with the cluster. This option is valid only for ESX clusters. The
-			switch is used to look up which networks are available for guests to use.
-		    </para>
-		    <para>
-			If <replaceable>SWITCH</replaceable> is the empty string, then the existing
-			switch association is removed.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--virtual_switch <replaceable>VSWITCH</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Update the virtual switch associated with the cluster. The virtual switch is
-			used to look up which networks are available for guests to use.
-		    </para>
-		    <para>
-			If <replaceable>VSWITCH</replaceable> is the empty string, then the existing
-			virtual switch association is removed.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--fix_location</option>
-		</term>
-		<listitem>
-		    <para>
-			Re-calculate the cluster's location, based on the location of its members. The location of the
-			cluster will be set to the smallest entity that contains all the members.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Update the comments of the cluster.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Place <replaceable>CLUSTER</replaceable> and <replaceable>OTHER_CLUSTER</replaceable> in the same cluster group.
-			At least one of the two should not be part of a cluster group when the command is executed. If both clusters are
-			already grouped, and the two groups are disjoint, then an error is returned, so it is not possible to combine
-			existing cluster groups with this command.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--clear_group</option>
-		</term>
-		<listitem>
-		    <para>
-			Remove <replaceable>CLUSTER</replaceable> from the cluster group it is currently the member of. If only one cluster
-			is left in the group after this operation, then the cluster group is deleted.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--preferred_building <replaceable>BUILDING</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Set the preferred side of the cluster to <replaceable>BUILDING</replaceable>, overriding any
-			global preferences.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--clear_location_preference</option>
-		</term>
-		<listitem>
-		    <para>
-			Remove the preferred side override, if set, and make the cluster honour the global preferences, if any.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/location_options_desc.xml"/>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the cluster to update.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the personality of the cluster to <replaceable>PERSONALITY</replaceable>. Changing the
+                        archetype of a cluster is not supported.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        If used without <option>--personality</option>, then make the cluster use stage <replaceable>STAGE</replaceable>
+                        of its current personality. If <option>--personality</option> is also specified, then select stage
+                        <replaceable>STAGE</replaceable> of that personality.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--metacluster <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the metacluster this cluster belongs to. If <replaceable>NAME</replaceable> is the empty string,
+                        then the cluster is removed from the current metacluster.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Number of hosts that can go down without impacting the availability of the cluster.
+                        <replaceable>THRESHOLD</replaceable> can be either an absolute number, or a percentage if it ends with
+                        the percent sign.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--maint_threshold <replaceable>THRESHOLD</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Number of hosts that can go down without triggering alerts during the cluster's maintenance window.
+                        <replaceable>THRESHOLD</replaceable> can be either an absolute number, or a percentage if it ends with
+                        the percent sign.
+                    </para>
+                    <para>
+                        The maintenance threshold is expected to be higher than the normal down hosts threshold, however that
+                        is not enforced.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--max_members <replaceable>NUMBER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Maximum number of members the cluster may have. If <replaceable>NUMBER</replaceable> is
+                        negative, then there will be no restrictions on the number of members.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--switch <replaceable>SWITCH</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Update the switch associated with the cluster. This option is valid only for ESX clusters. The
+                        switch is used to look up which networks are available for guests to use.
+                    </para>
+                    <para>
+                        If <replaceable>SWITCH</replaceable> is the empty string, then the existing
+                        switch association is removed.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--virtual_switch <replaceable>VSWITCH</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Update the virtual switch associated with the cluster. The virtual switch is
+                        used to look up which networks are available for guests to use.
+                    </para>
+                    <para>
+                        If <replaceable>VSWITCH</replaceable> is the empty string, then the existing
+                        virtual switch association is removed.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--fix_location</option>
+                </term>
+                <listitem>
+                    <para>
+                        Re-calculate the cluster's location, based on the location of its members. The location of the
+                        cluster will be set to the smallest entity that contains all the members.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Update the comments of the cluster.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Place <replaceable>CLUSTER</replaceable> and <replaceable>OTHER_CLUSTER</replaceable> in the same cluster group.
+                        At least one of the two should not be part of a cluster group when the command is executed. If both clusters are
+                        already grouped, and the two groups are disjoint, then an error is returned, so it is not possible to combine
+                        existing cluster groups with this command.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--clear_group</option>
+                </term>
+                <listitem>
+                    <para>
+                        Remove <replaceable>CLUSTER</replaceable> from the cluster group it is currently the member of. If only one cluster
+                        is left in the group after this operation, then the cluster group is deleted.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--preferred_building <replaceable>BUILDING</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Set the preferred side of the cluster to <replaceable>BUILDING</replaceable>, overriding any
+                        global preferences.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--clear_location_preference</option>
+                </term>
+                <listitem>
+                    <para>
+                        Remove the preferred side override, if set, and make the cluster honour the global preferences, if any.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/location_options_desc.xml"/>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>add_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>cat_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>add_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>cat_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

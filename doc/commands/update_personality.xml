@@ -4,205 +4,205 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_personality"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_update_personality</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_update_personality</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq update personality</refname>
-	<refpurpose>
-	    update certain personality options
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq update personality</refname>
+        <refpurpose>
+            update certain personality options
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq update personality</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
-		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
-	    </group>
-	    <arg><option>--leave_existing</option></arg>
-	    <group>
-		<arg choice="plain"><option>--cluster_required</option></arg>
-		<arg choice="plain"><option>--nocluster_required</option></arg>
-	    </group>
-	    <group>
-		<arg choice="plain"><option>--config_override</option></arg>
-		<arg choice="plain"><option>--noconfig_override</option></arg>
-	    </group>
-	    <group>
-		<arg choice="plain"><option>--staged</option></arg>
-		<arg choice="plain"><option>--unstaged</option></arg>
-	    </group>
-	    <arg><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
-	    <arg><option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option></arg>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq update personality</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+            <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+            <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+            </group>
+            <arg><option>--leave_existing</option></arg>
+            <group>
+                <arg choice="plain"><option>--cluster_required</option></arg>
+                <arg choice="plain"><option>--nocluster_required</option></arg>
+            </group>
+            <group>
+                <arg choice="plain"><option>--config_override</option></arg>
+                <arg choice="plain"><option>--noconfig_override</option></arg>
+            </group>
+            <group>
+                <arg choice="plain"><option>--staged</option></arg>
+                <arg choice="plain"><option>--unstaged</option></arg>
+            </group>
+            <arg><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
+            <arg><option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq update personality</command> Updates certain config options on personality.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq update personality</command> Updates certain config options on personality.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the personality to update.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Select the stage of the personality to use. Defaults to <literal>next</literal>.
-			Note that this parameter only affects updating staged properties.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the archteype, if the personality name is not unique.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--grn <replaceable>GRN</replaceable></option>
-		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Change the owner GRN of the personality. If the <option>--leave_existing</option> option is not
-			specified, all hosts having the same owner GRN as the personality will be updated as well. Hosts
-			having an owner GRN different from the original owner of the personality will not be affected.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--leave_existing</option>
-		</term>
-		<listitem>
-		    <para>
-			Do not cascade updates to hosts belonging to the personality. Currently only updating the owner
-			GRN is cascaded to the member hosts.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster_required</option>, <option>--nocluster_required</option>
-		</term>
-		<listitem>
-		    <para>
-			This flag specifies if this personality require hosts to be clustered.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--config_override</option>, <option>--noconfig_override</option>
-		</term>
-		<listitem>
-		    <para>
-			If this flag is specified a special template <filename>personality/config_override</filename> will
-			be included in the aqdb generated personality configuration template. This feature
-			effectively pulls in config_override.tpl from the personality templates in the
-			template domain, if it exists.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--staged</option>, <option>--unstaged</option>
-		</term>
-		<listitem>
-		    <para>
-			This flag turns personality staging on or off. Staging can only be turned off
-			if both the <literal>previous</literal> and the <literal>next</literal> stages are unused.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the personality to update.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Select the stage of the personality to use. Defaults to <literal>next</literal>.
+                        Note that this parameter only affects updating staged properties.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the archteype, if the personality name is not unique.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--grn <replaceable>GRN</replaceable></option>
+                    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the owner GRN of the personality. If the <option>--leave_existing</option> option is not
+                        specified, all hosts having the same owner GRN as the personality will be updated as well. Hosts
+                        having an owner GRN different from the original owner of the personality will not be affected.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--leave_existing</option>
+                </term>
+                <listitem>
+                    <para>
+                        Do not cascade updates to hosts belonging to the personality. Currently only updating the owner
+                        GRN is cascaded to the member hosts.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster_required</option>, <option>--nocluster_required</option>
+                </term>
+                <listitem>
+                    <para>
+                        This flag specifies if this personality require hosts to be clustered.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--config_override</option>, <option>--noconfig_override</option>
+                </term>
+                <listitem>
+                    <para>
+                        If this flag is specified a special template <filename>personality/config_override</filename> will
+                        be included in the aqdb generated personality configuration template. This feature
+                        effectively pulls in config_override.tpl from the personality templates in the
+                        template domain, if it exists.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--staged</option>, <option>--unstaged</option>
+                </term>
+                <listitem>
+                    <para>
+                        This flag turns personality staging on or off. Staging can only be turned off
+                        if both the <literal>previous</literal> and the <literal>next</literal> stages are unused.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
                         Function for calculating VM host capacity units.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Change the personality's comments. If <replaceable>COMMENTS</replaceable> is the empty string,
-			then the existing comments are removed.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-			<option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Environment for hosts assigned to this personality. Possible values:
-			<xi:include href="../common/host_environments_no_legacy.xml"/>.
-			Once the environment has been set to anything other that <literal>legacy</literal>, it
-			cannot be updated.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the personality's comments. If <replaceable>COMMENTS</replaceable> is the empty string,
+                        then the existing comments are removed.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                        <option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Environment for hosts assigned to this personality. Possible values:
+                        <xi:include href="../common/host_environments_no_legacy.xml"/>.
+                        Once the environment has been set to anything other that <literal>legacy</literal>, it
+                        cannot be updated.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_add_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_add_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+        </para>
     </refsect1>
 </refentry>
 
