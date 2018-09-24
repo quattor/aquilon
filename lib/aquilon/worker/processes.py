@@ -637,6 +637,12 @@ class DSDBRunner(object):
         return snapshot_chassis
 
     def add_rack(self, dbrack):
+        try:
+            self.show_rack(dbrack.name)
+            self.logger.warning("Rack with the same name already found in DSDB, adding rack just to aqdb.")
+            return
+        except ValueError:
+            pass
         dsdb_client_command_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
                                                  'building': dbrack.building.name,
                                                  'floor': dbrack.room.floor if dbrack.room else '0',
@@ -679,6 +685,12 @@ class DSDBRunner(object):
                         ignore_msg="Delete rack {} in DSDB failed, proceeding in AQDB.".format(dbrack.name))
 
     def add_chassis(self, dbchassis):
+        try:
+            self.show_chassis(dbchassis.label)
+            self.logger.warning("Chassis with the same name already found in DSDB, adding chassis just to aqdb.")
+            return
+        except ValueError:
+            pass
         dsdb_client_command_dict = {'add_chassis': {'id': dbchassis.label.replace(dbchassis.location.rack.name + 'c', ''),
                                                     'rack': dbchassis.location.rack.name,
                                                     'comments': dbchassis.comments}}
@@ -1037,6 +1049,20 @@ class DSDBRunner(object):
         if not fields or not fields["rack_row"] or not fields["rack_col"]:
             raise ValueError("Rack {} is not found in DSDB or missing "
                              "row and/or col data.".format(rackname))
+        return fields
+
+    def show_chassis(self, chassis):
+        chassis_data = self.dsdbclient.show_chassis(chassis_name=chassis).results()
+        fields = {}
+        if len(chassis_data) > 1:
+            raise ValueError("Multiple chassis with the same name {} "
+                             "prefix found.".format(chassis))
+        if chassis_data:
+            fields = {"nodes": chassis_data[0].get("nodes", ""),
+                      "comments": chassis_data[0].get("comments", "")}
+
+        if not fields:
+            raise ValueError("Chassis {} is not found in DSDB.".format(chassis))
         return fields
 
     def show_host(self, hostname):

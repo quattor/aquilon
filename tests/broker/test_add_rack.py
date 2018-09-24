@@ -248,11 +248,16 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(err, "Bad Request: DSDB update failed", command)
 
     def test_225_dsdbfailureoy604(self):
-        command = "add rack --building oy --row 604 --column zz"
-        err = self.badrequesttest(command.split(" "))
-        self.matchoutput(err, "Rack oy604 is already defined", command)
-        self.matchoutput(err, "Bad Request: DSDB update failed", command)
-        self.matchoutput(err, "DSDB command failed: add_rack", command)
+        command = ["add_rack", "--building", "oy", "--row", "604", "--column", "zz"]
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Rack with the same name already found in DSDB, "
+                              "adding rack just to aqdb.", command)
+
+    def test_226_dsdbfailureoy604_delete(self):
+        command = ["del_rack", "--rack", "oy604"]
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Rack oy604 delete in DSDB failed!", command)
+        self.matchoutput(err, "Delete rack oy604 in DSDB failed, proceeding in AQDB", command)
 
 
 if __name__ == '__main__':

@@ -87,12 +87,15 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
     def test_119_add_ut3c2_dsdb_fail(self):
         command = ["add_chassis", "--chassis", "ut3c2.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "aurora_chassis_model"]
-        err = self.badrequesttest(command)
-        self.matchoutput(err, "Chassis ut3c2 is already defined", command)
-        self.matchoutput(err, "DSDB command failed: add_chassis", command)
-        self.matchoutput(err, "Bad Request: Could not add chassis to DSDB", command)
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Chassis with the same name already found in DSDB, "
+                              "adding chassis just to aqdb.", command)
 
-    def test_120_add_ut9_chassis(self):
+    def test_120_add_ut3c2_dsdb_fail_delete(self):
+        command = ["del_chassis", "--chassis", "ut3c2.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_121_add_ut9_chassis(self):
         for i in range(1, 8):
             ip = self.net["ut9_chassis"].usable[i]
             self.dsdb_expect_add("ut9c%d.aqd-unittest.ms.com" % i,
@@ -104,7 +107,7 @@ class TestAddChassis(TestBrokerCommand, VerifyChassisMixin):
             self.noouttest(command)
         self.dsdb_verify()
 
-    def test_121_add_chassis_wrong_name_format(self):
+    def test_122_add_chassis_wrong_name_format(self):
         command = ["add_chassis", "--chassis", "testchassis.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "aurora_chassis_model"]
         err = self.badrequesttest(command)

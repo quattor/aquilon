@@ -40,6 +40,9 @@ class DSDB(object):
     def show_host(self, host_name):
         return DSDBHostData(host_name)
 
+    def show_chassis(self, chassis_name):
+        return DSDBChassisData(chassis_name)
+
     def add_rack(self, id, building, floor, comp_room, row, column, comments=None):
         rack_name = '{}{}'.format(building, id)
         dsdb_racks = DSDBRackData(rack_name)
