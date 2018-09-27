@@ -197,7 +197,8 @@ class AuthorizationBroker(object):
         return sorted(session.query(Role).
                       filter(Role.name.in_(roles)), key=str)
 
-    def add_command_to_option_dict(self, option_dict, command_info):
+    @staticmethod
+    def add_command_to_option_dict(option_dict, command_info):
         if not command_info["command"] in option_dict:
             option_dict[command_info["command"]] = set()
         option_dict[command_info["command"]].add(command_info["option"])
