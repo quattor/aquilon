@@ -33,13 +33,17 @@ class CommandDelChassis(BrokerCommand):
 
         check_only_primary_ip(dbchassis)
 
+        dsdb_runner = DSDBRunner(logger=logger)
+        oldinfo = DSDBRunner.snapshot_hw(dbchassis)
+        dsdb_runner.update_host(None, oldinfo)
+        dsdb_runner.delete_chassis(dbchassis)
+
         if dbchassis.not_empty_slots and not clear_slots:
             raise ArgumentError("{0} is still in use by {1} machines or network devices. Use "
                                 "--clear_slots if you really want to delete "
                                 "it.".format(dbchassis, len(dbchassis.not_empty_slots)))
 
         # Order matters here
-        oldinfo = DSDBRunner.snapshot_hw(dbchassis)
         dbdns_rec = dbchassis.primary_name
         session.delete(dbchassis)
         if dbdns_rec:
@@ -47,8 +51,6 @@ class CommandDelChassis(BrokerCommand):
 
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.update_host(None, oldinfo)
         dsdb_runner.commit_or_rollback("Could not remove chassis from DSDB")
 
         return

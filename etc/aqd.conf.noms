@@ -117,6 +117,7 @@ object_declarations_template = true
 [site]
 # Site specific settings
 default_hardware_label_regex = ^[a-z][a-z0-9]{,62}$
+dsdb_id_regex =
 
 ###############################################################################
 

@@ -378,6 +378,7 @@ git = 30
 [site]
 # Site specific settings
 default_hardware_label_regex = ^[a-z][a-z0-9]{,62}$
+dsdb_name_regex = ^(?P<loc>[^ ]*[^0-9])(?P<id>[1-9][0-9]*)$
 default_dns_environment = internal
 default_network_environment = internal
 # Space-separated list of user roles that can add and delete internal networks

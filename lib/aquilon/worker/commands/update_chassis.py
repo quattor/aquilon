@@ -39,7 +39,9 @@ class CommandUpdateChassis(BrokerCommand):
                **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
+        dsdb_runner = DSDBRunner(logger=logger)
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
+        snapshot_chassis = dsdb_runner.snapshot(dbchassis)
 
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
@@ -54,13 +56,12 @@ class CommandUpdateChassis(BrokerCommand):
         dblocation = get_location(session, rack=rack)
         if dblocation:
             dbchassis.location = dblocation
-
+            dbchassis.check_label(dbchassis.label)
             # Validate ChangeManagement
-            # Only if lacation being updated
+            # Only if location being updated
             cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
             cm.consider(dbchassis)
             cm.validate()
-
 
         if serial is not None:
             dbchassis.serial_no = serial
@@ -82,7 +83,7 @@ class CommandUpdateChassis(BrokerCommand):
 
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.update_chassis(dbchassis, snapshot_chassis)
         dsdb_runner.update_host(dbchassis, oldinfo)
         dsdb_runner.commit_or_rollback("Could not update chassis in DSDB")
 

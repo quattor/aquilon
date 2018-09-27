@@ -165,8 +165,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.assertEqual(chassis.model.vendor, 'aurora_vendor')
 
         self.assertEqual(chassis.location.location_type, 'rack')
-        self.assertEqual(chassis.location.name, 'np3')
-        self.assertEqual(chassis.location.fullname, 'np3')
+        self.assertEqual(chassis.location.name, 'ut3')
+        self.assertEqual(chassis.location.fullname, 'ut3')
         self.assertEqual(chassis.location.col, '3')
         self.assertEqual(chassis.location.row, 'a')
 

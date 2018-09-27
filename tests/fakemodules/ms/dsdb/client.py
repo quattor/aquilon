@@ -16,7 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
+
+# Keeping DSDB module isolated in its dir and not loading config here
+DSDB_HOST_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dsdb_host_data.json')
 
 
 class DSDB(object):
@@ -33,8 +37,14 @@ class DSDB(object):
     def show_rack(self, rack_name):
         return DSDBRackData(rack_name)
 
+    def show_host(self, host_name):
+        return DSDBHostData(host_name)
+
+    def show_chassis(self, chassis_name):
+        return DSDBChassisData(chassis_name)
+
     def add_rack(self, id, building, floor, comp_room, row, column, comments=None):
-        rack_name = building+id
+        rack_name = '{}{}'.format(building, id)
         dsdb_racks = DSDBRackData(rack_name)
         if dsdb_racks.results() or rack_name in dsdb_racks.side_effect:
             raise Exception('Rack {} is already defined'.format(rack_name))
@@ -48,6 +58,40 @@ class DSDB(object):
         dsdb_racks = DSDBRackData(rack)
         if rack in dsdb_racks.side_effect:
             raise Exception('Rack {} update in DSDB failed!'.format(rack))
+
+    def add_chassis(self, id, rack, comments=None):
+        chassis_name = '{}c{}'.format(rack, id)
+        dsdb_chassis = DSDBChassisData(chassis_name)
+        if chassis_name in dsdb_chassis.dsdb_chassis_data.keys():
+            raise Exception('Chassis {} is already defined'.format(chassis_name))
+
+    def delete_chassis(self, chassis_name):
+        dsdb_chassis = DSDBChassisData(chassis_name)
+        if chassis_name in dsdb_chassis.delete_side_effect:
+            raise Exception('Chassis {} delete in DSDB failed!'.format(chassis_name))
+
+    def update_chassis(self, chassis, **kwargs):
+        dsdb_chassis = DSDBChassisData(chassis)
+        if chassis in dsdb_chassis.update_side_effect:
+            raise Exception('Chassis {} update in DSDB failed!'.format(chassis))
+
+
+class DSDBChassisData(object):
+    """
+    DSDB Chassis Data Description
+    used by DSDB Interface class
+    if no DSDB module loaded
+    """
+    update_side_effect = ["ut3c1"]
+    delete_side_effect = []
+    dsdb_chassis_data = {"ut3c2": [{u'rack': u'ut3',
+                                    u'comment': u'test'}]}
+
+    def __init__(self, chassis):
+        self.chassis = chassis
+
+    def results(self):
+        return self.dsdb_chassis_data.get(self.chassis, [])
 
 
 class DSDBRackData(object):
@@ -70,3 +114,22 @@ class DSDBRackData(object):
 
     def results(self):
         return self.dsdb_host_data.get(self.rack_name, [])
+
+
+class DSDBHostData(object):
+    """
+    DSDB Host Data Description
+    used by DSDB Interface class
+    if no DSDB module loaded
+    """
+
+    dsdb_host_data = {}
+    with open(DSDB_HOST_FILE, 'r') as f:
+        dsdb_host_data = json.load(f)
+    side_effect = []
+
+    def __init__(self, host_name):
+        self.host_name = host_name
+
+    def results(self):
+        return self.dsdb_host_data.get(self.host_name, [])

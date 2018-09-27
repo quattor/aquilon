@@ -438,11 +438,9 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         # For Aurora hosts, we need to add the extra IP after the host object
         # has been created
         ip = self.net["tor_net_0"].usable[6]
-        self.dsdb_expect("show_host -host_name test-aurora-default-os-v0")
         self.noouttest(["add_interface_address", "--machine", "ut8s02p4",
                         "--interface", "eth0", "--label", "v0", "--ip", ip,
                         "--fqdn", "test-aurora-default-os-v0.ms.com"])
-        self.dsdb_verify()
 
     def test_440_verifyauroraextraip(self):
         ip1 = self.net["tor_net_0"].usable[4]

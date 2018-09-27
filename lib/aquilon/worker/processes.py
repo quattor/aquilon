@@ -49,18 +49,22 @@ LOGGER = logging.getLogger(__name__)
 config = Config()
 
 DSDB_ENABLED = config.getboolean("dsdb", "enable")
-
 if DSDB_ENABLED:
-    # FIXME - this needs to be moved to depends.py after
-    # refactoring runtests.py and Config to allow override
-    # sys.path for python modules when running tests
-    # DSDB python client
-    import ms.version
-    ms.version.addpkg("requests", "2.7.0")
-    ms.version.addpkg("requests-kerberos", "0.5-ms2")
-    ms.version.addpkg("kerberos", "1.1.5")
-    ms.version.addpkg("dns", "1.10.0")
-    ms.version.addpkg('ms.dsdb', '6.0.32')
+    try:
+        import ms.version
+    except ImportError:
+        pass
+    else:
+        # FIXME - this needs to be moved to depends.py after
+        # refactoring runtests.py and Config to allow override
+        # sys.path for python modules when running tests
+        # DSDB python client
+        import ms.version
+        ms.version.addpkg("requests", "2.7.0")
+        ms.version.addpkg("requests-kerberos", "0.5-ms2")
+        ms.version.addpkg("kerberos", "1.1.5")
+        ms.version.addpkg("dns", "1.10.0")
+        ms.version.addpkg('ms.dsdb', '6.0.32')
     import ms.dsdb.client
 
 # subprocess.Popen is not thread-safe in Python 2, so we need locking
@@ -628,7 +632,17 @@ class DSDBRunner(object):
                          'comments': dbrack.comments}
         return snapshot_rack
 
+    def snapshot_chassis(self, dbchassis):
+        snapshot_chassis = {'comments': dbchassis.comments}
+        return snapshot_chassis
+
     def add_rack(self, dbrack):
+        try:
+            self.show_rack(dbrack.name)
+            self.logger.warning("Rack with the same name already found in DSDB, adding rack just to aqdb.")
+            return
+        except ValueError:
+            pass
         dsdb_client_command_dict = {'add_rack': {'id': dbrack.name.replace(dbrack.building.name, ''),
                                                  'building': dbrack.building.name,
                                                  'floor': dbrack.room.floor if dbrack.room else '0',
@@ -669,6 +683,39 @@ class DSDBRunner(object):
         # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
         self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False, error_filter=True,
                         ignore_msg="Delete rack {} in DSDB failed, proceeding in AQDB.".format(dbrack.name))
+
+    def add_chassis(self, dbchassis):
+        try:
+            self.show_chassis(dbchassis.label)
+            self.logger.warning("Chassis with the same name already found in DSDB, adding chassis just to aqdb.")
+            return
+        except ValueError:
+            pass
+        dsdb_client_command_dict = {'add_chassis': {'id': dbchassis.label.replace(dbchassis.location.rack.name + 'c', ''),
+                                                    'rack': dbchassis.location.rack.name,
+                                                    'comments': dbchassis.comments}}
+        dsdb_client_rollback_dict = {'delete_chassis': {'chassis_name': dbchassis.label}}
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False)
+
+    def update_chassis(self, dbchassis, snapshot_chassis):
+        if dbchassis.comments:
+            dsdb_client_command_dict = {'update_chassis': {'chassis': dbchassis.label,
+                                                           'comments': dbchassis.comments}}
+            dsdb_client_rollback_dict = {'update_chassis': {'chassis': dbchassis.label,
+                                                            'comments': snapshot_chassis['comments']}}
+            # Ignoring DSDB failures for updates now, as many chassis do not exist in DSDB
+            self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False,
+                            error_filter=True, ignore_msg="Update chassis {} in DSDB failed, "
+                                                          "proceeding in AQDB.".format(dbchassis.label))
+
+    def delete_chassis(self, dbchassis):
+        dsdb_client_command_dict = {'delete_chassis': {'chassis_name': dbchassis.label}}
+        dsdb_client_rollback_dict = {'add_chassis': {'id': dbchassis.label.replace(dbchassis.location.rack.name + 'c', ''),
+                                                     'rack': dbchassis.location.rack.name,
+                                                     'comments': dbchassis.comments}}
+        # Ignoring DSDB failures for updates now, as many racks do not exist in DSDB
+        self.add_action(dsdb_client_command_dict, dsdb_client_rollback_dict, cmd_line=False, error_filter=True,
+                        ignore_msg="Delete chassis {} in DSDB failed, proceeding in AQDB.".format(dbchassis.label))
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
                          comments=None, **_):
@@ -992,19 +1039,31 @@ class DSDBRunner(object):
     def show_rack(self, rackname):
         rack_data = self.dsdbclient.show_rack(rack_name=rackname).results()
         fields = {}
+        if len(rack_data) > 1:
+            raise ValueError("Multiple racks with the same name {} "
+                             "prefix found.".format(rackname))
         if rack_data:
             fields = {"rack_row": rack_data[0]["row"],
                       "rack_col": rack_data[0]["column"]}
 
         if not fields or not fields["rack_row"] or not fields["rack_col"]:
-            raise ValueError("Rack %s is not found in DSDB or missing "
-                             "row and/or col data")
+            raise ValueError("Rack {} is not found in DSDB or missing "
+                             "row and/or col data.".format(rackname))
         return fields
 
-    primary_re = re.compile(r'^\s*Primary Name:\s*\b([-\w]+)\b$', re.M)
-    node_re = re.compile(r'^\s*Node:\s*\b([-\w]+)\b$', re.M)
-    dns_re = re.compile(r'^\s*DNS Domain:\s*\b([-\w\.]+)\b$', re.M)
-    state_re = re.compile(r'^\s*State:\s*\b(\d+)\b$', re.M)
+    def show_chassis(self, chassis):
+        chassis_data = self.dsdbclient.show_chassis(chassis_name=chassis).results()
+        fields = {}
+        if len(chassis_data) > 1:
+            raise ValueError("Multiple chassis with the same name {} "
+                             "prefix found.".format(chassis))
+        if chassis_data:
+            fields = {"nodes": chassis_data[0].get("nodes", ""),
+                      "comments": chassis_data[0].get("comments", "")}
+
+        if not fields:
+            raise ValueError("Chassis {} is not found in DSDB.".format(chassis))
+        return fields
 
     def show_host(self, hostname):
         (short, dot, dns_domain) = hostname.partition(".")
@@ -1022,20 +1081,18 @@ class DSDBRunner(object):
             fields["fqdn"] = hostname
             fields["dsdb_lookup"] = short
 
-        out = run_command(["dsdb", "show_host",
-                           "-host_name", fields["dsdb_lookup"]],
-                          env=self.getenv())
-        primary = self.primary_re.search(out)
-        node = self.node_re.search(out)
-        dns = self.dns_re.search(out)
-        state = self.state_re.search(out)
-        fields["primary_name"] = primary and primary.group(1) or None
-        fields["node"] = node and node.group(1) or None
-        fields["dns"] = dns and dns.group(1) or None
-        if state:
-            fields["state"] = int(state.group(1))
+        host_data = self.dsdbclient.show_host(host_name=fields["dsdb_lookup"]).results()
+        if len(host_data) > 1:
+            raise ValueError("Multiple hosts with same name {} "
+                             "prefix found in DSDB".format(fields["dsdb_lookup"]))
+        if host_data:
+            fields["primary_name"] = host_data[0].get("primary_hostname")
+            fields["node"] = host_data[0].get("nodename")
+            fields["dns"] = host_data[0].get("DNS_domain")
+            fields["state"] = host_data[0].get("state")
         else:
-            fields["state"] = None
+            raise ValueError("Host {} is not found in DSDB or "
+                             "multiple hosts with same name prefix found in DSDB".format(fields["dsdb_lookup"]))
         return fields
 
     def add_alias(self, alias, target, comments):
@@ -1085,3 +1142,4 @@ def build_mako_lookup(config, kind, **kwargs):
 
 
 DSDBRunner.snapshot_handlers['rack'] = DSDBRunner.snapshot_rack
+DSDBRunner.snapshot_handlers['chassis'] = DSDBRunner.snapshot_chassis

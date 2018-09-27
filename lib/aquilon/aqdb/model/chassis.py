@@ -19,12 +19,20 @@
     IBM: BCE and BCH (blade center e and blade center h). There may be some
     blade center e's in VA but they are like rackmounts as well"""
 
+import re
+
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.inspection import inspect
 
 from aquilon.aqdb.model import HardwareEntity, Machine, NetworkDevice
+from aquilon.config import Config
+from aquilon.exceptions_ import ArgumentError
 
 _TN = 'chassis'
+
+_config = Config()
+
+DSDB_ID_REGEX = re.compile(_config.get("site", "dsdb_name_regex")) if _config.has_value("site", "dsdb_name_regex") else None
 
 
 class Chassis(HardwareEntity):
@@ -36,6 +44,17 @@ class Chassis(HardwareEntity):
     hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
                                            ondelete='CASCADE'),
                                 primary_key=True)
+
+    def check_label(self, label):
+        # Adding even more strict chassis name validation
+        # Only enforced if site/dsdb_id_regex config option set
+        if DSDB_ID_REGEX:
+            m = DSDB_ID_REGEX.search(label)
+            if not m or not m.group('loc') == '{}c'.format(self.location.name):
+                raise ArgumentError("Invalid chassis name '{}'. Correct name format: "
+                                    "rack ID + 'c' + numeric chassis ID (integer without leading 0).".format(label))
+        else:
+            super(Chassis, self).check_label(label)
 
     @property
     def machine_slots(self):
