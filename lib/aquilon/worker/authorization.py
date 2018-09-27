@@ -203,7 +203,7 @@ class AuthorizationBroker(object):
             option_dict[command_info["command"]] = set()
         option_dict[command_info["command"]].add(command_info["option"])
 
-    def check_role_permission(self, session, role):
+    def check_role_permission(self, role):
         # This function return all commands that are allowed for a given role
         l = []
         # option_dict : {command : (option1, option2), command2 : (option1)..}
