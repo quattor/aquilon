@@ -56,7 +56,7 @@ class NoLockKey(LockKey):
 # relatively sane approach as generally the profile is the thing
 # we actually care about being in a good state.
 class CompileKey(LockKey):
-    def __init__(self, domain=None, profile=None,
+    def __init__(self, domain=None, profile=None, force_domain=True,
                  logger=LOGGER, loglevel=CLIENT_INFO):
         """Define the desired compile lock with a domain and a host.
 
@@ -69,12 +69,15 @@ class CompileKey(LockKey):
         # Emulate the previous behavior:
         # - if no profile is provided, then this is a domain-wide lock
         # - if no domain is provided either, then this is a global lock
+        # - if a profile is provided but no domain, and if force_domain
+        #   is False, we lock the profile without locking any domain
         if profile:
-            if not domain:
+            if domain:
+                self.shared["domain"].add(domain)
+            elif force_domain:
                 raise InternalError("Compile lock request for %s missing "
                                     "domain." % profile)
             self.shared["misc"].add("compile")
-            self.shared["domain"].add(domain)
             self.exclusive["profile"].add(profile)
         elif domain:
             self.shared["misc"].add("compile")
