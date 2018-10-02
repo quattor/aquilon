@@ -527,20 +527,23 @@ class Option(Element):
             self.default = None
 
     def check(self, options):
-        result = {}
-        found = False
+        """Check if self is present among the options provided by the user.
 
-        if self.mandatory:
-            if not hasattr(options, self.name):
-                raise ParsingError('Option ' + self.name + ' is missing')
-        if hasattr(options, self.name):
-            val = getattr(options, self.name)
-            if val is not None:
-                found = True
-            result[self.name] = getattr(options, self.name)
-#        if self.mandatory and not found:
-#            raise ParsingError(self.node.text, 'Option '+self.name+' is mandatory but it was not specified')
-        return result, found
+        If it is not, then either raise a ParsingError in case the option is
+        mandatory, or, if it is optional, return tuple(dict(), False).
+
+        If it is present, and the user has provided a value for it (i.e.
+        "--option-name option_value" instead of just "--option-name"), return
+        tuple({self.name: option_value}, True).  Otherwise (i.e. option present
+        but no option value provided), return ({self.name: None}, False).
+        """
+        option_present = hasattr(options, self.name)
+        if option_present:
+            option_value = getattr(options, self.name)
+            return {self.name: option_value}, option_value is not None
+        elif self.mandatory:
+            raise ParsingError('Option {} is missing'.format(self.name))
+        return {}, False
 
     def genOptions(self, parser):
         if parser.has_option('--' + self.name):
