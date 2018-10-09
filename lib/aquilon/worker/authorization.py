@@ -203,35 +203,99 @@ class AuthorizationBroker(object):
             option_dict[command_info["command"]] = set()
         option_dict[command_info["command"]].add(command_info["option"])
 
-    def check_role_permission(self, role):
-        # This function return all commands that are allowed for a given role
-        l = []
-        # option_dict : {command : (option1, option2), command2 : (option1)..}
+    def _compute_option_dict(self, role):
+        """Return effective permissions of a given role to execute commands.
+
+        This method computes a dictionary containing all commands (together
+        with, where relevant, allowed options) that a given role can execute.
+
+        :param role: the name of a role
+        :return: a dictionary (one key per command) in the following format:
+
+                 {command: {option1, option2}, command2: {option1}..}
+
+                 e.g.:
+
+        {'add_sandbox': set([None]),
+         'cat': set(['city',
+                     'cluster',
+                     'hostname',
+                     'instance',
+                     'machine',
+                     'metacluster',
+                     'network_device',
+                     'networkip',
+                     'personality',
+                     'service',
+                     'virtual_switch']),
+         'compile': set([None, 'cluster', 'hostname', 'metacluster',
+         'personality']),
+         'del_sandbox': set([None]),
+         ...
+        }
+        """
+        # Compute a dictionary of all the commands and options that the role
+        # has permissions to execute.
+        # option_dict : {command: {option1, option2}, command2: {option1}..}
         option_dict = {}
         for c, v in self.cregistry._commands_cache.items():
             if c in self.cregistry._readonly_commands:
                 self.add_command_to_option_dict(option_dict, v)
-
-            elif c in self.action_whitelist \
-                    and role in self.action_whitelist[c]:
+            elif c in self.action_whitelist and \
+                    role in self.action_whitelist[c]:
                 self.add_command_to_option_dict(option_dict, v)
-
             elif role in self.default_allow:
                 self.add_command_to_option_dict(option_dict, v)
-
-            elif role in self.role_whitelist \
-                    and c in self.role_whitelist[role]:
+            elif role in self.role_whitelist and \
+                    c in self.role_whitelist[role]:
                 self.add_command_to_option_dict(option_dict, v)
+        return option_dict
 
+    def _option_dict_to_strings(self, option_dict):
+        """Compute a list of strings describing effective permissions.
+
+        This method converts option_dict (see: below) to a list of strings
+        used by check_role_permission (please see that method definition for
+        explanation or the format of the returned result).
+
+        :param option_dict: a dictionary (see: method compute_option_dict)
+        :return: a list of strings (please see: method check_role_permission)
+        """
+        result = []
         for c, s in option_dict.items():
             if self.cregistry._commands_options[c] == s:
-                l.append(c)
+                result.append(c)
             elif None in s:
                 options = sorted(self.cregistry._commands_options[c] - s)
-                l.append("{} (except with: --{})"
-                         .format(c, ', --'.join(str(e) for e in options)))
+                result.append('{} (except with: --{})'.format(
+                    c, ', --'.join(str(e) for e in options)))
             else:
-                l.append("{} (only with: --{})".
-                         format(c, ', --'.join(str(e) for e in sorted(s))))
+                result.append('{} (only with: --{})'.format(
+                    c, ', --'.join(str(e) for e in sorted(s))))
+        return result
 
-        return sorted(l)
+    def check_role_permission(self, role):
+        """Return a list of commands to which a given role has permissions.
+
+        This method returns a sorted list of descriptive strings for all
+        commands (together with, where relevant, allowed or disallowed options)
+        that a given role can execute.
+
+        :param role: the name of a role
+        :return: a list of strings (one per command), see the example below:
+                 [
+                    'cat',
+                    'compile (except with: --cluster, --hostname),
+                    ...
+                    'del_interface (only with: --network_device, --switch)',
+                    ...
+                    'del_sandbox'
+                    ...
+                 ]
+        """
+        # Compute a dictionary of all the commands and options that the role
+        # has permissions to execute.
+        option_dict = self._compute_option_dict(role)
+        # Compute and return a sorted list of strings describing effective
+        # permissions.
+        return sorted(self._option_dict_to_strings(option_dict))
