@@ -228,7 +228,7 @@ class AuthorizationBroker(object):
                 l.append(c)
             elif None in s:
                 options = sorted(self.cregistry._commands_options[c] - s)
-                l.append("{} (expect with: --{})"
+                l.append("{} (except with: --{})"
                          .format(c, ', --'.join(str(e) for e in options)))
             else:
                 l.append("{} (only with: --{})".
