@@ -48,7 +48,7 @@ class TestShowPermission(TestBrokerCommand):
         command = ["show_permission", "--role", "unittester"]
         out = self.commandtest(command)
         self.matchoutput(out, "update_review", command)
-        self.matchoutput(out, "add_rack (expect with: --bunker, --room)",
+        self.matchoutput(out, "add_rack (except with: --bunker, --room)",
                          command)
         self.matchoutput(out, "del_interface (only with: --network_device, "
                          "--switch)", command)
