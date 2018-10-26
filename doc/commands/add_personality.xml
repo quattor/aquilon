@@ -4,172 +4,172 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_personality"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_add_personality</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_add_personality</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq add personality</refname>
-	<refpurpose>
-	    Add a new personality
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq add personality</refname>
+        <refpurpose>
+            Add a new personality
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq add personality</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <group choice="req">
-		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
-		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
-	    </group>
-	    <arg><option>--cluster_required</option></arg>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option></arg>
-		<arg><option>--copy_stage <replaceable>SRC_STAGE</replaceable></option></arg>
-	    </group>
-	    <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
-	    <arg><option>--config_override</option></arg>
+        <cmdsynopsis>
+            <command>aq add personality</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+            <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+            <group choice="req">
+                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+            </group>
+            <arg><option>--cluster_required</option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option></arg>
+                <arg><option>--copy_stage <replaceable>SRC_STAGE</replaceable></option></arg>
+            </group>
+            <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+            <arg><option>--config_override</option></arg>
             <group>
                 <arg choice="plain"><option>--staged</option></arg>
                 <arg choice="plain"><option>--unstaged</option></arg>
             </group>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq add personality</command> Command creates a new personality.
-	    A default template will be created. This default templatie will be used for host plenary
-	    generation only if no personality templates have been defined within the template domain.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq add personality</command> Command creates a new personality.
+            A default template will be created. This default templatie will be used for host plenary
+            generation only if no personality templates have been defined within the template domain.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the personality to create.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the archteype.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the environment hosts for belonging to this personality. The valid
-			environments are: <xi:include href="../common/host_environments_no_legacy.xml"/>.
-			For all purposes it is a required field, but archetypes can have a default
-			environment set which will be used when creating the personality. This can
-			be set as default_environment key in the
-			<literal>archetype_<replaceable>ARCHETYPE</replaceable></literal> section of the broker configuration.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--grn <replaceable>GRN</replaceable></option>,
-		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The owner GRN of the personality to be created. Scripts should use the
-			numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
-			more suitable for humans.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster_required</option>
-		</term>
-		<listitem>
-		    <para>
-			This flag specifies if this personality require hosts to be clustered.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Short description of the purpose of this personality.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			This option takes a name of another personality within the archetype.
-			All parameters, feature bindings, required services and service mappings
-			will be copied over from the copy_from personality to the new personality
-			being created.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--copy_stage <replaceable>SRC_STAGE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Select the stage of the personality to copy. Defaults to <literal>current</literal>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--config_override</option>
-		</term>
-		<listitem>
-		    <para>
-			If this flag is specified a special template <filename>personality/config_overridex</filename> will be included
-			in the aqdb generated personality configuration template. This feature
-			effectively pulls in config_override.tpl from the personality templates in the template
-			domain, if it exists.
-		    </para>
-		</listitem>
-	    </varlistentry>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the personality to create.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the archteype.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the environment hosts for belonging to this personality. The valid
+                        environments are: <xi:include href="../common/host_environments_no_legacy.xml"/>.
+                        For all purposes it is a required field, but archetypes can have a default
+                        environment set which will be used when creating the personality. This can
+                        be set as default_environment key in the
+                        <literal>archetype_<replaceable>ARCHETYPE</replaceable></literal> section of the broker configuration.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--grn <replaceable>GRN</replaceable></option>,
+                    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The owner GRN of the personality to be created. Scripts should use the
+                        numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
+                        more suitable for humans.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster_required</option>
+                </term>
+                <listitem>
+                    <para>
+                        This flag specifies if this personality require hosts to be clustered.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Short description of the purpose of this personality.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        This option takes a name of another personality within the archetype.
+                        All parameters, feature bindings, required services and service mappings
+                        will be copied over from the copy_from personality to the new personality
+                        being created.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--copy_stage <replaceable>SRC_STAGE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Select the stage of the personality to copy. Defaults to <literal>current</literal>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--config_override</option>
+                </term>
+                <listitem>
+                    <para>
+                        If this flag is specified a special template <filename>personality/config_overridex</filename> will be included
+                        in the aqdb generated personality configuration template. This feature
+                        effectively pulls in config_override.tpl from the personality templates in the template
+                        domain, if it exists.
+                    </para>
+                </listitem>
+            </varlistentry>
             <varlistentry>
                 <term>
                     <option>--staged</option>, <option>--unstaged</option>
@@ -181,67 +181,67 @@
                         New personalities will be created with staging on.
                     </para>
                 </listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>Examples</title>
+        <title>Examples</title>
 
-	<example>
-	    <title>add a personality</title>
-	    <programlisting>
+        <example>
+            <title>add a personality</title>
+            <programlisting>
 aq add personality --archetype aquilon --personality foo \
     --grn grn:/some/grn
-	    </programlisting>
-	    <para>
-		This adds personality <literal>foo</literal>.
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                This adds personality <literal>foo</literal>.
+            </para>
+            <programlisting>
 aq show personality --personality foo
-	    </programlisting>
-	    <screen>
+            </programlisting>
+            <screen>
 Host Personality: foo Archetype: aquilon
   Owned by GRN: grn:/some/grn
   Template: aquilon/personality/foo/config
-	    </screen>
-	    <para>
-		Following are generated templates
-	    </para>
-	    <programlisting>
+            </screen>
+            <para>
+                Following are generated templates
+            </para>
+            <programlisting>
 template personality/foo/config;
 
 variable PERSONALITY = "foo";
 include { if_exists("personality/foo/pre_feature") };
 include { if_exists("personality/config") };
 include { if_exists("personality/foo/post_feature") };
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>add a personality with config override option</title>
-	    <programlisting>
+        <example>
+            <title>add a personality with config override option</title>
+            <programlisting>
 aq add personality --archetype aquilon --personality foo \
     --grn grn:/some/grn --config_override
-	    </programlisting>
-	    <para>
-		  This adds personality <literal>foo</literal> with config override option enabled.
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                  This adds personality <literal>foo</literal> with config override option enabled.
+            </para>
+            <programlisting>
 aq show personality --personality foo
-	    </programlisting>
-	    <screen>
+            </programlisting>
+            <screen>
 Host Personality: foo Archetype: aquilon
   Owned by GRN: grn:/some/grn
   Config override: enabled
   Template: aquilon/personality/foo/config
-	    </screen>
-	    <para>
-		Following are generated templates
-	    </para>
-	    <programlisting>
+            </screen>
+            <para>
+                Following are generated templates
+            </para>
+            <programlisting>
 template personality/foo/config;
 
 variable PERSONALITY = "foo";
@@ -249,74 +249,74 @@ include { if_exists("personality/foo/pre_feature") };
 include { if_exists("personality/config") };
 include { "features/personality/config_override/config" };
 include { if_exists("personality/foo/post_feature") };
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>add a personality as clone of other personality</title>
-	    <programlisting>
+        <example>
+            <title>add a personality as clone of other personality</title>
+            <programlisting>
 aq add personality --archetype aquilon --personality foo \
     --grn grn:/some/grn --copy_from unixeng-test
-	    </programlisting>
-	    <para>
-		  This adds personality <literal>foo</literal> and will copy any parameters and feature bindings defined for
-		  personality unixeng-test to personality foo.
-	    </para>
-	    <programlisting>
+            </programlisting>
+            <para>
+                  This adds personality <literal>foo</literal> and will copy any parameters and feature bindings defined for
+                  personality unixeng-test to personality foo.
+            </para>
+            <programlisting>
 aq show personality --personality unixeng-test
-	    </programlisting>
-	    <screen>
+            </programlisting>
+            <screen>
 Host Personality: unixeng-test Archetype: aquilon
   Owned by GRN: grn:/some/grn
   Template: aquilon/personality/unixeng-test/config.tpl
     Required Service: service1
     Required Service: service2
     Host Feature: somefeat1 [post_personality]
-	    </screen>
-	    <programlisting>
+            </screen>
+            <programlisting>
 aq show parameter  --personality unixeng-test
-	    </programlisting>
-	    <screen>
+            </programlisting>
+            <screen>
 Archetype/Personality : aquilon/unixeng-test
 espinfo : {
-	"function": "crash",
-	"description": "Personality to test new features/os/etc",
-	"systemgrn": "[\"grn:/some/grn\"]",
+        "function": "crash",
+        "description": "Personality to test new features/os/etc",
+        "systemgrn": "[\"grn:/some/grn\"]",
 }
-	    </screen>
-	    <para>
-		After running the above commands parameters, feature bindings will be copied. Required services
-		and other service mappings are not copied.
-	    </para>
-	    <programlisting>
+            </screen>
+            <para>
+                After running the above commands parameters, feature bindings will be copied. Required services
+                and other service mappings are not copied.
+            </para>
+            <programlisting>
 aq show personality --personality foo
-	    </programlisting>
-	    <screen>
+            </programlisting>
+            <screen>
 Host Personality: foo Archetype: aquilon
   Owned by GRN: grn:/some/grn
   Template: aquilon/personality/foo/config
   Host Feature: somefeat1 [post_personality]
-	    </screen>
-	    <programlisting>
+            </screen>
+            <programlisting>
 aq show parameter  --personality foo
-	    </programlisting>
-	    <screen>
+            </programlisting>
+            <screen>
 Archetype/Personality : aquilon/foo
 espinfo : {
-	"function": "crash",
-	"description": "Personality to test new features/os/etc",
-	"systemgrn": "[\"grn:/some/grn\"]",
+        "function": "crash",
+        "description": "Personality to test new features/os/etc",
+        "systemgrn": "[\"grn:/some/grn\"]",
 }
-	    </screen>
-	</example>
+            </screen>
+        </example>
     </refsect1>
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_update_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_update_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

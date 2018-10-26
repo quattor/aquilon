@@ -4,485 +4,485 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_search_host"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_search_host</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_search_host</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq search host</refname>
-	<refpurpose>
-	    Search for hosts matching some criteria
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq search host</refname>
+        <refpurpose>
+            Search for hosts matching some criteria
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq search host</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group choice="req">
-		<arg><option>--hostname <replaceable>FQDN</replaceable></option></arg>
-		<arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
-		<arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-		<arg><option>--shortname <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--archetype <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
-		<arg><option>--ip <replaceable>IP</replaceable></option></arg>
-		<arg><option>--networkip <replaceable>IP</replaceable></option></arg>
-		<arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-		<arg><option>--mac <replaceable>MAC</replaceable></option></arg>
-		<group>
-		    <arg choice="plain"><option>--personality <replaceable>NAME</replaceable></option></arg>
-		    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
-		</group>
-		<arg><option>--cluster_personality <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--cluster_archetype <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
-		<arg><option>--osname <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--osversion <replaceable>VERSION</replaceable></option></arg>
-		<arg><option>--service <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--instance <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--model <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
-		<arg><option>--vendor <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--serial <replaceable>SERIAL</replaceable></option></arg>
-		<arg><option>--cluster <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--metacluster <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--guest_on_cluster <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--guest_on_share <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--member_cluster_share <replaceable>NAME</replaceable></option></arg>
-		<group>
-		    <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
-		    <arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
-		    <arg choice="plain"><option>--branch <replaceable>NAME</replaceable></option></arg>
-		    <arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
-		    <arg><option>--orphaned</option></arg>
-		</group>
-		<arg><option>--server_of_service <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--grn <replaceable>GRN</replaceable></option></arg>
-		<arg><option>--eon_id <replaceable>EONID</replaceable></option></arg>
-	    </group>
-	    <arg><option>--fullinfo</option></arg>
-	    <group>
-		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
-		<arg><option>--exact_location</option></arg>
-	    </group>
-	    <xi:include href="../common/location_options.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq search host</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg><option>--hostname <replaceable>FQDN</replaceable></option></arg>
+                <arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
+                <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+                <arg><option>--shortname <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--archetype <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
+                <arg><option>--ip <replaceable>IP</replaceable></option></arg>
+                <arg><option>--networkip <replaceable>IP</replaceable></option></arg>
+                <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+                <arg><option>--mac <replaceable>MAC</replaceable></option></arg>
+                <group>
+                    <arg choice="plain"><option>--personality <replaceable>NAME</replaceable></option></arg>
+                    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+                </group>
+                <arg><option>--cluster_personality <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--cluster_archetype <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+                <arg><option>--osname <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--osversion <replaceable>VERSION</replaceable></option></arg>
+                <arg><option>--service <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--instance <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--model <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
+                <arg><option>--vendor <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--serial <replaceable>SERIAL</replaceable></option></arg>
+                <arg><option>--cluster <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--metacluster <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--guest_on_cluster <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--guest_on_share <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--member_cluster_share <replaceable>NAME</replaceable></option></arg>
+                <group>
+                    <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+                    <arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
+                    <arg choice="plain"><option>--branch <replaceable>NAME</replaceable></option></arg>
+                    <arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
+                    <arg><option>--orphaned</option></arg>
+                </group>
+                <arg><option>--server_of_service <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
+                <arg><option>--grn <replaceable>GRN</replaceable></option></arg>
+                <arg><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+            </group>
+            <arg><option>--fullinfo</option></arg>
+            <group>
+                <synopfragmentref linkend="location-options">Location options</synopfragmentref>
+                <arg><option>--exact_location</option></arg>
+            </group>
+            <xi:include href="../common/location_options.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq search host</command> command searches for hosts
-	    matching the specified criteria.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq search host</command> command searches for hosts
+            matching the specified criteria.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--hostname <replaceable>FQDN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Return only the named host. This option is useful when combined with other options,
-			to quickly test if the named host matches the additional criteria or not.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--machine <replaceable>LABEL</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look up the host using the given machine.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that have any IP addresses that resolve to a DNS record in the given DNS domain.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--shortname <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that have any IP addresses that resolve to a DNS record with the given short name.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--archetype <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts in the archetype <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--buildstatus <replaceable>STATUS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts in the build status <replaceable>STATUS</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--network_environment <replaceable>NETENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Matches addresses in the given network environment. The default is
-			defined by the <literal>default_network_environment</literal> key in the
-			<literal>site</literal> section of the broker's configuration. The network
-			environment is used only if there are other search criteria based on
-			IP addresses.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--ip <replaceable>IP</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that have IP address <replaceable>IP</replaceable> configured on any interfaces.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--networkip <replaceable>IP</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that have an interface matching the network IP address <replaceable>IP</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--mac <replaceable>MAC</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			This option is deprecated, please use the <command>search_hardware</command> command instead.
-		    </para>
-		    <para>
-			Look for hosts having a network interface with MAC address <replaceable>MAC</replaceable>. Note that
-			an empty output does not necessarily mean the MAC address does not exist, just that there's no host
-			added to the machine (or other kind of hardware) that's using the MAC address.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts in the named personality. Note that personality names are not
-			globally unique, so you may want to also specify the <option>--archetype</option> option
-			together with <option>--personality</option>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Select the stage of the personality to filter for. If not specified, all stages are matched.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster_personality <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts in the named cluster personality. Note that personality names are not
-			globally unique, so you may want to also specify the <option>--cluster_archetype</option> option
-			together with <option>--cluster_personality</option>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster_archetype <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts in the cluster archetype <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts using a personality that lives in the host environment <replaceable>HOSTENV</replaceable>.
-			Valid environment names are: <xi:include href="../common/host_environments.xml"/>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--osname <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts running operating system <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--osversion <replaceable>VERSION</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts running operating system version <replaceable>VERSION</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--service <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for clients of service <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--instance <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for clients of a service instance named <replaceable>NAME</replaceable>. Note that service instance
-			names are not necessarily unique, so you may want to specify the <option>--service</option> option as well.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--model <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts having hardware model <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--machine_type <replaceable>TYPE</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts having the machine type <replaceable>TYPE</replaceable>. Valid values for
-			<replaceable>TYPE</replaceable> are: <xi:include href="../common/machine_types.xml"/>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--vendor <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts using a machine from the vendor <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--serial <replaceable>SERIAL</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts using a machine with the serial number <replaceable>SERIAL</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that are member of cluster <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--metacluster <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that are member of clusters held by this metacluster <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--guest_on_cluster <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for virtual machines hosted by cluster <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--guest_on_share <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for virtual machines that have disk images stored on share <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--member_cluster_share <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that are part of a cluster, which hosts virtual machines that store their disk
-			images on share <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--domain <replaceable>DOMAIN</replaceable></option>,
-		    <option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option>,
-		    <option>--branch <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that are in the given template branch (domain or sandbox). The <option>--branch</option>
-			variant matches both domains and sandboxes.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--orphaned</option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that are in any sandbox which does not have a valid owner.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--sandbox_author <replaceable>USER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts that are in any sandbox authored by (the checked out copy of the branch is
-			owned by) <replaceable>USER</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--server_of_service <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for any hosts that are providing service <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--server_of_instance <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for any hosts that are providing a service instance named <replaceable>NAME</replaceable>.
-			Note that service instance names are not necessarily unique, so you may want to
-			specify the <option>--server_of_service</option> option as well.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--grn <replaceable>GRN</replaceable></option>,
-		    <option>--eon_id <replaceable>EONID</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for hosts connected to the given GRN or EON ID. Both hosts owned by and hosts used by
-			the given GRN/EON ID are returned.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--fullinfo</option>
-		</term>
-		<listitem>
-		    <para>
-			Return the full description of the host if the raw output format is used, rather than
-			just the host name. Note that using this option can be expensive if the number of matched
-			hosts is big.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--exact_location</option>
-		</term>
-		<listitem>
-		    <para>
-			Require an exact match for the location. Default is to match sub-locations as well.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/location_options_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>FQDN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Return only the named host. This option is useful when combined with other options,
+                        to quickly test if the named host matches the additional criteria or not.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--machine <replaceable>LABEL</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look up the host using the given machine.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that have any IP addresses that resolve to a DNS record in the given DNS domain.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--shortname <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that have any IP addresses that resolve to a DNS record with the given short name.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts in the archetype <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--buildstatus <replaceable>STATUS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts in the build status <replaceable>STATUS</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--network_environment <replaceable>NETENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Matches addresses in the given network environment. The default is
+                        defined by the <literal>default_network_environment</literal> key in the
+                        <literal>site</literal> section of the broker's configuration. The network
+                        environment is used only if there are other search criteria based on
+                        IP addresses.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--ip <replaceable>IP</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that have IP address <replaceable>IP</replaceable> configured on any interfaces.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--networkip <replaceable>IP</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that have an interface matching the network IP address <replaceable>IP</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--mac <replaceable>MAC</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        This option is deprecated, please use the <command>search_hardware</command> command instead.
+                    </para>
+                    <para>
+                        Look for hosts having a network interface with MAC address <replaceable>MAC</replaceable>. Note that
+                        an empty output does not necessarily mean the MAC address does not exist, just that there's no host
+                        added to the machine (or other kind of hardware) that's using the MAC address.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts in the named personality. Note that personality names are not
+                        globally unique, so you may want to also specify the <option>--archetype</option> option
+                        together with <option>--personality</option>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Select the stage of the personality to filter for. If not specified, all stages are matched.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster_personality <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts in the named cluster personality. Note that personality names are not
+                        globally unique, so you may want to also specify the <option>--cluster_archetype</option> option
+                        together with <option>--cluster_personality</option>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster_archetype <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts in the cluster archetype <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts using a personality that lives in the host environment <replaceable>HOSTENV</replaceable>.
+                        Valid environment names are: <xi:include href="../common/host_environments.xml"/>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--osname <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts running operating system <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--osversion <replaceable>VERSION</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts running operating system version <replaceable>VERSION</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--service <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for clients of service <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--instance <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for clients of a service instance named <replaceable>NAME</replaceable>. Note that service instance
+                        names are not necessarily unique, so you may want to specify the <option>--service</option> option as well.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--model <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts having hardware model <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--machine_type <replaceable>TYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts having the machine type <replaceable>TYPE</replaceable>. Valid values for
+                        <replaceable>TYPE</replaceable> are: <xi:include href="../common/machine_types.xml"/>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--vendor <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts using a machine from the vendor <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--serial <replaceable>SERIAL</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts using a machine with the serial number <replaceable>SERIAL</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that are member of cluster <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--metacluster <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that are member of clusters held by this metacluster <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--guest_on_cluster <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for virtual machines hosted by cluster <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--guest_on_share <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for virtual machines that have disk images stored on share <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--member_cluster_share <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that are part of a cluster, which hosts virtual machines that store their disk
+                        images on share <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--domain <replaceable>DOMAIN</replaceable></option>,
+                    <option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option>,
+                    <option>--branch <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that are in the given template branch (domain or sandbox). The <option>--branch</option>
+                        variant matches both domains and sandboxes.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--orphaned</option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that are in any sandbox which does not have a valid owner.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--sandbox_author <replaceable>USER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts that are in any sandbox authored by (the checked out copy of the branch is
+                        owned by) <replaceable>USER</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--server_of_service <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for any hosts that are providing service <replaceable>NAME</replaceable>.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--server_of_instance <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for any hosts that are providing a service instance named <replaceable>NAME</replaceable>.
+                        Note that service instance names are not necessarily unique, so you may want to
+                        specify the <option>--server_of_service</option> option as well.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--grn <replaceable>GRN</replaceable></option>,
+                    <option>--eon_id <replaceable>EONID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Look for hosts connected to the given GRN or EON ID. Both hosts owned by and hosts used by
+                        the given GRN/EON ID are returned.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--fullinfo</option>
+                </term>
+                <listitem>
+                    <para>
+                        Return the full description of the host if the raw output format is used, rather than
+                        just the host name. Note that using this option can be expensive if the number of matched
+                        hosts is big.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--exact_location</option>
+                </term>
+                <listitem>
+                    <para>
+                        Require an exact match for the location. Default is to match sub-locations as well.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/location_options_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
 </refentry>

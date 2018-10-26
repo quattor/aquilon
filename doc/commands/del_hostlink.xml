@@ -4,136 +4,136 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_del_hostlink"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_del_hostlink</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_del_hostlink</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq del hostlink</refname>
-	<refpurpose>
-	    Removes a hostlink resource from a host, cluster or metacluster
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq del hostlink</refname>
+        <refpurpose>
+            Removes a hostlink resource from a host, cluster or metacluster
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq del hostlink</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <group choice="req">
-		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
-		<arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
-	    </group>
-	    <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq del hostlink</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+                <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+                <arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+                <arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+            </group>
+            <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq del_hostlink</command> command removes a
-	    hostlink resource from a host, cluster or metacluster.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq del_hostlink</command> command removes a
+            hostlink resource from a host, cluster or metacluster.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Templates</title>
-	<para>
-	    This command will modify the templates for the host, cluster or
-	    metacluster (depending on which option was given) and remove the resource
-	    template for the hostlink itself.
-	</para>
+        <title>Templates</title>
+        <para>
+            This command will modify the templates for the host, cluster or
+            metacluster (depending on which option was given) and remove the resource
+            template for the hostlink itself.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
-		</term>
-		<listitem>
-		    <para>
-			Specify the target host of the hostlink.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the target cluster of the hostlink.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the target metacluster of the hostlink.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the target resourcegroup of the hostlink.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--hostlink <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the hostlink.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+                </term>
+                <listitem>
+                    <para>
+                        Specify the target host of the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target cluster of the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target metacluster of the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the target resourcegroup of the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--hostlink <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>Examples</title>
-	<example>
-	    <title>Removing an hostlink from a host</title>
-	    <programlisting>
+        <title>Examples</title>
+        <example>
+            <title>Removing an hostlink from a host</title>
+            <programlisting>
 aq del_hostlink --hostname foo.example.com --hostlink ftp
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_add_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_add_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

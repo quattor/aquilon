@@ -4,107 +4,107 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_network_environment"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_update_network_environment</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_update_network_environment</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq update network environment</refname>
-	<refpurpose>
-	    Update parameters of a network environment
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq update network environment</refname>
+        <refpurpose>
+            Update parameters of a network environment
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq update network environment</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-	    <arg><option>--building <replaceable>NAME</replaceable></option></arg>
-	    <arg><option>--clear_location</option></arg>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq update network environment</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+            <arg><option>--building <replaceable>NAME</replaceable></option></arg>
+            <arg><option>--clear_location</option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq update network environment</command> command updates the parameters of a
-	    network environment.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq update network environment</command> command updates the parameters of a
+            network environment.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--network_environment <replaceable>NETENV</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the network environment to update.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--building <replaceable>NAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Update the physical building where the network environment is bound to.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--clear_location</option>
-		</term>
-		<listitem>
-		    <para>
-			Clear the mapping of the network environment to any specific physical
-			location.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Update the description of the network environment.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--network_environment <replaceable>NETENV</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the network environment to update.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--building <replaceable>NAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Update the physical building where the network environment is bound to.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--clear_location</option>
+                </term>
+                <listitem>
+                    <para>
+                        Clear the mapping of the network environment to any specific physical
+                        location.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Update the description of the network environment.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_del_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_search_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_del_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_search_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+        </para>
     </refsect1>
 </refentry>
 

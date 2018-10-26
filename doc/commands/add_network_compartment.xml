@@ -4,89 +4,89 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_network_compartment"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_add_network_compartment</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_add_network_compartment</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq add network compartment</refname>
-	<refpurpose>
-	    Create a new network compartment
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq add network compartment</refname>
+        <refpurpose>
+            Create a new network compartment
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq add network compartment</command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <arg choice="plain"><option>--network_compartment <replaceable>NETCOMP</replaceable></option></arg>
-	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq add network compartment</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <arg choice="plain"><option>--network_compartment <replaceable>NETCOMP</replaceable></option></arg>
+            <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq add network compartment</command> command creates a new network
-	    compartment.
-	</para>
-	<para>
-	    For networks compartmentalization is the establishment of boundaries
-	    between networks having different security constraints.  That is to
-	    say that a firewall exists between two networks in different network
-	    compartments.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq add network compartment</command> command creates a new network
+            compartment.
+        </para>
+        <para>
+            For networks compartmentalization is the establishment of boundaries
+            between networks having different security constraints.  That is to
+            say that a firewall exists between two networks in different network
+            compartments.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--network_compartment <replaceable>NETCOMP</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The name of the network compartment. The name must contain only alphanumeric characters, '_', '.' and '-'.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--comments <replaceable>COMMENTS</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Short description of the purpose of the network compartment.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--network_compartment <replaceable>NETCOMP</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The name of the network compartment. The name must contain only alphanumeric characters, '_', '.' and '-'.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--comments <replaceable>COMMENTS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Short description of the purpose of the network compartment.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_del_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_update_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_del_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_update_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+            <citerefentry><refentrytitle>aq_show_network_compartment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+        </para>
     </refsect1>
 </refentry>
 

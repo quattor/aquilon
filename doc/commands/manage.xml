@@ -4,212 +4,212 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_manage"
-	  xmlns="http://docbook.org/ns/docbook"
-	  xmlns:xi="http://www.w3.org/2001/XInclude">
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-	<refentrytitle>aq_manage</refentrytitle>
-	<manvolnum>1</manvolnum>
-	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
-	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+        <refentrytitle>aq_manage</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-	<refname>aq manage</refname>
-	<refpurpose>
-	    Move hosts or clusters between sandboxes/domains
-	</refpurpose>
-	<refclass>Aquilon</refclass>
+        <refname>aq manage</refname>
+        <refpurpose>
+            Move hosts or clusters between sandboxes/domains
+        </refpurpose>
+        <refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-	<cmdsynopsis>
-	    <command>aq manage </command>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
-	    <group>
-		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
-	    </group>
-	    <group choice="req">
-		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-		<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
-		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
-	    </group>
-	    <group choice="req">
-		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
-		<arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
-	    </group>
-	    <group>
-		<arg><option>--force </option></arg>
-		<arg><option>--skip_auto_compile </option></arg>
-	    </group>
-	    <xi:include href="../common/change_management.xml"/>
-	    <xi:include href="../common/global_options.xml"/>
-	</cmdsynopsis>
+        <cmdsynopsis>
+            <command>aq manage </command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group>
+                <synopfragmentref linkend="change-management">Change management</synopfragmentref>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+                <arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
+                <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+                <arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+            </group>
+            <group choice="req">
+                <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+                <arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
+            </group>
+            <group>
+                <arg><option>--force </option></arg>
+                <arg><option>--skip_auto_compile </option></arg>
+            </group>
+            <xi:include href="../common/change_management.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-	<title>Description</title>
-	<para>
-	    The <command>aq manage</command> command takes a host or cluster, and makes it build its
-	    configuration using the specified template domain or sandbox. This
-	    allows you to test building hosts using alternate templates, or to move
-	    a host back to a default production domain once testing has completed.
-	</para>
-	<para>
-	    The <command>aq manage</command> command by default verifies that the required templates
-	    exist in any domains used by any hosts or clusters affected by the new binding. Note
-	    that this check merely tests the existence of the templates - no functional testing is
-	    performed. Hosts or clusters in sandboxes are not checked, expecting the owners of such
-	    sandboxes to take care about any potential problems themselves. This check can be disabled
-	    using the <option>--force</option> option.
-	</para>
-	<para>
-	    The <command>aq manage</command> command by default also verifies that the configuration
-	    moves forward, that is, the target branch (domain or sandbox) contains all commits of the
-	    current branch of the objects. If the objects currently are in a sandbox, the command
-	    verifies that there are no uncommitted or unpublished changes will be left behind, to
-	    prevent losing such changes by mistake. These checks can also be disabled using the
-	    <option>--force</option> option.
-	</para>
-	<para>
-	    Managing host to a domain with auto_compile True or sandbox to sandbox will always run
-	    compile and rollback if compile fails. To bypass compile manually use
-	    <option>--skip_auto_compile</option> when running manage.
-	</para>
+        <title>Description</title>
+        <para>
+            The <command>aq manage</command> command takes a host or cluster, and makes it build its
+            configuration using the specified template domain or sandbox. This
+            allows you to test building hosts using alternate templates, or to move
+            a host back to a default production domain once testing has completed.
+        </para>
+        <para>
+            The <command>aq manage</command> command by default verifies that the required templates
+            exist in any domains used by any hosts or clusters affected by the new binding. Note
+            that this check merely tests the existence of the templates - no functional testing is
+            performed. Hosts or clusters in sandboxes are not checked, expecting the owners of such
+            sandboxes to take care about any potential problems themselves. This check can be disabled
+            using the <option>--force</option> option.
+        </para>
+        <para>
+            The <command>aq manage</command> command by default also verifies that the configuration
+            moves forward, that is, the target branch (domain or sandbox) contains all commits of the
+            current branch of the objects. If the objects currently are in a sandbox, the command
+            verifies that there are no uncommitted or unpublished changes will be left behind, to
+            prevent losing such changes by mistake. These checks can also be disabled using the
+            <option>--force</option> option.
+        </para>
+        <para>
+            Managing host to a domain with auto_compile True or sandbox to sandbox will always run
+            compile and rollback if compile fails. To bypass compile manually use
+            <option>--skip_auto_compile</option> when running manage.
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Templates</title>
-	<para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given).
-	</para>
+        <title>Templates</title>
+        <para>
+            This command will modify the templates for the host or
+            cluster (depending on which option was given).
+        </para>
     </refsect1>
 
     <refsect1>
-	<title>Options</title>
-	<variablelist>
-	    <title>Command-specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
-		</term>
-		<listitem>
-		    <para>
-			Move the named <replaceable>HOSTNAME</replaceable> to the target domain or sandbox.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--list <replaceable>FILENAME</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Move list of hosts, read from <replaceable>FILENAME</replaceable>, to the
-			target domain or sandbox.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Move the named <replaceable>CLUSTER</replaceable> and all its to the target
-			domain or sandbox.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Move the named <replaceable>METACLUSTER</replaceable> and all its members to the
-			target domain or sandbox.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--domain <replaceable>DOMAIN</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Specifies the domain to manage the host(s) or cluster to.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Specifies the user sandbox to manage the host(s) or cluster to.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--force</option>
-		</term>
-		<listitem>
-		    <para>
-			Disable sanity checks, and move the objects to the target domain/sandbox
-			anyway.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--skip_auto_compile</option>
-		</term>
-		<listitem>
-		    <para>
-			Skip template compiling check after move to domain/sandbox (potentially dangerous)
-		    </para>
-		</listitem>
-	    </varlistentry>
-	</variablelist>
-	<xi:include href="../common/change_management_desc.xml"/>
-	<xi:include href="../common/global_options_desc.xml"/>
+        <title>Options</title>
+        <variablelist>
+            <title>Command-specific options</title>
+            <varlistentry>
+                <term>
+                    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
+                </term>
+                <listitem>
+                    <para>
+                        Move the named <replaceable>HOSTNAME</replaceable> to the target domain or sandbox.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--list <replaceable>FILENAME</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Move list of hosts, read from <replaceable>FILENAME</replaceable>, to the
+                        target domain or sandbox.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Move the named <replaceable>CLUSTER</replaceable> and all its to the target
+                        domain or sandbox.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Move the named <replaceable>METACLUSTER</replaceable> and all its members to the
+                        target domain or sandbox.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--domain <replaceable>DOMAIN</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Specifies the domain to manage the host(s) or cluster to.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Specifies the user sandbox to manage the host(s) or cluster to.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--force</option>
+                </term>
+                <listitem>
+                    <para>
+                        Disable sanity checks, and move the objects to the target domain/sandbox
+                        anyway.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--skip_auto_compile</option>
+                </term>
+                <listitem>
+                    <para>
+                        Skip template compiling check after move to domain/sandbox (potentially dangerous)
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+        <xi:include href="../common/change_management_desc.xml"/>
+        <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
      <refsect1>
-	<title>Examples</title>
-	<example>
-	    <title>Manage host to user sandbox</title>
-	    <programlisting>
+        <title>Examples</title>
+        <example>
+            <title>Manage host to user sandbox</title>
+            <programlisting>
 aq manage --hostname foo.example.com --sandbox user/mysandbox
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>Manage cluster to user sandbox</title>
-	    <programlisting>
+        <example>
+            <title>Manage cluster to user sandbox</title>
+            <programlisting>
 aq manage --cluster mycluster --sandbox user/mysandbox
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
 
-	<example>
-	    <title>Manage a list of hosts user sandbox</title>
-	    <programlisting>
+        <example>
+            <title>Manage a list of hosts user sandbox</title>
+            <programlisting>
 aq manage --list host.txt --sandbox user/mysandbox
-	    </programlisting>
-	</example>
+            </programlisting>
+        </example>
     </refsect1>
 
     <refsect1>
-	<title>See also</title>
-	<para>
-	    <citerefentry><refentrytitle>aq_compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	</para>
+        <title>See also</title>
+        <para>
+            <citerefentry><refentrytitle>aq_compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+        </para>
     </refsect1>
 </refentry>
 
