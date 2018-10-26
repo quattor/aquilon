@@ -2597,6 +2597,7 @@
             <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
             <option name="rebase" type="flag">Force the commit history in
         the branch to be re-written (e.g. after a rebase)</option>
+            <option name="review" type="boolean" default="False">Submit change for review</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
         </optgroup>
@@ -2604,12 +2605,12 @@
     </command>
 
     <command name="request_review">
-        Announce the intention of deploying a sandbox or domain into a target domain, and ask for review and testing.
-        <optgroup mandatory="True" fields="all">
-            <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
-            <option name="target" type="string">Name of the target domain</option>
-        </optgroup>
-        <transport method="put" path="review/target/%(target)s/source/%(source)s"/>
+    DEPRECATED. Please use publish --review instead. Announce the intention of deploying a sandbox or domain into a target domain, and ask for review and testing.
+    <optgroup mandatory="True" fields="all">
+        <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+        <option name="target" type="string">Name of the target domain</option>
+    </optgroup>
+    <transport method="put" path="review/target/%(target)s/source/%(source)s"/>
     </command>
 
     <command name="del_review">
@@ -2621,19 +2622,28 @@
     </command>
 
     <command name="update_review">
-        <optgroup mandatory="True" fields="all">
-            <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
-            <option name="target" type="string">Name of the target domain</option>
+    <optgroup mandatory="True" fields="all">
+        <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+        <option name="target" type="string">Name of the target domain</option>
+    </optgroup>
+    <optgroup>
+        <option name="commit_id" type="string">Commit ID of the source the update is valid for</option>
+        <option name="testing_url" type="string" requires="commit_id">Update the test artifact URL</option>
+        <option name="review_url" type="string">Update the code review URL</option>
+        <optgroup fields="one">
+            <option name="approved" type="flag" requires="commit_id">Approve the change</option>
+            <option name="denied" type="flag" requires="commit_id">Deny the change</option>
+            <option name="reset" type="flag">Reset the change</option>
         </optgroup>
-        <optgroup>
-            <option name="commit_id" type="string">Commit ID of the source the update is valid for</option>
-            <option name="testing_succeeded" reverse="testing_failed" type="boolean" requires="commit_id">Update the testing status</option>
-            <option name="testing_url" type="string" requires="commit_id">Update the test artifact URL</option>
-            <option name="target_commit_tested" type="string" requires="testing_succeeded">Commit ID of the target which was tested</option>
-            <option name="review_url" type="string">Update the code review URL</option>
-            <option name="approved" reverse="denied" type="boolean">Approve/deny the change</option>
+        <optgroup fields="one">
+            <option name="testing_succeeded" type="flag" requires="commit_id">Set testing status as succeeded</option>
+            <option name="testing_failed" type="flag" requires="commit_id">Set testing status as failed</option>
+            <option name="reset_testing" type="flag">Reset test status</option>
         </optgroup>
-        <transport method="post" path="review/target/%(target)s"/>
+        <option name="target_commit_tested" type="string">Commit ID of the target which was tested</option>
+    </optgroup>
+
+    <transport method="post" path="review/target/%(target)s"/>
     </command>
 
     <command name="search_review">

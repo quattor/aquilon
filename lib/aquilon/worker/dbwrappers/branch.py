@@ -19,24 +19,92 @@
 import logging
 import os.path
 import re
+import json
 
+from aquilon.worker.processes import run_command
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql import and_, or_
 
-from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
-                                 ProcessException)
+from aquilon.exceptions_ import (
+    ArgumentError,
+    AuthorizationException,
+    ProcessException
+)
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
-                                Archetype, Personality, PersonalityStage,
-                                User)
-from aquilon.utils import remove_dir, validate_template_name
+from aquilon.aqdb.model import (
+    Archetype,
+    Branch,
+    CompileableMixin,
+    Domain,
+    Personality,
+    PersonalityStage,
+    Sandbox,
+    User
+)
+from aquilon.utils import (
+    remove_dir,
+    validate_template_name
+)
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
-from aquilon.worker.processes import run_git, GitRepo
+from aquilon.worker.processes import (
+    GitRepo,
+    run_git
+)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
+
+
+def trigger_review_pipeline(dbreview, user, logger):
+    """
+    Trigger external tool to start template CI build
+    :param dbreview: template Review database object
+    :param user: user that initiated command
+    :param logger: python logger
+    :return:
+    """
+    logger.debug("Triggering Template testing pipeline for "
+                 "source branch: {}. Target branch is {}.".
+                 format(dbreview.source.name, dbreview.target.name))
+    cmd = ["gerrit_trigger",
+           "-s", dbreview.source.name,
+           "-t", dbreview.target.name,
+           "-c", dbreview.commit_id,
+           "-a", user]
+    logger.debug("Starting Gerrit trigger")
+    try:
+        out = run_command(cmd)
+        logger.debug("Response returned: {}".format(out))
+        out_dict = json.loads(out)
+        if out_dict.get("URL"):
+            dbreview.review_url = out_dict["URL"]
+    except Exception as err:
+        logger.debug("Warning: Gerrit Trigger Failed, "
+                     "but continue. Reason: {}.".format(str(err)))
+        # When we are sure that json is always returned and status code is 0
+        # when we can continue further we should uncomment this
+        # raise InternalError(str(err))
+
+
+def trigger_review_domain_update(target, logger):
+    """
+    Trigger external tool to update template CI target domain branch
+    :param dbtarget: domain target database object
+    :param logger: python logger
+    :return:
+    """
+    logger.debug("Update Template testing pipeline domain for "
+                 "Target branch {}.".format(target))
+    cmd = ["gerrit_push_branch", "-t", target]
+    logger.debug("Starting Gerrit branch update")
+    try:
+        out = run_command(cmd)
+        logger.debug("Response returned: {}".format(out))
+    except Exception as err:
+        logger.debug("Warning: Gerrit branch update Failed, "
+                     "but continue. Reason: {}.".format(str(err)))
 
 
 def parse_sandbox(session, sandbox, default_author=None):
@@ -175,9 +243,9 @@ def remove_branch(logger, dbbranch, dbauthor=None):
                            "proceeding anyway: %s", dbbranch.name, e)
 
 
-def search_branch_query(config, session, cls, owner=None, compiler_version=None,
-                        autosync=None, validated=None, used=None,
-                        compileable=None, **_):
+def search_branch_query(config, session, cls, owner=None,
+                        compiler_version=None, autosync=None, validated=None,
+                        used=None, compileable=None, **_):
     q = session.query(cls)
     if owner:
         dbowner = get_user_principal(session, owner)

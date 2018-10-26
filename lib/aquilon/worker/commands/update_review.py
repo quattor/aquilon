@@ -32,8 +32,8 @@ class CommandUpdateReview(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, commit_id,
-               testing_succeeded, testing_url, target_commit_tested, review_url,
-               approved, **_):
+               testing_succeeded, testing_failed, reset_testing, testing_url,
+               target_commit_tested, review_url, approved, denied, reset, **_):
         dbsource = Branch.get_unique(session, source, compel=True)
         dbtarget = Domain.get_unique(session, target, compel=True)
 
@@ -44,22 +44,27 @@ class CommandUpdateReview(BrokerCommand):
         # was updated in the mean time
         if commit_id:
             if not _commit_re.search(commit_id):
-                raise ArgumentError("Invalid commit ID (%s), make sure to pass "
-                                    "the full hash." % commit_id)
+                raise ArgumentError("Invalid commit ID ({}), make sure to "
+                                    "pass the full hash.".format(commit_id))
 
             if dbreview.commit_id.lower() != commit_id.lower():
                 raise ArgumentError("Possible attempt to update an old review "
-                                    "record - the commit being reviewed is %s, "
-                                    "not %s."
-                                    % (dbreview.commit_id, commit_id))
+                                    "record - the commit being reviewed is "
+                                    "{}, not {}."
+                                    .format(dbreview.commit_id, commit_id))
 
         if testing_succeeded is not None:
-            dbreview.tested = testing_succeeded
+            dbreview.tested = True
+        elif testing_failed is not None:
+            dbreview.tested = False
+        elif reset_testing is not None:
+            dbreview.tested = None
 
         if target_commit_tested:
             if not _commit_re.search(target_commit_tested):
-                raise ArgumentError("Invalid commit ID (%s), make sure to pass "
-                                    "the full hash." % target_commit_tested)
+                raise ArgumentError("Invalid commit ID ({}), make sure to "
+                                    "pass the full hash."
+                                    .format(target_commit_tested))
             repo = GitRepo.domain(dbtarget.name, logger)
             if not repo.ref_contains_commit(target_commit_tested,
                                             ref=dbtarget.name):
@@ -74,7 +79,11 @@ class CommandUpdateReview(BrokerCommand):
             dbreview.review_url = review_url
 
         if approved is not None:
-            dbreview.approved = approved
+            dbreview.approved = True
+        elif denied is not None:
+            dbreview.approved = False
+        elif reset is not None:
+            dbreview.approved = None
 
         session.flush()
 

@@ -68,6 +68,7 @@ get_camtable = %(srcdir)s/tests/fakebin/fake_macdata
 checkedm = %(srcdir)s/tests/fakebin/fake_checkedm
 aqd_checkedm = %(srcdir)s/tests/fakebin/fake_aqd_checkedm
 location_uri_validator = %(srcdir)s/tests/fakebin/location_uri_validator
+gerrit_trigger = %(srcdir)s/tests/fakebin/fake_gerrit_trigger
 
 # Alternative tool locations outside MS
 git_daemon = /usr/libexec/git-core/git-daemon

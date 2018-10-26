@@ -21,8 +21,16 @@ from base64 import b64decode
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
-from aquilon.aqdb.model import Sandbox
-from aquilon.worker.dbwrappers.branch import force_my_sandbox, sync_all_trackers
+from aquilon.aqdb.model import (
+    Domain,
+    Review,
+    Sandbox
+)
+from aquilon.worker.dbwrappers.branch import (
+    force_my_sandbox,
+    sync_all_trackers,
+    trigger_review_pipeline
+)
 from aquilon.worker.processes import GitRepo
 from aquilon.worker.logger import CLIENT_INFO
 
@@ -32,8 +40,8 @@ class CommandPublish(BrokerCommand):
     required_parameters = ["bundle"]
     requires_format = True
 
-    def render(self, session, logger, dbuser, branch, sandbox, bundle, sync,
-               rebase, **_):
+    def render(self, session, logger, dbuser, user, branch, sandbox, bundle,
+               sync, rebase, review, **_):
         if sandbox:
             sandbox, _ = force_my_sandbox(session, dbuser, sandbox)
             dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
@@ -69,16 +77,18 @@ class CommandPublish(BrokerCommand):
                     command.append("--force")
                 temprepo.run(command, stream_level=CLIENT_INFO)
 
-                # Using --force above allows rewriting any history, even before the
-                # start of the sandbox. We don't want to allow that, so verify that
-                # the starting point of the sandbox is still part of its history.
+                # Using --force above allows rewriting any history, even before
+                # the start of the sandbox. We don't want to allow that, so
+                # verify that the starting point of the sandbox is still part
+                # of its history.
                 if rebase:
                     found = temprepo.ref_contains_commit(dbsandbox.base_commit,
                                                          dbsandbox.name)
                     if not found:
                         raise ArgumentError("The published branch no longer "
-                                            "contains commit %s it was branched "
-                                            "from." % dbsandbox.base_commit)
+                                            "contains commit {} it was "
+                                            "branched from."
+                                            .format(dbsandbox.base_commit))
 
                 # FIXME: Run tests before pushing back to template-king
                 temprepo.push_origin(dbsandbox.name, force=rebase)
@@ -90,9 +100,18 @@ class CommandPublish(BrokerCommand):
         if sync and dbsandbox.autosync:
             sync_all_trackers(dbsandbox, logger)
 
-        # Invalidate previous reviews
         new_head = kingrepo.ref_commit(dbsandbox.name)
-        for dbreview in dbsandbox.reviews:
+        dbtarget = Domain.get_unique(
+            session,
+            self.config.get("panc", "default_target_branch"),
+            compel=True)
+        # find existing review
+        dbreview = Review.get_unique(session,
+                                     source=dbsandbox,
+                                     target=dbtarget)
+
+        if dbreview:
+            # Invalidate previous review
             dbreview.commit_id = new_head
             dbreview.tested = None
             dbreview.testing_url = None
@@ -100,6 +119,23 @@ class CommandPublish(BrokerCommand):
             # Explicit denials should be kept
             if dbreview.approved is True:
                 dbreview.approved = None
+
+            # Trigger CI Pipeline
+            trigger_review_pipeline(dbreview=dbreview,
+                                    user=user,
+                                    logger=logger)
+
+        elif review:
+            # Create new review
+            dbreview = Review(source=dbsandbox,
+                              target=dbtarget,
+                              commit_id=new_head)
+            session.add(dbreview)
+
+            # Trigger CI Pipeline
+            trigger_review_pipeline(dbreview=dbreview,
+                                    user=user,
+                                    logger=logger)
 
         session.flush()
 
