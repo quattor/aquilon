@@ -414,7 +414,10 @@ def run():
         checkerhandler_cls = CheckerHandlerStaged
     else:
         checkerhandler_cls = CheckerHandlerCommits
-    checkerhandler = checkerhandler_cls(**vars(args))
+
+    checkerhandler_args = vars(args)
+    checkerhandler_args.update(git_dir='.')
+    checkerhandler = checkerhandler_cls(**checkerhandler_args)
 
     with checkerhandler.get_files() as files:
         if not files:
