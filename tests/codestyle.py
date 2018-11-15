@@ -267,8 +267,11 @@ class CheckerHandlerCommits(CheckerHandler):
         return lines
 
     def is_affected(self, line, path, code):
-        return any(self.get_affected_lines(path).get(l)
-                   for l in self.consider_lines(line, code))
+        for l in self.consider_lines(line, code):
+            affected = self.get_affected_lines(path).get(l)
+            if affected:
+                return affected
+        return False
 
 
 class CheckerHandlerStaged(CheckerHandlerCommits):
@@ -411,7 +414,10 @@ def run():
         checkerhandler_cls = CheckerHandlerStaged
     else:
         checkerhandler_cls = CheckerHandlerCommits
-    checkerhandler = checkerhandler_cls(**vars(args))
+
+    checkerhandler_args = vars(args)
+    checkerhandler_args.update(git_dir='.')
+    checkerhandler = checkerhandler_cls(**checkerhandler_args)
 
     with checkerhandler.get_files() as files:
         if not files:
