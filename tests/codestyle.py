@@ -181,6 +181,10 @@ class CheckerHandlerCommits(CheckerHandler):
         self._commits = self._repo.git.rev_list(
             '--ancestry-path', '{}..{}'.format(
                 ancestor, to_ref)).splitlines()
+        if current:
+            # If we check the current files, we want to consider errors on
+            # not-yet-in-a-commit changes
+            self._commits.append('0000000000000000000000000000000000000000')
 
         # Initialize the empty cache
         self._affected_lines_cache = {}
@@ -241,8 +245,11 @@ class CheckerHandlerCommits(CheckerHandler):
     def get_affected_lines(self, path):
         if path not in self._affected_lines_cache:
             lines = {}
-            blame = self._repo.git.blame(
-                '-l', '-s', '-f', self._to_ref, '--', path).splitlines()
+            blame_params = ['-l', '-s', '-f']
+            if not self._current:
+                blame_params.append(self._to_ref)
+            blame_params.extend(['--', path])
+            blame = self._repo.git.blame(*blame_params).splitlines()
             for line in blame:
                 commit = line.split(' ', 1)[0]
                 if commit not in self._commits:
