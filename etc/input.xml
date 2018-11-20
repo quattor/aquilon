@@ -2611,9 +2611,9 @@
     </command>
 
     <command name="request_review">
-    DEPRECATED. Please use publish --review instead. Announce the intention of deploying a sandbox or domain into a target domain, and ask for review and testing.
+    Start the review process for deploying sandbox or domain into a target domain.
     <optgroup mandatory="True" fields="all">
-        <option name="source" type="string">Name of the branch (domain or sandbox) with changes</option>
+        <option name="source" type="string">Name of the branch (sandbox) with changes</option>
         <option name="target" type="string">Name of the target domain</option>
     </optgroup>
     <transport method="put" path="review/target/%(target)s/source/%(source)s"/>

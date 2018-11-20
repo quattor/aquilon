@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ class TestDeployDomain(TestBrokerCommand):
 
     def test_123_request_review(self):
         command = ["request_review", "--source", "changetest1", "--target", "prod"]
-        self.noouttest(command)
+        self.successtest(command)
 
     def test_123_request_review_tracking(self):
         command = ["request_review", "--source", "changetest1", "--target", "ut-prod"]
@@ -109,6 +109,7 @@ class TestDeployDomain(TestBrokerCommand):
               Target Domain: prod
               Source Sandbox: changetest1
                 Published Commit: %s
+              Code Review URL: TEST_GERRIT_PR_URL
               Testing Status: Untested
               Approval Status: No decision
             """ % changetest1_head,
