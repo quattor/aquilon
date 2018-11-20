@@ -310,26 +310,40 @@ class ChangeManagement(object):
         session = object_session(location)
         location_children = session.query(Location).get(location.id).children
         loc_ids = [loc.id for loc in location_children] + [location.id]
-        q = session.query(Host).join(HardwareEntity,
-                                     Host.hardware_entity_id == HardwareEntity.id). \
-            join(Location, HardwareEntity.location_id == Location.id).filter(Location.id.in_(loc_ids))
 
-        q1 = session.query(Cluster).join(Location, Cluster.location_constraint_id == Location.id). \
-            filter(Location.id.in_(loc_ids))
+        # ORA-01795: maximum number of expressions in a list is 1000
+        for i in range(0, len(loc_ids), 1000):
+            chunk_loc_ids = loc_ids[i:i + 1000]
 
-        q = q.reset_joinpoint()
-        q = q.join(HostLifecycle).options(contains_eager('status'))
-        q = q.join(PersonalityStage, Personality).join(HostEnvironment).options(
-            contains_eager('personality_stage.personality.host_environment'))
-        for host in q.all():
-            self.validate_host(host)
+            q = session.query(Host).join(
+                HardwareEntity,
+                Host.hardware_entity_id == HardwareEntity.id).join(
+                    Location,
+                    HardwareEntity.location_id == Location.id).filter(
+                        Location.id.in_(chunk_loc_ids))
 
-        q1 = q1.reset_joinpoint()
-        q1 = q1.join(ClusterLifecycle).options(contains_eager('status'))
-        q1 = q1.join(PersonalityStage, Personality).join(HostEnvironment).options(
-            contains_eager('personality_stage.personality.host_environment'))
-        for cluster in q1.all():
-            self.validate_cluster(cluster)
+            q1 = session.query(Cluster).join(
+                Location,
+                Cluster.location_constraint_id == Location.id).filter(
+                    Location.id.in_(chunk_loc_ids))
+
+            q = q.reset_joinpoint()
+            q = q.join(HostLifecycle).options(contains_eager('status'))
+            q = q.join(PersonalityStage, Personality).join(
+                HostEnvironment).options(
+                    contains_eager(
+                        'personality_stage.personality.host_environment'))
+            for host in q.all():
+                self.validate_host(host)
+
+            q1 = q1.reset_joinpoint()
+            q1 = q1.join(ClusterLifecycle).options(contains_eager('status'))
+            q1 = q1.join(PersonalityStage, Personality).join(
+                HostEnvironment).options(
+                    contains_eager(
+                        'personality_stage.personality.host_environment'))
+            for cluster in q1.all():
+                self.validate_cluster(cluster)
 
     def validate_prod_network(self, network_or_networks):
         """
