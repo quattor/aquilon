@@ -53,10 +53,10 @@ else:
         pass
 
     # For PEP8
-    ms.version.addpkg('pycodestyle', '2.3.1')
+    ms.version.addpkg('pycodestyle', '2.4.0')
 
     # For flake8
-    ms.version.addpkg('flake8', '3.4.1')
+    ms.version.addpkg('flake8', '3.6.0')
     ms.version.addpkg('enum34', '1.1.6')
     ms.version.addpkg('configparser', '3.5.0b2')
     ms.version.addpkg('pyflakes', '1.5.0')
@@ -117,7 +117,7 @@ class Flake8DictReport(DictReport, flake8.formatter.BaseFormatter):
     def format(self, error):
         self.save_error(
             filename=error.filename,
-            code=self._regex_clean_code.sub('\g<1>', error.code),
+            code=self._regex_clean_code.sub(r'\g<1>', error.code),
             row=error.line_number,
             col=error.column_number,
             text=error.text,
@@ -154,10 +154,10 @@ class CheckerHandler(object):
 class CheckerHandlerCommits(CheckerHandler):
 
     _regex_blame_line = re.compile(
-        '^(?P<commit>[a-z0-9]*) '
-        '(?P<file>.*\.py) +'
-        '(?P<line>[0-9]+)\) '
-        '(?P<content>.*)$')
+        r'^(?P<commit>[a-z0-9]*) '
+        r'(?P<file>.*\.py) +'
+        r'(?P<line>[0-9]+)\) '
+        r'(?P<content>.*)$')
 
     def __init__(self, from_ref, to_ref, git_dir, current, **kwargs):
         self._from_ref = from_ref
@@ -284,9 +284,9 @@ class CheckerHandlerCommits(CheckerHandler):
 class CheckerHandlerStaged(CheckerHandlerCommits):
 
     _regex_diff_block = re.compile(
-        '@@ -(?P<linebef>[0-9]+),(?P<nlinebef>[0-9]+) '
-        '\+(?P<lineaf>[0-9]+),(?P<nlineaf>[0-9]+) @@'
-        '[^\n]*\n(?P<patch>.*?)(?=@@ |$)', re.DOTALL)
+        r'@@ -(?P<linebef>[0-9]+),(?P<nlinebef>[0-9]+) '
+        r'\+(?P<lineaf>[0-9]+),(?P<nlineaf>[0-9]+) @@'
+        r'[^\n]*\n(?P<patch>.*?)(?=@@ |$)', re.DOTALL)
 
     def __init__(self, git_dir, current, **kwargs):
         self._current = current
@@ -443,11 +443,13 @@ def run():
         'cyan',
     )
     error_types = (
+        ('AQD', 'Aquilon style error'),
         ('E', 'PEP8 error'),
         ('W', 'PEP8 warning'),
         ('F', 'pyflakes error'),
         ('H', 'hacking error'),
     )
+    re_code_type = re.compile('^([a-z]*)|$', re.IGNORECASE)
 
     def print_results(result, prefix=None):
         errors = defaultdict(lambda: 0)
@@ -457,7 +459,8 @@ def run():
 
         # Go through the errors
         for error in result.get_errors():
-            tot_errors[error['code'][0]] += 1
+            code_type = re_code_type.search(error['code']).group()
+            tot_errors[code_type] += 1
 
             # Only consider this error if it is introduced in the change
             path = checkerhandler.relpath(error['path'])
@@ -466,7 +469,7 @@ def run():
             if not affected:
                 continue
 
-            errors[error['code'][0]] += 1
+            errors[code_type] += 1
             if args.stats:
                 stats[error['code']] += 1
 
