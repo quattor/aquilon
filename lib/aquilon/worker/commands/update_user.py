@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014,2016,2017  Contributor
+# Copyright (C) 2008-2011,2013-2014,2016-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.aqdb.model import User
+from aquilon.aqdb.model import (
+    User,
+    UserType,
+)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
@@ -25,7 +29,7 @@ class CommandUpdateUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, gid, full_name, home_directory,
-               user, justification, reason, logger, **arguments):
+               user, type, justification, reason, logger, **arguments):
         dbuser = User.get_unique(session, username, compel=True)
 
         # Validate ChangeManagement
@@ -46,6 +50,10 @@ class CommandUpdateUser(BrokerCommand):
 
         if home_directory:
             dbuser.home_dir = home_directory
+
+        if type:
+            dbtype = UserType.get_unique(session, name=type, compel=True)
+            dbuser.type = dbtype
 
         session.flush()
 

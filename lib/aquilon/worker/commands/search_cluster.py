@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2010-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ class CommandSearchCluster(BrokerCommand):
                cluster, esx_guest, instance,
                metacluster, esx_metacluster, service, share,
                esx_switch, esx_virtual_machine,
+               cluster_exact_location, member_exact_location,
                fullinfo, style, **arguments):
 
         if esx_metacluster:
@@ -110,34 +111,24 @@ class CommandSearchCluster(BrokerCommand):
             dbbuildstatus = ClusterLifecycle.get_instance(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
 
-        # Go through the arguments and make special dicts for each
-        # specific set of location arguments that are stripped of the
-        # given prefix.
-        location_args = {'cluster_': {}, 'member_': {}, 'preferred_': {}}
-        for prefix, values in location_args.items():
-            for k, v in arguments.items():
-                if k.startswith(prefix):
-                    # arguments['cluster_building'] = 'dd'
-                    # becomes
-                    # location_args['cluster_']['building'] = 'dd'
-                    values[k.replace(prefix, '')] = v
-
-        dblocation = get_location(session, **location_args['cluster_'])
+        dblocation = get_location(
+            session, locfunc=lambda x: 'cluster_{}'.format(x), **arguments)
         if dblocation:
-            if location_args['cluster_']['exact_location']:
+            if cluster_exact_location:
                 q = q.filter_by(location_constraint=dblocation)
             else:
                 childids = dblocation.offspring_ids()
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
 
-        dblocations = get_location_list(session, **location_args['member_'])
+        dblocations = get_location_list(
+            session, locfunc=lambda x: 'member_{}'.format(x), **arguments)
         for dblocation in dblocations:
             HWLoc = aliased(Location)
             Parent = aliased(Location)
 
             q1 = session.query(Cluster.id)
             q1 = q1.join(Cluster._hosts, Host, HardwareEntity)
-            if location_args['member_']['exact_location']:
+            if member_exact_location:
                 q1 = q1.filter_by(location=dblocation)
             else:
                 q1 = q1.join(HWLoc, HardwareEntity.location)
@@ -147,7 +138,8 @@ class CommandSearchCluster(BrokerCommand):
 
             q = q.filter(Cluster.id.in_(q1.subquery()))
 
-        dblocation = get_location(session, **location_args['preferred_'])
+        dblocation = get_location(
+            session, locfunc=lambda x: 'preferred_{}'.format(x), **arguments)
         if dblocation:
             q = q.filter_by(preferred_location=dblocation)
 

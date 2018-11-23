@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2008-2014,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,12 +18,38 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Sequence, DateTime
-from sqlalchemy.orm import deferred
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Sequence,
+    String,
+)
+from sqlalchemy.orm import (
+    deferred,
+    relation,
+)
 
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Base
 
+_TYPES = 'user_type'
 _TN = 'userinfo'
+
+
+class UserType(Base):
+    __tablename__ = _TYPES
+
+    id = Column(Integer, Sequence('%s_id_seq' % __tablename__),
+                primary_key=True)
+    name = Column(AqStr(64), nullable=False, unique=True)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+    comments = Column(String(255), nullable=True)
+
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
 
 class User(Base):
@@ -42,6 +68,9 @@ class User(Base):
     gid = Column(Integer, nullable=False)
     full_name = Column(String(64), nullable=False)
     home_dir = Column(String(64), nullable=False)
+
+    type_id = Column(ForeignKey(UserType.id), nullable=False)
+    type = relation(UserType, lazy=False, innerjoin=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

@@ -25,7 +25,10 @@ from aquilon.aqdb.model.lifecycleengine import LifecycleEngine
 from aquilon.aqdb.model.role import Role
 from aquilon.aqdb.model.realm import Realm
 from aquilon.aqdb.model.user_principal import UserPrincipal
-from aquilon.aqdb.model.user import User
+from aquilon.aqdb.model.user import (
+    User,
+    UserType,
+)
 from aquilon.aqdb.model.netgroup_whitelist import NetGroupWhiteList
 
 # DNS DOMAINS

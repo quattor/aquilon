@@ -122,6 +122,7 @@ database_section = database_sqlite
 
 [broker]
 default_organization = ms
+default_user_type = human
 servername = %(hostname)s
 umask = 0022
 kncport = 6900
@@ -235,6 +236,7 @@ klist = /ms/dist/aurora/bin/klist
 aqd_checkedm = /ms/dist/aquilon/PROJ/edmtools/prod/bin/aqd_checkedm
 gerrit_trigger = /ms/dist/aquilon/PROJ/templates-ci/prod/bin/gerrit_trigger
 gerrit_push_branch = /ms/dist/aquilon/PROJ/templates-ci/prod/bin/gerrit_push_branch
+refresh_user_list = /ms/dist/aquilon/PROJ/aqd-scripts/prod/bin/refresh_user_list
 
 java_home = /ms/dist/msjava/PROJ/oraclejdk/1.8.0_121
 ant_home = /ms/dist/ossjava/PROJ/ant/1.9.4

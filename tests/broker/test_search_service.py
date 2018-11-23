@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016  Contributor
+# Copyright (C) 2015-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,6 +104,28 @@ class TestSearchService(TestBrokerCommand):
         self.matchoutput(out, "utsvc/utsi2", command)
         self.matchclean(out, "bootserver/one-nyp", command)
         self.matchclean(out, "dns/one-nyp", command)
+        self.matchoutput(out, "test_network_dev/test", command)
+
+    def test_141_server_location_exact_location(self):
+        command = ["search_service",
+                   "--server_building", "ut",
+                   "--server_exact_location"]
+        out = self.commandtest(command)
+        self.matchclean(out, "bootserver/unittest", command)
+        self.matchclean(out, "chooser1/ut.a", command)
+        self.matchclean(out, "chooser1/ut.b", command)
+        self.matchclean(out, "chooser1/ut.c", command)
+        self.matchclean(out, "chooser2/ut.a", command)
+        self.matchclean(out, "chooser2/ut.c", command)
+        self.matchclean(out, "chooser3/ut.a", command)
+        self.matchclean(out, "chooser3/ut.b", command)
+        self.matchclean(out, "dns/unittest", command)
+        self.matchclean(out, "utnotify/localhost", command)
+        self.matchclean(out, "utsvc/utsi1", command)
+        self.matchclean(out, "utsvc/utsi2", command)
+        self.matchclean(out, "bootserver/one-nyp", command)
+        self.matchclean(out, "dns/one-nyp", command)
+        self.matchoutput(out, "test_network_dev/test", command)
 
     def test_150_client_location(self):
         command = ["search_service", "--client_building", "np"]
@@ -121,6 +143,20 @@ class TestSearchService(TestBrokerCommand):
         self.matchclean(out, "utsvc/utsi2", command)
         self.matchclean(out, "vmseasoning", command)
         self.matchclean(out, "esx_management_server", command)
+
+    def test_151_client_location_exact_location(self):
+        command = ["search_service",
+                   "--client_building", "np",
+                   "--client_exact_location"]
+        out = self.commandtest(command)
+        self.matchclean(out, "afs/q.ny.ms.com", command)
+        self.matchclean(out, "aqd/ny-prod", command)
+        self.matchclean(out, "bootserver/one-nyp", command)
+        self.matchclean(out, "dns/one-nyp", command)
+        self.matchclean(out, "ntp/pa.ny.na", command)
+        self.matchclean(out, "support-group/ec-service", command)
+        self.matchclean(out, "syslogng/ny-prod", command)
+        self.matchclean(out, "utsvc/utsi1", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchService)

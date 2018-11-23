@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2018  Contributor
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Print the header line
+echo "name,type,passwd,uid,gid,full_name,home_dir,shell"
+
+# Add the current user information
+LOGINSH=$(getent passwd $USER | cut -d':' -f7)
+echo "$USER,human,dontcare,1000,1000,Current user,$HOME,$LOGINSH"
+
+# Then add other information required for the tests
+# Normal line
+echo "testuser1,human,dontcare,1234,423,test user 1,/tmp,/bin/sh"
+# Bad line, not even one separator
+echo "bad_line"
+# Normal line, without specified type, to check if the default_type is used
+echo "testuser2,,dontcare,1235,435,test user 2,/tmp,/bin/sh"
+# Bad line, not enough fields
+echo "foo,bar,baz"
+# Normal line
+echo "testuser3,human,dontcare,1236,655,test user 3,/tmp/foo,/bin/sh"
+# Bad line, UID that was already used before
+echo "dup_uid,,dontcare,1236,1236,duplicate uid,/tmp,/bin/sh"
+# Bad line, UID and GID are strings
+echo "name_str,,dontcare,uid_str,gid_str,fullname_str,dir_str,shell_str"
+# Normal line, robot type
+echo "testbot1,robot,*NOACCESS*,1337,655,test bot 1,/tmp/bothome1,/bin/bash"
+# Normal line, human type
+echo "testbot2,human,*NOACCESS*,1338,655,test bot 2,/tmp/bothome2,/bin/bash"

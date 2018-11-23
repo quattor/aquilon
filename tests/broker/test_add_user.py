@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016,2017  Contributor
+# Copyright (C) 2014-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ class TestAddUser(TestBrokerCommand):
         command = ["show_user", "--username", pwrec[0]]
         out = self.commandtest(command)
         self.matchoutput(out, "User: %s" % pwrec[0], command)
+        self.matchoutput(out, "Type: human", command)
         self.matchoutput(out, "UID: 1000", command)
         self.matchoutput(out, "GID: 1000", command)
         self.matchoutput(out, "Full Name: Current user", command)
@@ -56,6 +57,7 @@ class TestAddUser(TestBrokerCommand):
         command = ["show_user", "--username", "testuser3"]
         out = self.commandtest(command)
         self.searchoutput(out, r'User: testuser3$', command)
+        self.searchoutput(out, r'Type: human$', command)
         self.searchoutput(out, r'UID: 2361$', command)
         self.searchoutput(out, r'GID: 654$', command)
         self.searchoutput(out, r'Full Name: test user$', command)
@@ -70,9 +72,31 @@ class TestAddUser(TestBrokerCommand):
         command = ["show_user", "--username", "testuser4"]
         out = self.commandtest(command)
         self.searchoutput(out, r'User: testuser4$', command)
+        self.searchoutput(out, r'Type: human$', command)
         self.searchoutput(out, r'UID: 2362$', command)
         self.searchoutput(out, r'GID: 654$', command)
         self.searchoutput(out, r'Full Name: test user$', command)
+        self.searchoutput(out, r'Home Directory: /tmp$', command)
+
+    def test_120_add_testbot2(self):
+        self.noouttest([
+            "add_user",
+            "--username", "testbot2",
+            "--uid", 2363,
+            "--gid", 654,
+            "--full_name", "test bot",
+            "--home_directory", "/tmp",
+            "--type", "robot",
+        ] + self.valid_just_sn)
+
+    def test_121_verify_testbot2(self):
+        command = ["show_user", "--username", "testbot2"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testbot2$', command)
+        self.searchoutput(out, r'Type: robot$', command)
+        self.searchoutput(out, r'UID: 2363$', command)
+        self.searchoutput(out, r'GID: 654$', command)
+        self.searchoutput(out, r'Full Name: test bot$', command)
         self.searchoutput(out, r'Home Directory: /tmp$', command)
 
     def test_200_duplicate_name(self):

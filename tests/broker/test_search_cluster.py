@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,23 +117,68 @@ class TestSearchCluster(TestBrokerCommand):
                          "Domain domain-does-not-exist not found.", command)
 
     def testclusterlocationavailable(self):
-        command = "search cluster --cluster_building ut"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "utvcs1", command)
+        command = ["search_cluster", "--cluster_building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "camelcase", command)
+        self.matchoutput(out, "sandboxcl1", command)
+        self.matchoutput(out, "utecl1", command)
+        self.matchoutput(out, "utecl10", command)
+        self.matchoutput(out, "utecl11", command)
+        self.matchoutput(out, "utecl12", command)
+        self.matchoutput(out, "utecl13", command)
+        self.matchoutput(out, "utecl14", command)
+        self.matchoutput(out, "utecl15", command)
+        self.matchoutput(out, "utecl2", command)
+        self.matchoutput(out, "utecl3", command)
+        self.matchoutput(out, "utecl4", command)
+        self.matchoutput(out, "utecl5", command)
+        self.matchoutput(out, "utecl6", command)
+        self.matchoutput(out, "utecl7", command)
+        self.matchoutput(out, "utecl8", command)
+        self.matchoutput(out, "utecl9", command)
         self.matchoutput(out, "utgrid1", command)
         self.matchoutput(out, "utstorage1", command)
         self.matchoutput(out, "utstorage2", command)
+        self.matchoutput(out, "utvcs1", command)
+        self.matchclean(out, "utstorages2", command)  # bu
+
+    def testclusterlocationavailable_exact_location(self):
+        command = ["search_cluster",
+                   "--cluster_building", "ut",
+                   "--cluster_exact_location"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "camelcase", command)
+        self.matchoutput(out, "sandboxcl1", command)
+        self.matchoutput(out, "utecl1", command)
+        self.matchclean(out, "utecl10", command)
+        self.matchoutput(out, "utecl11", command)
+        self.matchclean(out, "utecl12", command)
+        self.matchclean(out, "utecl13", command)
+        self.matchclean(out, "utecl14", command)
+        self.matchclean(out, "utecl15", command)
+        self.matchoutput(out, "utecl2", command)
+        self.matchoutput(out, "utecl3", command)
+        self.matchoutput(out, "utecl4", command)
+        self.matchclean(out, "utecl5", command)
+        self.matchclean(out, "utecl6", command)
+        self.matchclean(out, "utecl7", command)
+        self.matchclean(out, "utecl8", command)
+        self.matchclean(out, "utecl9", command)
+        self.matchoutput(out, "utgrid1", command)
+        self.matchoutput(out, "utstorage1", command)
+        self.matchoutput(out, "utstorage2", command)
+        self.matchoutput(out, "utvcs1", command)
         self.matchclean(out, "utstorages2", command)  # bu
 
     def testclusterlocationtoolong(self):
         command = ["search_cluster",
-                   "--cluster_building=building-too-long-does-not-exist"]
+                   "--cluster_building", "building-too-long-does-not-exist"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "is more than the maximum 16 allowed.", command)
 
     def testclusterlocationunavailable(self):
         command = ["search_cluster",
-                   "--cluster_building=bldg-not-exist"]
+                   "--cluster_building", "bldg-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Building bldg-not-exist not found",
                          command)
@@ -236,8 +281,29 @@ class TestSearchCluster(TestBrokerCommand):
 
     # based on testvmhostlocationbuilding, to see that member_ location works
     def testvmhostlocationbuilding(self):
-        command = "search cluster --member_building ut"
-        out = self.commandtest(command.split(" "))
+        command = ["search_cluster",
+                   "--member_building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utecl1", command)
+        self.matchoutput(out, "utecl2", command)
+        self.matchclean(out, "utecl3", command)
+        self.matchclean(out, "utecl4", command)
+
+    def testvmhostlocationbuilding_exact_location(self):
+        command = ["search_cluster",
+                   "--member_building", "ut",
+                   "--member_exact_location"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utecl1", command)
+        self.matchclean(out, "utecl2", command)
+        self.matchclean(out, "utecl3", command)
+        self.matchclean(out, "utecl4", command)
+
+    def testvmhostlocationrack_exact_location(self):
+        command = ["search_cluster",
+                   "--member_rack", "ut10",
+                   "--member_exact_location"]
+        out = self.commandtest(command)
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
         self.matchclean(out, "utecl3", command)

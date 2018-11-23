@@ -27,41 +27,106 @@ from aquilon.worker.logger import CLIENT_INFO
 
 def get_location(session, query_options=None, compel=False, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
-    # Extract location-specific options from kwargs
-    location_args = {key: (mapper.class_, kwargs.get(key))
-                     for key, mapper in Location.__mapper__.polymorphic_map.items()
-                     if key in kwargs and kwargs[key] is not None}
-    if len(location_args) > 1:
-        raise ArgumentError("Please specify just a single location "
-                            "parameter.")
-    if not location_args:
-        if compel:
-            raise ArgumentError("Please specify a location parameter.")
-        return None
-
-    _, (cls, name) = location_args.popitem()
-    return cls.get_unique(session, name, query_options=query_options,
-                          compel=True)
+    return get_locations(session, query_options=query_options, compel=compel,
+                         separator=False, single_location=True, **kwargs)
 
 
 def get_location_list(session, compel=False, **kwargs):
     """
     A variant of get_location(), accepting multiple, comma-separated names
     """
-    location_args = {key: (mapper.class_, kwargs.get(key))
-                     for key, mapper in Location.__mapper__.polymorphic_map.items()
-                     if key in kwargs and kwargs[key] is not None}
-    if len(location_args) > 1:
-        raise ArgumentError("Please specify just a single location "
-                            "parameter.")
+    return get_locations(session, compel=compel, multiple_types=False,
+                         separator=',', single_location=False,
+                         unique_values=False, **kwargs)
+
+
+def get_locations(session, query_options=None, compel=False,
+                  locfunc=None, multiple_types=True, separator=None,
+                  unique_values=True, single_location=False, **kwargs):
+    """Somewhat sophisticated getter for any of the location types.
+
+    This allows to have multiple values for the locations, it accepts repeated
+    arguments (if the location argument is a list for instance) and
+    char-separated arguments.
+
+    query_options:
+        options to pass to the get_unique call
+    compel:
+        whether or not to force a location to be returned or raise an error
+    locfunc:
+        the function used to compute the location name in the kwargs
+        (default: only uses the location type name)
+    multiple_types:
+        whether or not multiple locations are authorized; when enabled, this
+        will authorize multiple location types at the same time
+    separator:
+        the char (or chars) that separates the locations
+        (default: disabled if single_location, comma else, e.g. --hub ny,hk ;
+         set to False to explicitly disable, or any value to explicitly enable)
+    unique_values:
+        whether or not to discard the repetitions of location values
+        (i.e. --city ln,ln to only one 'ln' occurrence) (default: True)
+    single_location:
+        whether or not there should only be one location found in the call
+        of that function (default: False)
+    """
+    if not locfunc:
+        def locfunc(loc):
+            return loc
+
+    if separator is None:
+        separator = False if single_location else ','
+
+    # Extract location-specific options from kwargs
+    location_args = {}
+    for key, mapper in Location.__mapper__.polymorphic_map.items():
+        if kwargs.get(locfunc(key)) is not None:
+            # If the data is not a list, put it in a form of one
+            values = kwargs[locfunc(key)]
+            if not isinstance(values, list):
+                values = [values, ]
+
+            # If a separator is specified, split the values
+            if separator:
+                split_values = []
+                for v in values:
+                    split_values.extend(v.split(separator))
+                values = split_values
+
+            # Update the location args with these locations information
+            locinfo = location_args.setdefault(key, {})
+            locinfo['class'] = mapper.class_
+            locinfo.setdefault('values', []).extend(values)
+
+    # If we did not find any location, either raise an exception (compel)
+    # or return None (single_location) or an empty list.
     if not location_args:
         if compel:
             raise ArgumentError("Please specify a location parameter.")
-        return []
+        return None if single_location else []
+    elif single_location and (
+            len(location_args) > 1 or
+            len(location_args.itervalues().next()['values']) > 1):
+        raise ArgumentError("Please specify just a single location "
+                            "parameter.")
 
-    _, (cls, names) = location_args.popitem()
-    return [cls.get_unique(session, name.strip(), compel=True)
-            for name in names.split(",")]
+    locations = []
+    for locinfo in location_args.itervalues():
+        cls = locinfo['class']
+        values = locinfo['values']
+
+        # If we only want unique values, put the values in form of a set
+        if unique_values:
+            values = set(values)
+
+        for name in values:
+            locations.append(cls.get_unique(session, name,
+                                            query_options=query_options,
+                                            compel=True))
+
+    if single_location:
+        locations = locations[0]
+    return locations
 
 
 def add_location(session, cls, name, parent, force_uri=None, logger=None, **kwargs):

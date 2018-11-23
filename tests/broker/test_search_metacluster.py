@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016,2017  Contributor
+# Copyright (C) 2014-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -97,14 +97,23 @@ class TestSearchMetaCluster(TestBrokerCommand):
                          "Domain domaind-does-not-exist not found.", command)
 
     def testclusterlocationavailable(self):
-        command = "search metacluster --metacluster_building ut"
-        out = self.commandtest(command.split(" "))
+        command = ["search_metacluster",
+                   "--metacluster_building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc1", command)
+        self.matchclean(out, "hamc1", command)
+
+    def testclusterlocationavailable_building_exact_location(self):
+        command = ["search_metacluster",
+                   "--metacluster_building", "ut",
+                   "--metacluster_exact_location"]
+        out = self.commandtest(command)
         self.matchoutput(out, "utmc1", command)
         self.matchclean(out, "hamc1", command)
 
     def testclusterlocationunavailable(self):
         command = ["search_metacluster",
-                   "--metacluster_building=bldg-not-exist"]
+                   "--metacluster_building", "bldg-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Building bldg-not-exist not found",
                          command)
@@ -175,11 +184,30 @@ class TestSearchMetaCluster(TestBrokerCommand):
         self.notfoundtest(command)
 
     def testvmhostlocationbuilding(self):
-        command = "search metacluster --member_building ut"
-        out = self.commandtest(command.split(" "))
+        command = ["search_metacluster",
+                   "--member_building", "ut"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "sandboxmc", command)
         self.matchoutput(out, "utmc1", command)
         self.matchoutput(out, "utmc2", command)
+        self.matchoutput(out, "utmc4", command)
+        self.matchoutput(out, "utmc7", command)
+        self.matchoutput(out, "utmc8", command)
+        self.matchoutput(out, "utmc9", command)
         self.matchclean(out, "hamc1", command)
+
+    def testvmhostlocationbuilding_exact_location(self):
+        command = ["search_metacluster",
+                   "--member_building", "ut",
+                   "--member_exact_location"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "sandboxmc", command)
+        self.matchoutput(out, "utmc1", command)
+        self.matchoutput(out, "utmc2", command)
+        self.matchclean(out, "utmc4", command)
+        self.matchoutput(out, "utmc7", command)
+        self.matchclean(out, "utmc8", command)
+        self.matchclean(out, "utmc9", command)
 
     def testshare(self):
         command = ["search_metacluster", "--share", "test_v2_share"]

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016,2017  Contributor
+# Copyright (C) 2014,2015,2016,2017,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,13 @@
 from sqlalchemy.sql import func
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import User
+from aquilon.aqdb.model import (
+    User,
+    UserType,
+)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.worker.dbwrappers.user import get_default_user_type
 
 
 class CommandAddUser(BrokerCommand):
@@ -28,8 +32,13 @@ class CommandAddUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, autouid, gid, full_name,
-               home_directory, user, justification, reason, logger, **arguments):
+               home_directory, type, user, justification, reason, logger,
+               **arguments):
         User.get_unique(session, username, preclude=True)
+
+        if type is None:
+            type = get_default_user_type(self.config)
+        dbtype = UserType.get_unique(session, name=type, compel=True)
 
         if autouid:
             # Prevent concurrent invocations
@@ -45,10 +54,11 @@ class CommandAddUser(BrokerCommand):
                 raise ArgumentError("UID %s is already in use." % uid)
 
         dbuser = User(name=username, uid=uid, gid=gid, full_name=full_name,
-                      home_dir=home_directory)
+                      home_dir=home_directory, type=dbtype)
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
+        cm = ChangeManagement(session, user, justification, reason, logger,
+                              self.command, **arguments)
         cm.consider(dbuser)
         cm.validate()
 
