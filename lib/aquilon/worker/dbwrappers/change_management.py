@@ -703,6 +703,7 @@ ChangeManagement.handlers[Rack] = ChangeManagement.validate_location
 ChangeManagement.handlers[Organization] = ChangeManagement.validate_location
 ChangeManagement.handlers[Hub] = ChangeManagement.validate_location
 ChangeManagement.handlers[Continent] = ChangeManagement.validate_location
+ChangeManagement.handlers[Country] = ChangeManagement.validate_location
 ChangeManagement.handlers[Campus] = ChangeManagement.validate_location
 ChangeManagement.handlers[City] = ChangeManagement.validate_location
 ChangeManagement.handlers[Building] = ChangeManagement.validate_location
