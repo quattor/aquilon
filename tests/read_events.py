@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2013,2015,2016,2017  Contributor
+# Copyright (C) 2013,2015-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ except ImportError:
     pass
 else:
     ms.version.addpkg('twisted', '12.0.0')
-    ms.version.addpkg('zope.interface', '3.6.1')
+    ms.version.addpkg('zope.interface', '4.5.0')
     ms.version.addpkg('setuptools', '0.6c11')
     ms.version.addpkg('protobuf', '3.0.0b2')
     ms.version.addpkg('six', '1.9.0')
