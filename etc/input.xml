@@ -1403,11 +1403,17 @@
 
     <command name="show_network_environment">
         Display a new network environment.
+        <p/>
+        Supported options for --format: raw, proto.
+        <p/>
         <optgroup mandatory="True" fields="one">
             <option name="network_environment" type="string">Name of the environment</option>
             <option name="all" type="flag">Show all environments</option>
         </optgroup>
         <transport trigger="network_environment" method="get" path="network_environment/%(network_environment)s"/>
+        <format name="proto">
+            <message_class name="NetworkEnvironmentList" module="aqdsystems_pb2"/>
+        </format>
         <transport trigger="all" method="get" path="network_environment"/>
     </command>
 

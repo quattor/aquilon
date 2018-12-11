@@ -51,6 +51,15 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
               Comments: Some netenv comments
             """, command)
 
+    def test_107_show_excx_proto(self):
+        command = ["show", "network", "environment",
+                   "--network_environment", "excx", "--format=proto"]
+        protoout = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(protoout.name, 'excx')
+        self.assertEqual(protoout.location.name, 'np')
+        self.assertEqual(protoout.location.location_type, 'building')
+        self.assertEqual(protoout.dns_environment.name, 'excx')
+
     def test_110_add_utcolo(self):
         command = ["add", "network", "environment",
                    "--network_environment", "utcolo",
@@ -68,6 +77,13 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
                 Comments: Some DNS env comments
               Comments: Some other netenv comments
             """, command)
+
+    def test_117_show_utcolo_proto(self):
+        command = ["show", "network", "environment",
+                   "--network_environment", "utcolo", "--format=proto"]
+        protoout = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(protoout.name, 'utcolo')
+        self.assertEqual(protoout.dns_environment.name, 'ut-env')
 
     def test_120_add_cardenv(self):
         command = ["add", "network", "environment",
@@ -100,6 +116,13 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchoutput(out, "Network Environment: excx", command)
         self.matchoutput(out, "Network Environment: utcolo", command)
+
+    def test_305_show_all_proto(self):
+        command = ["show", "network", "environment", "--all", "--format=proto"]
+        network_environments = self.protobuftest(command)
+        names = {n.name for n in network_environments}
+        self.assertEqual(names, {'cardenv', 'excx', 'internal', 'utcolo'})
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkEnvironment)
