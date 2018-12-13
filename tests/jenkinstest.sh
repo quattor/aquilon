@@ -39,7 +39,7 @@ sed     -e "s!^basedir =.*\$!basedir = $BASEDIR/run!" \
 
 # Make sure UNITTEST_FAILURE is returned if tests fail otherwise jenkins does not mark build as failed
 $TESTDIR/runtests.py --config $BASEDIR/unittest.conf --coverage 2>&1 --no-interactive | tee $TESTDIR/aqdtests.log
-if ! grep -q '^OK$' $TESTDIR/aqdtests.log; then
+if [ $(grep -c '^OK$' $TESTDIR/aqdtests.log 2>/dev/null) -ne 2 ]; then
     echo UNITTEST_FAILURE
     exit 1
 fi

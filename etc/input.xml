@@ -5469,7 +5469,7 @@
         <p/>Date specifications: MM-DD-YY (midnight UTC),
         "MM-DD-YY HH:MM:SS+OOOO" (quotes needed), or "now" or "today".
         <p/>
-        Some more complex formats are capable, details can be found in
+        Some more complex formats are available, details can be found in
         the "parser" section of http://niemeyer.net/python-dateutil
         <p/>The limit option defaults to 5000 and has a maximum of 20000
         in order to enhance performance and stability.

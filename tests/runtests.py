@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2017,2018  Contributor
+# Copyright (C) 2008-2015,2017-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -97,6 +97,22 @@ parser.add_argument('-f', '--failfast', action='store_true',
 
 
 opts = parser.parse_args()
+
+
+def run_unit_tests(interactive):
+    command = 'run_unit_tests.py'
+    path = os.path.join(BINDIR, command)
+    option = '' if interactive else '--no-interactive'
+    print('\n\nExecuting {} to run unit tests...'.format(command))
+    return call('{} {}'.format(path, option), shell=True)
+
+
+# Real unit tests are fast.  Run them before any other tests.
+if run_unit_tests(opts.interactive) != 0:
+    sys.exit('Unit tests fail.  Aborting functional tests.')
+else:
+    print('All unit tests pass.  Preparing to run functional tests...\n\n')
+
 
 if not os.path.exists(opts.config):
     print("configfile %s does not exist" % opts.config, file=sys.stderr)
