@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016  Contributor
+# Copyright (C) 2015-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class TestDelAddressAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_150_verify_del_addralias_with_target(self):
-        command = ["search", "dns",
+        command = ["search_dns",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--fullinfo"]
         out = self.commandtest(command)
@@ -71,13 +71,9 @@ class TestDelAddressAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_450_verify_del_addralias(self):
-        command = ["search", "dns",
+        command = ["search_dns",
                    "--fqdn", "addralias1.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Fqdn addralias1, DNS environment internal, "
-                         "DNS domain aqd-unittest.ms.com not found.",
-                         command)
+        self.noouttest(command)
 
     def test_500_del_cross_environment(self):
         command = ["del", "address", "alias",
@@ -88,14 +84,10 @@ class TestDelAddressAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_550_verify_del_cross_environment(self):
-        command = ["search", "dns",
+        command = ["search_dns",
                    "--fqdn", "addralias1.aqd-unittest-ut-env.ms.com",
                    "--dns_environment", "ut-env"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Fqdn addralias1, DNS environment ut-env, "
-                         "DNS domain aqd-unittest-ut-env.ms.com not found.",
-                         command)
+        self.noouttest(command)
 
     def test_600_del_addralias_with_grn(self):
         command = ["del", "address", "alias",
@@ -103,7 +95,7 @@ class TestDelAddressAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_605_verify_del_addralias_with_grn(self):
-        command = ["search", "dns",
+        command = ["search_dns",
                    "--fqdn", "addralias3.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
@@ -113,7 +105,7 @@ class TestDelAddressAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_615_verify_del_addralias_with_grn(self):
-        command = ["search", "dns",
+        command = ["search_dns",
                    "--fqdn", "addralias4.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 

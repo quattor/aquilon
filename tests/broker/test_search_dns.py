@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class TestSearchDns(TestBrokerCommand):
     def testbyip(self):
         net = self.net["unknown0"]
         ip = net.usable[2]
-        command = ["search", "dns", "--ip", ip, "--fullinfo"]
+        command = ["search_dns", "--ip", ip, "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Record: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "DNS Environment: internal", command)
@@ -61,7 +61,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "Assigned To: ut3c1n3/eth0", command)
 
     def testbyfqdn(self):
-        command = ["search", "dns", "--fqdn", "zebra2.aqd-unittest.ms.com",
+        command = ["search_dns", "--fqdn", "zebra2.aqd-unittest.ms.com",
                    "--fullinfo"]
         out = self.commandtest(command)
         self.matchclean(out, "Primary Name", command)
@@ -70,7 +70,7 @@ class TestSearchDns(TestBrokerCommand):
                          command)
 
     def testauxiliary(self):
-        command = ["search", "dns", "--fqdn",
+        command = ["search_dns", "--fqdn",
                    "unittest20-e1.aqd-unittest.ms.com", "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "IP: %s" % self.net["zebra_eth1"].usable[0],
@@ -79,7 +79,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "Primary Name", command)
 
     def testbydomain(self):
-        command = ["search", "dns", "--dns_domain", "aqd-unittest.ms.com"]
+        command = ["search_dns", "--dns_domain", "aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "alias2host.aqd-unittest.ms.com", command)
@@ -90,12 +90,12 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "one-nyp.ms.com", command)
 
     def testbyshort(self):
-        command = ["search", "dns", "--shortname", "unittest00"]
+        command = ["search_dns", "--shortname", "unittest00"]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
     def testbytype(self):
-        command = ["search", "dns", "--record_type", "reserved_name",
+        command = ["search_dns", "--record_type", "reserved_name",
                    "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Reserved Name: %s" % self.aurora_with_node,
@@ -104,7 +104,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "Alias:", command)
 
     def testbytarget(self):
-        command = ["search", "dns", "--target", "arecord13.aqd-unittest.ms.com",
+        command = ["search_dns", "--target", "arecord13.aqd-unittest.ms.com",
                    "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Alias: alias2host.aqd-unittest.ms.com", command)
@@ -115,7 +115,7 @@ class TestSearchDns(TestBrokerCommand):
                          command)
 
     def testbytarget_environment(self):
-        command = ["search", "dns",
+        command = ["search_dns",
                    "--dns_environment", "ut-env",
                    "--target", "arecord13.aqd-unittest.ms.com",
                    "--target_environment", "internal",
@@ -127,7 +127,7 @@ class TestSearchDns(TestBrokerCommand):
                         command)
 
     def testbytargetdomain(self):
-        command = ["search", "dns", "--target_domain", "aqd-unittest.ms.com",
+        command = ["search_dns", "--target_domain", "aqd-unittest.ms.com",
                    "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Alias: alias.ms.com", command)
@@ -145,7 +145,7 @@ class TestSearchDns(TestBrokerCommand):
                          command)
 
     def testbynetwork(self):
-        command = ["search", "dns", "--network", self.net["unknown0"].ip]
+        command = ["search_dns", "--network", self.net["unknown0"].ip]
         out = self.commandtest(command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3c5.aqd-unittest.ms.com", command)
@@ -160,7 +160,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "utcolo", command)
 
     def testbynetenv(self):
-        command = ["search", "dns", "--network", self.net["unknown1"].ip,
+        command = ["search_dns", "--network", self.net["unknown1"].ip,
                    "--network_environment", "utcolo"]
         out = self.commandtest(command)
         self.matchoutput(out, "gw1.utcolo.aqd-unittest.ms.com", command)
@@ -172,8 +172,30 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "unittest00", command)
         self.matchclean(out, "alias", command)
 
+    def testbynetenvexcl(self):
+        command = ["search_dns", "--network", self.net["unknown1"].ip,
+                   "--exclude_network_environment", "utcolo"]
+        out = self.commandtest(command)
+        self.matchclean(out, "gw1.utcolo.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest25-e1.utcolo.aqd-unittest.ms.com",
+                        command)
+        self.matchoutput(out, "infra1-e1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "infra1-e1.one-nyp.ms.com", command)
+        self.matchoutput(out, "ut3gd1r04-loop0.aqd-unittest.ms.com", command)
+
+    def testbynetenvall(self):
+        command = ["search_dns", "--network", self.net["unknown1"].ip,
+                   "--all_network_environments"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "gw1.utcolo.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest25-e1.utcolo.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "infra1-e1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "infra1-e1.one-nyp.ms.com", command)
+        self.matchoutput(out, "ut3gd1r04-loop0.aqd-unittest.ms.com", command)
+
     def testbydnsenv(self):
-        command = ["search", "dns", "--record_type", "a",
+        command = ["search_dns", "--record_type", "a",
                    "--dns_environment", "ut-env"]
         out = self.commandtest(command)
         # arecord14: dns_env=ut-env, net_env=internal
@@ -184,8 +206,32 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "unittest00", command)
         self.matchclean(out, "arecord13", command)
 
+    def testbydnsenvexcl(self):
+        command = ["search_dns", "--record_type", "a",
+                   "--exclude_dns_environment", "ut-env"]
+        out = self.commandtest(command)
+        # arecord14: dns_env=ut-env, net_env=internal
+        self.matchclean(out, "gw1.utcolo.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest25-e1.utcolo.aqd-unittest.ms.com",
+                        command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "arecord14.aqd-unittest.ms.com", command)
+
+    def testbydnsenvall(self):
+        command = ["search_dns", "--record_type", "a",
+                   "--all_dns_environments"]
+        out = self.commandtest(command)
+        # arecord14: dns_env=ut-env, net_env=internal
+        self.matchoutput(out, "gw1.utcolo.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "unittest25-e1.utcolo.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "arecord14.aqd-unittest.ms.com", command)
+
     def testcsv(self):
-        command = ["search", "dns", "--dns_domain", "aqd-unittest.ms.com",
+        command = ["search_dns", "--dns_domain", "aqd-unittest.ms.com",
                    "--format", "csv"]
         out = self.commandtest(command)
         self.matchoutput(out, "arecord13.aqd-unittest.ms.com,internal,A,%s" %
@@ -206,7 +252,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "utcolo", command)
 
     def testproto(self):
-        command = ["search", "dns", "--ip",
+        command = ["search_dns", "--ip",
                    self.net["unknown0"].usable[2], "--fullinfo"]
         dns_records = self.protobuftest(
             command + ['--format', 'proto'], expect=2)
@@ -223,7 +269,7 @@ class TestSearchDns(TestBrokerCommand):
             flatten_dns_records, expected_dns_records)
 
     def testused(self):
-        command = ["search", "dns", "--used"]
+        command = ["search_dns", "--used"]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest00r.one-nyp.ms.com", command)
@@ -237,7 +283,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
     def testunused(self):
-        command = ["search", "dns", "--unused"]
+        command = ["search_dns", "--unused"]
         out = self.commandtest(command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00r.one-nyp.ms.com", command)
@@ -251,7 +297,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
     def testprimary(self):
-        command = ["search", "dns", "--primary_name"]
+        command = ["search_dns", "--primary_name"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut9c1.aqd-unittest.ms.com", command)
@@ -264,7 +310,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
     def testnoprimary(self):
-        command = ["search", "dns", "--noprimary_name"]
+        command = ["search_dns", "--noprimary_name"]
         out = self.commandtest(command)
         self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut9c1.aqd-unittest.ms.com", command)
@@ -277,12 +323,12 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "_kerberos._tcp.aqd-unittest.ms.com", command)
 
     def testbadtype(self):
-        command = ["search", "dns", "--record_type", "no-such-rr"]
+        command = ["search_dns", "--record_type", "no-such-rr"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown DNS record type 'no-such-rr'.", command)
 
     def testunittest20(self):
-        command = ["search", "dns", "--reverse_ptr",
+        command = ["search_dns", "--reverse_ptr",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest20-e0.aqd-unittest.ms.com", command)
@@ -293,7 +339,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "zebra2.aqd-unittest.ms.com", command)
 
     def testptroverride(self):
-        command = ["search", "dns", "--reverse_override"]
+        command = ["search_dns", "--reverse_override"]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest20-e0.aqd-unittest.ms.com", command)
         self.matchoutput(out, "unittest20-e1.aqd-unittest.ms.com", command)
@@ -309,7 +355,7 @@ class TestSearchDns(TestBrokerCommand):
         self.matchclean(out, "_tcp.aqd-unittest.ms.com", command)
 
     def testptrnooverride(self):
-        command = ["search", "dns", "--noreverse_override"]
+        command = ["search_dns", "--noreverse_override"]
         out = self.commandtest(command)
         self.matchclean(out, "unittest20-e0.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest20-e1.aqd-unittest.ms.com", command)

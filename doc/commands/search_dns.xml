@@ -48,8 +48,16 @@
                 <arg choice="plain"><option>--reverse_override</option></arg>
                 <arg choice="plain"><option>--noreverse_override</option></arg>
             </group>
-            <arg><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
-            <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--all_dns_environments</option></arg>
+                <arg choice="plain"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
+                <arg choice="plain"><option>--exclude_dns_environment <replaceable>DNSENV</replaceable></option></arg>
+            </group>
+            <group>
+                <arg choice="plain"><option>--all_network_environments</option></arg>
+                <arg choice="plain"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+                <arg choice="plain"><option>--exclude_network_environment <replaceable>NETENV</replaceable></option></arg>
+            </group>
             <arg><option>--target_environment <replaceable>DNSENV</replaceable></option></arg>
             <arg><option>--fullinfo</option></arg>
             <xi:include href="../common/global_options.xml"/>
@@ -204,7 +212,9 @@
             </varlistentry>
             <varlistentry>
                 <term>
-                    <option>--network_environment <replaceable>NETENV</replaceable></option>
+                    <option>--all_network_environments</option>,
+                    <option>--network_environment <replaceable>NETENV</replaceable></option>,
+                    <option>--exclude_network_environment <replaceable>NETENV</replaceable></option>,
                 </term>
                 <listitem>
                     <para>
@@ -218,7 +228,9 @@
             </varlistentry>
             <varlistentry>
                 <term>
-                    <option>--dns_environment <replaceable>DNSENV</replaceable></option>
+                    <option>--all_dns_environments</option>,
+                    <option>--dns_environment <replaceable>DNSENV</replaceable></option>,
+                    <option>--exclude_dns_environment <replaceable>DNSENV</replaceable></option>
                 </term>
                 <listitem>
                     <para>

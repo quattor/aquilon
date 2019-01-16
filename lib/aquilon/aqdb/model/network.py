@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -274,11 +274,44 @@ class Network(Base):
             return NotImplemented
         return self.ip > other.ip
 
+    @staticmethod
+    def parse_parameter(arg):
+        # The order matters here, we don't want to parse '1.2.3.4' as
+        # IPv4Network('1.2.3.4/32')
+        ip = None
+        if isinstance(arg, (IPv4Address, IPv6Address)):
+            ip = arg
+        else:
+            try:
+                ip = ip_address(text_type(arg))
+            except ValueError:
+                pass
+
+        if ip:
+            return {'ip': ip}
+
+        net = None
+        if isinstance(arg, (IPv4Network, IPv6Network)):
+            net = arg
+        else:
+            try:
+                net = ip_network(text_type(arg))
+            except ValueError:
+                pass
+
+        if net:
+            return {
+                'ip': net.network_address,
+                'cidr': net.prefixlen,
+            }
+
+        return {'name': arg}
+
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
-        # Fall back to the generic implementation unless the caller used exactly
-        # one non-keyword argument.  Any caller using preclude would be passing
-        # keywords anyway.
+        # Fall back to the generic implementation unless the caller used
+        # exactly one non-keyword argument.  Any caller using preclude would
+        # be passing keywords anyway.
         compel = kwargs.pop("compel", False)
         options = kwargs.pop("query_options", None)
         netenv = kwargs.pop("network_environment", None)
@@ -289,42 +322,10 @@ class Network(Base):
                                                   compel=compel, **kwargs)
 
         # Just a single positional argumentum - do magic
-        # The order matters here, we don't want to parse '1.2.3.4' as
-        # IPv4Network('1.2.3.4/32')
-        ip = None
-        if isinstance(args[0], (IPv4Address, IPv6Address)):
-            ip = args[0]
-        else:
-            try:
-                ip = ip_address(text_type(args[0]))
-            except ValueError:
-                pass
-
-        if ip:
-            return super(Network, cls).get_unique(session, ip=ip,
-                                                  network_environment=netenv,
-                                                  query_options=options,
-                                                  compel=compel)
-        net = None
-        if isinstance(args[0], (IPv4Network, IPv6Network)):
-            net = args[0]
-        else:
-            try:
-                net = ip_network(text_type(args[0]))
-            except ValueError:
-                pass
-        if net:
-            return super(Network, cls).get_unique(session,
-                                                  ip=net.network_address,
-                                                  cidr=net.prefixlen,
-                                                  network_environment=netenv,
-                                                  query_options=options,
-                                                  compel=compel)
-
-        return super(Network, cls).get_unique(session, name=args[0],
-                                              network_environment=netenv,
-                                              query_options=options,
-                                              compel=compel)
+        return super(Network, cls).get_unique(
+            session, network_environment=netenv,
+            query_options=options, compel=compel,
+            **Network.parse_parameter(args[0]))
 
     @property
     def _label(self):
