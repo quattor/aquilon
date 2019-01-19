@@ -97,9 +97,11 @@ def get_net_dns_env(session, network_environment=None,
 def get_net_dns_envs(session, all_network_environments=None,
                      network_environment=None,
                      exclude_network_environment=None,
+                     mandatory_network_environment=True,
                      all_dns_environments=None,
                      dns_environment=None,
-                     exclude_dns_environment=None, **_):
+                     exclude_dns_environment=None,
+                     mandatory_dns_environment=True, **_):
     """Prepare network and dns environments objects from parameters
 
     That function receives lists of network and dns environments to either
@@ -129,7 +131,8 @@ def get_net_dns_envs(session, all_network_environments=None,
             ]
         # In case no inclusion nor exclusion is specified, just use the
         # default network environment as inclusion
-        if not dbnet_envs and not dbnet_envs_excl:
+        if not dbnet_envs and not dbnet_envs_excl and \
+                mandatory_network_environment:
             dbnet_envs = [NetworkEnvironment.get_default(session)]
 
     # As we did above for the network environments, we do for the dns
@@ -154,9 +157,12 @@ def get_net_dns_envs(session, all_network_environments=None,
         # included/excluded network environments
         if not dbdns_envs and not dbdns_envs_excl and \
                 not all_network_environments:
-            dbdns_envs = [dbnetenv.dns_environment
-                          for dbnetenv in dbnet_envs]
-            dbdns_envs_excl = [dbnetenv.dns_environment
-                               for dbnetenv in dbnet_envs_excl]
+            if dbnet_envs or dbnet_envs_excl:
+                dbdns_envs = [dbnetenv.dns_environment
+                              for dbnetenv in dbnet_envs]
+                dbdns_envs_excl = [dbnetenv.dns_environment
+                                   for dbnetenv in dbnet_envs_excl]
+            elif mandatory_dns_environment:
+                dbdns_envs = [DnsEnvironment.get_default(session)]
 
     return (dbnet_envs, dbnet_envs_excl, dbdns_envs, dbdns_envs_excl)

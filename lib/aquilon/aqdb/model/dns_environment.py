@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2008-2014,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,10 +57,14 @@ class DnsEnvironment(Base):
         return self.name == _config.get("site", "default_dns_environment")
 
     @classmethod
+    def get_default(cls, session):
+        return cls.get_unique(
+            session, _config.get("site", "default_dns_environment"),
+            compel=InternalError)
+
+    @classmethod
     def get_unique_or_default(cls, session, dns_environment=None):
         if dns_environment:
             return cls.get_unique(session, dns_environment, compel=True)
         else:
-            return cls.get_unique(session, _config.get("site",
-                                                       "default_dns_environment"),
-                                  compel=InternalError)
+            return cls.get_default(session)
