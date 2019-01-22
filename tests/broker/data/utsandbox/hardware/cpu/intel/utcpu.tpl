@@ -6,3 +6,4 @@ structure template hardware/cpu/intel/utcpu;
 "speed" = 1000*MHz;
 "arch" = "x86_64";
 "cores" = 1;
+"template_name" = "utcpu";
