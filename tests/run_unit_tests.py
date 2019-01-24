@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -171,62 +171,6 @@ def load_config(opts, srcdir):
 if __name__ == '__main__':
     opts = parse_args()
     config = load_config(opts, SRCDIR)
-
-    database_type = config.get('database', 'database_section')
-
-    makefile = os.path.join(SRCDIR, "Makefile")
-    prod_python = None
-    with open(makefile) as f:
-        prod_python_re = re.compile(r'^PYTHON_SERVER_PROD\s*=\s*(\S+)(\s+|$)')
-        for line in f:
-            m = prod_python_re.search(line)
-            if m:
-                prod_python = m.group(1)
-                break
-    if prod_python and sys.executable.find(prod_python) < 0:
-        print("\n")
-        if opts.interactive:
-            force_yes('Running with {} but prod is {}'.format(sys.executable,
-                                                              prod_python))
-
-    # Execute this every run... the man page says that it should do the right
-    # thing in terms of not contacting the kdc very often. Don't abort the
-    # tests if this fails, the keytab may be there.
-    try:
-        call(config.lookup_tool('krb5_keytab'))
-    except OSError:
-        pass
-
-    dirs = []
-    broker_dir_list = ['quattordir', 'templatesdir', 'domainsdir', 'rundir',
-                       'logdir', 'profilesdir', 'plenarydir', 'cfgdir',
-                       'kingdir']
-    # FIXME: Need to be careful about attempting to nuke templatesdir.
-    dirs = [config.get('unittest', 'scratchdir')]
-    for label in broker_dir_list:
-        dirs.append(config.get('broker', label))
-    if config.has_option('database', 'dbfile'):
-        dirs.append(os.path.dirname(config.get('database', 'dbfile')))
-
-    existing_dirs = [d for d in dirs if os.path.exists(d)]
-
-    for dirname in existing_dirs:
-        if os.path.exists(dirname):
-            print('Removing "{}".'.format(dirname))
-            rmtree(dirname, ignore_errors=True)
-
-    for dirname in dirs:
-        try:
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-        except OSError as e:
-            print('Could not create "{}": "{}".'.format(dirname, e),
-                  file=sys.stderr)
-
-    # Set up an environment variable to propagate the location of the scratch
-    # directory to tools started by the broker
-    scratchdir = config.get('unittest', 'scratchdir')
-    os.environ['AQTEST_SCRATCHDIR'] = scratchdir
 
     sys.argv.insert(1, 'discover')
     sys.argv.insert(2, '-s')
