@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2015,2017-2018  Contributor
+# Copyright (C) 2008-2015,2017-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,6 +94,9 @@ parser.add_argument('-s', '--start', action='store',
 parser.add_argument('-f', '--failfast', action='store_true',
                     help='Add failfast=True option to TestRunner. This will stop '
                          'unittests immediatelly if any failure.')
+parser.add_argument('--skip', action='append', choices=('unit', 'integration'),
+                    type=str.lower, default=[],
+                    help='Skip some tests (choices: unit, integration)')
 
 
 opts = parser.parse_args()
@@ -105,13 +108,6 @@ def run_unit_tests(interactive):
     option = '' if interactive else '--no-interactive'
     print('\n\nExecuting {} to run unit tests...'.format(command))
     return call('{} {}'.format(path, option), shell=True)
-
-
-# Real unit tests are fast.  Run them before any other tests.
-if run_unit_tests(opts.interactive) != 0:
-    sys.exit('Unit tests fail.  Aborting functional tests.')
-else:
-    print('All unit tests pass.  Preparing to run functional tests...\n\n')
 
 
 if not os.path.exists(opts.config):
@@ -251,16 +247,26 @@ for dirname in dirs:
 scratchdir = config.get("unittest", "scratchdir")
 os.environ["AQTEST_SCRATCHDIR"] = scratchdir
 
-suite = unittest.TestSuite()
-# Relies on the oracle rebuild doing a nuke first.
-if opts.start:
-    if database_type == 'database_sqlite':
-        copy_sqldb(config, target='DB')
-else:
-    suite.addTest(DatabaseTestSuite())
-suite.addTest(BrokerTestSuite(opts.start))
-if opts.failfast:
-    result = VerboseTextTestRunner(config=config, verbosity=opts.verbose, failfast=True).run(suite)
-else:
-    result = VerboseTextTestRunner(config=config, verbosity=opts.verbose).run(suite)
-sys.exit(not result.wasSuccessful())
+if not opts.start and 'unit' not in opts.skip:
+    # Real unit tests are fast.  Run them before any other tests.
+    if run_unit_tests(opts.interactive) != 0:
+        sys.exit('Unit tests fail.  Aborting functional tests.')
+    else:
+        print('All unit tests pass.  Preparing to run functional tests...\n\n')
+
+if 'integration' not in opts.skip:
+    suite = unittest.TestSuite()
+    # Relies on the oracle rebuild doing a nuke first.
+    if opts.start:
+        if database_type == 'database_sqlite':
+            copy_sqldb(config, target='DB')
+    else:
+        suite.addTest(DatabaseTestSuite())
+    suite.addTest(BrokerTestSuite(opts.start))
+    if opts.failfast:
+        result = VerboseTextTestRunner(
+            config=config, verbosity=opts.verbose, failfast=True).run(suite)
+    else:
+        result = VerboseTextTestRunner(
+            config=config, verbosity=opts.verbose).run(suite)
+    sys.exit(not result.wasSuccessful())
