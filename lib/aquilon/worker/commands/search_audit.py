@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 # limitations under the License.
 """ Search the transaction log for history """
 
+from datetime import datetime
+from datetime import timedelta
 from dateutil.parser import parse
 from dateutil.tz import tzutc
-from datetime import datetime, timedelta
 
 from sqlalchemy.sql.expression import asc, desc, exists
 from sqlalchemy import or_
@@ -39,7 +40,38 @@ class CommandSearchAudit(BrokerCommand):
 
     def render(self, session, logger, keyword, argument, username, command,
                before, after, forever, return_code, limit, reverse_order, **_):
+        """Render the search_audit command.
 
+        Please see the abstract method defined in the superclass of this
+        class to better understand the purpose of the render method.
+
+        :param keyword: The value of any argument supplied to a command
+                        (str or None)
+        :param argument: Look at the value of the specified argument only
+                         (str or None)
+        :param username: The user name who executed the command
+                         (str or None)
+        :param command: The name of the command or command type
+                        (str or None)
+        :param before: Search for transactions started before a specific
+                       date/time (str or None)
+        :param after: Search for transactions started after a specific
+                      date/time (str or None)
+        :param forever: Search for transactions throughout the transaction log
+                        (a flag, any value that evaluates to True or False)
+        :param return_code: Search by an HTTP response code (None or
+                            int: 200-505)
+        :param limit: Limit the number of rows returned. (None (sets limit
+                      to the configured default value) or int))
+        :param reverse_order: Output records in reverse chronological order.
+                              Also causes the --limit parameter to find the
+                              oldest records and not the newest.
+                              (a flag, any value that evaluates to True or
+                              False)
+
+        :return: a list of all results represented by the computed SQLAlchemy
+                 Query object
+        """
         q = session.query(Xtn)
 
         if command is not None:
@@ -60,7 +92,8 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.filter_by(command=str(command))
         else:
             # filter out read only
-            q = q.filter(or_(Xtn.is_readonly==False, Xtn.command.in_(_NON_DB_CHANGE_TYPE_COMMANDS)))
+            q = q.filter(or_(Xtn.is_readonly == False,
+                             Xtn.command.in_(_NON_DB_CHANGE_TYPE_COMMANDS)))
 
         if username is not None:
             username = username.strip()
@@ -72,40 +105,24 @@ class CommandSearchAudit(BrokerCommand):
 
         # TODO: These should be typed in input.xml as datetime and use
         # the standard broker methods for dealing with input validation.
-        if before is not None:
-            try:
-                end = parse(before)
-            except (ValueError, TypeError):
-                raise ArgumentError("Unable to parse date string '%s'" %
-                                    before)
-            if not end.tzinfo:
-                end = end.replace(tzinfo=tzutc())
-        else:
-            end = None
-
-        if after is not None:
-            try:
-                start = parse(after)
-            except (ValueError, TypeError):
-                raise ArgumentError("Unable to parse date string '%s'" % after)
-            if not start.tzinfo:
-                start = start.replace(tzinfo=tzutc())
-        else:
-            start = None
+        start, end = self.after_before_to_start_end(after, before)
 
         if forever:
             if before is not None or after is not None:
-                raise ArgumentError("Cannot specify 'forever' with 'before' or 'after'")
+                raise ArgumentError(
+                    "Cannot specify 'forever' with 'before' or 'after'")
         else:
-            # if no end-time set, and no start time set, use now;  if start-time
-            # if set (and no end), end at +1 year.  (unless 'forever' is given)
+            # if no end-time set, and no start time set, use now;  if
+            # start-time if set (and no end), end at +1 year.  (unless
+            # 'forever' is given)
 
             if end is None:
                 if start is None:
-                    # Note: put this 1s in the future so we don't accidently miss
-                    # things that were added within the last second (from zero'd
-                    # microseconds).
-                    end = datetime.utcnow().replace(microsecond=0) + timedelta(seconds=1)
+                    # Note: put this 1s in the future so we don't accidently
+                    # miss things that were added within the last second (from
+                    # zero'd microseconds).
+                    end = datetime.utcnow().replace(microsecond=0) +\
+                          timedelta(seconds=1)
                 else:
                     end = start + timedelta(days=366)
 
@@ -119,8 +136,9 @@ class CommandSearchAudit(BrokerCommand):
 
             # sanity check: that end is after before.
             if end < start:
-                raise ArgumentError(("Time region from after '%s' to before '%s'" +
-                                    " is invalid.") % (after, before))
+                raise ArgumentError(
+                    "Time region from after '{}' to before '{}'"
+                    " is invalid.".format(after, before))
 
             q = q.filter(Xtn.start_time > start, Xtn.start_time < end)
 
@@ -132,7 +150,7 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.filter(XtnEnd.return_code == return_code)
                 q = q.reset_joinpoint()
 
-        # FIXME: Oracle ignores indexes if it has to perform unicode -> string
+        # FIXME: Oracle ignores indices if it has to perform unicode -> string
         # conversion, see the discussion at:
         # https://groups.google.com/d/topic/sqlalchemy/8Xn31vBfGKU/discussion
         # We may need a more generic solution like a custom type decorator as
@@ -157,8 +175,9 @@ class CommandSearchAudit(BrokerCommand):
         if limit is None:
             limit = self.config.getint('broker', 'default_audit_rows')
         if limit > self.config.getint('broker', 'max_audit_rows'):
-            raise ArgumentError("Cannot set the limit higher than %s" %
-                                self.config.get('broker', 'max_audit_rows'))
+            raise ArgumentError(
+                "Cannot set the limit higher than {}".format(
+                    self.config.get('broker', 'max_audit_rows')))
         q = q.limit(limit)
 
         # Now apply the user preference to the limited output after
@@ -169,3 +188,56 @@ class CommandSearchAudit(BrokerCommand):
             q = q.from_self().order_by(asc(Xtn.start_time))
 
         return q.all()
+
+    @classmethod
+    def after_before_to_start_end(cls, after, before):
+        """Return a tuple (start, end) with parsed 'after' and 'before'.
+
+        This method parses after and before and returns a tuple (start, end)
+        specifying a period of interest, where each item is either a None (if
+        initially None) or a datetime object.
+        NB: This method purposefully does not ensure that start < end (this is
+        done elsewhere).
+
+        :param after: None, datetime or str
+        :param before: None, datetime or str
+
+        :return: a tuple (start, end) - each item is either set to None, or an
+                 instance of datetime (with UTC timezone if no other timezone
+                 given).
+        """
+        # To protect ourselves against some very unlikely cases when 'after'
+        # would be erroneously computed to precede 'before' (for different
+        # combinations of 'now' or 'today' (NB: if today is used for either
+        # of the parameters, using now or today for another one does not
+        # make sense)), and to ensure that, from the user perspective, 'now'
+        # means 'now', we must use the same value of 'now' and 'tzinfo' (in
+        # this case we only use UTC) for both.
+        now = datetime.now()
+        tzinfo = tzutc()
+        if after == 'today':
+            after = now.combine(now.date(), now.max.time())
+        if before == 'today':
+            before = now.combine(now.date(), now.min.time())
+        after = cls._parsed_datetime_or_none(after, now, tzinfo)
+        before = cls._parsed_datetime_or_none(before, now, tzinfo)
+        return after, before
+
+    @staticmethod
+    def _parsed_datetime_or_none(fuzzy_dt, now=None, tzinfo=None):
+        """Parse fuzzy_dt and return a datetime object on success, or None."""
+        if fuzzy_dt is None:
+            return None
+        if fuzzy_dt == 'now':
+            parsed = now or datetime.now()
+        elif isinstance(fuzzy_dt, datetime):
+            parsed = fuzzy_dt
+        else:
+            try:
+                parsed = parse(fuzzy_dt)
+            except (ValueError, TypeError):
+                raise ArgumentError(
+                    "Unable to parse date string '{}'".format(fuzzy_dt))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=tzinfo or tzutc())
+        return parsed
