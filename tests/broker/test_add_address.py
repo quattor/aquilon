@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2013,2015-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,10 @@ from dnstest import inaddr_ptr, in6addr_ptr
 
 class TestAddAddress(EventsTestMixin, TestBrokerCommand):
 
-    def event_add_arecord(self, fqdn, ip, reverse=None, ttl=None, dns_environment='internal'):
+    def event_add_arecord(self, fqdn, ip, reverse=None, ttl=None,
+                          dns_environment='internal',
+                          network_environment='internal',
+                          reverse_dns_environment=None):
         # Determine the IP type
         ip = ip_address(unicode(ip))
         if isinstance(ip, IPv6Address):
@@ -45,6 +48,7 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
         # Prepare the records
         a_record = {
             'target': str(ip),
+            'targetNetworkEnvironmentName': network_environment,
             'rrtype': rrtype,
         }
         ptr_record = {
@@ -53,6 +57,7 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
                 if reverse is None
                 else reverse
             ),
+            'targetEnvironmentName': dns_environment,
             'rrtype': 'PTR',
         }
 
@@ -66,7 +71,10 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
                 fqdn,
                 inaddr(ip),
             ],
-            dns_environment=dns_environment,
+            dns_environment=[
+                dns_environment,
+                reverse_dns_environment or network_environment,
+            ],
             dns_records=[
                 [a_record, ],
                 [ptr_record, ],
@@ -404,6 +412,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             fqdn=fqdn,
             ip=str(ip),
             dns_environment='ut-env',
+            network_environment='cardenv',
+            reverse_dns_environment='ut-env',
         )
         command = ["add", "address", "--ip", ip, "--fqdn", fqdn,
                    "--network_environment", "cardenv",
@@ -430,6 +440,8 @@ class TestAddAddress(EventsTestMixin, TestBrokerCommand):
             fqdn=fqdn,
             ip='192.168.3.5',
             dns_environment='ut-env',
+            network_environment='cardenv',
+            reverse_dns_environment='ut-env',
         )
         command = ["add", "address", "--ipfromip", "192.168.3.0",
                    "--fqdn", fqdn, "--network_environment", "cardenv",

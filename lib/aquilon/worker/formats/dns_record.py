@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2017  Contributor
+# Copyright (C) 2008-2015,2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,6 +52,8 @@ class ARecordFormatter(ObjectFormatter):
             else skeleton.AAAA
         )
         skeleton.target = str(dns_record.ip)
+        skeleton.target_network_environment_name = \
+            dns_record.network.network_environment.name
         if dns_record.ttl is not None:
             skeleton.ttl = dns_record.ttl
 
@@ -109,6 +111,8 @@ class AddressAliasFormatter(ObjectFormatter):
             else skeleton.AAAA
         )
         skeleton.target = str(dns_record.target_ip)
+        skeleton.target_network_environment_name = \
+            dns_record.target_network.network_environment.name
         if dns_record.ttl is not None:
             skeleton.ttl = dns_record.ttl
 
@@ -177,12 +181,14 @@ def process_reverse_ptr(container, record):
         if isinstance(record.ip, IPv4Address)
         else in6addr_ptr(record.ip)
     )
-    reverse.environment_name = target.dns_environment.name
+    reverse.environment_name = \
+        record.network.network_environment.dns_environment.name
 
     # Then add the PTR record to the reverse
     ptr_record = reverse.rdata.add()
     ptr_record.rrtype = ptr_record.PTR
     ptr_record.target = str(target)
+    ptr_record.target_environment_name = target.dns_environment.name
     if record.ttl is not None:
         ptr_record.ttl = record.ttl
 

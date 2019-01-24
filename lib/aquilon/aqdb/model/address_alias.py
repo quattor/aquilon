@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015  Contributor
+# Copyright (C) 2015,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,6 +50,11 @@ class AddressAlias(DnsRecordTargetMixin, DnsRecord):
         # AddressAlias only allows reference to ARecord which only contain
         # one ip address per name.
         return self.target.dns_records[0].ip
+
+    @property
+    def target_network(self):
+        # Same as for target_ip
+        return self.target.dns_records[0].network
 
     def __init__(self, fqdn, target, **kwargs):
         if not isinstance(fqdn, Fqdn):  # pragma: no cover

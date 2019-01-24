@@ -35,7 +35,15 @@ class TestSearchDns(TestBrokerCommand):
                 rdetails = [
                     rdata.DNSRecordType.Name(rdata.rrtype),
                 ]
-                for field in ['target', 'ttl', 'weight', 'port', 'priority']:
+                for field in [
+                    'target',
+                    'ttl',
+                    'weight',
+                    'port',
+                    'priority',
+                    'target_environment_name',
+                    'target_network_environment_name',
+                ]:
                     if rdata.HasField(field):
                         rdetails.append(getattr(rdata, field))
                 record_list.append(tuple(rdetails))
@@ -259,10 +267,10 @@ class TestSearchDns(TestBrokerCommand):
         flatten_dns_records = self.flatten_proto_dns_records(dns_records)
         expected_dns_records = (
             (u'7.1.2.4.in-addr.arpa', u'internal', (
-                ('PTR', u'unittest00.one-nyp.ms.com'),
+                ('PTR', u'unittest00.one-nyp.ms.com', u'internal'),
              )),
             (u'unittest00.one-nyp.ms.com', u'internal', (
-                ('A', u'4.2.1.7'),
+                ('A', u'4.2.1.7', u'internal'),
              )),
         )
         self.assertTupleEqual(
