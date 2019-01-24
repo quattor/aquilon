@@ -1,0 +1,11 @@
+DROP TABLE entit_personality_user_map;
+DROP TABLE entit_personality_grn_map;
+DROP TABLE entit_host_user_map;
+DROP TABLE entit_host_grn_map;
+DROP TABLE entit_grn_user_map;
+DROP TABLE entit_grn_grn_map;
+DROP TABLE entit_cluster_user_map;
+DROP TABLE entit_cluster_grn_map;
+DROP TABLE entit_archetype_user_map;
+DROP TABLE entit_archetype_grn_map;
+

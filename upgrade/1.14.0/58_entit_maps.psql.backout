@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS entit_personality_user_map;
+DROP TABLE IF EXISTS entit_personality_grn_map;
+DROP TABLE IF EXISTS entit_host_user_map;
+DROP TABLE IF EXISTS entit_host_grn_map;
+DROP TABLE IF EXISTS entit_grn_user_map;
+DROP TABLE IF EXISTS entit_grn_grn_map;
+DROP TABLE IF EXISTS entit_cluster_user_map;
+DROP TABLE IF EXISTS entit_cluster_grn_map;
+DROP TABLE IF EXISTS entit_archetype_user_map;
+DROP TABLE IF EXISTS entit_archetype_grn_map;
+

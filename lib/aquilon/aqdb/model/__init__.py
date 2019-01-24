@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2009-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -154,3 +154,29 @@ from aquilon.aqdb.model.cluster_asl import (PriorityList, MemberPriority,
                                             SystemList, AutoStartList)
 
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
+
+# ENTITLEMENTS
+from aquilon.aqdb.model.entitlement import (
+    Entitlement,
+    EntitlementArchetypeGrnMap,
+    EntitlementArchetypeUserMap,
+    EntitlementClusterGrnMap,
+    EntitlementClusterUserMap,
+    EntitlementGrnGrnMap,
+    EntitlementGrnUserMap,
+    EntitlementHostGrnMap,
+    EntitlementHostUserMap,
+    EntitlementOnArchetype,
+    EntitlementOnCluster,
+    EntitlementOnGrn,
+    EntitlementOnHost,
+    EntitlementOnHostEnvironment,
+    EntitlementOnLocation,
+    EntitlementOnPersonality,
+    EntitlementPersonalityGrnMap,
+    EntitlementPersonalityUserMap,
+    EntitlementToGrn,
+    EntitlementToUser,
+    EntitlementType,
+    EntitlementTypeUserTypeMap,
+)

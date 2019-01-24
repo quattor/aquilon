@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -536,6 +537,53 @@ class TestBrokerCommand(unittest.TestCase):
             self.assertEqual(out, s,
                              "output for %s differs:\n%s"
                              % (command, "\n".join(diff)))
+
+    def output_unordered_equals(self, out, sl, command, match_all=True):
+        out = dedent(out).strip()
+
+        unmatched = []
+        for s in sl:
+            s = dedent(s).strip()
+            m = re.search('^{}$'.format(re.escape(s)), out, re.MULTILINE)
+            if not m:
+                unmatched.append(s)
+            else:
+                out = out[:max(0, m.start() - 1)] + out[m.end():]
+
+        # Clean-up leftover output
+        out = out.strip()
+
+        self.assertFalse(unmatched,
+                         'Unmatched blocks for {}:\n{}{}'.format(
+                             command, '\n--\n'.join(unmatched),
+                             '\n>>> Leftover output:\n{}'.format(out)
+                             if bool(out) else ''))
+
+        if match_all:
+            # Check that the output is now empty
+            self.assertFalse(bool(out),
+                             'Output for {} does not perfectly match the '
+                             'expected output; in excess:\n{}'.format(
+                                 command, out))
+
+    def output_unordered_clean(self, out, sl, command):
+        out = dedent(out).strip()
+        matched = []
+        for s in sl:
+            s = dedent(s).strip()
+            m = re.search('^{}$'.format(re.escape(s)), out, re.MULTILINE)
+            if m:
+                matched.append(s)
+                out = out[:max(0, m.start() - 1)] + out[m.end():]
+
+        # Clean-up leftover output
+        out = out.strip()
+
+        self.assertFalse(matched,
+                         'Matched blocks for {}:\n{}{}'.format(
+                             command, '\n--\n'.join(matched),
+                             '\n>>> Leftover output:\n{}'.format(out)
+                             if bool(out) else ''))
 
     def parse_proto_msg(self, listclass, attr, msg, expect=None):
         protolist = listclass()
