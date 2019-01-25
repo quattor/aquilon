@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016,2017  Contributor
+# Copyright (C) 2015-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -134,6 +134,7 @@ class EventsTestMixin(object):
         # check.  To accomodate this we will have two passes at processing
         # the events, after which we will consider it a failure.
         remaining = self._expected_events[:]
+        unneeded = []
         for _ in range(1, 30):
             # Find all of the JSON event files in the event directory and
             # process them one by one looking for matches
@@ -144,8 +145,11 @@ class EventsTestMixin(object):
                 try:
                     with open(jsonfile) as fh:
                         data = json.load(fh)
+                        cursize = len(remaining)
                         remaining[:] = [e for e in remaining
                                         if not partial_match(e, data)]
+                        if len(remaining) == cursize:
+                            unneeded.append(data)
                     os.unlink(jsonfile)
                 except ValueError as e:
                     continue
@@ -161,7 +165,9 @@ class EventsTestMixin(object):
 
         # If there are any events remaining then we have failed to match
         if remaining:
-            self.fail('Unmatched events: {}'.format(str(remaining)))
+            self.fail('Unmatched events:\n{}\n\nUnused events:\n{}'.format(
+                '\n'.join(str(e) for e in remaining),
+                '\n'.join(str(e) for e in unneeded)))
 
         # Some tests call verify multiple times.  To avoid any false
         # results we reset again here just to make sure

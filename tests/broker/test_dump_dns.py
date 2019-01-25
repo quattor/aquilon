@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -142,6 +141,42 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out, "Calias13.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com", command)
         # The target definition in different environment should not be included
         self.matchclean(out, "=arecord13.aqd-unittest.ms.com", command)
+
+    def test_djb_env_excl(self):
+        command = ["dump_dns", "--exclude_dns_environment", "ut-env"]
+        out = self.commandtest(command)
+        # ut-env records should be excluded
+        self.matchclean(
+            out,
+            "Calias2host.aqd-unittest-ut-env.ms.com:"
+            "arecord13.aqd-unittest.ms.com",
+            command)
+        self.matchclean(
+            out,
+            "Calias13.aqd-unittest.ms.com:"
+            "arecord13.aqd-unittest.ms.com",
+            command)
+        # Other records not in ut-env should be included
+        self.matchoutput(out, "=arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "=ivirt1.aqd-unittest.ms.com", command)
+
+    def test_djb_env_all(self):
+        command = ["dump_dns", "--all_dns_environments"]
+        out = self.commandtest(command)
+        # ut-env records should be included
+        self.matchoutput(
+            out,
+            "Calias2host.aqd-unittest-ut-env.ms.com:"
+            "arecord13.aqd-unittest.ms.com",
+            command)
+        self.matchoutput(
+            out,
+            "Calias13.aqd-unittest.ms.com:"
+            "arecord13.aqd-unittest.ms.com",
+            command)
+        # Other records not in ut-env should be included
+        self.matchoutput(out, "=arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "=ivirt1.aqd-unittest.ms.com", command)
 
     def test_bind(self):
         command = ["dump", "dns", "--format", "raw"]

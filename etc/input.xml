@@ -4637,7 +4637,14 @@
         <p/>
         <optgroup>
             <option name="dns_domain" type="string">Name of the DNS domain</option>
-            <option name="dns_environment" type="string">The name of the environment (defaults to 'internal')</option>
+        </optgroup>
+        <optgroup fields="one">
+            <option name="all_dns_environments" type="flag">Dumps all environments</option>
+            <option name="dns_environment" type="string" action="extend">The name of the environment (defaults to 'internal')</option>
+            <option name="exclude_dns_environment" type="string" action="extend">The name of the environment to exclude</option>
+            <option name="all_network_environments" type="flag">Include all network environments for A records</option>
+            <option name="network_environment" type="string" action="extend">The network environment for A records (default: internal)</option>
+            <option name="exclude_network_environment" type="string" action="extend">Exclude network environments for A records</option>
         </optgroup>
         <transport method="get" path="command/dump_dns"/>
         <format name="proto">
@@ -5413,9 +5420,15 @@
             <option name="reverse_override" type="boolean">Is there an override for the reverse PTR record?</option>
             <option name="reverse_ptr" type="string">The reverse PTR points to this FQDN</option>
         </optgroup>
+        <optgroup fields="one">
+            <option name="all_dns_environments" type="flag">Include all DNS environments for the addresses</option>
+            <option name="dns_environment" type="string" action="extend">The name of an environment the address is in (default: internal)</option>
+            <option name="exclude_dns_environment" type="string" action="extend">The name of an environment the address is in</option>
+            <option name="all_network_environments" type="flag">Include all network environments for A records</option>
+            <option name="network_environment" type="string" action="extend">The network environment for A records (default: internal)</option>
+            <option name="exclude_network_environment" type="string" action="extend">Exclude network environments for A records</option>
+        </optgroup>
         <optgroup>
-            <option name="dns_environment" type="string" conflicts="network_environment">The name of an environment the address is in (default: internal)</option>
-            <option name="network_environment" type="string" conflicts="dns_environment"> The network environment for A records (default: internal)</option>
             <option name="target_environment" type="string">The name of an environment the record's target lives in (default is the same as the record's dns environment)</option>
             <option name="fullinfo" type="flag">Show full information for the matching records</option>
         </optgroup>
