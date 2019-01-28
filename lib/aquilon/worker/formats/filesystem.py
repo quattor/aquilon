@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2008-2014,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ class FilesystemFormatter(ResourceFormatter):
         details.append(indent + "  Mountpoint: %s" % fs.mountpoint)
         details.append(indent + "  Dump Freq: %d" % fs.dumpfreq)
         details.append(indent + "  Fsck Pass: %d" % fs.passno)
+        details.append(indent + "  Transport Type: %s" % fs.transport_type)
+        details.append(indent + "  Transport ID: %s" % fs.transport_ident)
         details.append(indent + "  Virtual Disk Count: %d" % fs.virtual_disk_count)
         return details
 
@@ -44,5 +46,7 @@ class FilesystemFormatter(ResourceFormatter):
             skeleton.fsdata.opts = fs.mountoptions
         skeleton.fsdata.freq = fs.dumpfreq
         skeleton.fsdata.passno = fs.passno
+        # TODO: skeleton.fsdata.transport_type = fs.transport_type
+        # TODO: skeleton.fsdata.transport_id = fs.transport_ident
 
 ObjectFormatter.handlers[Filesystem] = FilesystemFormatter()

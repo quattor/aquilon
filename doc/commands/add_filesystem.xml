@@ -47,6 +47,10 @@
             <arg><option>--dumpfreq <replaceable>DUMPFREQ</replaceable></option></arg>
             <arg><option>--fsckpass <replaceable>PASSNO</replaceable></option></arg>
             <arg><option>--options <replaceable>OPTIONS</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--transport_type <replaceable>TYPE</replaceable></option></arg>
+                <arg><option>--transport_id <replaceable>ID</replaceable></option></arg>
+            </group>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
@@ -219,6 +223,27 @@
             </varlistentry>
             <varlistentry>
                 <term>
+                    <option>--transport_type <replaceable>TYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Optional transport type.  For example, "iscsi".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--transport_id <replaceable>ID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Optional transport identifier, only valid if --transport_type
+                        is specified.  For example, "iqn.2019-01.com.ms:unixeng:diskarray01".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
                     <option>--comments <replaceable>COMMENTS</replaceable></option>
                 </term>
                 <listitem>
@@ -253,6 +278,7 @@ aq add_filesystem --hostname foo.example.com --filesystem d1 \
 "/system/resources/filesystem/0/mountopts" = "";
 "/system/resources/filesystem/0/freq" = 0;
 "/system/resources/filesystem/0/pass" = 2;
+"/system/resources/filesystem/0/transport" = dict();
             </programlisting>
         </example>
         <example>
@@ -273,6 +299,7 @@ aq add_filesystem --filesystem d1 --cluster grid1 --type ext3 \
 "/system/resources/filesystem/0/mountopts" = "";
 "/system/resources/filesystem/0/freq" = 0;
 "/system/resources/filesystem/0/pass" = 2;
+"/system/resources/filesystem/0/transport" = dict();
             </programlisting>
         </example>
     </refsect1>

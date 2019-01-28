@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011,2013-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +31,7 @@ class CommandAddFilesystem(CommandAddResource):
 
     def setup_resource(self, session, logger, dbfs, reason, type, mountpoint,
                        blockdevice, bootmount, dumpfreq, fsckpass, options,
-                       **_):
+                       transport_type, transport_id, **_):
         if dumpfreq is None:
             dumpfreq = 0
         if fsckpass is None:
@@ -45,3 +46,8 @@ class CommandAddFilesystem(CommandAddResource):
         dbfs.fstype = type
         dbfs.passno = fsckpass
         dbfs.dumpfreq = dumpfreq
+        dbfs.transport_type = transport_type
+        if transport_type:
+            # only try and set if bool(transport_type) evaluates True
+            # (e.g. not None or empty-string)
+            dbfs.transport_ident = transport_id

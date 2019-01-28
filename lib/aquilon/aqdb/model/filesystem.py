@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2008-2014,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,5 +37,7 @@ class Filesystem(Resource):
     mountoptions = Column(String(255), nullable=True)
     dumpfreq = Column(Integer)
     passno = Column(Integer)
+    transport_type = Column(String(32), nullable=True)
+    transport_ident = Column(String(255), nullable=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

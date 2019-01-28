@@ -47,6 +47,10 @@
             <arg><option>--dumpfreq <replaceable>DUMPFREQ</replaceable></option></arg>
             <arg><option>--fsckpass <replaceable>PASSNO</replaceable></option></arg>
             <arg><option>--options <replaceable>OPTIONS</replaceable></option></arg>
+            <group>
+                <arg choice="plain"><option>--transport_type <replaceable>TYPE</replaceable></option></arg>
+                <arg><option>--transport_id <replaceable>ID</replaceable></option></arg>
+            </group>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
@@ -195,6 +199,27 @@
             <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
                         For
                         example, "rw,nosuid".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--transport_type <replaceable>TYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Optional transport type.  For example, "iscsi".
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--transport_id <replaceable>ID</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Optional transport identifier, only valid if --transport_type
+                        is specified.  For example, "iqn.2019-01.com.ms:unixeng:diskarray01".
                     </para>
                 </listitem>
             </varlistentry>
