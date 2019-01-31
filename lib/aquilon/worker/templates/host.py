@@ -34,6 +34,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryClusterClient,
                                       PlenaryResource, PlenaryPersonalityBase,
                                       PlenaryServiceInstanceClientDefault,
+                                      PlenaryServiceInstanceData,
                                       PlenaryServiceInstanceServerDefault)
 from aquilon.worker.templates.personality import get_parameters_by_feature
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
@@ -354,11 +355,13 @@ class PlenaryHostObject(ObjectPlenary):
                 continue
 
         services = []
+        services_data = {}
         required_services = self.dbobj.required_services
 
         for si in self.dbobj.services_used:
             required_services.pop(si.service, None)
             services.append(PlenaryServiceInstanceClientDefault.template_name(si))
+            services_data[si.service.name] = PlenaryServiceInstanceData.template_name(si)
         if required_services:
             missing = ", ".join(sorted(srv.name for srv in required_services))
             raise IncompleteError("{0} is missing the following required "
@@ -389,6 +392,12 @@ class PlenaryHostObject(ObjectPlenary):
         pan_assign(lines, "/",
                    StructureTemplate(path,
                                      {"metadata": PanValue("/metadata")}))
+
+        # Include service data
+        for service_name in sorted(services_data.keys()):
+            pan_assign(lines, "/system/services/%s" % service_name,
+                       StructureTemplate(services_data[service_name]))
+
         pan_include(lines, "archetype/base")
 
         dbos = self.dbobj.operating_system

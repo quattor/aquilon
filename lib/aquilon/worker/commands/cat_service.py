@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.service import (PlenaryServiceToplevel,
+from aquilon.worker.templates.service import (PlenaryServiceData,
                                               PlenaryServiceClientDefault,
                                               PlenaryServiceServerDefault)
 
@@ -38,7 +38,7 @@ class CommandCatService(BrokerCommand):
             else:
                 cls = PlenaryServiceClientDefault
         else:
-            cls = PlenaryServiceToplevel
+            cls = PlenaryServiceData
 
         plenary_info = cls.get_plenary(dbservice, logger=logger)
 
