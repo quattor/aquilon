@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,14 +19,18 @@ import datetime
 import unittest
 
 try:
-    from unittest.mock import mock
+    from unittest.mock import patch
 except ImportError:
-    import mock
+    from mock import patch
 
 from dateutil.tz import tzoffset
 from dateutil.tz import tzutc
 
-from aquilon.worker.commands import search_audit
+# As these are unit tests, we do not need the full broker capability,
+# we can thus mock the DbFactory in order for it not to try and open
+# the database (which is not required anyway)
+with patch('aquilon.aqdb.db_factory.DbFactory', autospec=True):
+    from aquilon.worker.commands import search_audit
 
 
 class TestCommandSearchAudit(unittest.TestCase):
@@ -83,8 +87,8 @@ class TestCommandSearchAudit(unittest.TestCase):
         now0 = self._get_utc_now()
         now1 = self._get_utc_now()
         self.assertNotEqual(now0, now1)
-        with mock.patch.object(search_audit, 'datetime',
-                               autospec=datetime.datetime) as mock_datetime:
+        with patch.object(search_audit, 'datetime',
+                          autospec=datetime.datetime) as mock_datetime:
             mock_datetime.now.side_effect = (now0, now1)
             start, end = \
                 search_audit.CommandSearchAudit.after_before_to_start_end(
