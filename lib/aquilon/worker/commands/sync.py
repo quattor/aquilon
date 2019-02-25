@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014,2016  Contributor
+# Copyright (C) 2008-2011,2013-2014,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,6 +40,6 @@ class CommandSync(BrokerCommand):
             sync_domain(dbdomain, logger=logger)
         except ProcessException as e:
             raise ArgumentError("Problem encountered updating templates for "
-                                "domain %s: %s", dbdomain.name, e)
+                                "domain {}: {}".format(dbdomain.name, e))
 
         return
