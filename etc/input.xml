@@ -6537,6 +6537,9 @@
             </optgroup>
         </optgroup>
         <transport method="get" path="entitlement/host/%(on_hostname)s"/>
+        <format name="proto">
+            <message_class name="EntitlementList" module="aqdentitlements_pb2"/>
+        </format>
     </command>
 
     <command name="search_entitlement">
@@ -6601,6 +6604,9 @@
             <option name="on_host_environment" type="string" action="extend">Host environment</option>
         </optgroup>
         <transport method="get" path="entitlement"/>
+        <format name="proto">
+            <message_class name="EntitlementList" module="aqdentitlements_pb2"/>
+        </format>
     </command>
 
     <command name="map_grn">

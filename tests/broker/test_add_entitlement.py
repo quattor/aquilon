@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,6 +53,27 @@ class TestAddEntitlement(TestBrokerCommand):
                        '  To Human User: testuser1',
                        '  On Host: unittest02.one-nyp.ms.com'))
         self.output_equals(out, expected_out, command)
+
+    def test_105_show_etype_all_to_human_on_hostname_proto(self):
+        command = [
+            'show_entitlement',
+            '--type', 'etype_all',
+            '--to_user', 'testuser1',
+            '--on_hostname', 'unittest02.one-nyp.ms.com',
+            '--format', 'proto',
+        ]
+        entit = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(entit.type, 'etype_all')
+        self.assertEqual(entit.host.fqdn, 'unittest02.one-nyp.ms.com')
+        self.assertEqual(entit.user.name, 'testuser1')
+
+        for field in (
+            'cluster', 'personality', 'archetype', 'target_eonid',
+            'host_environment', 'location',
+            'eonid',
+        ):
+            self.assertFalse(entit.HasField(field),
+                             'Field {} is defined'.format(field))
 
     def test_110_add_etype_human_to_human_on_hostname(self):
         command = [
@@ -192,6 +212,27 @@ class TestAddEntitlement(TestBrokerCommand):
                        '  To GRN: grn:/ms/ei/aquilon/unittest',
                        '  On Host: unittest02.one-nyp.ms.com'))
         self.output_equals(out, expected_out, command)
+
+    def test_165_show_etype_grn_to_eon_id_on_hostname_proto(self):
+        command = [
+            'show_entitlement',
+            '--type', 'etype_grn',
+            '--to_eon_id', 3,
+            '--on_hostname', 'unittest02.one-nyp.ms.com',
+            '--format', 'proto',
+        ]
+        entit = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(entit.type, 'etype_grn')
+        self.assertEqual(entit.host.fqdn, 'unittest02.one-nyp.ms.com')
+        self.assertEqual(entit.eonid, 3)
+
+        for field in (
+            'cluster', 'personality', 'archetype', 'target_eonid',
+            'host_environment', 'location',
+            'user',
+        ):
+            self.assertFalse(entit.HasField(field),
+                             'Field {} is defined'.format(field))
 
     def test_197_cat_hostname(self):
         command = [
@@ -409,6 +450,31 @@ class TestAddEntitlement(TestBrokerCommand):
                        '  On Host Environment: dev',
                        '  On Hub: ny'))
         self.output_equals(out, expected_out, command)
+
+    def test_245_search_etype_all_to_human_on_arch_on_loc_proto(self):
+        command = [
+            'search_entitlement',
+            '--type', 'etype_all',
+            '--to_user', 'testuser2',
+            '--on_archetype', 'aquilon',
+            '--on_host_environment', 'dev',
+            '--on_hub', 'ny',
+            '--format', 'proto',
+        ]
+        entit = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(entit.type, 'etype_all')
+        self.assertEqual(entit.archetype.name, 'aquilon')
+        self.assertEqual(entit.host_environment, 'dev')
+        self.assertEqual(entit.location.location_type, 'hub')
+        self.assertEqual(entit.location.name, 'ny')
+        self.assertEqual(entit.user.name, 'testuser2')
+
+        for field in (
+            'host', 'cluster', 'personality', 'target_eonid',
+            'eonid',
+        ):
+            self.assertFalse(entit.HasField(field),
+                             'Field {} is defined'.format(field))
 
     def test_247_cat_archetype(self):
         command = [

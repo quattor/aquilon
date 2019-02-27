@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -101,6 +101,38 @@ class EntitlementFormatter(ObjectFormatter):
             add('  On {0:c}: {0.name}'.format(entit.location))
 
         return '\n'.join(details)
+
+    def fill_proto(self, entit, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.type = entit.type.name
+
+        if isinstance(entit, EntitlementToGrn):
+            skeleton.eonid = entit.grn.eon_id
+        elif isinstance(entit, EntitlementToUser):
+            self.redirect_proto(entit.user, skeleton.user,
+                                indirect_attrs=False)
+
+        if isinstance(entit, EntitlementOnHost):
+            self.redirect_proto(entit.host, skeleton.host,
+                                indirect_attrs=False)
+        elif isinstance(entit, EntitlementOnCluster):
+            self.redirect_proto(entit.cluster, skeleton.cluster,
+                                indirect_attrs=False)
+        elif isinstance(entit, EntitlementOnPersonality):
+            self.redirect_proto(entit.personality, skeleton.personality,
+                                indirect_attrs=False)
+        elif isinstance(entit, EntitlementOnArchetype):
+            self.redirect_proto(entit.archetype, skeleton.archetype,
+                                indirect_attrs=False)
+        elif isinstance(entit, EntitlementOnGrn):
+            skeleton.target_eonid = entit.target_grn.eon_id
+
+        if isinstance(entit, EntitlementOnHostEnvironment):
+            skeleton.host_environment = entit.host_environment.name
+
+        if isinstance(entit, EntitlementOnLocation):
+            self.redirect_proto(entit.location, skeleton.location,
+                                indirect_attrs=False)
+
 
 
 for cls in [
