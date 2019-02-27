@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014-2018  Contributor
+# Copyright (C) 2014-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,6 +47,17 @@ class TestAddUser(TestBrokerCommand):
         self.matchoutput(out, "GID: 1000", command)
         self.matchoutput(out, "Full Name: Current user", command)
         self.matchoutput(out, "Home Directory: %s" % pwrec[5], command)
+
+    def test_101_verify_current_proto(self):
+        pwrec = pwd.getpwuid(os.getuid())
+        command = ['show_user', '--username', pwrec[0], '--format', 'proto']
+        user = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(user.name, pwrec[0])
+        self.assertEqual(user.type, 'human')
+        self.assertEqual(user.uid, 1000)
+        self.assertEqual(user.gid, 1000)
+        self.assertEqual(user.fullname, 'Current user')
+        self.assertEqual(user.homedir, pwrec[5])
 
     def test_110_add_testuser3(self):
         self.noouttest(["add_user", "--username", "testuser3", "--uid", 2361,

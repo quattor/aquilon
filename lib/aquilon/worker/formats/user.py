@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2014,2018  Contributor
+# Copyright (C) 2008-2014,2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +51,14 @@ class UserFormatter(ObjectFormatter):
         details.append(indent + "  Full Name: %s" % user.full_name)
         details.append(indent + "  Home Directory: %s" % user.home_dir)
         return "\n".join(details)
+
+    def fill_proto(self, user, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.name = user.name
+        skeleton.type = user.type.name
+        skeleton.uid = user.uid
+        skeleton.gid = user.gid
+        skeleton.fullname = user.full_name
+        skeleton.homedir = user.home_dir
 
     def csv_fields(self, user):
         yield (user.name, user.uid, user.gid, user.name, user.home_dir)

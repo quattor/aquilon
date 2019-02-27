@@ -130,7 +130,8 @@ class TestBrokerCommand(unittest.TestCase):
         cls.protocols = {}
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
                   'aqddnsdomains_pb2', 'aqdlocations_pb2', 'aqdaudit_pb2',
-                  'aqdparamdefinitions_pb2', 'aqdparameters_pb2']:
+                  'aqdparamdefinitions_pb2', 'aqdparameters_pb2',
+                  'aqdentitlements_pb2']:
             cls.protocols[m] = __import__(m)
 
     def setUp(self):

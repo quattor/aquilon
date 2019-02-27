@@ -7333,6 +7333,9 @@
         </optgroup>
         <transport trigger="username" method="get" path="user/%(username)s"/>
         <transport trigger="all" method="get" path="user"/>
+        <format name="proto">
+            <message_class name="UserList" module="aqdentitlements_pb2"/>
+        </format>
     </command>
 
     <command name="refresh_user">
