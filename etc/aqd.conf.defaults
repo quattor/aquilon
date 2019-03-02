@@ -213,6 +213,7 @@ default_dynamic_range_class = vm
 [dsdb]
 enable = True
 dsdb_use_testdb = False
+manager_grn = grn:/ms/ei/aquilon/aqd
 
 [change_management]
 # The contents of --justification will not be validated externally

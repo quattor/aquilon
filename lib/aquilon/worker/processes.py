@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -455,6 +455,7 @@ class DSDBRunner(object):
         self.dsdb_use_testdb = config.getboolean("dsdb", "dsdb_use_testdb")
         self.actions = []
         self.rollback_list = []
+        self.manager_grn = config.get('dsdb', 'manager_grn')
 
     def normalize_iface(self, iface):
         return INVALID_NAME_RE.sub("_", iface)
@@ -730,6 +731,9 @@ class DSDBRunner(object):
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
             command.extend(["-primary_host_name", primary])
+        else:
+            # if primary isn't specified, means we're creating the primary
+            command.extend(["-manager_grn", self.manager_grn])
         if comments:
             command.extend(["-comments", comments])
 
