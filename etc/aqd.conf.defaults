@@ -379,7 +379,7 @@ aqd_checkedm = 120
 location_uri_validator = 30
 switch_discover = 30
 dsdb = 120
-git = 30
+git = 0
 
 [site]
 # Site specific settings
