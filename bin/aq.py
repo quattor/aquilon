@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -292,7 +292,13 @@ def quoteOptions(options):
     return "&".join(quote(k) + "=" + quote(v) for k, v in iteritems(options))
 
 
-def get_default_opts(auth_option, conf_file=None):
+def is_readonly(command):
+    return (command.startswith('show_') or
+            command.startswith('search_') or
+            command.startswith('dump_'))
+
+
+def get_default_opts(auth_option, conf_file=None, readonly=None):
 
     config = SafeConfigParser()
 
@@ -304,6 +310,9 @@ def get_default_opts(auth_option, conf_file=None):
         config_options = {}
         if not auth_option and config.has_section("readonly"):
             config_options = dict(config.items("readonly"))
+        if not config_options and readonly and \
+                config.has_section("readonly_auth"):
+            config_options = dict(config.items("readonly_auth"))
         if not config_options and config.has_section("defaults"):
             config_options = dict(config.items("defaults"))
         return config_options
@@ -334,9 +343,11 @@ if __name__ == "__main__":
     # that should overide  env or default options.
     if globalOptions.get('aqconf'):
         globalOptions.update(get_default_opts(globalOptions.get('auth'),
-                                              globalOptions.get('aqconf')))
+                                              globalOptions.get('aqconf'),
+                                              readonly=is_readonly(command)))
     else:
-        defaultOpts = get_default_opts(globalOptions.get('auth'))
+        defaultOpts = get_default_opts(globalOptions.get('auth'),
+                                       readonly=is_readonly(command))
 
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
