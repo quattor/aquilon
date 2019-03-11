@@ -207,4 +207,5 @@ from aquilon.aqdb.model.entitlement import (
 from aquilon.aqdb.model.hostlink import (
     Hostlink,
     HostlinkEntitlementMap,
+    HostlinkParentMap,
 )

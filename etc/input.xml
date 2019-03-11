@@ -5935,7 +5935,10 @@
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
             <option name="hostlink" type="string">Name of hostlink</option>
-            <option name="target" type="string">Target path of link</option>
+            <optgroup fields="one">
+                <option name="target" type="string">Target path of link</option>
+                <option name="parent" type="string" action="extend">Name(s) of parent link(s)</option>
+            </optgroup>
             <option name="owner" type="string">Username to be owner of the target directory</option>
         </optgroup>
         <optgroup>

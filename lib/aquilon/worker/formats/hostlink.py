@@ -24,7 +24,13 @@ from aquilon.aqdb.model import Hostlink
 class HostlinkFormatter(ResourceFormatter):
     def extra_details(self, hostlink, indent=""):
         details = []
-        details.append(indent + "  Target Path: %s" % hostlink.target)
+
+        if hostlink.target:
+            details.append(indent + "  Target Path: %s" % hostlink.target)
+        else:
+            details.append('{}  Parents: {}'.format(
+                indent, ', '.join(p.parent for p in hostlink.parents)))
+
         details.append(indent + "  Owner: %s" % hostlink.owner_user)
         if hostlink.entitlements:
             details.append('{}  Relates to:'.format(indent))
@@ -42,7 +48,11 @@ class HostlinkFormatter(ResourceFormatter):
     def fill_proto(self, hostlink, skeleton, embedded=True,
                    indirect_attrs=True):
         super(HostlinkFormatter, self).fill_proto(hostlink, skeleton)
-        skeleton.hostlink.target = hostlink.target
+        # Target field in protobuf is marked as being required, we thus need
+        # to provide an information even if we do not have one; we fall back
+        # on using '/dev/null' in this case
+        skeleton.hostlink.target = hostlink.target or '/dev/null'
+        skeleton.hostlink.parents.extend(p.parent for p in hostlink.parents)
         skeleton.hostlink.owner_user = hostlink.owner_user
         if hostlink.owner_group:
             skeleton.hostlink.owner_group = hostlink.owner_group

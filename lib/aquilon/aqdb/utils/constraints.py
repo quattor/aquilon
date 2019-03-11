@@ -53,6 +53,7 @@ _table_abbrev = {
     'host_cluster_member': 'host_clstr_mmbr',
     'host_environment': 'host_env',
     'hostlink_entitlement_map': 'hl_entit_map',
+    'hostlink_parent_map': 'hl_prnt_map',
     'interface': 'iface',
     'metacluster': 'mtaclstr',
     'metacluster_member': 'mtaclstr_mbr',

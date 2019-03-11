@@ -30,6 +30,7 @@ from aquilon.aqdb.model import (
     Host,
     Hostlink,
     HostlinkEntitlementMap,
+    HostlinkParentMap,
     ParameterizedArchetype,
     ParameterizedGrn,
     ParameterizedPersonality,
@@ -45,13 +46,23 @@ from sqlalchemy.orm.exc import (
 
 class CommandAddHostlink(CommandAddResource):
 
-    required_parameters = ["hostlink", "target", "owner"]
+    required_parameters = ["hostlink", "owner"]
     resource_class = Hostlink
     resource_name = "hostlink"
 
     def setup_resource(self, session, logger, dbhl, reason, target, owner,
-                       group, mode, entitlement, **_):
-        dbhl.target = target
+                       group, mode, entitlement, parent, **_):
+        if target:
+            if parent:
+                raise ArgumentError('Cannot use both target and parent')
+
+            dbhl.target = target
+        elif parent:
+            for pname in parent:
+                dbhl.parents.append(HostlinkParentMap(parent=pname))
+        else:
+            raise ArgumentError('Missing mandatory argument target or parent')
+
         dbhl.owner_user = owner
         dbhl.owner_group = group
         dbhl.target_mode = mode

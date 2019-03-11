@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011-2018  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,7 +146,14 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "eonid", self.dbobj.eon_id)
 
     def body_hostlink(self, lines):
-        pan_assign(lines, "target", self.dbobj.target)
+        # Even if there is no target, to keep the compatibility with the
+        # previous templates that required the target to exist, just use
+        # '/dev/null' when no target is available.  The new templates should
+        # pick-up the information by verifying the presence of 'parents'
+        pan_assign(lines, "target", self.dbobj.target or '/dev/null')
+        if self.dbobj.parents:
+            pan_assign(lines, "parents", [
+                p.parent for p in self.dbobj.parents])
         if self.dbobj.owner_group:
             owner_string = self.dbobj.owner_user + ':' + self.dbobj.owner_group
         else:

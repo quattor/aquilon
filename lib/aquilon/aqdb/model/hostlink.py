@@ -23,6 +23,7 @@ from sqlalchemy.orm import (
     validates,
 )
 
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (
     Base,
     Entitlement,
@@ -33,6 +34,7 @@ from aquilon.exceptions_ import ArgumentError
 
 _TN = 'hostlink'
 _HOSTLINK_ENTITLEMENT_MAP = 'hostlink_entitlement_map'
+_HOSTLINK_PARENT_MAP = 'hostlink_parent_map'
 
 
 class Hostlink(Resource):
@@ -43,7 +45,7 @@ class Hostlink(Resource):
     resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
                          primary_key=True)
 
-    target = Column(String(255), nullable=False)
+    target = Column(String(255), nullable=True)
     owner_user = Column(String(32), default='root', nullable=False)
     owner_group = Column(String(32), nullable=True)
     # "mode" is a reserved keyword in oracle, so use target_mode in the DB. 
@@ -84,6 +86,27 @@ class Hostlink(Resource):
                         self.resource_id))
 
         return q.all()
+
+
+class HostlinkParentMap(Base):
+    """Table to associate a hostlink to its expected parents
+
+    A hostlink can either have a target or parents.  This table allows
+    to associate a hostlink to all its parents' names.
+    """
+    __tablename__ = _HOSTLINK_PARENT_MAP
+
+    resource_id = Column(ForeignKey(Hostlink.id,
+                                    ondelete='CASCADE'),
+                         nullable=False, primary_key=True)
+    resource = relation(Hostlink, lazy=False, innerjoin=True)
+
+    parent = Column(AqStr(32), nullable=False, primary_key=True)
+
+
+Hostlink.parents = relation(HostlinkParentMap,
+                            cascade='all, delete-orphan',
+                            passive_deletes=True)
 
 
 class HostlinkEntitlementMap(Base):

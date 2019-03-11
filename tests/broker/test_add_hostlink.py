@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011-2018  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -362,6 +362,62 @@ class TestAddHostlink(TestBrokerCommand):
         ]]
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
+
+    def test_400_add_parented_hostlink(self):
+        command = [
+            'add_hostlink', '--hostlink', 'parentedhostlink',
+            '--parent', 'parent1,parent2',
+            '--hostname', 'server1.aqd-unittest.ms.com',
+            '--owner', 'testuser1',
+            '--group', 'testgroup1',
+            '--comments', 'A parented hostlink',
+        ]
+        self.successtest(command)
+
+    def test_402_show_parented_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'parentedhostlink',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: parentedhostlink',
+                       '  Comments: A parented hostlink',
+                       '  Bound to: Host server1.aqd-unittest.ms.com',
+                       '  Parents: parent1, parent2',
+                       '  Owner: testuser1',
+                       '  Group: testgroup1'))
+        self.output_equals(out, expected_out, command)
+
+    def test_404_cat_host_parented_hostlink(self):
+        command = [
+            'cat',
+            '--hostname', 'server1.aqd-unittest.ms.com',
+            '--hostlink', 'parentedhostlink',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('structure template resource/host/'
+             'server1.aqd-unittest.ms.com/hostlink/'
+             'parentedhostlink/config;',
+             '',
+             '"name" = "parentedhostlink";',
+             '"target" = "/dev/null";',
+             '"parents" = list(',
+             '  "parent1",',
+             '  "parent2"',
+             ');',
+             '"owner" = "testuser1:testgroup1";'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_406_del_parented_hostlink(self):
+        command = [
+            'del_hostlink', '--hostlink', 'parentedhostlink',
+            '--hostname', 'server1.aqd-unittest.ms.com',
+        ]
+        self.successtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHostlink)

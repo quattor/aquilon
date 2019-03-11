@@ -108,6 +108,7 @@ model_group = {
             Filesystem,
             Hostlink,
             HostlinkEntitlementMap,
+            HostlinkParentMap,
             Intervention,
             RebootIntervention,
             RebootSchedule,
