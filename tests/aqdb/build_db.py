@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@
 from __future__ import print_function
 
 import argparse
-import sys
+import importlib
 import logging
 import os
 import subprocess
+import sys
 
 logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger('aqdb.populate')
@@ -31,6 +32,7 @@ log = logging.getLogger('aqdb.populate')
 import utils
 utils.load_classpath()
 
+from sqlalchemy import create_engine
 from sqlalchemy.orm import configure_mappers
 
 from aquilon.config import Config
@@ -76,6 +78,13 @@ def parse_cli(*args, **kw):
                         help='run functions to prepopulate data from the named file',
                         default=os.path.join(BINDIR, "data", "unittest.dump"))
 
+    parser.add_argument('--no-populate', action='store_false', dest='populate',
+                        help='disable populate')
+
+    parser.add_argument('--dump',
+                        help='dump the SQL commands instead of running them',
+                        type=str)
+
     return parser.parse_args()
 
 
@@ -87,6 +96,22 @@ def main(*args, **kw):
 
     db = DbFactory(verbose=opts.verbose)
     assert db, "No db_factory in build_db"
+
+    if opts.dump:
+        dialect = importlib.import_module(
+            'sqlalchemy.dialects.{}'.format(opts.dump))
+        dialect_inst = dialect.dialect()
+
+        def metadata_dump(sql, *multiparams, **params):
+            # We will print the data that passes by here using the
+            # dialect that was requested
+            print(sql.compile(dialect=dialect_inst))
+
+        db.engine = create_engine(
+            "sqlite:///:memory:",
+            strategy='mock',
+            executor=metadata_dump)
+
     Base.metadata.bind = db.engine
 
     if opts.delete_db:
