@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2013,2014,2015,2016  Contributor
+# Copyright (C) 2013-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -165,11 +165,67 @@ model_group = {
     },
     'users': {
         'title': 'Users',
-        'classes': [UserPrincipal, Realm, Role, User, NetGroupWhiteList],
+        'classes': [
+            UserPrincipal,
+            Realm,
+            Role,
+            User,
+            UserType,
+            NetGroupWhiteList,
+        ],
     },
     'storage': {
         'title': 'Storage',
         'classes': [Disk, Share, Filesystem],
+    },
+    'entitlements': {
+        'title': 'Entitlements',
+        'classes': [
+            EntitlementType,
+            EntitlementTypeUserTypeMap,
+        ],
+    },
+    'entitlements_host': {
+        'title': 'Host-level Entitlements',
+        'classes': [
+            EntitlementHostGrnMap,
+            EntitlementHostUserMap,
+        ],
+    },
+    'entitlements_cluster': {
+        'title': 'Cluster-level Entitlements',
+        'classes': [
+            EntitlementClusterGrnMap,
+            EntitlementClusterUserMap,
+        ],
+    },
+    'entitlements_personality': {
+        'title': 'Personality-level Entitlements',
+        'classes': [
+            EntitlementPersonalityGrnMap,
+            EntitlementPersonalityUserMap,
+        ],
+    },
+    'entitlements_archetype': {
+        'title': 'Archetype-level Entitlements',
+        'classes': [
+            EntitlementArchetypeGrnMap,
+            EntitlementArchetypeUserMap,
+        ],
+    },
+    'entitlements_grn': {
+        'title': 'Grn-level Entitlements',
+        'classes': [
+            EntitlementGrnGrnMap,
+            EntitlementGrnUserMap,
+        ],
+    },
+    'console_server': {
+        'title': 'Console Server',
+        'classes': [
+            ConsoleServer,
+            ConsolePort,
+        ],
     },
 }
 
