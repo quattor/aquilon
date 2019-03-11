@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -125,40 +125,128 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          '"system/archetype/model" = "%s";' % self.linux_version_prev,
                          command)
 
-        command = "cat --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-
-        self.matchoutput(out,
-                         """include "archetype/base";""",
-                         command)
-        self.matchoutput(out,
-                         'include "os/linux/%s/config";' %
-                         self.linux_version_prev,
-                         command)
-        self.matchoutput(out,
-                         """include "service/afs/q.ny.ms.com/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/bootserver/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/dns/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/ntp/pa.ny.na/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "personality/compileserver/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "archetype/final";""",
-                         command)
-
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
-                         command)
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('include "archetype/base";',),
+            ('include "os/linux/{}/config";'.format(self.linux_version_prev),),
+            ('include "service/afs/q.ny.ms.com/client/config";',),
+            ('include "service/bootserver/unittest/client/config";',),
+            ('include "service/dns/unittest/client/config";',),
+            ('include "service/ntp/pa.ny.na/client/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'eon_id/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'archetype/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'personality/config";',),
+            ('include "archetype/final";',),
+            ('"/metadata/template/branch/name" = "unittest";',),
+            ('"/metadata/template/branch/type" = "domain";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'personality/config;',),
+            ('include "personality/compileserver/config";',),
+            ('include if_exists("personality/compileserver/'
+             'organization/ms/config");',
+             'include if_exists("personality/compileserver/'
+             'hub/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'continent/na/config");',
+             'include if_exists("personality/compileserver/'
+             'country/us/config");',
+             'include if_exists("personality/compileserver/'
+             'campus/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'city/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'building/ut/config");',
+             'include if_exists("personality/compileserver/'
+             'room/utroom1/config");',
+             'include if_exists("personality/compileserver/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("personality/compileserver/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+            '--host_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'archetype/config;',),
+            ('include if_exists("archetype/aquilon/dev/'
+             'organization/ms/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'hub/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'continent/na/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'country/us/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'campus/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'city/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'building/ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'room/utroom1/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+            '--host_grn',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'eon_id/config;',),
+            ('include if_exists("eon_id/3/dev/'
+             'organization/ms/config");',
+             'include if_exists("eon_id/3/dev/'
+             'hub/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'continent/na/config");',
+             'include if_exists("eon_id/3/dev/'
+             'country/us/config");',
+             'include if_exists("eon_id/3/dev/'
+             'campus/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'city/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'building/ut/config");',
+             'include if_exists("eon_id/3/dev/'
+             'room/utroom1/config");',
+             'include if_exists("eon_id/3/dev/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("eon_id/3/dev/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
 
     def testverifyunittest02services(self):
         for service, instance in [("afs", "q.ny.ms.com"),
@@ -281,38 +369,129 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           command)
         self.matchoutput(out, '"system/advertise_status" = false', command)
 
-        command = "cat --hostname unittest00.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         """include "archetype/base";""",
-                         command)
-        self.matchoutput(out,
-                         'include "os/linux/%s/config";' %
-                         self.linux_version_prev,
-                         command)
-        self.matchoutput(out,
-                         """include "service/afs/q.ny.ms.com/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/bootserver/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/dns/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/ntp/pa.ny.na/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "personality/compileserver/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "archetype/final";""",
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
-                         command)
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('include "archetype/base";',),
+            ('include "os/linux/{}/config";'.format(self.linux_version_prev),),
+            ('include "service/afs/q.ny.ms.com/client/config";',),
+            ('include "service/bootserver/unittest/client/config";',),
+            ('include "service/dns/unittest/client/config";',),
+            ('include "service/ntp/pa.ny.na/client/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'eon_id/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'archetype/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'personality/config";',),
+            ('include "archetype/final";',),
+            ('"/metadata/template/branch/name" = "unittest";',),
+            ('"/metadata/template/branch/type" = "domain";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'personality/config;',),
+            ('include "personality/compileserver/config";',),
+            ('include if_exists("personality/compileserver/'
+             'organization/ms/config");',
+             'include if_exists("personality/compileserver/'
+             'hub/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'continent/na/config");',
+             'include if_exists("personality/compileserver/'
+             'country/us/config");',
+             'include if_exists("personality/compileserver/'
+             'campus/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'city/ny/config");',
+             'include if_exists("personality/compileserver/'
+             'building/ut/config");',
+             'include if_exists("personality/compileserver/'
+             'room/utroom1/config");',
+             'include if_exists("personality/compileserver/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("personality/compileserver/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+            '--host_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'archetype/config;',),
+            ('include if_exists("archetype/aquilon/dev/'
+             'organization/ms/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'hub/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'continent/na/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'country/us/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'campus/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'city/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'building/ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'room/utroom1/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+            '--host_grn',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'eon_id/config;',),
+            ('include if_exists("eon_id/3/dev/'
+             'organization/ms/config");',
+             'include if_exists("eon_id/3/dev/'
+             'hub/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'continent/na/config");',
+             'include if_exists("eon_id/3/dev/'
+             'country/us/config");',
+             'include if_exists("eon_id/3/dev/'
+             'campus/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'city/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'building/ut/config");',
+             'include if_exists("eon_id/3/dev/'
+             'room/utroom1/config");',
+             'include if_exists("eon_id/3/dev/'
+             'bunker/zebrabucket.ut/config");',
+             'include if_exists("eon_id/3/dev/'
+             'rack/ut3/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
 
     def testverifyshowservicebyclient(self):
         command = "show service --client unittest00.one-nyp.ms.com"

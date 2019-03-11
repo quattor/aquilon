@@ -2813,28 +2813,41 @@
             <option name="cluster" type="string">Name of the cluster</option>
             <option name="metacluster" type="string">Name of the metacluster</option>
             <option name="service" type="string">Name of the service</option>
-            <option name="city" type="string">Name of the city</option>
             <option name="network_device" type="string">Name of the network device</option>
             <option name="networkip" type="ip">IP address of a network</option>
-            <option name="personality" type="string">Name of personality</option>
             <option name="virtual_switch" type="string">Virtual Switch name</option>
+            <optgroup fields="any">
+                <option name="city" type="string">Name of the city</option>
+                <optgroup fields="one">
+                    <option name="grn" type="string" requires="location+host_environment city+host_environment">GRN as string</option>
+                    <option name="eon_id" type="int" requires="location+host_environment city+host_environment">Numeric EON ID</option>
+                    <optgroup fields="any">
+                        <option name="personality" type="string">Name of personality</option>
+                        <option name="archetype" type="string" requires="personality location+host_environment city+host_environment">Archetype</option>
+                    </optgroup>
+                </optgroup>
+            </optgroup>
         </optgroup>
         <optgroup>
             <option name="generate" type="flag">Show the plenary template as it would be generated</option>
+        </optgroup>
+        <optgroup fields="one" conflicts="resources">
             <option name="data" type="flag" requires="hostname cluster metacluster network_device virtual_switch">Show the data template for the host/cluster</option>
             <option name="client" type="flag" requires="cluster">Show the client template for the cluster</option>
+            <option name="host_personality" type="flag" requires="hostname">Show the personality template for the host</option>
+            <option name="host_archetype" type="flag" requires="hostname">Show the archetype template for the host</option>
+            <option name="host_grn" type="flag" requires="hostname">Show the GRN template for the host</option>
         </optgroup>
         <optgroup>
-            <option name="archetype" requires="personality" type="string">Archetype</option>
-            <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
-            <option name="param_tmpl" requires="personality" type="string">Param templates</option>
+            <option name="personality_stage" requires="personality" type="string" conflicts="location city">Personality stage to use, defaults to 'current'.</option>
+            <option name="param_tmpl" requires="personality" type="string" conflicts="location city resources">Param templates</option>
         </optgroup>
         <optgroup>
             <option name="instance" type="string" requires="service">Name of the service instance</option>
             <option name="default" type="flag" requires="service">Show the default client config for the service/instance</option>
             <option name="server" type="flag" requires="service">Show the server config for the service/instance</option>
         </optgroup>
-        <optgroup>
+        <optgroup name="resources">
             <option name="resourcegroup" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
             <option name="application" type="string" requires="hostname cluster metacluster">Name of an application</option>
             <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
@@ -2845,13 +2858,24 @@
             <option name="virtual_machine" type="string" requires="hostname cluster metacluster">Name of a virtual machine</option>
             <option name="service_address" type="string" requires="hostname cluster metacluster">Name of a service address</option>
             <option name="share" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
-        </optgroup>
-        <optgroup>
             <option name="system_list" type="flag" requires="cluster">System list entries</option>
             <option name="auto_start_list" type="flag" requires="cluster">Auto start list entries</option>
         </optgroup>
         <optgroup>
+            <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
             <option name="network_environment" type="string" requires="networkip">Network environment (default: internal)</option>
+        </optgroup>
+        <optgroup name="location" requires="personality archetype eon_id grn" fields="one" conflicts="city">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="campus" type="string">Campus</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
         </optgroup>
         <transport trigger="machine" method="get" path="machine/%(machine)s/plenary"/>
         <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary"/>
@@ -2862,8 +2886,11 @@
         <transport trigger="city" method="get" path="location/city/%(city)s/plenary"/>
         <transport trigger="network_device" method="get" path="network_device/%(network_device)s/plenary"/>
         <transport trigger="networkip" method="get" path="network/plenary/%(networkip)s"/>
+        <transport trigger="archetype" method="get" path="archetype/%(archetype)s/plenary"/> <!-- Needs to be _before_ the personality transport -->
         <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary"/>
         <transport trigger="virtual_switch" method="get" path="virtual_switch/%(virtual_switch)s/plenary"/>
+        <transport trigger="grn" method="get" path="grn//%(grn)s/plenary"/>
+        <transport trigger="eon_id" method="get" path="grn/%(eon_id)s//plenary"/>
     </command>
 
     <command name="sync">

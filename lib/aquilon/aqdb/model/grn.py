@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2008-2014,2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,12 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import deferred
 
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import (
+    Base,
+    HostEnvironment,
+    Location,
+    Parameterized,
+)
 
 _TN = 'grn'
 
@@ -47,3 +52,19 @@ class Grn(Base):
 
     __table_args__ = ({'info': {'unique_fields': ['grn'],
                                 'extra_search_fields': ['eon_id']}},)
+
+
+class ParameterizedGrn(Parameterized):
+    _objects = {
+        'main': Grn,
+        'host_environment': HostEnvironment,
+        'location': Location,
+    }
+
+    @property
+    def resholder(self):
+        for resholder in self._main.resholders:
+            if resholder.host_environment == self.host_environment and \
+                    resholder.location == self.location:
+                return resholder
+        return None

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -220,43 +220,49 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, '"system/owner_eon_id" = %d;' %
                          self.grns["grn:/ms/ei/aquilon/aqd"], command)
 
-        command = "cat --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "object template unittest02.one-nyp.ms.com;",
-                         command)
-        self.searchoutput(out,
-                          r'variable LOADPATH = list\(\s*"aquilon"\s*\);',
-                          command)
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('object template unittest02.one-nyp.ms.com;',),
+            ('variable LOADPATH = list(',
+             '  "aquilon"',
+             ');'),
+            ('include "archetype/base";',),
+            ('"/" = create("hostdata/unittest02.one-nyp.ms.com",',
+             '  "metadata", value("/metadata")',
+             ');'),
+            ('include "os/linux/{}/config";'.format(self.linux_version_prev),),
+            ('include "service/afs/q.ny.ms.com/client/config";',),
+            ('include "service/bootserver/unittest/client/config";',),
+            ('include "service/dns/unittest/client/config";',),
+            ('include "service/ntp/pa.ny.na/client/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'eon_id/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'archetype/config";',),
+            ('include "host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'personality/config";',),
+            ('include "archetype/final";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
 
-        self.matchoutput(out,
-                         """include "archetype/base";""",
-                         command)
-        self.matchoutput(out,
-                         """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
-                         command)
-        self.matchoutput(out,
-                         'include "os/linux/%s/config";' %
-                         self.linux_version_prev,
-                         command)
-        self.matchoutput(out,
-                         """include "service/afs/q.ny.ms.com/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/bootserver/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/dns/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/ntp/pa.ny.na/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "personality/compileserver/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "archetype/final";""",
-                         command)
+        command = [
+            'cat',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest02.one-nyp.ms.com/'
+             'personality/config;',),
+            ('include "personality/compileserver/config";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
 
     def test_1056_clear_comments(self):
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
@@ -336,36 +342,49 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, '"system/advertise_status" = false;', command)
 
     def test_1065_cat_unittest00(self):
-        command = "cat --hostname unittest00.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         """include "archetype/base";""",
-                         command)
-        self.matchoutput(out,
-                         """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
-                         command)
-        self.matchoutput(out,
-                         'include "os/linux/%s/config";' %
-                         self.linux_version_prev,
-                         command)
-        self.matchoutput(out,
-                         """include "service/afs/q.ny.ms.com/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/bootserver/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/dns/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/ntp/pa.ny.na/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "personality/compileserver/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "archetype/final";""",
-                         command)
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('object template unittest00.one-nyp.ms.com;',),
+            ('variable LOADPATH = list(',
+             '  "aquilon"',
+             ');'),
+            ('include "archetype/base";',),
+            ('"/" = create("hostdata/unittest00.one-nyp.ms.com",',
+             '  "metadata", value("/metadata")',
+             ');'),
+            ('include "os/linux/{}/config";'.format(self.linux_version_prev),),
+            ('include "service/afs/q.ny.ms.com/client/config";',),
+            ('include "service/bootserver/unittest/client/config";',),
+            ('include "service/dns/unittest/client/config";',),
+            ('include "service/ntp/pa.ny.na/client/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'eon_id/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'archetype/config";',),
+            ('include "host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'personality/config";',),
+            ('include "archetype/final";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+        command = [
+            'cat',
+            '--hostname', 'unittest00.one-nyp.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/one-nyp/unittest00.one-nyp.ms.com/'
+             'personality/config;',),
+            ('include "personality/compileserver/config";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
 
     def test_1070_reconfigure_windows_status(self):
         # Not a compileable archetype, so there should be no messages from the
@@ -490,43 +509,137 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          '"hardware" = create("machine/americas/ut/ut9/ut9s03p37");',
                          command)
 
+    def test_1105_verify_plenary_host_personality(self):
+        command = [
+            'cat',
+            '--hostname', 'aquilon87.aqd-unittest.ms.com',
+            '--host_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/aqd-unittest/'
+             'aquilon87.aqd-unittest.ms.com/personality/config;',),
+            ('include "personality/inventory/config";',),
+            ('include if_exists("personality/inventory/'
+             'organization/ms/config");',
+             'include if_exists("personality/inventory/'
+             'hub/ny/config");',
+             'include if_exists("personality/inventory/'
+             'continent/na/config");',
+             'include if_exists("personality/inventory/'
+             'country/us/config");',
+             'include if_exists("personality/inventory/'
+             'campus/ny/config");',
+             'include if_exists("personality/inventory/'
+             'city/ny/config");',
+             'include if_exists("personality/inventory/'
+             'building/ut/config");',
+             'include if_exists("personality/inventory/'
+             'room/utroom2/config");',
+             'include if_exists("personality/inventory/'
+             'bunker/bucket2.ut/config");',
+             'include if_exists("personality/inventory/'
+             'rack/ut9/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
+    def test_1105_verify_plenary_host_archetype(self):
+        command = [
+            'cat',
+            '--hostname', 'aquilon87.aqd-unittest.ms.com',
+            '--host_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/aqd-unittest/'
+             'aquilon87.aqd-unittest.ms.com/archetype/config;',),
+            ('include if_exists("archetype/aquilon/dev/'
+             'organization/ms/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'hub/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'continent/na/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'country/us/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'campus/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'city/ny/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'building/ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'room/utroom2/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'bunker/bucket2.ut/config");',
+             'include if_exists("archetype/aquilon/dev/'
+             'rack/ut9/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
+    def test_1105_verify_plenary_host_grn(self):
+        command = [
+            'cat',
+            '--hostname', 'aquilon87.aqd-unittest.ms.com',
+            '--host_grn',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('unique template host/ms.com/aqd-unittest/'
+             'aquilon87.aqd-unittest.ms.com/eon_id/config;',),
+            ('include if_exists("eon_id/3/dev/'
+             'organization/ms/config");',
+             'include if_exists("eon_id/3/dev/'
+             'hub/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'continent/na/config");',
+             'include if_exists("eon_id/3/dev/'
+             'country/us/config");',
+             'include if_exists("eon_id/3/dev/'
+             'campus/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'city/ny/config");',
+             'include if_exists("eon_id/3/dev/'
+             'building/ut/config");',
+             'include if_exists("eon_id/3/dev/'
+             'room/utroom2/config");',
+             'include if_exists("eon_id/3/dev/'
+             'bunker/bucket2.ut/config");',
+             'include if_exists("eon_id/3/dev/'
+             'rack/ut9/config");'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command)
+
     def test_1105_verify_plenary(self):
         osversion = self.config.get("archetype_aquilon", "default_osversion")
-        command = "cat --hostname aquilon87.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
+        command = [
+            'cat',
+            '--hostname', 'aquilon87.aqd-unittest.ms.com',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('include "archetype/base";',),
+            ('"/" = create("hostdata/aquilon87.aqd-unittest.ms.com",',
+             '  "metadata", value("/metadata")',
+             ');'),
+            ('include "os/linux/{}/config";'.format(osversion),),
+            ('include "service/aqd/ny-prod/client/config";',),
+            ('include "service/ntp/pa.ny.na/client/config";',),
+            ('include "service/bootserver/unittest/client/config";',),
+            ('include "service/afs/q.ny.ms.com/client/config";',),
+            ('include "service/dns/unittest/client/config";',),
+            ('include "host/ms.com/aqd-unittest/aquilon87.aqd-unittest.ms.com/'
+             'eon_id/config";',),
+            ('include "host/ms.com/aqd-unittest/aquilon87.aqd-unittest.ms.com/'
+             'archetype/config";',),
+            ('include "host/ms.com/aqd-unittest/aquilon87.aqd-unittest.ms.com/'
+             'personality/config";',),
+            ('include "archetype/final";',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
         self.matchclean(out, "chooser1", command)
         self.matchclean(out, "chooser2", command)
         self.matchclean(out, "chooser3", command)
-        self.matchoutput(out,
-                         """include "archetype/base";""",
-                         command)
-        self.matchoutput(out,
-                         """\"/\" = create(\"hostdata/aquilon87.aqd-unittest.ms.com\"""",
-                         command)
-        self.matchoutput(out,
-                         'include "os/linux/%s/config";' % osversion,
-                         command)
-        self.matchoutput(out,
-                         """include "service/aqd/ny-prod/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/ntp/pa.ny.na/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/bootserver/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/afs/q.ny.ms.com/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "service/dns/unittest/client/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "personality/inventory/config";""",
-                         command)
-        self.matchoutput(out,
-                         """include "archetype/final";""",
-                         command)
 
     def test_1110_reconfigure_debug(self):
         command = ["reconfigure", "--debug",

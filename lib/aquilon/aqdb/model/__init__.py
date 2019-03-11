@@ -21,6 +21,9 @@ from aquilon.aqdb.model.base import Base, SingleInstanceMixin
 from aquilon.aqdb.model.stateengine import StateEngine
 from aquilon.aqdb.model.lifecycleengine import LifecycleEngine
 
+# PARAMETERIZED
+from aquilon.aqdb.model.parameterized import Parameterized
+
 # AUTHORIZATION
 from aquilon.aqdb.model.role import Role
 from aquilon.aqdb.model.realm import Realm
@@ -48,8 +51,14 @@ from aquilon.aqdb.model.bunker import Bunker
 from aquilon.aqdb.model.rack import Rack
 from aquilon.aqdb.model.desk import Desk
 
+# ENVIRONMENT
+from aquilon.aqdb.model.host_environment import HostEnvironment
+
 # GRN
-from aquilon.aqdb.model.grn import Grn
+from aquilon.aqdb.model.grn import (
+    Grn,
+    ParameterizedGrn,
+)
 
 # NETWORK
 from aquilon.aqdb.model.dns_environment import DnsEnvironment
@@ -69,10 +78,16 @@ from aquilon.aqdb.model.ns_record import NsRecord
 from aquilon.aqdb.model.router_address import RouterAddress
 
 # CONFIG
-from aquilon.aqdb.model.archetype import Archetype
-from aquilon.aqdb.model.host_environment import HostEnvironment
-from aquilon.aqdb.model.personality import (Personality, PersonalityGrnMap,
-                                            PersonalityStage)
+from aquilon.aqdb.model.archetype import (
+    Archetype,
+    ParameterizedArchetype,
+)
+from aquilon.aqdb.model.personality import (
+    ParameterizedPersonality,
+    Personality,
+    PersonalityGrnMap,
+    PersonalityStage,
+)
 from aquilon.aqdb.model.asset_lifecycle import AssetLifecycle
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
