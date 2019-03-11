@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2017  Contributor
+# Copyright (C) 2008-2014,2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,10 +26,17 @@ class HostlinkFormatter(ResourceFormatter):
         details = []
         details.append(indent + "  Target Path: %s" % hostlink.target)
         details.append(indent + "  Owner: %s" % hostlink.owner_user)
+        if hostlink.entitlements:
+            details.append('{}  Relates to:'.format(indent))
+            for entit in hostlink.entitlements:
+                details.append(self.redirect_raw(entit,
+                                                 indent=indent + '    '))
+
         if hostlink.owner_group is not None:
             details.append(indent + "  Group: %s" % hostlink.owner_group)
         if hostlink.target_mode is not None:
             details.append(indent + "  Mode: %o" % hostlink.target_mode)
+
         return details
 
     def fill_proto(self, hostlink, skeleton, embedded=True,

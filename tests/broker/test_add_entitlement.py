@@ -98,6 +98,35 @@ class TestAddEntitlement(TestBrokerCommand):
                        '  On Host: unittest02.one-nyp.ms.com'))
         self.output_equals(out, expected_out, command)
 
+    def test_116_add_hostname_entitlement_hostlink(self):
+        command = [
+            'add_hostlink',
+            '--entitlement', 'etype_human',
+            '--owner', 'testuser1',
+            '--hostlink', 'testuser1',
+            '--target', '/var/spool/hostlinks/testuser1',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+        ]
+        self.noouttest(command)
+
+    def test_117_show_hostname_entitlement_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'testuser1',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: testuser1',
+                       '  Bound to: Host unittest02.one-nyp.ms.com',
+                       '  Target Path: /var/spool/hostlinks/testuser1',
+                       '  Owner: testuser1',
+                       '  Relates to:',
+                       '    Entitlement: etype_human',
+                       '      To Human User: testuser1',
+                       '      On Host: unittest02.one-nyp.ms.com'))
+        self.output_equals(out, expected_out, command)
+
     def test_120_add_etype_all_to_robot_on_hostname(self):
         command = [
             'add_entitlement',
@@ -314,6 +343,39 @@ class TestAddEntitlement(TestBrokerCommand):
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
 
+    def test_208_add_cluster_entitlement_hostlink(self):
+        command = [
+            'add_hostlink',
+            '--entitlement', 'etype_all',
+            '--owner', 'testuser1',
+            '--hostlink', 'testuser1',
+            '--target', '/var/spool/hostlinks/testuser1',
+            '--cluster', 'utecl1',
+        ]
+        self.noouttest(command)
+
+    def test_209_show_cluster_entitlement_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'testuser1',
+            '--cluster', 'utecl1',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Entitlement: etype_all',
+                       '  To Human User: testuser1',
+                       '  On ESX Cluster: utecl1'))
+        expected_out = \
+            '\n'.join(('Hostlink: testuser1',
+                       '  Bound to: ESX Cluster utecl1',
+                       '  Target Path: /var/spool/hostlinks/testuser1',
+                       '  Owner: testuser1',
+                       '  Relates to:',
+                       '    Entitlement: etype_all',
+                       '      To Human User: testuser1',
+                       '      On ESX Cluster: utecl1'))
+        self.output_equals(out, expected_out, command)
+
     def test_210_add_etype_all_to_human_on_personality(self):
         command = [
             'add_entitlement',
@@ -394,6 +456,38 @@ class TestAddEntitlement(TestBrokerCommand):
         ]]
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
+
+    def test_228_add_personality_entitlement_hostlink(self):
+        command = [
+            'add_hostlink',
+            '--entitlement', 'etype_all',
+            '--owner', 'testuser2',
+            '--hostlink', 'testuser2',
+            '--target', '/var/spool/hostlinks/testuser2',
+            '--personality', 'compileserver',
+            '--hub', 'ny',
+        ]
+        self.noouttest(command)
+
+    def test_229_show_personality_entitlement_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'testuser2',
+            '--personality', 'compileserver',
+            '--hub', 'ny',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: testuser2',
+                       '  Bound to: Personality aquilon/compileserver, Hub ny',
+                       '  Target Path: /var/spool/hostlinks/testuser2',
+                       '  Owner: testuser2',
+                       '  Relates to:',
+                       '    Entitlement: etype_all',
+                       '      To Human User: testuser2',
+                       '      On Personality: compileserver',
+                       '      On Hub: ny'))
+        self.output_equals(out, expected_out, command)
 
     def test_230_add_etype_all_to_human_on_archetype(self):
         command = [
@@ -509,6 +603,42 @@ class TestAddEntitlement(TestBrokerCommand):
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
 
+    def test_248_add_archetype_entitlement_hostlink(self):
+        command = [
+            'add_hostlink',
+            '--entitlement', 'etype_all',
+            '--owner', 'testuser2',
+            '--hostlink', 'testuser2',
+            '--target', '/var/spool/hostlinks/testuser2',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+        ]
+        self.noouttest(command)
+
+    def test_249_show_archetype_entitlement_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'testuser2',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: testuser2',
+                       '  Bound to: Archetype aquilon, '
+                       'Host Environment dev, Hub ny',
+                       '  Target Path: /var/spool/hostlinks/testuser2',
+                       '  Owner: testuser2',
+                       '  Relates to:',
+                       '    Entitlement: etype_all',
+                       '      To Human User: testuser2',
+                       '      On Archetype: aquilon',
+                       '      On Host Environment: dev',
+                       '      On Hub: ny'))
+        self.output_equals(out, expected_out, command)
+
     def test_250_add_etype_all_to_human_on_grn(self):
         command = [
             'add_entitlement',
@@ -597,6 +727,40 @@ class TestAddEntitlement(TestBrokerCommand):
         ]]
         self.output_unordered_equals(out, expected_out, command,
                                      match_all=False)
+
+    def test_268_add_grn_entitlement_hostlink(self):
+        command = [
+            'add_hostlink',
+            '--entitlement', 'etype_all',
+            '--owner', 'testuser1',
+            '--hostlink', 'testuser1',
+            '--target', '/var/spool/hostlinks/testuser1',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+        ]
+        self.noouttest(command)
+
+    def test_269_show_grn_entitlement_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'testuser1',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: testuser1',
+                       '  Bound to: GRN grn:/ms/ei/aquilon/ut2, '
+                       'Host Environment dev, Organization ms',
+                       '  Target Path: /var/spool/hostlinks/testuser1',
+                       '  Owner: testuser1',
+                       '  Relates to:',
+                       '    Entitlement: etype_all',
+                       '      To Human User: testuser1',
+                       '      On GRN: grn:/ms/ei/aquilon/ut2',
+                       '      On Host Environment: dev',
+                       '      On Organization: ms'))
+        self.output_equals(out, expected_out, command)
 
     def test_270_add_etype_all_to_human_on_eon_id(self):
         command = [

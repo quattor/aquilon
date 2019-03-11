@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2016,2018  Contributor
+# Copyright (C) 2008-2016,2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ _table_abbrev = {
     'hardware_entity': 'hw_ent',
     'host_cluster_member': 'host_clstr_mmbr',
     'host_environment': 'host_env',
+    'hostlink_entitlement_map': 'hl_entit_map',
     'interface': 'iface',
     'metacluster': 'mtaclstr',
     'metacluster_member': 'mtaclstr_mbr',
@@ -94,6 +95,10 @@ _col_abbrev = {
     'user_id': 'usr',
     'host_environment_id': 'hostenv',
     'location_id': 'loc',
+    'entitlement_type_id': 'enttype',
+    'cluster_id': 'clstr',
+    'personality_id': 'pers',
+    'archetype_id': 'arch',
 }
 
 

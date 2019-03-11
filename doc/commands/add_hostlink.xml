@@ -64,6 +64,7 @@
             <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
             <arg><option>--group <replaceable>GROUP</replaceable></option></arg>
             <arg><option>--mode <replaceable>MODE</replaceable></option></arg>
+            <arg rep="repeat"><option>--entitlement <replaceable>ENTITLEMENT_TYPE</replaceable></option></arg>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
@@ -205,6 +206,20 @@
                         The mode to apply on the target directory, if it is
                         automatically created and managed by aquilon
                         (it is on local storage). This must be an octal value.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--entitlement <replaceable>ENTITLEMENT_TYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The entitlement type to link the hostlink to. Other
+                        parameters of the entitlement to link will be derived
+                        from the parameters used to create the hostlink.
+                        If specified, and the entitlement is deleted, then
+                        the hostlink will also be deleted.
                     </para>
                 </listitem>
             </varlistentry>

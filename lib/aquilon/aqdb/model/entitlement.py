@@ -39,6 +39,7 @@ from sqlalchemy.orm import (
     object_session,
     relation,
 )
+from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (
@@ -212,6 +213,23 @@ class Entitlement(AbstractConcreteBase, Base):
                                       suffix=_IDXSUFFIX),
                   *get_ids(cls, EntitlementTo))
         )
+
+    @property
+    def hostlinks(self):
+        """Property to return the hostlinks related to the entitlement"""
+        # Avoid circular dependency
+        from aquilon.aqdb.model import (
+            Hostlink,
+            HostlinkEntitlementMap,
+        )
+
+        session = object_session(self)
+        q = session.query(Hostlink)
+        q = q.join(HostlinkEntitlementMap, and_(
+            HostlinkEntitlementMap.resource_id == Hostlink.resource_id,
+            HostlinkEntitlementMap.entitlement_id == self.id))
+
+        return q.all()
 
 
 class EntitlementWithId(object):

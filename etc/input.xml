@@ -5953,6 +5953,7 @@
                 <option name="desk" type="string">Desk</option>
             </optgroup>
             <option name="host_environment" requires="archetype eon_id grn" type="string">Host environment</option>
+            <option name="entitlement" requires="hostname cluster personality archetype eon_id grn" type="string">Entitlement type to which that hostlinks relates</option>
 
             <option name="group" type="string">Group owner of the target directory</option>
             <option name="mode" type="string">Mode (octal) to apply on hostlink target</option>

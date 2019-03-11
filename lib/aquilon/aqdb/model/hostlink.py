@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016,2017  Contributor
+# Copyright (C) 2008-2014,2016-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,22 @@
 
 from sqlalchemy import String, Integer, Column, ForeignKey, CheckConstraint
 from sqlalchemy.sql import and_
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import (
+    object_session,
+    relation,
+    validates,
+)
 
+from aquilon.aqdb.model import (
+    Base,
+    Entitlement,
+    EntitlementId,
+    Resource,
+)
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Resource
 
 _TN = 'hostlink'
+_HOSTLINK_ENTITLEMENT_MAP = 'hostlink_entitlement_map'
 
 
 class Hostlink(Resource):
@@ -61,3 +71,48 @@ class Hostlink(Resource):
             if ':' in value:
                 raise ArgumentError("%s cannot contain the ':' character" % key)
         return value
+
+    @property
+    def entitlements(self):
+        session = object_session(self)
+
+        q = session.query(Entitlement)
+        q = q.join(HostlinkEntitlementMap,
+                   and_(Entitlement.id ==
+                        HostlinkEntitlementMap.entitlement_id,
+                        HostlinkEntitlementMap.resource_id ==
+                        self.resource_id))
+
+        return q.all()
+
+
+class HostlinkEntitlementMap(Base):
+    """Table to map hostlinks to the related entitlements
+
+    When adding a hostlink that relates to a given entitlement, an entry
+    in this table will be created, allowing to bind the hostlink to the
+    entitlement.  This will then allow to remove the hostlink when the
+    entitlement is removed, for instance.
+    """
+    __tablename__ = _HOSTLINK_ENTITLEMENT_MAP
+
+    resource_id = Column(ForeignKey(Hostlink.id,
+                                    ondelete='CASCADE'),
+                         nullable=False, primary_key=True)
+    resource = relation(Hostlink, lazy=False, innerjoin=True)
+
+    entitlement_id = Column(ForeignKey(EntitlementId.id,
+                                       ondelete='CASCADE'),
+                            nullable=False, primary_key=True)
+
+    @property
+    def entitlement(self):
+        session = object_session(self)
+        q = session.query(Entitlement)
+        q = q.filter_by(id=self.entitlement_id)
+        return q.one()
+
+
+Hostlink.entitmap = relation(HostlinkEntitlementMap,
+                             cascade='all, delete-orphan',
+                             passive_deletes=True)

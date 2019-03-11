@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 
 from aquilon.worker.broker import BrokerCommand  # noqa
 from aquilon.worker.commands.add_entitlement import CommandAddEntitlement
+
+from sqlalchemy.orm.session import object_session
 
 
 class CommandDelEntitlement(CommandAddEntitlement):
@@ -37,7 +39,14 @@ class CommandDelEntitlement(CommandAddEntitlement):
 
         # If found, remove it
         if found:
+            # Delete all related hostlinks if there is any
+            session = object_session(entitlement)
+            for hl in entitlement.hostlinks:
+                session.delete(hl)
+
+            # Delete the entitlement itself
             entitlements.remove(entitlement)
+
             return True
 
         # Else, return that no update was performed
