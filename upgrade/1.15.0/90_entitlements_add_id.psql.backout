@@ -1,0 +1,67 @@
+ALTER TABLE entit_host_grn_map DROP CONSTRAINT entit_host_grn_map_id_fk;
+ALTER TABLE entit_host_grn_map DROP CONSTRAINT entit_host_grn_map_pk;
+ALTER TABLE entit_host_grn_map DROP COLUMN id;
+ALTER TABLE entit_host_grn_map DROP CONSTRAINT entit_host_grn_map_uk;
+ALTER TABLE entit_host_grn_map ADD CONSTRAINT entit_host_grn_map_pk PRIMARY KEY (type_id, host_id, eon_id);
+
+ALTER TABLE entit_host_user_map DROP CONSTRAINT entit_host_user_map_id_fk;
+ALTER TABLE entit_host_user_map DROP CONSTRAINT entit_host_user_map_pk;
+ALTER TABLE entit_host_user_map DROP COLUMN id;
+ALTER TABLE entit_host_user_map DROP CONSTRAINT entit_host_user_map_uk;
+ALTER TABLE entit_host_user_map ADD CONSTRAINT entit_host_user_map_pk PRIMARY KEY (type_id, host_id, user_id);
+
+
+ALTER TABLE entit_cluster_grn_map DROP CONSTRAINT entit_cluster_grn_map_id_fk;
+ALTER TABLE entit_cluster_grn_map DROP CONSTRAINT entit_cluster_grn_map_pk;
+ALTER TABLE entit_cluster_grn_map DROP COLUMN id;
+ALTER TABLE entit_cluster_grn_map DROP CONSTRAINT entit_cluster_grn_map_uk;
+ALTER TABLE entit_cluster_grn_map ADD CONSTRAINT entit_cluster_grn_map_pk PRIMARY KEY (type_id, cluster_id, eon_id);
+
+ALTER TABLE entit_cluster_user_map DROP CONSTRAINT entit_cluster_user_map_id_fk;
+ALTER TABLE entit_cluster_user_map DROP CONSTRAINT entit_cluster_user_map_pk;
+ALTER TABLE entit_cluster_user_map DROP COLUMN id;
+ALTER TABLE entit_cluster_user_map DROP CONSTRAINT entit_cluster_user_map_uk;
+ALTER TABLE entit_cluster_user_map ADD CONSTRAINT entit_cluster_user_map_pk PRIMARY KEY (type_id, cluster_id, user_id);
+
+
+ALTER TABLE entit_personality_grn_map DROP CONSTRAINT entit_pers_grn_map_id_fk;
+ALTER TABLE entit_personality_grn_map DROP CONSTRAINT entit_personality_grn_map_pk;
+ALTER TABLE entit_personality_grn_map DROP COLUMN id;
+ALTER TABLE entit_personality_grn_map DROP CONSTRAINT entit_personality_grn_map_uk;
+ALTER TABLE entit_personality_grn_map ADD CONSTRAINT entit_personality_grn_map_pk PRIMARY KEY (type_id, personality_id, location_id, eon_id);
+
+ALTER TABLE entit_personality_user_map DROP CONSTRAINT entit_pers_usr_map_id_fk;
+ALTER TABLE entit_personality_user_map DROP CONSTRAINT entit_personality_user_map_pk;
+ALTER TABLE entit_personality_user_map DROP COLUMN id;
+ALTER TABLE entit_personality_user_map DROP CONSTRAINT entit_personality_user_map_uk;
+ALTER TABLE entit_personality_user_map ADD CONSTRAINT entit_personality_user_map_pk PRIMARY KEY (type_id, personality_id, location_id, user_id);
+
+
+ALTER TABLE entit_archetype_grn_map DROP CONSTRAINT entit_archetype_grn_map_id_fk;
+ALTER TABLE entit_archetype_grn_map DROP CONSTRAINT entit_archetype_grn_map_pk;
+ALTER TABLE entit_archetype_grn_map DROP COLUMN id;
+ALTER TABLE entit_archetype_grn_map DROP CONSTRAINT entit_archetype_grn_map_uk;
+ALTER TABLE entit_archetype_grn_map ADD CONSTRAINT entit_archetype_grn_map_pk PRIMARY KEY (type_id, archetype_id, host_environment_id, location_id, eon_id);
+
+ALTER TABLE entit_archetype_user_map DROP CONSTRAINT entit_archetype_user_map_id_fk;
+ALTER TABLE entit_archetype_user_map DROP CONSTRAINT entit_archetype_user_map_pk;
+ALTER TABLE entit_archetype_user_map DROP COLUMN id;
+ALTER TABLE entit_archetype_user_map DROP CONSTRAINT entit_archetype_user_map_uk;
+ALTER TABLE entit_archetype_user_map ADD CONSTRAINT entit_archetype_user_map_pk PRIMARY KEY (type_id, archetype_id, host_environment_id, location_id, user_id);
+
+
+ALTER TABLE entit_grn_grn_map DROP CONSTRAINT entit_grn_grn_map_id_fk;
+ALTER TABLE entit_grn_grn_map DROP CONSTRAINT entit_grn_grn_map_pk;
+ALTER TABLE entit_grn_grn_map DROP COLUMN id;
+ALTER TABLE entit_grn_grn_map DROP CONSTRAINT entit_grn_grn_map_uk;
+ALTER TABLE entit_grn_grn_map ADD CONSTRAINT entit_grn_grn_map_pk PRIMARY KEY (type_id, target_eon_id, host_environment_id, location_id, eon_id);
+
+ALTER TABLE entit_grn_user_map DROP CONSTRAINT entit_grn_user_map_id_fk;
+ALTER TABLE entit_grn_user_map DROP CONSTRAINT entit_grn_user_map_pk;
+ALTER TABLE entit_grn_user_map DROP COLUMN id;
+ALTER TABLE entit_grn_user_map DROP CONSTRAINT entit_grn_user_map_uk;
+ALTER TABLE entit_grn_user_map ADD CONSTRAINT entit_grn_user_map_pk PRIMARY KEY (type_id, target_eon_id, host_environment_id, location_id, user_id);
+
+
+DROP TABLE IF EXISTS entitlement;
+DROP SEQUENCE IF EXISTS entitlement_id_seq;

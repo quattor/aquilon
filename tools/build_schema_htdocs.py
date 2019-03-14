@@ -181,6 +181,7 @@ model_group = {
     'entitlements': {
         'title': 'Entitlements',
         'classes': [
+            EntitlementId,
             EntitlementType,
             EntitlementTypeUserTypeMap,
         ],
