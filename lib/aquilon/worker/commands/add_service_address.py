@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2012-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -152,13 +153,20 @@ class CommandAddServiceAddress(BrokerCommand):
         plenaries.add(dbsrv)
 
         with plenaries.transaction():
-            if (not newly_created and not shared and
-                    dbdns_rec.network.is_internal):
-                dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
+            if dbdns_rec.network.is_internal:
 
-            if newly_created and dbdns_rec.network.is_internal:
-                dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip,
-                                             comments=comments)
+                # If the IP address was not just created, and if it is not
+                # shared, we will delete it for it to be re-added just after
+                deleted = False
+                if not shared and not newly_created:
+                    deleted = True
+                    dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
+
+                # If the IP address has just been created, or if it was
+                # deleted just before, we will re-add it to DSDB
+                if newly_created or deleted:
+                    dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip,
+                                                 comments=comments)
 
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 

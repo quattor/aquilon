@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2012-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,6 +181,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[10]
         fqdn = "zebra4.aqd-unittest.ms.com"
         self.dsdb_expect_delete(ip)
+        self.dsdb_expect_add(fqdn, ip)
         command = ["add", "service", "address", "--cluster", "campus-test", "--service_address",
                    fqdn, "--name", "test-cluster-service"] + self.valid_just_sn
         self.noouttest(command)
@@ -202,6 +203,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[11]
         fqdn = "zebra5.aqd-unittest.ms.com"
         self.dsdb_expect_delete(ip)
+        self.dsdb_expect_add(fqdn, ip)
         command = ["add", "service", "address", "--resourcegroup", "test-resource-group", "--service_address",
                    fqdn, "--name", "test-cluster-res-service"] + self.valid_just_sn
         self.noouttest(command)
@@ -223,6 +225,7 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[12]
         fqdn = "zebra6.aqd-unittest.ms.com"
         self.dsdb_expect_delete(ip)
+        self.dsdb_expect_add(fqdn, ip)
         command = ["add_service_address", "--resourcegroup", "test-host-resgr", "--name", "test-service-host",
                    "--service_address", "zebra6.aqd-unittest.ms.com"] + self.valid_just_sn
         self.noouttest(command)
