@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2009-2014,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class OperatingSystem(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(32), nullable=False)
-    version = Column(AqStr(16), nullable=False)
+    version = Column(AqStr(32), nullable=False)
     archetype_id = Column(ForeignKey(Archetype.id, ondelete="CASCADE"),
                           nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
