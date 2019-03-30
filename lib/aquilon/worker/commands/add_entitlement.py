@@ -21,6 +21,7 @@ from aquilon.aqdb.model import (
     Archetype,
     Grn,
     Organization,
+    Parameterized,
     Personality,
 )
 from aquilon.worker.broker import BrokerCommand
@@ -35,6 +36,7 @@ from itertools import product
 
 class CommandAddEntitlement(BrokerCommand):
 
+    requires_plenaries = True
     required_parameters = []
 
     def _update_entitlements(self, dbon, mapcls, parameters):
@@ -75,7 +77,7 @@ class CommandAddEntitlement(BrokerCommand):
         # Return True if that lead to a change
         return True
 
-    def render(self, session, logger, user, justification, reason,
+    def render(self, session, logger, plenaries, user, justification, reason,
                **arguments):
         # Parse the options to get the entitlements options
         dbtos, dbons, dblocations, dbenvs, dbtype = get_entitlements_options(
@@ -130,7 +132,17 @@ class CommandAddEntitlement(BrokerCommand):
             parameters[dbto.__class__.__name__.lower()] = dbto
             parameters['type'] = dbtype
             mapcls = get_entitlement_class_for(dbon, dbto)
-            self._update_entitlements(dbon, mapcls, parameters)
+            updated = self._update_entitlements(dbon, mapcls, parameters)
+
+            if updated:
+                params = [v for k, v in parameters.items()
+                          if k in ['location', 'host_environment']]
+                plenobj = (Parameterized.get(dbon, *params)
+                           if params else dbon)
+                plenaries.add(plenobj)
 
         # Flush the session
         session.flush()
+
+        # Write the plenaries
+        plenaries.write()

@@ -1,0 +1,3 @@
+ALTER TABLE hostlink ALTER target SET NOT NULL;
+
+DROP TABLE IF EXISTS hostlink_parent_map;

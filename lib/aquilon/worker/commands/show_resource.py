@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015  Contributor
+# Copyright (C) 2008-2015,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ class CommandShowResource(BrokerCommand):
     resource_name = None
 
     def render(self, session, logger, hostname, cluster, metacluster, all,
-               **kwargs):
+               personality=None, archetype=None, grn=None, eon_id=None,
+               host_environment=None, **kwargs):
+
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -37,6 +39,7 @@ class CommandShowResource(BrokerCommand):
 
         q = session.query(self.resource_class)
 
+        who = None
         if not all:
             if self.resource_name:
                 name = kwargs.get(self.resource_name)
@@ -46,12 +49,14 @@ class CommandShowResource(BrokerCommand):
             if name:
                 q = q.filter_by(name=name)
 
-        if hostname or cluster or resourcegroup:
-            who = get_resource_holder(session, logger, hostname, cluster,
-                                      metacluster, resourcegroup)
-            q = q.filter_by(holder=who)
-        else:
-            who = None
+            if hostname or cluster or resourcegroup or personality or \
+                    archetype or grn or eon_id:
+                who = get_resource_holder(session, logger, hostname, cluster,
+                                          metacluster, resourcegroup,
+                                          personality, archetype, grn, eon_id,
+                                          host_environment, config=self.config,
+                                          **kwargs)
+                q = q.filter_by(holder=who)
 
         results = q.all()
         if who:

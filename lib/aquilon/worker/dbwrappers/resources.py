@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2018  Contributor
+# Copyright (C) 2011-2016,2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,14 +22,35 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterResource,
-                                HostResource, Resource, ResourceGroup,
-                                BundleResource, RebootIntervention, VirtualDisk)
+from aquilon.aqdb.model import (
+    Archetype,
+    ArchetypeResource,
+    BundleResource,
+    Cluster,
+    ClusterResource,
+    GrnResource,
+    HostEnvironment,
+    HostResource,
+    MetaCluster,
+    Organization,
+    Personality,
+    PersonalityResource,
+    RebootIntervention,
+    Resource,
+    ResourceGroup,
+    VirtualDisk,
+)
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.location import get_location
 
 
 def get_resource_holder(session, logger, hostname=None, cluster=None,
-                        metacluster=None, resgroup=None, compel=True):
+                        metacluster=None, resgroup=None, personality=None,
+                        archetype=None, grn=None, eon_id=None,
+                        host_environment=None, compel=True, config=None,
+                        **arguments):
+
     who = None
     if hostname is not None:
         dbhost = hostname_to_host(session, hostname)
@@ -67,6 +88,83 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             who = dbmeta.resholder
         else:
             set_committed_value(who, 'cluster', dbmeta)
+
+    # If we need to deal with personality, archetype or grn, we need to have a
+    # location ready
+    if personality is not None or archetype is not None or grn is not None or \
+            eon_id is not None:
+        dbloc = get_location(session, **arguments) or \
+                Organization.get_unique(
+                    session, config.get('broker', 'default_organization'),
+                    compel=True)
+
+    # If we need to deal with archetype or grn, we also need a host environment
+    if archetype is not None or grn is not None or eon_id is not None:
+        dbenv = HostEnvironment.get_unique(
+            session, host_environment, compel=True)
+
+    if personality is not None:
+        dbpers = Personality.get_unique(session, name=personality, compel=True)
+
+        for resholder in dbpers.resholders:
+            if resholder.location == dbloc:
+                who = resholder
+                break
+
+        if who is None:
+            if compel:
+                raise NotFoundException(
+                    "{0}, {1} has no resources.".format(dbpers, dbloc))
+            resholder = PersonalityResource(personality=dbpers,
+                                            location=dbloc)
+            dbpers.resholders.append(resholder)
+            who = resholder
+        else:
+            set_committed_value(who, 'personality', dbpers)
+
+    if archetype is not None:
+        dbarch = Archetype.get_unique(session, archetype, compel=True)
+
+        for resholder in dbarch.resholders:
+            if resholder.host_environment == dbenv and \
+                    resholder.location == dbloc:
+                who = resholder
+                break
+
+        if who is None:
+            if compel:
+                raise NotFoundException(
+                    "{0}, {1}, {2} has no resources.".format(
+                        dbarch, dbenv, dbloc))
+            resholder = ArchetypeResource(archetype=dbarch,
+                                          host_environment=dbenv,
+                                          location=dbloc)
+            dbarch.resholders.append(resholder)
+            who = resholder
+        else:
+            set_committed_value(who, 'archetype', dbarch)
+
+    if grn is not None or eon_id is not None:
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger, config=config)
+
+        for resholder in dbgrn.resholders:
+            if resholder.host_environment == dbenv and \
+                    resholder.location == dbloc:
+                who = resholder
+                break
+
+        if who is None:
+            if compel:
+                raise NotFoundException(
+                    "{0}, {1}, {2} has no resources.".format(
+                        dbgrn, dbenv, dbloc))
+            resholder = GrnResource(grn=dbgrn,
+                                    host_environment=dbenv,
+                                    location=dbloc)
+            dbgrn.resholders.append(resholder)
+            who = resholder
+        else:
+            set_committed_value(who, 'grn', dbgrn)
 
     if resgroup is not None:
         dbrg = ResourceGroup.get_unique(session, name=resgroup, holder=who,

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2016,2017  Contributor
+# Copyright (C) 2016-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,6 +62,92 @@ class TestDelHostlink(TestBrokerCommand):
         command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Hostlink", command)
+
+    def test_300_del_hostlink_personality(self):
+        path = [
+            'resource',
+            'personality', 'compileserver',
+            'country', 'us',
+            'hostlink', 'app_personality',
+            'config',
+        ]
+        self.check_plenary_exists(*path)
+
+        command = [
+            'del_hostlink',
+            '--hostlink', 'app_personality',
+            '--personality', 'compileserver',
+            '--country', 'us',
+        ]
+        self.successtest(command)
+
+        self.check_plenary_gone(*path, directory_gone=True)
+
+    def test_300_del_hostlink_archetype(self):
+        path = [
+            'resource',
+            'archetype', 'aquilon',
+            'dev',
+            'hub', 'ny',
+            'hostlink', 'app_archetype',
+            'config',
+        ]
+        self.check_plenary_exists(*path)
+
+        command = [
+            'del_hostlink',
+            '--hostlink', 'app_archetype',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+        ]
+        self.successtest(command)
+
+        self.check_plenary_gone(*path, directory_gone=True)
+
+    def test_300_del_hostlink_grn(self):
+        path = [
+            'resource',
+            'eon_id', '4',
+            'dev',
+            'city', 'ln',
+            'hostlink', 'app_grn',
+            'config',
+        ]
+        self.check_plenary_exists(*path)
+
+        command = [
+            'del_hostlink',
+            '--hostlink', 'app_grn',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+            '--city', 'ln',
+        ]
+        self.successtest(command)
+
+        self.check_plenary_gone(*path, directory_gone=True)
+
+    def test_300_del_hostlink_eon_id(self):
+        path = [
+            'resource',
+            'eon_id', '3',
+            'dev',
+            'organization', 'ms',
+            'hostlink', 'app_eon_id',
+            'config',
+        ]
+        self.check_plenary_exists(*path)
+
+        command = [
+            'del_hostlink',
+            '--hostlink', 'app_eon_id',
+            '--eon_id', 3,
+            '--host_environment', 'dev',
+            '--organization', 'ms',
+        ]
+        self.successtest(command)
+
+        self.check_plenary_gone(*path, directory_gone=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHostlink)

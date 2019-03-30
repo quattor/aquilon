@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009-2018  Contributor
+# Copyright (C) 2009-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -151,11 +151,17 @@ from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.xtn import Xtn, XtnDetail, XtnEnd
 
 # Resources
-from aquilon.aqdb.model.resource import (Resource, ResourceHolder,
-                                         HostResource, ClusterResource)
+from aquilon.aqdb.model.resource import (
+    ArchetypeResource,
+    ClusterResource,
+    GrnResource,
+    HostResource,
+    PersonalityResource,
+    Resource,
+    ResourceHolder,
+)
 from aquilon.aqdb.model.filesystem import Filesystem
 from aquilon.aqdb.model.application import Application
-from aquilon.aqdb.model.hostlink import Hostlink
 from aquilon.aqdb.model.intervention import Intervention
 from aquilon.aqdb.model.resourcegroup import ResourceGroup, BundleResource
 from aquilon.aqdb.model.reboot_schedule import (RebootSchedule,
@@ -173,6 +179,7 @@ from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 # ENTITLEMENTS
 from aquilon.aqdb.model.entitlement import (
     Entitlement,
+    EntitlementId,
     EntitlementArchetypeGrnMap,
     EntitlementArchetypeUserMap,
     EntitlementClusterGrnMap,
@@ -194,4 +201,11 @@ from aquilon.aqdb.model.entitlement import (
     EntitlementToUser,
     EntitlementType,
     EntitlementTypeUserTypeMap,
+)
+
+# Resources dependent on entitlements
+from aquilon.aqdb.model.hostlink import (
+    Hostlink,
+    HostlinkEntitlementMap,
+    HostlinkParentMap,
 )

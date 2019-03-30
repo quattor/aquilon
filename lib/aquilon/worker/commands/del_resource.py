@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016,2017  Contributor
+# Copyright (C) 2015-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,8 +30,10 @@ class CommandDelResource(BrokerCommand):
     resource_class = None
     resource_name = None
 
-    def render(self, session, logger, plenaries, hostname, cluster, metacluster,
-               user, justification, reason, **kwargs):
+    def render(self, session, logger, plenaries, hostname, cluster,
+               metacluster, user, justification, reason,
+               personality=None, archetype=None, grn=None, eon_id=None,
+               host_environment=None, **kwargs):
         # resourcegroup is special, because it's both a holder and a resource
         # itself
         if self.resource_name != "resourcegroup":
@@ -44,7 +47,9 @@ class CommandDelResource(BrokerCommand):
             name = self.resource_class.__mapper__.polymorphic_identity
 
         holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup)
+                                     metacluster, resourcegroup, personality,
+                                     archetype, grn, eon_id, host_environment,
+                                     config=self.config, **kwargs)
 
         # Validate ChangeManagement
         cm = ChangeManagement(session, user, justification, reason, logger, self.command, **kwargs)

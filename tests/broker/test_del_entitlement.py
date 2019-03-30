@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,11 +27,17 @@ from brokertest import TestBrokerCommand
 
 class TestDelEntitlement(TestBrokerCommand):
 
-    def _test_del(self, parameters, entries):
+    def _test_del(self, parameters, entries, hostlink_params=False):
         # Check that the entry was there previously
         command = ['search_entitlement'] + parameters
         out = self.commandtest(command)
         self.output_unordered_equals(out, entries, command, match_all=False)
+
+        # If there was a linked hostlink, verify that it exists first
+        if hostlink_params:
+            hostlink_command = ['show_hostlink'] + hostlink_params
+            out = self.commandtest(hostlink_command)
+            self.assertNotEqual(out, '')
 
         # Delete the entry
         command = ['del_entitlement'] + parameters
@@ -42,6 +47,11 @@ class TestDelEntitlement(TestBrokerCommand):
         command = ['search_entitlement'] + parameters
         out = self.commandtest(command)
         self.output_unordered_clean(out, entries, command)
+
+        # If there was a linked hostlink, it should have been removed
+        if hostlink_params:
+            out = self.commandtest(hostlink_command)
+            self.assertEqual(out, '')
 
     #
     # 1xx => test all working "to_" options
@@ -53,12 +63,16 @@ class TestDelEntitlement(TestBrokerCommand):
             '--to_user', 'testuser1',
             '--on_hostname', 'unittest02.one-nyp.ms.com',
         ]
+        hostlink_params = [
+            '--hostlink', 'testuser1',
+            '--hostname', 'unittest02.one-nyp.ms.com',
+        ]
         entries = ['\n'.join(n) for n in [
             ('Entitlement: etype_human',
              '  To Human User: testuser1',
              '  On Host: unittest02.one-nyp.ms.com'),
         ]]
-        self._test_del(parameters, entries)
+        self._test_del(parameters, entries, hostlink_params)
 
     def test_100_del_etype_robot_to_robot_on_hostname(self):
         parameters = [
@@ -109,12 +123,16 @@ class TestDelEntitlement(TestBrokerCommand):
             '--to_user', 'testuser1',
             '--on_cluster', 'utecl1',
         ]
+        hostlink_params = [
+            '--hostlink', 'testuser1',
+            '--cluster', 'utecl1',
+        ]
         entries = ['\n'.join(n) for n in [
             ('Entitlement: etype_all',
              '  To Human User: testuser1',
              '  On ESX Cluster: utecl1'),
         ]]
-        self._test_del(parameters, entries)
+        self._test_del(parameters, entries, hostlink_params)
 
     def test_200_del_etype_all_to_human_on_personality(self):
         parameters = [
@@ -137,13 +155,18 @@ class TestDelEntitlement(TestBrokerCommand):
             '--on_personality', 'compileserver',
             '--on_hub', 'ny',
         ]
+        hostlink_params = [
+            '--hostlink', 'testuser2',
+            '--personality', 'compileserver',
+            '--hub', 'ny',
+        ]
         entries = ['\n'.join(n) for n in [
             ('Entitlement: etype_all',
              '  To Human User: testuser2',
              '  On Personality: compileserver',
              '  On Hub: ny'),
         ]]
-        self._test_del(parameters, entries)
+        self._test_del(parameters, entries, hostlink_params)
 
     def test_200_del_etype_all_to_human_on_archetype(self):
         parameters = [
@@ -169,6 +192,12 @@ class TestDelEntitlement(TestBrokerCommand):
             '--on_host_environment', 'dev',
             '--on_hub', 'ny',
         ]
+        hostlink_params = [
+            '--hostlink', 'testuser2',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+        ]
         entries = ['\n'.join(n) for n in [
             ('Entitlement: etype_all',
              '  To Human User: testuser2',
@@ -176,7 +205,7 @@ class TestDelEntitlement(TestBrokerCommand):
              '  On Host Environment: dev',
              '  On Hub: ny'),
         ]]
-        self._test_del(parameters, entries)
+        self._test_del(parameters, entries, hostlink_params)
 
     def test_200_del_etype_all_to_human_on_grn(self):
         parameters = [
@@ -185,6 +214,11 @@ class TestDelEntitlement(TestBrokerCommand):
             '--on_grn', 'grn:/ms/ei/aquilon/ut2',
             '--on_host_environment', 'dev',
         ]
+        hostlink_params = [
+            '--hostlink', 'testuser1',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+        ]
         entries = ['\n'.join(n) for n in [
             ('Entitlement: etype_all',
              '  To Human User: testuser1',
@@ -192,7 +226,7 @@ class TestDelEntitlement(TestBrokerCommand):
              '  On Host Environment: dev',
              '  On Organization: ms'),
         ]]
-        self._test_del(parameters, entries)
+        self._test_del(parameters, entries, hostlink_params)
 
     def test_200_del_etype_all_to_human_on_grn_on_location(self):
         parameters = [

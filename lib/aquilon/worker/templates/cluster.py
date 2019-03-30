@@ -23,6 +23,11 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
+from aquilon.worker.dbwrappers.cluster import get_cluster_location_preference
+from aquilon.worker.locks import (
+    CompileKey,
+    PlenaryKey,
+)
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryResource,
                                       PlenaryServiceInstanceClientDefault,
@@ -36,8 +41,7 @@ from aquilon.worker.templates.panutils import (
     PanValue,
     StructureTemplate,
 )
-from aquilon.worker.dbwrappers.cluster import get_cluster_location_preference
-from aquilon.worker.locks import CompileKey, PlenaryKey
+from aquilon.worker.templates.entitlementutils import flatten_entitlements
 
 
 LOGGER = logging.getLogger(__name__)
@@ -228,9 +232,11 @@ class PlenaryClusterObject(ObjectPlenary):
 
 
 class PlenaryClusterClient(Plenary):
-    """
+    """Cluster client plenary template
+
     A host that is a member of a cluster will include the cluster client
-    plenary template. This just names the cluster and nothing more.
+    plenary template. This just names the cluster and parse the entitlements
+    set at the cluster level.
     """
 
     prefix = "cluster"
@@ -261,3 +267,5 @@ class PlenaryClusterClient(Plenary):
 
         pan_include_if_exists(lines, "archetype/{}/config".format(
             self.dbobj.archetype.name))
+
+        flatten_entitlements(lines, self.dbobj, prefix='/')

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -173,6 +173,251 @@ class TestAddHostlink(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "owner_group cannot contain the ':' character",
                          command)
+
+    def test_300_add_hostlink_personality(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_personality',
+            '--target', '/var/spool/hostlinks/app_personality',
+            '--personality', 'compileserver',
+            '--country', 'us',
+            '--owner', 'testuser1',
+            '--group', 'testgroup1',
+            '--comments', 'A hostlink set at the personality level',
+        ]
+        self.successtest(command)
+
+    def test_302_show_hostlink_personality(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_personality',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_personality',
+                       '  Comments: A hostlink set at the personality level',
+                       '  Bound to: Personality aquilon/compileserver, '
+                       'Country us',
+                       '  Target Path: /var/spool/hostlinks/app_personality',
+                       '  Owner: testuser1',
+                       '  Group: testgroup1'))
+        self.output_equals(out, expected_out, command)
+
+    def test_304_cat_personality(self):
+        command = [
+            'cat',
+            '--personality', 'compileserver',
+            '--country', 'us',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/personality/compileserver'
+             '/country/us'
+             '/hostlink/app_personality'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_310_add_hostlink_archetype(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_archetype',
+            '--target', '/var/spool/hostlinks/app_archetype',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+            '--owner', 'testuser2',
+            '--group', 'testgroup2',
+            '--comments', 'A hostlink set at the archetype level',
+        ]
+        self.successtest(command)
+
+    def test_312_show_hostlink_archetype(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_archetype',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_archetype',
+                       '  Comments: A hostlink set at the archetype level',
+                       '  Bound to: Archetype aquilon, Host Environment dev, '
+                       'Hub ny',
+                       '  Target Path: /var/spool/hostlinks/app_archetype',
+                       '  Owner: testuser2',
+                       '  Group: testgroup2'))
+        self.output_equals(out, expected_out, command)
+
+    def test_314_cat_archetype(self):
+        command = [
+            'cat',
+            '--archetype', 'aquilon',
+            '--host_environment', 'dev',
+            '--hub', 'ny',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/archetype/aquilon'
+             '/dev'
+             '/hub/ny'
+             '/hostlink/app_archetype'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_320_add_hostlink_grn(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_grn',
+            '--target', '/var/spool/hostlinks/app_grn',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+            '--city', 'ln',
+            '--owner', 'testuser3',
+            '--group', 'testgroup3',
+            '--comments', 'A hostlink set at the GRN level',
+        ]
+        self.successtest(command)
+
+    def test_322_show_hostlink_grn(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_grn',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_grn',
+                       '  Comments: A hostlink set at the GRN level',
+                       '  Bound to: GRN grn:/ms/ei/aquilon/ut2, '
+                       'Host Environment dev, City ln',
+                       '  Target Path: /var/spool/hostlinks/app_grn',
+                       '  Owner: testuser3',
+                       '  Group: testgroup3'))
+        self.output_equals(out, expected_out, command)
+
+    def test_324_cat_grn(self):
+        command = [
+            'cat',
+            '--grn', 'grn:/ms/ei/aquilon/ut2',
+            '--host_environment', 'dev',
+            '--city', 'ln',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/eon_id/4'
+             '/dev'
+             '/city/ln'
+             '/hostlink/app_grn'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_330_add_hostlink_eon_id(self):
+        command = [
+            'add_hostlink', '--hostlink', 'app_eon_id',
+            '--target', '/var/spool/hostlinks/app_eon_id',
+            '--eon_id', 3,
+            '--host_environment', 'dev',
+            '--organization', 'ms',
+            '--owner', 'testuser4',
+            '--group', 'testgroup4',
+            '--comments', 'A hostlink set at the GRN level (eon_id)',
+        ]
+        self.successtest(command)
+
+    def test_332_show_hostlink_eon_id(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'app_eon_id',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: app_eon_id',
+                       '  Comments: A hostlink set at the GRN level (eon_id)',
+                       '  Bound to: GRN grn:/ms/ei/aquilon/unittest, '
+                       'Host Environment dev, Organization ms',
+                       '  Target Path: /var/spool/hostlinks/app_eon_id',
+                       '  Owner: testuser4',
+                       '  Group: testgroup4'))
+        self.output_equals(out, expected_out, command)
+
+    def test_334_cat_eon_id(self):
+        command = [
+            'cat',
+            '--eon_id', 3,
+            '--host_environment', 'dev',
+            '--organization', 'ms',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('"/system/resources/hostlink" = append(create("resource'
+             '/eon_id/3'
+             '/dev'
+             '/organization/ms'
+             '/hostlink/app_eon_id'
+             '/config"));',),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_400_add_parented_hostlink(self):
+        command = [
+            'add_hostlink', '--hostlink', 'parentedhostlink',
+            '--parent', 'parent1,parent2',
+            '--hostname', 'server1.aqd-unittest.ms.com',
+            '--owner', 'testuser1',
+            '--group', 'testgroup1',
+            '--comments', 'A parented hostlink',
+        ]
+        self.successtest(command)
+
+    def test_402_show_parented_hostlink(self):
+        command = [
+            'show_hostlink',
+            '--hostlink', 'parentedhostlink',
+        ]
+        out = self.commandtest(command)
+        expected_out = \
+            '\n'.join(('Hostlink: parentedhostlink',
+                       '  Comments: A parented hostlink',
+                       '  Bound to: Host server1.aqd-unittest.ms.com',
+                       '  Parents: parent1, parent2',
+                       '  Owner: testuser1',
+                       '  Group: testgroup1'))
+        self.output_equals(out, expected_out, command)
+
+    def test_404_cat_host_parented_hostlink(self):
+        command = [
+            'cat',
+            '--hostname', 'server1.aqd-unittest.ms.com',
+            '--hostlink', 'parentedhostlink',
+        ]
+        out = self.commandtest(command)
+        expected_out = ['\n'.join(n) for n in [
+            ('structure template resource/host/'
+             'server1.aqd-unittest.ms.com/hostlink/'
+             'parentedhostlink/config;',
+             '',
+             '"name" = "parentedhostlink";',
+             '"target" = "/dev/null";',
+             '"parents" = list(',
+             '  "parent1",',
+             '  "parent2"',
+             ');',
+             '"owner" = "testuser1:testgroup1";'),
+        ]]
+        self.output_unordered_equals(out, expected_out, command,
+                                     match_all=False)
+
+    def test_406_del_parented_hostlink(self):
+        command = [
+            'del_hostlink', '--hostlink', 'parentedhostlink',
+            '--hostname', 'server1.aqd-unittest.ms.com',
+        ]
+        self.successtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHostlink)

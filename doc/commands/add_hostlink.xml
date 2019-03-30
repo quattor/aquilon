@@ -42,15 +42,36 @@
                 <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
                 <arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
                 <arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+                <arg choice="plain">
+                    <group choice="req">
+                        <arg choice="plain">
+                            <group choice="req">
+                                <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+                                <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
+                                <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+                            </group>
+                            <arg choice="plain"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+                        </arg>
+                        <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+                    </group>
+                    <group>
+                        <synopfragmentref linkend="location-options">Location options</synopfragmentref>
+                    </group>
+                </arg>
             </group>
             <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
-            <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
+            <group choice="req">
+                <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
+                <arg choice="plain" rep="repeat"><option>--parent <replaceable>PARENT</replaceable></option></arg>
+            </group>
             <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
             <arg><option>--group <replaceable>GROUP</replaceable></option></arg>
             <arg><option>--mode <replaceable>MODE</replaceable></option></arg>
+            <arg rep="repeat"><option>--entitlement <replaceable>ENTITLEMENT_TYPE</replaceable></option></arg>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
+            <xi:include href="../common/location_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
 
@@ -122,6 +143,53 @@
             </varlistentry>
             <varlistentry>
                 <term>
+                    {
+                        <option>--grn <replaceable>GRN</replaceable></option> |
+                        <option>--eon_id <replaceable>EON_ID</replaceable></option>
+                    }
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                    [
+                        --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                    ]
+                </term>
+                <listitem>
+                    <para>
+                        The information of the target parameterized GRN
+                        for the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+                    <option>--host_environment <replaceable>HOSTENV</replaceable></option>
+                    [
+                        --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                    ]
+                </term>
+                <listitem>
+                    <para>
+                        The information of the target parameterized
+                        Archetype for the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+                    [
+                        --<replaceable>location_type</replaceable> <replaceable>LOCNAME</replaceable>
+                    ]
+                </term>
+                <listitem>
+                    <para>
+                        The information of the target parameterized
+                        Personality for the hostlink.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
                     <option>--group <replaceable>GROUP</replaceable></option>
                 </term>
                 <listitem>
@@ -141,6 +209,20 @@
                         The mode to apply on the target directory, if it is
                         automatically created and managed by aquilon
                         (it is on local storage). This must be an octal value.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--entitlement <replaceable>ENTITLEMENT_TYPE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The entitlement type to link the hostlink to. Other
+                        parameters of the entitlement to link will be derived
+                        from the parameters used to create the hostlink.
+                        If specified, and the entitlement is deleted, then
+                        the hostlink will also be deleted.
                     </para>
                 </listitem>
             </varlistentry>
@@ -178,6 +260,19 @@
             </varlistentry>
             <varlistentry>
                 <term>
+                    <option>--parent <replaceable>PARENT</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        The parent hostlink(s). When specified instead of the
+                        target, a target directory with the name of that
+                        hostlink will be created underneath each hostlink
+                        which name matches one of the listed parents.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
                     <option>--comments <replaceable>COMMENTS</replaceable></option>
                 </term>
                 <listitem>
@@ -187,6 +282,7 @@
                 </listitem>
             </varlistentry>
         </variablelist>
+        <xi:include href="../common/location_options_desc.xml"/>
         <xi:include href="../common/change_management_desc.xml"/>
         <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>

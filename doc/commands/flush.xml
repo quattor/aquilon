@@ -41,6 +41,8 @@
                 <arg choice="plain"><option>--networks</option></arg>
                 <arg choice="plain"><option>--network_devices</option></arg>
                 <arg choice="plain"><option>--virtual_switches</option></arg>
+                <arg choice="plain"><option>--archetypes</option></arg>
+                <arg choice="plain"><option>--grns</option></arg>
             </group>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
@@ -176,6 +178,26 @@
                 <listitem>
                     <para>
                         Refresh the virtual switch plenaries.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetypes</option>
+                </term>
+                <listitem>
+                    <para>
+                        Refresh the archetype plenaries.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--grns</option>
+                </term>
+                <listitem>
+                    <para>
+                        Refresh the GRN plenaries.
                     </para>
                 </listitem>
             </varlistentry>

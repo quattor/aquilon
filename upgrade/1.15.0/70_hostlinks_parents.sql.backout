@@ -1,0 +1,3 @@
+ALTER TABLE hostlink MODIFY(target NOT NULL);
+
+DROP TABLE hostlink_parent_map;

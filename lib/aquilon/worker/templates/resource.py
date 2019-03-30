@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,11 +20,26 @@ from operator import attrgetter
 import os.path
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.model import (Application, Filesystem, Intervention,
-                                ResourceGroup, Hostlink, RebootSchedule,
-                                RebootIntervention, ServiceAddress,
-                                VirtualMachine, Share, AutoStartList,
-                                SystemList, BundleResource, Host)
+from aquilon.aqdb.model import (
+    Application,
+    AutoStartList,
+    BundleResource,
+    Cluster,
+    Filesystem,
+    Host,
+    Hostlink,
+    Intervention,
+    ParameterizedArchetype,
+    ParameterizedGrn,
+    ParameterizedPersonality,
+    RebootIntervention,
+    RebootSchedule,
+    ResourceGroup,
+    ServiceAddress,
+    Share,
+    SystemList,
+    VirtualMachine,
+)
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       PlenaryCollection, PlenaryMachineInfo)
@@ -46,23 +61,46 @@ class PlenaryResource(StructurePlenary):
             from aquilon.worker.templates import PlenaryHostObject
 
             self.profile = PlenaryHostObject.template_name(holder_object)
-        else:
+        elif isinstance(holder_object, Cluster):
             # Avoid circular dependency
             from aquilon.worker.templates import PlenaryClusterObject
 
             self.profile = PlenaryClusterObject.template_name(holder_object)
+        elif isinstance(holder_object, ParameterizedPersonality):
+            # Avoid circular dependency
+            from aquilon.worker.templates import \
+                PlenaryParameterizedPersonality
 
-        self.branch = holder_object.branch.name
+            self.profile = PlenaryParameterizedPersonality.template_name(
+                holder_object)
+        elif isinstance(holder_object, ParameterizedArchetype):
+            # Avoid circular dependency
+            from aquilon.worker.templates import PlenaryParameterizedArchetype
+
+            self.profile = PlenaryParameterizedArchetype.template_name(
+                holder_object)
+        elif isinstance(holder_object, ParameterizedGrn):
+            # Avoid circular dependency
+            from aquilon.worker.templates import PlenaryParameterizedGrn
+
+            self.profile = PlenaryParameterizedGrn.template_name(holder_object)
+        else:
+            raise InternalError('Unsupported holder object: {}'.format(
+                holder_object))
+
+        self.branch = (holder_object.branch.name
+                       if hasattr(holder_object, 'branch')
+                       else None)
 
     def get_key(self, exclusive=True):
         # Resources are tightly bound to their holder, so always lock the
         # holder
         if not exclusive:
             # CompileKey() does not support shared mode
-            raise InternalError("Shared locks are not implemented for resource "
-                                "plenaries.")
+            raise InternalError("Shared locks are not implemented for "
+                                "resource plenaries.")
         return CompileKey(domain=self.branch, profile=self.profile,
-                          logger=self.logger)
+                          force_domain=False, logger=self.logger)
 
     @classmethod
     def template_name(cls, dbresource):
@@ -71,10 +109,9 @@ class PlenaryResource(StructurePlenary):
 
         if isinstance(holder, BundleResource):
             parent_holder = holder.resourcegroup.holder
-            components.extend([parent_holder.holder_type,
-                               parent_holder.holder_name])
+            components.extend([parent_holder.template_name])
 
-        components.extend([holder.holder_type, holder.holder_name,
+        components.extend([holder.template_name,
                            dbresource.resource_type, dbresource.name,
                            "config"])
 
@@ -109,7 +146,14 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "eonid", self.dbobj.eon_id)
 
     def body_hostlink(self, lines):
-        pan_assign(lines, "target", self.dbobj.target)
+        # Even if there is no target, to keep the compatibility with the
+        # previous templates that required the target to exist, just use
+        # '/dev/null' when no target is available.  The new templates should
+        # pick-up the information by verifying the presence of 'parents'
+        pan_assign(lines, "target", self.dbobj.target or '/dev/null')
+        if self.dbobj.parents:
+            pan_assign(lines, "parents", [
+                p.parent for p in self.dbobj.parents])
         if self.dbobj.owner_group:
             owner_string = self.dbobj.owner_user + ':' + self.dbobj.owner_group
         else:

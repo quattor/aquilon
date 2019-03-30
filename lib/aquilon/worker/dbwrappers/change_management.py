@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2014-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,18 +23,69 @@ import json
 import logging
 import shlex
 
-from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality, HardwareEntity,
-                                PersonalityStage, InterfaceFeature, Domain, Sandbox, Machine,
-                                HardwareFeature, HostFeature, ServiceInstance, NetworkDevice,
-                                OperatingSystem, ComputeCluster, StorageCluster, Network,
-                                EsxCluster, HostClusterMember, HostEnvironment, AddressAssignment,
-                                MetaCluster, ClusterLifecycle, HostLifecycle, Interface,
-                                HostResource, Resource, ServiceAddress, ARecord, ClusterResource,
-                                ResourceGroup, BundleResource, Chassis, ConsoleServer, Location, Rack,
-                                Share, Alias, NetworkCompartment, DnsEnvironment, NetworkEnvironment,
-                                Fqdn, ARecord, ReservedName, AddressAlias, DnsDomain, DnsRecord, NsRecord,
-                                SrvRecord, DynamicStub, Organization, Hub, Continent, Country, Campus, City,
-                                Building, Room, Bunker, Desk, NetGroupWhiteList, Grn, User, Realm, Role)
+from aquilon.aqdb.model import (
+    AddressAlias,
+    AddressAssignment,
+    Alias,
+    Archetype,
+    ArchetypeResource,
+    ARecord,
+    Building,
+    BundleResource,
+    Bunker,
+    Campus,
+    Chassis,
+    City,
+    Cluster,
+    ClusterLifecycle,
+    ClusterResource,
+    ComputeCluster,
+    ConsoleServer,
+    Continent,
+    Country,
+    Desk,
+    DnsDomain,
+    DnsEnvironment,
+    Domain,
+    EsxCluster,
+    Fqdn,
+    Grn,
+    GrnResource,
+    HardwareEntity,
+    HardwareFeature,
+    Host,
+    HostClusterMember,
+    HostEnvironment,
+    HostFeature,
+    HostLifecycle,
+    HostResource,
+    Hub,
+    Interface,
+    InterfaceFeature,
+    Location,
+    Machine,
+    MetaCluster,
+    NetGroupWhiteList,
+    Network,
+    NetworkCompartment,
+    NetworkDevice,
+    NetworkEnvironment,
+    OperatingSystem,
+    Organization,
+    Personality,
+    PersonalityResource,
+    PersonalityStage,
+    Rack,
+    Realm,
+    Resource,
+    ResourceGroup,
+    Role,
+    Room,
+    ServiceAddress,
+    ServiceInstance,
+    StorageCluster,
+    User,
+)
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
 from aquilon.exceptions_ import AuthorizationException, InternalError, AquilonError
@@ -540,48 +592,25 @@ class ChangeManagement(object):
                 self.validate_host(dbhw_ent.host)
 
     def validate_resource_holder(self, resource_holder):
-        session = object_session(resource_holder)
-        CR = aliased(ClusterResource)
-        HR = aliased(HostResource)
-        RG = aliased(ResourceGroup)
-        BR = aliased(BundleResource)
-        q = None
-        q2 = None
+        """Validate a resource holder
 
-        if isinstance(resource_holder, BundleResource):
-            q = session.query(Cluster).join(CR)
-            q = q.outerjoin((RG, RG.holder_id == CR.id), (BR, BR.resourcegroup_id == RG.id))
-            q = q.filter(BR.id == resource_holder.id)
+        Validate if given resource holder has hosts, through direct link,
+        cluster, personality, or a specified host environment
+        Args:
+            resource_holder: a single resource_holder object
+        Returns: None
+        """
+        if getattr(resource_holder, 'host_environment', None):
+            self.validate_host_environment(resource_holder.host_environment)
+            return
 
-            q2 = session.query(Host).join(HR)
-            q2 = q2.outerjoin((RG, RG.holder_id == HR.id), (BR, BR.resourcegroup_id == RG.id))
-            q2 = q2.filter(BR.id == resource_holder.id)
-
-        elif isinstance(resource_holder, ClusterResource):
-            q = session.query(Cluster).join(CR)
-            q = q.filter(CR.id == resource_holder.id)
-
-        elif isinstance(resource_holder, HostResource):
-            q2 = session.query(Host).join(HR)
-            q2 = q2.filter(HR.id == resource_holder.id)
-
-        # Validate Clusters
-        if q:
-            q = q.reset_joinpoint()
-            q = q.join(ClusterLifecycle).options(contains_eager('status'))
-            q = q.join(PersonalityStage, Personality).join(HostEnvironment).options(
-                contains_eager('personality_stage.personality.host_environment'))
-            for cluster in q.all():
-                self.validate_cluster(cluster)
-
-        # Validate hosts
-        if q2:
-            q2 = q2.reset_joinpoint()
-            q2 = q2.join(HostLifecycle).options(contains_eager('status'))
-            q2 = q2.join(PersonalityStage, Personality).join(HostEnvironment).options(
-                contains_eager('personality_stage.personality.host_environment'))
-            for host in q2.all():
-                self.validate_host(host)
+        dbobj = resource_holder.toplevel_holder_object
+        if isinstance(dbobj, Cluster):
+            self.validate_cluster(dbobj)
+        elif isinstance(dbobj, Host):
+            self.validate_host(dbobj)
+        elif isinstance(dbobj, Personality):
+            self.validate_prod_personality(dbobj)
 
     def validate_host_environment(self, host_environment):
         if host_environment.name == 'prod':
@@ -713,6 +742,12 @@ ChangeManagement.handlers[Desk] = ChangeManagement.validate_location
 ChangeManagement.handlers[BundleResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[ClusterResource] = ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[HostResource] = ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[PersonalityResource] = \
+    ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[ArchetypeResource] = \
+    ChangeManagement.validate_resource_holder
+ChangeManagement.handlers[GrnResource] = \
+    ChangeManagement.validate_resource_holder
 ChangeManagement.handlers[Fqdn] = ChangeManagement.validate_fqdn
 ChangeManagement.handlers[DnsDomain] = ChangeManagement.validate_default
 ChangeManagement.handlers[DnsEnvironment] = ChangeManagement.validate_default

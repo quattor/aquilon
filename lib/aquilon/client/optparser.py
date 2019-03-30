@@ -507,6 +507,11 @@ class Option(Element):
         else:
             self.short = None
 
+        # Allows alternative names for options
+        self.altnames = node.attrib.get('altnames')
+        if self.altnames:
+            self.altnames = self.altnames.split(' ')
+
         if "mandatory" in node.attrib:
             self.mandatory = node.attrib["mandatory"].lower() == "true"
         else:
@@ -561,6 +566,8 @@ class Option(Element):
         if parser.has_option('--' + self.name):
             return
         names = ["--" + self.name]
+        if self.altnames:
+            names.extend('--{}'.format(name) for name in self.altnames)
         if self.short:
             names.append("-" + self.short)
 

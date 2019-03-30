@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2018  Contributor
+# Copyright (C) 2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    event,
     ForeignKey,
     Index,
     Integer,
     PrimaryKeyConstraint,
     Sequence,
     String,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import (
     AbstractConcreteBase,
@@ -34,8 +36,10 @@ from sqlalchemy.ext.declarative import (
 )
 from sqlalchemy.orm import (
     deferred,
+    object_session,
     relation,
 )
+from sqlalchemy.sql import and_
 
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (
@@ -143,6 +147,31 @@ EntitlementType.to_user_types = relation(EntitlementTypeUserTypeMap,
                                          passive_deletes=True)
 
 
+class EntitlementId(Base):
+    """Entitlement identificator table to be used as foreign key
+
+    This table is mainly useful to reference an unique and primary key
+    for all entitlement, including all entitlement classes. This allows
+    to reference entitlements by using a unique foreign key instead of
+    having to repeat all entitlements specifics like the object on which
+    it applies (and all parameters such as the location and environment)
+    and the object to which it applies.
+    """
+    __tablename__ = 'entitlement'
+    id = Column(Integer, Sequence('%s_id_seq' % __tablename__),
+                primary_key=True)
+
+    @property
+    def entitlement(self):
+        """Property to return the entitlement corresponding to that id"""
+        session = object_session(self)
+
+        q = session.query(Entitlement)
+        q = q.filter_by(id=self.id)
+
+        return q.one()
+
+
 class Entitlement(AbstractConcreteBase, Base):
     """Base class of all entitlements
 
@@ -173,7 +202,8 @@ class Entitlement(AbstractConcreteBase, Base):
             return ()
 
         return (
-            PrimaryKeyConstraint(*get_ids(cls)),
+            UniqueConstraint(*get_ids(cls),
+                             name='{}_uk'.format(cls.__tablename__)),
             Index(ref_constraint_name(local_table=cls.__tablename__,
                                       column=_MATCHIDX,
                                       suffix=_IDXSUFFIX),
@@ -183,6 +213,51 @@ class Entitlement(AbstractConcreteBase, Base):
                                       suffix=_IDXSUFFIX),
                   *get_ids(cls, EntitlementTo))
         )
+
+    @property
+    def hostlinks(self):
+        """Property to return the hostlinks related to the entitlement"""
+        # Avoid circular dependency
+        from aquilon.aqdb.model import (
+            Hostlink,
+            HostlinkEntitlementMap,
+        )
+
+        session = object_session(self)
+        q = session.query(Hostlink)
+        q = q.join(HostlinkEntitlementMap, and_(
+            HostlinkEntitlementMap.resource_id == Hostlink.resource_id,
+            HostlinkEntitlementMap.entitlement_id == self.id))
+
+        return q.all()
+
+
+class EntitlementWithId(object):
+    """Base class for the id of the Entitlement
+
+    It allows to add an id parameter on the inherited classes. This is
+    separate from the Entitlement class because of the way sqlalchemy work
+    for abstractly inherited classes that build SQL tables.
+
+    The id parameter is a foreign key related to the EntitlementId class,
+    which provides a unique id for all entitlements, and can be used as
+    a foreign key to reference an entitlement in any other table.
+    The idobj parameter returns the EntitlementId object.
+    """
+
+    @declared_attr
+    def id(cls):
+        return Column(ForeignKey(EntitlementId.id, ondelete='CASCADE',
+                                 name=ref_constraint_name(
+                                    local_table=cls.__tablename__,
+                                    column='id',
+                                    suffix='fk')),
+                      nullable=False, primary_key=True)
+
+    @declared_attr
+    def idobj(cls):
+        return relation(EntitlementId, lazy=False, innerjoin=True,
+                        foreign_keys=cls.id)
 
 
 class EntitlementWithType(object):
@@ -422,20 +497,32 @@ class EntitlementOnGrn(EntitlementOnHostEnvironment,
     _on_class = Grn
 
 
-class EntitlementHostGrnMap(EntitlementWithType,
+class EntitlementHostGrnMap(EntitlementWithId,
+                            EntitlementWithType,
                             EntitlementOnHost,
                             EntitlementToGrn,
                             Entitlement):
     """Class to represent the table that entitles to a Grn on a Host"""
     __tablename__ = _HOSTGRN
 
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementHostGrnMap, self).__init__(*args, **kwargs)
 
-class EntitlementHostUserMap(EntitlementWithType,
+
+class EntitlementHostUserMap(EntitlementWithId,
+                             EntitlementWithType,
                              EntitlementOnHost,
                              EntitlementToUser,
                              Entitlement):
     """Class to represent the table that entitles to a User on a Host"""
     __tablename__ = _HOSTUSER
+
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementHostUserMap, self).__init__(*args, **kwargs)
 
 
 Host.entitled_grns = relation(EntitlementHostGrnMap,
@@ -446,20 +533,32 @@ Host.entitled_users = relation(EntitlementHostUserMap,
                                passive_deletes=True)
 
 
-class EntitlementClusterGrnMap(EntitlementWithType,
+class EntitlementClusterGrnMap(EntitlementWithId,
+                               EntitlementWithType,
                                EntitlementOnCluster,
                                EntitlementToGrn,
                                Entitlement):
     """Class to represent the table that entitles to a Grn on a Cluster"""
     __tablename__ = _CLUSTERGRN
 
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementClusterGrnMap, self).__init__(*args, **kwargs)
 
-class EntitlementClusterUserMap(EntitlementWithType,
+
+class EntitlementClusterUserMap(EntitlementWithId,
+                                EntitlementWithType,
                                 EntitlementOnCluster,
                                 EntitlementToUser,
                                 Entitlement):
     """Class to represent the table that entitles to a User on a Cluster"""
     __tablename__ = _CLUSTERUSER
+
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementClusterUserMap, self).__init__(*args, **kwargs)
 
 
 Cluster.entitled_grns = relation(EntitlementClusterGrnMap,
@@ -470,20 +569,32 @@ Cluster.entitled_users = relation(EntitlementClusterUserMap,
                                   passive_deletes=True)
 
 
-class EntitlementPersonalityGrnMap(EntitlementWithType,
+class EntitlementPersonalityGrnMap(EntitlementWithId,
+                                   EntitlementWithType,
                                    EntitlementOnPersonality,
                                    EntitlementToGrn,
                                    Entitlement):
     """Class to represent the table that entitles to a Grn on a Personality"""
     __tablename__ = _PERSONALITYGRN
 
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementPersonalityGrnMap, self).__init__(*args, **kwargs)
 
-class EntitlementPersonalityUserMap(EntitlementWithType,
+
+class EntitlementPersonalityUserMap(EntitlementWithId,
+                                    EntitlementWithType,
                                     EntitlementOnPersonality,
                                     EntitlementToUser,
                                     Entitlement):
     """Class to represent the table that entitles to a User on a Personality"""
     __tablename__ = _PERSONALITYUSER
+
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementPersonalityUserMap, self).__init__(*args, **kwargs)
 
 
 Personality.entitled_grns = relation(EntitlementPersonalityGrnMap,
@@ -494,20 +605,32 @@ Personality.entitled_users = relation(EntitlementPersonalityUserMap,
                                       passive_deletes=True)
 
 
-class EntitlementArchetypeGrnMap(EntitlementWithType,
+class EntitlementArchetypeGrnMap(EntitlementWithId,
+                                 EntitlementWithType,
                                  EntitlementOnArchetype,
                                  EntitlementToGrn,
                                  Entitlement):
     """Class to represent the table that entitles to a Grn on an Archetype"""
     __tablename__ = _ARCHETYPEGRN
 
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementArchetypeGrnMap, self).__init__(*args, **kwargs)
 
-class EntitlementArchetypeUserMap(EntitlementWithType,
+
+class EntitlementArchetypeUserMap(EntitlementWithId,
+                                  EntitlementWithType,
                                   EntitlementOnArchetype,
                                   EntitlementToUser,
                                   Entitlement):
     """Class to represent the table that entitles to a User on an Archetype"""
     __tablename__ = _ARCHETYPEUSER
+
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementArchetypeUserMap, self).__init__(*args, **kwargs)
 
 
 Archetype.entitled_grns = relation(EntitlementArchetypeGrnMap,
@@ -518,20 +641,32 @@ Archetype.entitled_users = relation(EntitlementArchetypeUserMap,
                                     passive_deletes=True)
 
 
-class EntitlementGrnGrnMap(EntitlementWithType,
+class EntitlementGrnGrnMap(EntitlementWithId,
+                           EntitlementWithType,
                            EntitlementOnGrn,
                            EntitlementToGrn,
                            Entitlement):
     """Class to represent the table that entitles to a Grn on a Grn"""
     __tablename__ = _GRNGRN
 
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementGrnGrnMap, self).__init__(*args, **kwargs)
 
-class EntitlementGrnUserMap(EntitlementWithType,
+
+class EntitlementGrnUserMap(EntitlementWithId,
+                            EntitlementWithType,
                             EntitlementOnGrn,
                             EntitlementToUser,
                             Entitlement):
     """Class to represent the table that entitles to a User on a Grn"""
     __tablename__ = _GRNUSER
+
+    def __init__(self, *args, **kwargs):
+        if 'id' not in kwargs and 'idobj' not in kwargs:
+            kwargs['idobj'] = EntitlementId()
+        super(EntitlementGrnUserMap, self).__init__(*args, **kwargs)
 
 
 Grn.entitled_grns = relation(EntitlementGrnGrnMap,
@@ -541,3 +676,30 @@ Grn.entitled_grns = relation(EntitlementGrnGrnMap,
 Grn.entitled_users = relation(EntitlementGrnUserMap,
                               cascade='all, delete-orphan',
                               passive_deletes=True)
+
+
+def receive_after_delete_entitlement(mapper, connection, target):
+    """Function to be run after we received a delete for an entitlement
+
+    This is used to take care of the cleanup needed after removing an
+    entitlement; for instance, an entitlement id entry is added when
+    creating a new entitlement, and this is used to remove that entry
+    from the entitlement table as well as from the specific per-on
+    and per-to entitlement (e.g. on host/to user) when the later is
+    being deleted.
+    """
+    # Create a new session to make the change
+    session = object_session(target).__class__(bind=connection)
+
+    # Query for the EntitlementId entry that corresponds to that id,
+    # and delete it
+    session.query(EntitlementId).filter_by(id=target.id).delete()
+
+    # Commit the changes
+    session.commit()
+
+
+# This goes through all the entitlement subclasses and declare the
+# after_delete event on each of them
+for cls in Entitlement.__subclasses__():
+    event.listen(cls, 'after_delete', receive_after_delete_entitlement)

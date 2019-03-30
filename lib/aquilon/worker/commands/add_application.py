@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2009-2018  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +29,8 @@ class CommandAddApplication(CommandAddResource):
     resource_class = Application
     resource_name = "application"
 
-    def setup_resource(self, session, logger, dbapp, reason, eon_id, grn, **_):
-        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+    def setup_resource(self, session, logger, dbapp, reason,
+                       app_eon_id, app_grn, **_):
+        dbgrn = lookup_grn(session, app_grn, app_eon_id, logger=logger,
                            config=self.config)
         dbapp.grn = dbgrn
