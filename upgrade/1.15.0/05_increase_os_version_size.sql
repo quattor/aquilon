@@ -1,2 +1,2 @@
-ALTER TABLE os MODIFY version VARCHAR2(32) NOT NULL;
+ALTER TABLE operating_system MODIFY version VARCHAR2(32);
 
