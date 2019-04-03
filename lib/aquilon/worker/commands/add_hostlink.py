@@ -50,8 +50,19 @@ class CommandAddHostlink(CommandAddResource):
     resource_class = Hostlink
     resource_name = "hostlink"
 
+    def render(self, hostlink, subdir, **kwargs):
+        # Prepare the parameters to support the subdir one
+        if subdir is None:
+            kwargs['hostlink'] = hostlink[-1]
+        else:
+            kwargs['hostlink'] = subdir
+            kwargs['parent'] = hostlink
+
+        # Call the parent render
+        super(CommandAddHostlink, self).render(**kwargs)
+
     def setup_resource(self, session, logger, dbhl, reason, target, owner,
-                       group, mode, entitlement, parent, **_):
+                       group, mode, entitlement, parent=None, **_):
         if target:
             if parent:
                 raise ArgumentError('Cannot use both target and parent')

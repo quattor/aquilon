@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2018  Contributor
+# Copyright (C) 2008-2015,2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,3 +25,16 @@ class CommandSearchHostlink(CommandSearchResource):
 
     resource_class = Hostlink
     resource_name = "hostlink"
+
+    def filter_by(self, q, target=None, owner=None, group=None,
+                  mode=None, **kwargs):
+        if target:
+            q = q.filter_by(target=target)
+        if owner:
+            q = q.filter_by(owner_user=owner)
+        if group:
+            q = q.filter_by(owner_group=group)
+        if mode:
+            q = q.filter_by(target_mode=mode)
+
+        return q
