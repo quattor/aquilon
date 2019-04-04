@@ -365,8 +365,8 @@ class TestAddHostlink(TestBrokerCommand):
 
     def test_400_add_parented_hostlink(self):
         command = [
-            'add_hostlink', '--hostlink', 'parentedhostlink',
-            '--parent', 'parent1,parent2',
+            'add_hostlink', '--subdir', 'parentedhostlink',
+            '--hostlink', 'parent1,parent2',
             '--hostname', 'server1.aqd-unittest.ms.com',
             '--owner', 'testuser1',
             '--group', 'testgroup1',
@@ -377,7 +377,7 @@ class TestAddHostlink(TestBrokerCommand):
     def test_402_show_parented_hostlink(self):
         command = [
             'show_hostlink',
-            '--hostlink', 'parentedhostlink',
+            '--subdir', 'parentedhostlink',
         ]
         out = self.commandtest(command)
         expected_out = \
@@ -393,7 +393,7 @@ class TestAddHostlink(TestBrokerCommand):
         command = [
             'cat',
             '--hostname', 'server1.aqd-unittest.ms.com',
-            '--hostlink', 'parentedhostlink',
+            '--subdir', 'parentedhostlink',
         ]
         out = self.commandtest(command)
         expected_out = ['\n'.join(n) for n in [
@@ -414,7 +414,7 @@ class TestAddHostlink(TestBrokerCommand):
 
     def test_406_del_parented_hostlink(self):
         command = [
-            'del_hostlink', '--hostlink', 'parentedhostlink',
+            'del_hostlink', '--subdir', 'parentedhostlink',
             '--hostname', 'server1.aqd-unittest.ms.com',
         ]
         self.successtest(command)

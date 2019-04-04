@@ -2853,7 +2853,7 @@
             <option name="resourcegroup" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
             <option name="application" type="string" requires="hostname cluster metacluster">Name of an application</option>
             <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
-            <option name="hostlink" type="string" requires="hostname cluster metacluster personality archetype eon_id grn">Name of a hostlink</option>
+            <option name="hostlink" altnames="subdir" type="string" requires="hostname cluster metacluster personality archetype eon_id grn">Name of a hostlink</option>
             <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
             <option name="reboot_intervention" type="flag" requires="hostname cluster metacluster">Name of a reboot intervention</option>
             <option name="reboot_schedule" type="flag" requires="hostname cluster metacluster">Name of a reboot schedule</option>
@@ -5934,10 +5934,10 @@
                 </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
-            <option name="hostlink" type="string">Name of hostlink</option>
+            <option name="hostlink" type="string" action="extend">Name of hostlink</option>
             <optgroup fields="one">
                 <option name="target" type="string">Target path of link</option>
-                <option name="parent" type="string" action="extend">Name(s) of parent link(s)</option>
+                <option name="subdir" type="string">Name of the subdirectory to create</option>
             </optgroup>
             <option name="owner" type="string">Username to be owner of the target directory</option>
         </optgroup>
@@ -5984,7 +5984,7 @@
                 </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
-            <option name="hostlink" type="string">Name</option>
+            <option name="hostlink" altnames="subdir" type="string">Name</option>
         </optgroup>
         <optgroup>
             <optgroup name="location" fields="one" requires="personality archetype eon_id grn">
@@ -6023,7 +6023,7 @@
                 </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
-            <option name="hostlink" type="string">Hostlink name</option>
+            <option name="hostlink" altnames="subdir" type="string">Hostlink name</option>
             <option name="all" type="flag" conflicts="holder hostlink">List all hostlinks</option>
         </optgroup>
         <optgroup>
@@ -6064,7 +6064,10 @@
                 </optgroup>
                 <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
             </optgroup>
-            <option name="hostlink" type="string">Hostlink name</option>
+            <option name="hostlink" altnames="subdir" type="string">Hostlink name</option>
+            <option name="owner" type="string">Username to be owner of the target directory</option>
+            <option name="group" type="string">Group owner of the target directory</option>
+            <option name="mode" type="string">Mode (octal) to apply on hostlink target</option>
         </optgroup>
         <optgroup>
             <optgroup name="location" fields="one" requires="personality archetype eon_id grn">

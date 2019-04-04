@@ -59,10 +59,15 @@
                     </group>
                 </arg>
             </group>
-            <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
             <group choice="req">
-                <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
-                <arg choice="plain" rep="repeat"><option>--parent <replaceable>PARENT</replaceable></option></arg>
+                <arg choice="plain">
+                    <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+                    <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
+                </arg>
+                <arg choice="plain">
+                    <arg choice="plain"><option>--subdir <replaceable>SUBDIR</replaceable></option></arg>
+                    <arg choice="plain" rep="repeat"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+                </arg>
             </group>
             <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
             <arg><option>--group <replaceable>GROUP</replaceable></option></arg>
@@ -235,6 +240,11 @@
                         A name for the hostlink. This is the name that appears in
                         /var/hostlinks. It must be unique to the cluster, host or
                         resourcegroup to which this resource is assigned.
+
+                        Multiple names can be specified, comma-separated, or the
+                        parameter can be repeated, when used with --subdir, as will
+                        represent in such cases the hostlinks underneath which
+                        to create the sub directory.
                     </para>
                 </listitem>
             </varlistentry>
@@ -260,14 +270,14 @@
             </varlistentry>
             <varlistentry>
                 <term>
-                    <option>--parent <replaceable>PARENT</replaceable></option>
+                    <option>--subdir <replaceable>SUBDIR</replaceable></option>
                 </term>
                 <listitem>
                     <para>
-                        The parent hostlink(s). When specified instead of the
-                        target, a target directory with the name of that
-                        hostlink will be created underneath each hostlink
-                        which name matches one of the listed parents.
+                        A subdirectory to create under a list of provided
+                        hostlinks.  When specified, this will not per-se
+                        create a hostlink but will create a subdirectory
+                        under those hostlinks _if_ they exist on the host.
                     </para>
                 </listitem>
             </varlistentry>
@@ -305,6 +315,15 @@ aq add hostlink --cluster ny01vv \
     --hostlink nyqsanless1  \
     --target /var/spool/hostlinks/nyqsanless1 \
     --owner zeti --group fwpbatch
+            </programlisting>
+        </example>
+        <example>
+            <title>Adding a subdirectory</title>
+            <programlisting>
+aq add_hostlink --hostname foo.example.com \
+    --subdir foo \
+    --hostlink bar,baz \
+    --owner alice
             </programlisting>
         </example>
     </refsect1>

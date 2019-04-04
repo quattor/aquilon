@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2015,2018  Contributor
+# Copyright (C) 2008-2015,2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ class CommandSearchResource(BrokerCommand):
 
     resource_class = None
     resource_name = None
+
+    def filter_by(self, q, **kwargs):
+        return q
 
     def render(self, session, logger, hostname, cluster, metacluster,
                personality=None, archetype=None, grn=None, eon_id=None,
@@ -61,6 +64,8 @@ class CommandSearchResource(BrokerCommand):
             q = q.filter_by(holder=who)
         else:
             who = None
+
+        q = self.filter_by(q, **kwargs)
 
         results = q.all()
         if who:
