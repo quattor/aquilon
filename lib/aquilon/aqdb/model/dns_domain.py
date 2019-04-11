@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -97,3 +97,19 @@ class DnsDomain(Base):
             self.check_label(part)
 
         super(DnsDomain, self).__init__(name=name, **kwargs)
+
+    def get_associated_locations(self, location_class, session):
+        """Get location_class locations that use this domain as their default.
+
+        Return a list of locations of class location_class that have this DNS
+        domain set as their default_dns_domain.  This intentionally ignores
+        default_dns_domain inherited from parents (i.e. only locations that
+        directly and explicitly define this DNS domain as their default DNS
+        domain are returned).
+
+        :param location_class: a location class (e.g. Building, or Room)
+        :param session: an sqlalchemy.orm.session.Session object
+        :return: a list of locations satisfying the given criteria
+        """
+        return session.query(location_class).filter_by(
+            default_dns_domain=self).all()

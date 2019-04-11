@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 """Contains the logic for `aq add host`."""
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.model import DnsDomain
 from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource,
                                 Archetype, Bunker, Building)
 from aquilon.utils import validate_nlist_key
@@ -50,7 +51,33 @@ class CommandAddHost(BrokerCommand):
 
     def render(self, session, logger, plenaries, hostname, machine, archetype,
                zebra_interfaces, user, justification, reason,
-               exporter, skip_dsdb_check=False, **arguments):
+               exporter, skip_dsdb_check=False, force_dns_domain=False,
+               **arguments):
+        """Extend the superclass method to render the add_host command.
+
+        :param session: an sqlalchemy.orm.session.Session object
+        :param logger: an aquilon.worker.logger.RequestLogger object
+        :param plenaries: PlenaryCollection()
+        :param hostname: a string with a hostname / FQDN for the new host
+        :param machine: a string with the name of the machine for the new host
+        :param archetype: a string with an archetype name
+        :param zebra_interfaces: interfaces on which to configure Zebra
+        :param user: a string with the principal / user who invoked the command
+        :param justification: authorization tokens (e.g. TCM number or
+                              "emergency") to validate the request (None or
+                              str)
+        :param reason: a human-readable description of why the operation was
+                       performed (None or str)
+        :param exporter: an aquilon.worker.exporter.Exporter object
+        :param force_dns_domain: if True, do not run self._validate_dns_domain
+        :param skip_dsdb_check: when False, an ArgumentError will be raised if
+                                hostname not found in DSDB
+
+        :return: None (on success)
+
+        :raise ArgumentError: on failure (please see the code below to see all
+                              the cases when the error is raised)
+        """
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
@@ -73,6 +100,16 @@ class CommandAddHost(BrokerCommand):
                                     "supported for Aurora hosts.")
 
         validate_nlist_key('hostname', hostname)
+
+        # Check if the given (either with --hostname, or --prefix and
+        # --dns_domain) DNS domain should be allowed for the given machine.
+        # This check was first added to deal with AQUILON-2479 -- i.e. to
+        # prevent users from using domains assigned to other buildings than
+        # the building in which the machine is located.
+        # Skip the checks for other 'add host' commands (e.g. 'add windows
+        # host').
+        if not force_dns_domain:
+            self._validate_dns_domain(hostname, dbmachine, session)
 
         dsdb_runner = DSDBRunner(logger=logger)
         if dbarchetype.name == 'aurora':
@@ -214,3 +251,30 @@ class CommandAddHost(BrokerCommand):
             dbsrv_addr.interfaces = dbifaces
 
         return dbsrv_addr
+
+    @staticmethod
+    def _validate_dns_domain(hostname, dbmachine, session):
+        # Check if the given (either with --hostname, or --prefix and
+        # --dns_domain) DNS domain should be allowed for the given machine.
+        # This check was first added to deal with AQUILON-2479 -- i.e. to
+        # prevent users from using domains assigned to other buildings than
+        # the building in which the machine is located.
+        dns_domain = hostname.split('.', 1)[-1]
+        dns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+        buildings = dns_domain.get_associated_locations(Building, session)
+        my_building = dbmachine.location.get_p_dict('building')
+        if my_building is not None and buildings and my_building not in \
+                buildings:
+            raise ArgumentError(
+                'DNS domain "{domain}" is already being used as the default '
+                'domain for other buildings (e.g. {buildings}).  The machine '
+                'you have selected is located in building "{building}", which '
+                'is not associated with this domain.  Please use '
+                '--force_dns_domain if you really know what you are doing and '
+                'insist on using this domain for a host located in building '
+                '"{building}".'.format(
+                    domain=dns_domain.name,
+                    # We do not want hundreds of buildings listed in the error
+                    # message.
+                    buildings=', '.join([b.name for b in buildings[:3]]),
+                    building=my_building.name))

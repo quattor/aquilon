@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -768,6 +768,124 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)
         self.matchoutput(out, "Used by GRN: grn:/example/cards [target: esp]", command)
+
+    def _prepare_for_500(self, dns_domain):
+        cases = {'wrong': {'building': 'ut'}, 'right': {'building': 'cards'}}
+        for case in cases:
+            cases[case]['dns_domain'] = dns_domain
+            for k in ('desk', 'machine', 'prefix', 'net'):
+                cases[case][k] = '{}{}'.format(case, k)
+            cases[case]['net'] = '{}net'.format(case)
+            cases[case]['host'] = '{}1'.format(cases[case]['prefix'])
+            cases[case]['fqhn'] = '{}.{}'.format(
+                cases[case]['host'], cases[case]['dns_domain'])
+            net = self.net.allocate_network(
+                self, cases[case]['net'], 28, 'unknown',
+                'building', cases[case]['building'])
+            cases[case]['mac'] = net.usable[0].mac
+            cases[case]['ip'] = net.usable[0]
+            if case == 'right':
+                # Set the default DNS domain for the right building.
+                command = ['update_building',
+                           '--building', cases[case]['building'],
+                           '--default_dns_domain', dns_domain]
+                self.successtest(command)
+            command = ['add_desk', '--desk', cases[case]['desk'],
+                       '--building', cases[case]['building']]
+            self.successtest(command)
+            self.create_machine_dl360g9(
+                cases[case]['machine'], desk=cases[case]['desk'],
+                eth0_mac=cases[case]['mac'])
+        return cases
+
+    def _clean_up_after_500(self, cases):
+        # Clean up.
+        for case in cases:
+            command = ['del_host', '--hostname={}'.format(cases[case]['fqhn'])]
+            self.dsdb_expect_delete(cases[case]['ip'])
+            self.successtest(command)
+            self.noouttest(['del_machine',
+                            '--machine', cases[case]['machine']])
+            self.net.dispose_network(self, cases[case]['net'])
+            command = ['del_desk', '--desk', cases[case]['desk']]
+            self.successtest(command)
+            if case == 'right':
+                # Unset the default DNS domain for the right building.
+                command = ['update_building',
+                           '--building', cases[case]['building'],
+                           '--default_dns_domain', '']
+                self.successtest(command)
+
+    def verify_dns_domain_for_buildings(self, extend_command):
+        # Set up.
+        dns_domain = 'cards.example.com'
+        cases = self._prepare_for_500(dns_domain)
+        osver = self.config.get('unittest', 'linux_version_curr')
+        common = ['add_host', '--domain', 'unittest', '--archetype', 'aquilon',
+                  '--osname', 'linux', '--osversion', osver]
+        # Test.
+        for case in cases:
+            command = common[:]
+            command.extend(['--ip', cases[case]['ip'],
+                            '--machine', cases[case]['machine']])
+            extend_command(command, cases[case])
+            self.dsdb_expect_add(cases[case]['fqhn'], cases[case]['ip'],
+                                 'eth0', cases[case]['mac'])
+            if case == 'right':
+                # Try to add a host that uses a DNS domain used as the default
+                # for the building in which the machine is located. This should
+                # succeed.
+                self.successtest(command)
+                # After leaving this conditional, verify if the right machine
+                # without --force_dns_domain worked.
+            else:
+                # Try to add a host that uses a DNS domain used as the default
+                # DNS domain for a building other than the one in which the
+                # machine is located.  This should fail.
+                # Verify if the wrong machine without --force_dns_domain failed
+                # and suggested the use of --force_dns_domain to override.
+                failing_command = command[:]
+                out = self.badrequesttest(failing_command)
+                self.searchoutput(
+                    out,
+                    (r'DNS domain "' + dns_domain + r'" is already.*'
+                     + r'being .* other buildings \(e.g. [^)]*'
+                     + cases['right']['building']
+                     + r'.*The machine .* is located in building "'
+                     + cases[case]['building']
+                     + r'".* not associated with this domain'
+                     + r'.* use --force_dns_domain.*'),
+                    failing_command)
+                # Try to add a host that uses a DNS domain used as the default
+                # DNS domain for a building other than the one in which the
+                # machine is located.  Use the --force_dns_domain switch.  This
+                # should succeed.
+                succeeding_command = failing_command[:]
+                succeeding_command.append('--force_dns_domain')
+                self.successtest(succeeding_command)
+                # After leaving this conditional, verify if the wrong machine
+                # with --force_dns_domain worked.
+            # Verify if the right machine without --force_dns_domain and/or
+            # the wrong machine with --force_dns_domain worked.
+            verify_command = ['show_host', '--format=proto',
+                              '--hostname={}'.format(cases[case]['fqhn'])]
+            host = self.protobuftest(verify_command, expect=1)[0]
+            self.assertEqual(host.hostname, cases[case]['host'])
+            self.assertEqual(host.dns_domain, cases[case]['dns_domain'])
+            self.assertEqual(host.fqdn, cases[case]['fqhn'])
+        # Clean up.
+        self._clean_up_after_500(cases)
+
+    def test_500_verify_hostname_for_building(self):
+        def extend_command(command, case_data):
+            command.extend(['--hostname', case_data['fqhn']])
+        self.verify_dns_domain_for_buildings(extend_command=extend_command)
+
+    def test_500_verify_dns_domain_with_prefix_for_building(self):
+        def extend_command(command, case_data):
+            command.extend(['--prefix', case_data['prefix'],
+                            '--dns_domain', case_data['dns_domain']])
+        self.verify_dns_domain_for_buildings(extend_command=extend_command)
 
     def test_800_verify_host_all(self):
         command = ["show", "host", "--all"]
