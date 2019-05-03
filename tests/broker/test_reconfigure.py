@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -922,6 +922,37 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                                     servicedir])
         self.assertFalse(results, "Found service plenary data that includes "
                          "aquilon93.aqd-unittest.ms.com")
+
+    def test_3020_duplicate_list_entries_rejected(self):
+        # A regression test for AQUILON-616.
+        # When running something like `aq reconfigure --hostlist`, the command
+        # gets a transaction detail entry in the audit table in the database
+        # for every host in the list. We have a uniqueness constraint across
+        # this table, so when the same request tries to have two entries for
+        # argument 'hostlist' with the same host value, a database constraint
+        # is triggered, e.g.:
+        #
+        # $ aq reconfigure --hostlist /var/tmp/doranada/hostlist
+        # Internal Server Error: (IntegrityError) ORA-00001: unique constraint
+        #  (AQAUDIT.XTN_DTL_PK) violated
+        #
+        # Instead of throwing the above error, or transparently throwing
+        # away an action, the broker should report an error to the user and
+        # tell them to de-duplicate their input. That puts the responsibility
+        # on the user to fix their input.
+        hosts = ['unittest00.one-nyp.ms.com',
+                 'unittest01.one-nyp.ms.com', 'unittest01.one-nyp.ms.com',
+                 'unittest02.one-nyp.ms.com']
+
+        scratchfile = self.writescratch(
+            'hostlist-with-duplicates', '\n'.join(hosts))
+        command = ['reconfigure', '--list', scratchfile]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         'Provided list contains duplicate entry: '
+                         'unittest01.one-nyp.ms.com',
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
