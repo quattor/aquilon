@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2012-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +16,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Contains the logic for `aq update building`."""
-
 from sqlalchemy.orm import with_polymorphic
 
+from aquilon.aqdb.model import Building
+from aquilon.aqdb.model import City
+from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import DnsDomain
+from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import Network
+from aquilon.aqdb.model import NetworkDevice
+from aquilon.aqdb.model import ServiceMap
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Building, City, HardwareEntity, Machine,
-                                NetworkDevice, ServiceMap, Cluster, Network)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import update_location
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
-
 
 class CommandUpdateBuilding(BrokerCommand):
     requires_plenaries = True
@@ -33,9 +39,48 @@ class CommandUpdateBuilding(BrokerCommand):
     required_parameters = ["building"]
 
     def render(self, session, logger, plenaries, building, city, address,
-               fullname, uri, default_dns_domain, comments, netdev_require_rack, user,
-               justification, reason, force_uri, next_rackid, **kwargs):
+               fullname, uri, default_dns_domain, comments,
+               netdev_require_rack, user, justification, reason, force_uri,
+               next_rackid, force_dns_domain, **kwargs):
+        """Extend the superclass method to render the update_building command.
+
+        :param session: an sqlalchemy.orm.session.Session object
+        :param logger: an aquilon.worker.logger.RequestLogger object
+        :param plenaries: PlenaryCollection()
+        :param building: a string with the name of the building
+        :param city: a string with the name of the city in which the
+                     building is located
+        :param address: a string with the address of the building
+        :param fullname: a full descriptive name of the building
+        :param uri: a reference to a unique identifier in another system
+        :param default_dns_domain: a string with the default DNS domain for
+                                   the building
+        :param comments: a string with comments
+        :param netdev_require_rack: if True, restrict this building to require
+                                    racks as location for network devices
+                                    rather than building
+        :param user: a string with the principal / user who invoked the command
+        :param justification: authorization tokens (e.g. TCM number or
+                              "emergency") to validate the request (None or
+                              str)
+        :param reason: a human-readable description of why the operation was
+                       performed (None or str)
+        :param force_uri: if True, bypass URI validation
+        :param next_rackid: a numeric part of the next rack name in the
+                            building
+        :param force_dns_domain: if True, do not run self._validate_dns_domain
+
+        :return: None (on success)
+
+        :raise ArgumentError: on failure (please see the code below to see all
+                              the cases when the error is raised)
+        """
         dbbuilding = Building.get_unique(session, building, compel=True)
+
+        # Check if the given default DNS domain should be allowed for the
+        # given building.
+        if default_dns_domain and not force_dns_domain:
+            self._validate_dns_domain(default_dns_domain, dbbuilding, session)
 
         old_city = dbbuilding.city
 
@@ -116,3 +161,24 @@ class CommandUpdateBuilding(BrokerCommand):
             dsdb_runner.commit_or_rollback()
 
         return
+
+    @staticmethod
+    def _validate_dns_domain(dns_domain, building, session):
+        # Check if the given default DNS domain should be allowed for the
+        # given building.
+        # If the domain is already assigned to other buildings as their default
+        # DNS domain, raise an exception.
+        dns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+        buildings = dns_domain.get_associated_locations(Building, session)
+        if building is not None and buildings and building not in buildings:
+            raise ArgumentError(
+                'DNS domain "{domain}" is already being used as the default '
+                'domain for other buildings (e.g. {buildings}).  Please use '
+                '--force_dns_domain if you really know what you are doing and '
+                'insist on using this domain as the default DNS domain for '
+                'building "{building}".'.format(
+                    domain=dns_domain.name,
+                    # We do not want hundreds of buildings listed in the error
+                    # message.
+                    buildings=', '.join([b.name for b in buildings[:3]]),
+                    building=building.name))

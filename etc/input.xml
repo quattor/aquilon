@@ -3162,6 +3162,7 @@
             <option name="fullname" type="string">Full, descriptive name</option>
             <option name="next_rackid" type="int">Numeric part of the next rack name in the building</option>
             <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
+            <option name="force_dns_domain" type="flag" requires="default_dns_domain">Force the system to use the given DNS domain even if its use for the given building would generally be discouraged.</option>
             <option name="uri" type="string">Reference to a unique identifier in another system.</option>
             <option name="netdev_require_rack" type="boolean">Restrict this building to require racks as location for network devices rather than building</option>
             <option name="comments" type="string">Comments</option>

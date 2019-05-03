@@ -109,6 +109,90 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
                          command)
 
+    def _preconditions_for_force_dns_domain_tests(self, domain, building,
+                                                  another_building):
+        # First, we need to be sure that domain is not already assigned to
+        # building.
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchclean(out, 'Default DNS Domain', command)
+        self.matchclean(out, domain, command)
+        # Make sure that domain is already assigned to another_building.
+        command = ['show_building', '--building', another_building]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Default DNS Domain: {}'.format(domain), command)
+
+    def test_133_force_dns_domain_requires_default_dns_domain(self):
+        # An attempt to use --force_dns_domain without providing
+        # --default_dns_domain should fail with a warning.
+        command = ['update_building', '--building', 'any-building',
+                   '--force_dns_domain']
+        out = self.badoptiontest(command)
+        self.matchoutput(out, 'force_dns_domain can only be used together with'
+                              ' one of: default_dns_domain.', command)
+
+    def test_133_cannot_use_dns_domain_already_used_by_another_building(
+            self):
+        # The domain we will use for testing:
+        domain = 'aqd-unittest.ms.com'
+        # The building to which we will try to assign the domain:
+        building = 'ut'
+        # The building that already uses the domain (i.e. has it assigned as
+        # its default DNS domain):
+        another_building = 'tu'
+
+        self._preconditions_for_force_dns_domain_tests(domain, building,
+                                                       another_building)
+
+        # An attempt to assign domain to building should fail with a warning.
+        command = ['update_building', '--building', building,
+                   '--default_dns_domain', domain]
+        out = self.badrequesttest(command)
+        self.searchoutput(
+            out,
+            (r'DNS domain "' + domain + r'" is already.*'
+             + r'being .* other buildings \(e.g. [^)]*' + another_building
+             + r'.* use --force_dns_domain.*'
+             + r'as the default DNS domain for building "' + building
+             ),
+            command)
+        # The default DNS domain for building should still be unset at this
+        # point.
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchclean(out, 'Default DNS Domain', command)
+        self.matchclean(out, domain, command)
+
+    def test_133_default_dns_domain_used_by_another_building_can_be_forced(
+            self):
+        # The domain we will use for testing:
+        domain = 'aqd-unittest.ms.com'
+        # The building to which we will try to assign the domain:
+        building = 'ut'
+        # The building that already uses the domain (i.e. has it assigned as
+        # its default DNS domain):
+        another_building = 'tu'
+
+        self._preconditions_for_force_dns_domain_tests(domain, building,
+                                                       another_building)
+
+        # An attempt to assign domain to building should succeed.
+        command = ['update_building', '--building', building,
+                   '--default_dns_domain', domain, '--force_dns_domain']
+        self.noouttest(command)
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Default DNS Domain: {}'.format(domain), command)
+
+        # Clean up.
+        command = ['update_building', '--building', building,
+                   '--default_dns_domain', '']
+        self.noouttest(command)
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchclean(out, 'Default DNS Domain', command)
+        self.matchclean(out, domain, command)
+
     def test_135_update_tu_nodnsdomain(self):
         command = ["update", "building", "--building", "tu",
                    "--default_dns_domain", ""]
