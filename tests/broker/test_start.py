@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,9 +50,11 @@ class TestBrokerStart(TestBrokerReStart):
         git = self.config.lookup_tool("git")
         if source.startswith("git://"):
             # Easy case - just clone the source repository
-            start = None
-            if self.config.has_option("unittest", "template_alternate_prod"):
+            start = os.environ.get('AQD_UNITTEST_TEMPLATE_ALTERNATE_PROD')
+            if not start and \
+               self.config.has_option("unittest", "template_alternate_prod"):
                 start = self.config.get("unittest", "template_alternate_prod").strip()
+
             if not start:
                 start = "prod"
 

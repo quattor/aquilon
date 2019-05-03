@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2012,2013,2015,2016  Contributor
+# Copyright (C) 2008-2010,2012-2013,2015-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,10 @@ class TestDelFilesystem(TestBrokerCommand):
 
     def test_del_filesystem(self):
         command = ["del_filesystem", "--filesystem=fs2",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+        command = ["del_filesystem", "--filesystem=iscsi0",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 

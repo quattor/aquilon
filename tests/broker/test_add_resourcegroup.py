@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
+        self.matchoutput(out, "Transport Type: None", command)
+        self.matchoutput(out, "Transport ID: None", command)
 
     def test_115_show_resourcegroup(self):
         command = ["show", "resourcegroup", "--resourcegroup", "utvcs1as1"]

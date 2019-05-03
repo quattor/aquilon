@@ -1,0 +1,3 @@
+ALTER TABLE filesystem DROP COLUMN transport_type;
+ALTER TABLE filesystem DROP COLUMN transport_ident;
+

@@ -141,6 +141,12 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "mountopts", opts)
         pan_assign(lines, "freq", self.dbobj.dumpfreq)
         pan_assign(lines, "pass", self.dbobj.passno)
+        if self.dbobj.transport_type:
+            txptid = ""
+            if self.dbobj.transport_ident:
+                txptid = self.dbobj.transport_ident
+            pan_assign(lines, "transport",
+                       {self.dbobj.transport_type: txptid})
 
     def body_application(self, lines):
         pan_assign(lines, "eonid", self.dbobj.eon_id)

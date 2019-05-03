@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt1", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
+        self.matchoutput(out, "Transport Type: None", command)
+        self.matchoutput(out, "Transport ID: None", command)
         self.matchoutput(out, "Comments: Some filesystem comments", command)
 
         command = ["show_filesystem", "--filesystem", "fs1",
@@ -111,6 +113,8 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt2", command)
         self.matchoutput(out, "Dump Freq: 0", command)
         self.matchoutput(out, "Fsck Pass: 2", command)
+        self.matchoutput(out, "Transport Type: None", command)
+        self.matchoutput(out, "Transport ID: None", command)
         self.matchclean(out, "Comments", command)
 
         command = ["show_filesystem", "--filesystem", "fs2",
@@ -126,6 +130,7 @@ class TestAddFilesystem(TestBrokerCommand):
         self.assertEqual(fs.fsdata.opts, "")
         self.assertEqual(fs.fsdata.freq, 0)
         self.assertEqual(fs.fsdata.passno, 2)
+        # TODO: protobuf entry for fs.fsdata.transport
 
         command = ["cat", "--hostname", "server1.aqd-unittest.ms.com",
                    "--filesystem", "fs2"]
@@ -189,6 +194,8 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
+        self.matchoutput(out, "Transport Type: None", command)
+        self.matchoutput(out, "Transport ID: None", command)
         self.matchoutput(out, "Comments: Some cluster filesystem comments", command)
 
         command = ["show_filesystem", "--all"]
@@ -216,9 +223,47 @@ class TestAddFilesystem(TestBrokerCommand):
                          "--hostname", "evh83.aqd-unittest.ms.com",
                          "--resourcegroup", "utrg2"])
 
-    def test_60_show_all_proto(self):
+    def test_60_transport_type_required(self):
+        command = ["add_filesystem", "--filesystem=iscsi0",
+                   "--type=ext4", "--mountpoint=/d/unixeng/iscsi0",
+                   "--blockdevice=/dev/vx/dsk/dg.0/iscsi0", "--nobootmount",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--transport_id=iqn.2019-01.com.ms:iscsitest"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out,
+                         'Option or option group transport_id can only be '
+                         'used together with one of: transport_type',
+                         command)
+
+    def test_70_add_iscsi_fs_host(self):
+        command = ["add_filesystem", "--filesystem=iscsi0",
+                   "--type=ext4", "--mountpoint=/d/unixeng/iscsi0",
+                   "--blockdevice=/dev/vx/dsk/dg.0/iscsi0", "--nobootmount",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--transport_type=iscsi",
+                   "--transport_id=iqn.2019-01.com.ms:iscsitest"]
+        self.successtest(command)
+
+        command = ["show_filesystem", "--filesystem=iscsi0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Transport Type: iscsi", command)
+        self.matchoutput(out, "Transport ID: iqn.2019-01.com.ms:iscsitest",
+                         command)
+
+        command = ["cat", "--hostname=server1.aqd-unittest.ms.com",
+                   "--filesystem=iscsi0"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"transport" = nlist\(\s*'
+                          r'"iscsi",\s*"iqn\.2019-01\.com\.ms:iscsitest"'
+                          r'\s*\);\s*',
+                          command)
+
+        # TODO: protobuf output for transport
+
+    def test_80_show_all_proto(self):
         command = ["show", "filesystem", "--all", "--format", "proto"]
-        self.protobuftest(command, expect=6)
+        self.protobuftest(command, expect=7)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)

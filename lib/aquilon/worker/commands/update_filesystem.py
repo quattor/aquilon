@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Filesystem
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_resource import CommandUpdateResource
 
@@ -26,7 +27,9 @@ class CommandUpdateFilesystem(CommandUpdateResource):
     resource_class = Filesystem
     resource_name = "filesystem"
 
-    def update_resource(self, dbresource, session, logger, type, mountpoint, blockdevice, bootmount, dumpfreq, fsckpass, options, **_):
+    def update_resource(self, dbresource, session, logger, type, mountpoint,
+                        blockdevice, bootmount, dumpfreq, fsckpass, options,
+                        transport_type, transport_id, **_):
         if type is not None:
             dbresource.fstype = type
 
@@ -47,3 +50,14 @@ class CommandUpdateFilesystem(CommandUpdateResource):
 
         if options is not None:
             dbresource.mountoptions = options
+
+        if transport_type:
+            dbresource.transport_type = transport_type
+        else:
+            dbresource.transport_ident = None
+
+        if transport_id is not None:
+            if not transport_type:
+                raise ArgumentError("Cannot set transport ID if "
+                                    "no transport type")
+            dbresource.transport_ident = transport_id
