@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -494,6 +494,18 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               r'\);' % (share, machine, share),
                               command)
 
+    def _270_update_ut_dnsdomain(self):
+        # Needed by test_270_add_hosts and test_271_add_host_prefix.
+        # Set aqd-unittest.ms.com as the default DNS domain for building 'ut'.
+        command = ['update_building', '--building', 'ut',
+                   '--default_dns_domain', 'aqd-unittest.ms.com']
+        self.noouttest(command)
+        # Confirm that the domain for the building has been set.
+        command = ['show_building', '--building', 'ut']
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Default DNS Domain: aqd-unittest.ms.com',
+                         command)
+
     # Because the machines are allocated across portgroups, the IP addresses
     # allocated by autoip also differ
     # evm10 -> self.net["ut01ga2s01_v710"].usable[0]
@@ -505,6 +517,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
     # evm19 -> self.net["ut01ga2s02_v710"].usable[0]
     # and the above pattern repeats
     def test_270_add_hosts(self):
+        self._270_update_ut_dnsdomain()
         # Skip index 8 and 17 - these don't have interfaces. Index 16 will be
         # used for --prefix testing.
         mac_prefix = "00:50:56:01:20"

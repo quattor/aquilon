@@ -84,11 +84,19 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
                          command)
 
-    def test_125_verify_ut_dnsdomain(self):
-        command = ["show", "building", "--building", "ut"]
+    def test_126_update_ut_nodnsdomain(self):
+        # Clean up (caused problems in test_build_clusters after the update
+        # that introduced 'add host --force-dns-domain')
+        command = ['update_building', '--building', 'ut',
+                   '--default_dns_domain', '']
+        self.noouttest(command)
+
+    def test_127_verify_ut_dnsdomain_gone(self):
+        # Confirm it has been cleaned up (see: test_126_update_... above).
+        command = ['show_building', '--building', 'ut']
         out = self.commandtest(command)
-        self.matchoutput(out, "Default DNS Domain: aqd-unittest.ms.com",
-                         command)
+        self.matchclean(out, 'Default DNS Domain', command)
+        self.matchclean(out, 'aqd-unittest.ms.com', command)
 
     def test_130_update_tu_dnsdomain(self):
         command = ["update", "building", "--building", "tu",
