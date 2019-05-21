@@ -23,11 +23,14 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from brokertest import TestBrokerCommand
+from broker.machinetest import MachineTestMixin
 from broker.personalitytest import PersonalityTestMixin
+from broker.utils import MockHub
+from brokertest import TestBrokerCommand
 
 
-class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
+class TestUpdateBuilding(PersonalityTestMixin, MachineTestMixin,
+                         TestBrokerCommand):
     def test_100_updateaddress(self):
         self.dsdb_expect("update_building_aq -building_name tu "
                          "-building_addr 24 Cherry Lane")
@@ -192,6 +195,63 @@ class TestUpdateBuilding(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, 'Default DNS Domain', command)
         self.matchclean(out, domain, command)
+
+    def test_133_cannot_change_dns_domain_if_some_hosts_still_aligned_to_it(
+            self):
+        # If there are hosts in a building that align with the building's
+        # default DNS domain, and then that building's default DNS domain is
+        # subsequently changed, command 'aq update_building ...
+        # --default_dns_domain ...' should emit a warning and abort unless
+        # '--force_dns_domain' is used.
+        mh = MockHub(self)
+        building = mh.add_building()
+        mh.add_hosts(2, building=building)
+        old_dns_domain = mh.add_dns_domain('old.ms.cc')
+        self.noouttest(['update_building', '--building', building,
+                        '--default_dns_domain', old_dns_domain])
+        # Add a host aligned with the default DNS domain old_dns_domain.
+        mh.add_host(building=building)
+        new_dns_domain = mh.add_dns_domain('new.ms.cc')
+        command = ['update_building', '--building', building,
+                   '--default_dns_domain', new_dns_domain]
+        # An attempt to assign domain to building should fail with a warning.
+        out = self.badrequesttest(command)
+
+        self.searchoutput(
+            out,
+            (r'There is at least one host in building .*' + building
+             + r'.* that is aligned with the default DNS domain currently.*'
+             + r'Use --force_dns_domain to override .*'
+             + r'the current default DNS domain to "' + new_dns_domain),
+            command)
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Default DNS Domain: {}'.format(old_dns_domain),
+                         command)
+        mh.delete()
+
+    def test_133_dns_domain_change_can_be_forced_even_if_hosts_use_previous(
+            self):
+        # Option --force_dns_domain should allow the default DNS domain to
+        # be changed even if there are still some host aligned to the
+        # previous default DNS domain in the building.
+        mh = MockHub(self)
+        building = mh.add_building()
+        mh.add_hosts(2, building=building)
+        old_dns_domain = mh.add_dns_domain('old.ms.cc')
+        self.noouttest(['update_building', '--building', building,
+                        '--default_dns_domain', old_dns_domain])
+        # Add a host aligned with the default DNS domain old_dns_domain.
+        mh.add_host(building=building)
+        new_dns_domain = mh.add_dns_domain('new.ms.cc')
+        self.successtest(['update_building', '--building', building,
+                          '--default_dns_domain', new_dns_domain,
+                          '--force_dns_domain'])
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Default DNS Domain: {}'.format(new_dns_domain),
+                         command)
+        mh.delete()
 
     def test_135_update_tu_nodnsdomain(self):
         command = ["update", "building", "--building", "tu",
