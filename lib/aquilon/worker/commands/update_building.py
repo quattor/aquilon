@@ -168,6 +168,11 @@ class CommandUpdateBuilding(BrokerCommand):
     @staticmethod
     def _validate_dns_domain(dns_domain, building, session):
         dns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+        if dns_domain == building.default_dns_domain:
+            # When the currently set default DNS domain is the same as the
+            # "new" one, we assume that it is valid, and skip all further
+            # checks for the sake of performance.
+            return
         # Check if the given default DNS domain should be allowed for the
         # given building.
         # If the domain is already assigned to other buildings as their default
