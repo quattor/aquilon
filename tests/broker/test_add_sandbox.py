@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2010-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@
 """Module for testing the add sandbox command."""
 
 import os
-
+import re
+import subprocess
 import unittest
 
 if __name__ == "__main__":
@@ -122,13 +123,40 @@ class TestAddSandbox(TestBrokerCommand):
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def test_121_umask(self):
-        old_umask = os.umask(0000)
-        command = ["add", "sandbox", "--sandbox", "umasktest"]
+        sandbox = 'umasktest'
+        # Store old umask to restore it after the test.
+        old_umask = os.umask(0)
+        # Get rid of all ACLs (access and default) that might be imposed by
+        # the test environment (e.g. train/jenkins).
+        # TODO: Replace check_output with pylibacl when this library becomes
+        #       available at the firm.
+        subprocess.check_output(['setfacl', '-b', self.sandboxdir])
+        command = ['add_sandbox', '--sandbox', sandbox]
         self.successtest(command)
-        sandboxdir = os.path.join(self.sandboxdir, "umasktest")
-        sandboxmode = os.stat(sandboxdir).st_mode & 0o777
         os.umask(old_umask)
-        self.assertEqual(sandboxmode, 0o755)
+        sandboxdir = os.path.join(self.sandboxdir, sandbox)
+        # Check mode of the sandbox directory the old way (i.e. the way this
+        # test was originally written).
+        sandbox_mode = os.stat(sandboxdir).st_mode & 0o777
+        self.assertEqual(sandbox_mode, 0o755)
+        # To double-check, also use getfacl instead of stat to get file
+        # permissions (the train/jenkins environment is now slightly
+        # different in this respect than what is needed in production and may
+        # modify POSIX ACLs).
+        # TODO: Replace check_output with pylibacl when this library becomes
+        #       available at the firm.
+        out = subprocess.check_output(['getfacl', sandboxdir])
+        sandbox_permissions = ''
+        for s in ('user', 'group', 'other'):
+            # Let us ignore effective: as there should be no ACL_MASK at this
+            # point.
+            split = re.split(r'{}::(\S{{3}})'.format(s), out)
+            if len(split) != 3:
+                raise RuntimeError(
+                    'Permissions for {} not found in:\n {}\n'.format(s, out))
+            sandbox_permissions += split[1]
+        # noinspection SpellCheckingInspection
+        self.assertEqual(sandbox_permissions, 'rwxr-xr-x')
 
     def test_125_verify_changetest1(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
