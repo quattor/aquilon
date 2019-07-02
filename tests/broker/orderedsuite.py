@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008-2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -351,6 +351,7 @@ class BrokerTestSuite(unittest.TestSuite):
                   TestPing, TestStatus]
     test_restart = [TestBrokerReStart,
                     TestPing, TestStatus]
+    test_stop = [TestBrokerStop]
     test_list = [TestAddRole, TestPermission,
                  TestAddDnsDomain, TestAddDnsEnvironment,
                  TestAddUserType, TestAddUser, TestShowPermission,
@@ -531,33 +532,77 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestDelUser, TestDelUserType,
                  TestDelDnsEnvironment, TestDelDnsDomain, TestDelRole,
                  TestClientFailure, TestAudit, TestShowActiveCommands,
-                 TestDocumentation, TestBrokerStop]
+                 TestDocumentation]
 
-    def __init__(self, start, *args, **kwargs):
+    def __init__(self, start=None, resume=False, single=False,
+                 *args, **kwargs):
+        if resume and not start:
+            raise ValueError('Cannot resume without a start test given.')
+        # Initialise.
         unittest.TestSuite.__init__(self, *args, **kwargs)
+
+        # Add the required set of non-optional, initialising tests depending on
+        # whether the testing is to be resumed after a prior failed test run or
+        # not.  NB: this set of tests precedes the test given with 'start' (or
+        # test 0 if 'start' not given).
+        for case in (self.test_start, self.test_restart)[resume]:
+            self.addTest(unittest.TestLoader().loadTestsFromTestCase(case))
+        # Load the first (after the required start/restart set) test (and the
+        # remaining tests in case of single not true.  This is either test 0 or
+        # the test given with 'start'.
         if start:
-            try:
-                start_class = start.split('.')[0]
-                start_method = start.split('.')[1]
-                start_index = [test.__name__ for test in self.test_list].index(start_class)
-            except Exception as e:
-                 raise AttributeError("Wrong --start parameter value. Pass --start "
-                       "TestCase.testmethod, to re-start the tests from specific tests.")
-            for test in self.test_restart:
-                self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
+            # Find indices for the given (in the 'TestCase.test_method format')
+            # start method.  The first index we need points to the given test
+            # case (stored in self.test_list).  The second one is the index of
+            # the given test method (on a sorted list of all test methods
+            # defined in the test case class).
+            start_indices = self._get_case_and_method_indices(start)
         else:
-            for test in self.test_start:
-                self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
-        for index, test in enumerate(self.test_list):
-            if start and start_index > index:
-                continue
-            elif start and start_index == index:
-                try:
-                    test_method_list = unittest.TestLoader().loadTestsFromTestCase(test)
-                    test_method_index = [x._testMethodName for x in test_method_list].index(start_method)
-                except Exception as e:
-                    raise AttributeError("Wrong --start parameter value. Pass --start "
-                          "TestCase.testmethod, to re-start the tests from specific tests.")
-                self.addTests(list(test_method_list)[test_method_index:])
-                continue
-            self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
+            start_indices = 0, 0
+        # Load the given start, or the test with index 0, 0.
+        method_list = list(
+            unittest.TestLoader().loadTestsFromTestCase(
+                self.test_list[start_indices[0]])
+        )
+        # We want all the subsequent methods from the selected test
+        # case unless single is True, in which case we do not want to load any
+        # more methods.
+        last_method_index = start_indices[1] + 1 if single else None
+        self.addTests(
+            list(method_list)[start_indices[1]:last_method_index]
+        )
+
+        # When appropriate, load tests from all the remaining (sans stop) test
+        # cases.
+        # We do not want to load any other (than the stop) tests in case of
+        # single.
+        if single:
+            end_case_index = start_indices[0]
+        else:
+            end_case_index = len(self.test_list)
+        for i in range(start_indices[0] + 1, end_case_index):
+            self.addTest(unittest.TestLoader().loadTestsFromTestCase(
+                self.test_list[i]))
+
+        # Add the required end test(s).
+        for case in self.test_stop:
+            self.addTest(unittest.TestLoader().loadTestsFromTestCase(case))
+
+    def _get_case_and_method_indices(self, case_and_method):
+        try:
+            case_name, method_name = case_and_method.split('.')
+            case_index = [test.__name__ for test in self.test_list
+                          ].index(case_name)
+            method_list = list(
+                unittest.TestLoader().loadTestsFromTestCase(
+                    self.test_list[case_index])
+            )
+            # noinspection PyProtectedMember
+            method_index = [method._testMethodName for method in method_list
+                            ].index(method_name)
+        except ValueError:
+            raise ValueError(
+                'Invalid value of the "start" parameter. Please pass --start '
+                'YourSelectedTestCase.your_selected_test_method, to [re]start '
+                'testing from the specified test.')
+        return case_index, method_index

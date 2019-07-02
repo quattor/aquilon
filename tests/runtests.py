@@ -66,41 +66,6 @@ def force_yes(msg):
         print("""Aborting.""", file=sys.stderr)
         sys.exit(1)
 
-parser = argparse.ArgumentParser(description="Run the broker test suite.",
-                                 epilog=epilog)
-parser.add_argument('-v', '--verbose', action='count', dest='verbose',
-                    default=1,
-                    help='list each test name as it runs')
-parser.add_argument('-q', '--quiet', dest='verbose', action='store_const',
-                    const=0,
-                    help='do not print the module names during tests')
-parser.add_argument('-c', '--config', dest='config',
-                    default=default_configfile,
-                    help='supply an alternate config file')
-parser.add_argument('--no-interactive', dest='interactive',
-                    action='store_false', default=True,
-                    help='automatically send yes to queries')
-parser.add_argument('--coverage', action='store_true',
-                    help='generate code coverage metrics for the broker in '
-                         'logs/coverage')
-parser.add_argument('--profile', action='store_true',
-                    help='generate profiling information for the broker in '
-                         'logs/aqd.profile (currently broken)')
-parser.add_argument('-m', '--mirror', action='store_true',
-                    help='copy source to an alternate location and re-exec')
-parser.add_argument('-s', '--start', action='store',
-                    help='Start from tests from this test method. '
-                         'Pass TestCase.testmethod which to start tests from.')
-parser.add_argument('-f', '--failfast', action='store_true',
-                    help='Add failfast=True option to TestRunner. This will stop '
-                         'unittests immediatelly if any failure.')
-parser.add_argument('--skip', action='append', choices=('unit', 'integration'),
-                    type=str.lower, default=[],
-                    help='Skip some tests (choices: unit, integration)')
-
-
-opts = parser.parse_args()
-
 
 def run_unit_tests(interactive):
     command = 'run_unit_tests.py'
@@ -109,6 +74,57 @@ def run_unit_tests(interactive):
     print('\n\nExecuting {} to run unit tests...'.format(command))
     return call('{} {}'.format(path, option), shell=True)
 
+
+def get_options(epilog):
+    parser = argparse.ArgumentParser(description='Run the broker test suite.',
+                                     epilog=epilog)
+    parser.add_argument('-v', '--verbose', action='count', dest='verbose',
+                        default=1,
+                        help='list each test name as it runs')
+    parser.add_argument('-q', '--quiet', dest='verbose', action='store_const',
+                        const=0,
+                        help='do not print the module names during tests')
+    parser.add_argument('-c', '--config', dest='config',
+                        default=default_configfile,
+                        help='supply an alternate config file')
+    parser.add_argument('--no-interactive', dest='interactive',
+                        action='store_false', default=True,
+                        help='automatically send yes to queries')
+    parser.add_argument('--coverage', action='store_true',
+                        help='generate code coverage metrics for the'
+                             ' broker in logs/coverage')
+    parser.add_argument('--profile', action='store_true',
+                        help='generate profiling information for the broker '
+                             'in logs/aqd.profile (currently broken)')
+    parser.add_argument('-m', '--mirror', action='store_true',
+                        help='copy source to an alternate location and '
+                             're-exec')
+    parser.add_argument('-s', '--start', action='store',
+                        help='Pass TestCase.testmethod to select the test '
+                             'which should be run first. If this option is '
+                             'not used, the first test will be used by '
+                             'default.')
+    parser.add_argument('-1', '--single', action='store_true',
+                        help='Execute a single test (either the first '
+                             'one or the one given with --start).')
+    parser.add_argument('-r', '--resume', action='store_true',
+                        help='Resume tests from the one given with '
+                             '--start, and using the state preserved with '
+                             '--failfast.')
+    parser.add_argument('-f', '--failfast', action='store_true',
+                        help='Abort functional tests on first failure.')
+    parser.add_argument('-x', '--exclude', action='append',
+                        choices=('unit', 'integration'),
+                        type=str.lower, default=[],
+                        help='Do not run any tests of the given type (choices:'
+                             ' unit, integration)')
+    options = parser.parse_args()
+    if options.resume and not options.start:
+        raise argparse.ArgumentError('Option --resume requires --start.')
+    return options
+
+
+opts = get_options(epilog)
 
 if not os.path.exists(opts.config):
     print("configfile %s does not exist" % opts.config, file=sys.stderr)
@@ -169,7 +185,7 @@ if opts.mirror:
     os.execve(sys.executable, args, env)
 
 database_type = config.get('database', 'database_section')
-if opts.start:
+if opts.resume:
     dumfile = config.get('unittest', 'last_success_db_snapshot')
     if not os.path.isfile(dumfile) and database_type == 'database_sqlite':
         print("Tests cannot be started from the test {0}. "
@@ -182,6 +198,11 @@ if opts.start:
 if opts.failfast:
     print("Running unittests with failfast option.")
     os.environ["AQD_UNITTEST_FAILFAST"] = "1"
+
+if opts.single:
+    test_to_run = ('test {}'.format(opts.start) if opts.start
+                   else 'the first test')
+    print('Only {} will be run.'.format(test_to_run))
 
 makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
@@ -215,7 +236,7 @@ dirs = []
 broker_dir_list = ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
                         "profilesdir", "plenarydir", "cfgdir", "kingdir"]
 
-if not opts.start:
+if not opts.resume:
     # FIXME: Need to be careful about attempting to nuke templatesdir.
     dirs = [config.get("unittest", "scratchdir")]
     for label in broker_dir_list:
@@ -247,22 +268,22 @@ for dirname in dirs:
 scratchdir = config.get("unittest", "scratchdir")
 os.environ["AQTEST_SCRATCHDIR"] = scratchdir
 
-if not opts.start and 'unit' not in opts.skip:
+if not opts.resume and not opts.single and 'unit' not in opts.exclude:
     # Real unit tests are fast.  Run them before any other tests.
     if run_unit_tests(opts.interactive) != 0:
         sys.exit('Unit tests fail.  Aborting functional tests.')
     else:
         print('All unit tests pass.  Preparing to run functional tests...\n\n')
 
-if 'integration' not in opts.skip:
+if 'integration' not in opts.exclude:
     suite = unittest.TestSuite()
     # Relies on the oracle rebuild doing a nuke first.
-    if opts.start:
+    if opts.resume:
         if database_type == 'database_sqlite':
             copy_sqldb(config, target='DB')
     else:
         suite.addTest(DatabaseTestSuite())
-    suite.addTest(BrokerTestSuite(opts.start))
+    suite.addTest(BrokerTestSuite(opts.start, opts.resume, opts.single))
     if opts.failfast:
         result = VerboseTextTestRunner(
             config=config, verbosity=opts.verbose, failfast=True).run(suite)
