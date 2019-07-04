@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -197,6 +197,21 @@ class Location(Base):
         session.expire(parent, ["_child_links", "children"])
         session.expire(self, ["_parent_links", "parent", "parents"])
         self._parent_dict = None
+
+    def contains_any_location_of_class(self, location_class, session):
+        """True if at least one object of location_class has this as ancestor.
+
+        :param location_class: a location class (e.g. City, or Room)
+        :param session: an sqlalchemy.orm.session.Session object
+        :return: True if at least one object of class location_class that is
+                 either direct or indirect child of self found (excluding
+                 self), otherwise False
+        """
+        q = (session.query(location_class)
+             .join(LocationLink, LocationLink.parent_id == self.id)
+             .filter(LocationLink.child_id == location_class.id,
+                     LocationLink.child_id != self.id))
+        return session.query(q.exists()).scalar()
 
 
 class LocationLink(Base):

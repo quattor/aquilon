@@ -400,7 +400,8 @@ class MockHub(object):
 
     def delete_countries(self, verify=False):
         for country in self.countries:
-            self._engine.successtest(['del_country', '--country', country])
+            self._engine.successtest(['del_country', '--country', country,
+                                      '--force_non_empty'])
         if verify:
             self._verify_deletion_with_show_all('country', self.countries)
         self.countries = []

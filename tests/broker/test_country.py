@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2015,2016  Contributor
+# Copyright (C) 2011-2013,2015-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ if __name__ == "__main__":
     utils.import_depends()
 
 from brokertest import TestBrokerCommand
+from utils import MockHub
 
 
 class TestCountry(TestBrokerCommand):
@@ -91,6 +92,34 @@ class TestCountry(TestBrokerCommand):
         command = "show country --all"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Country: ct", command)
+
+    def test_400_del_country_fails_with_warning_if_cities_found(self):
+        mh = MockHub(engine=self)
+        country = mh.add_country()
+        mh.add_city(country=country)
+
+        command = ['del_country', '--country', country]
+        err = self.badrequesttest(command)
+        self.matchoutput(err,
+                         'Bad Request: Could not delete country {}, at least '
+                         'one city found in this country.'.format(country),
+                         command)
+        mh.delete()
+
+    def test_400_del_country_can_be_forced_if_cities_found(self):
+        # Set up.
+        mh = MockHub(engine=self)
+        country = mh.add_country()
+        mh.add_city(country=country)
+        # Test.
+        command = ['del_country', '--country', country, '--force_non_empty']
+        self.noouttest(command)
+        # Confirm the deletion of the country.
+        command = ['show_country', '--country', country]
+        self.notfoundtest(command)
+        # Clean up.
+        mh.countries.remove(country)
+        mh.delete()
 
 
 if __name__ == '__main__':
