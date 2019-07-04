@@ -400,8 +400,7 @@ class MockHub(object):
 
     def delete_countries(self, verify=False):
         for country in self.countries:
-            self._engine.successtest(['del_country', '--country', country,
-                                     '--force_non_empty'])
+            self._engine.successtest(['del_country', '--country', country])
         if verify:
             self._verify_deletion_with_show_all('country', self.countries)
         self.countries = []
@@ -418,8 +417,10 @@ class MockHub(object):
         for archetype in self.archetypes:
             self._engine.successtest(['del_archetype',
                                       '--archetype', archetype])
-        if verify:
-            self._verify_deletion_with_show_all('archetype', self.archetypes)
+            if verify and self._exists_according_to_show('archetype',
+                                                         archetype):
+                raise RuntimeError('At least one archetype has not been '
+                                   'deleted ({}).'.format(archetype))
         self.archetypes = []
 
     def delete_operating_systems(self, verify=False):
@@ -849,8 +850,8 @@ class MockHub(object):
         if not self._exists_according_to_show('domain', self.default_domain):
             self.add_domain(self.default_domain)
         # Add the default archetype if it does not exist.
-        if not self._exists_according_to_show_all('archetype',
-                                                  self.default_archetype):
+        if not self._exists_according_to_show('archetype',
+                                              self.default_archetype):
             self.add_archetype(self.default_archetype)
         # Add the default OS if it does not exist.
         os = ['--osname', self.default_os,
