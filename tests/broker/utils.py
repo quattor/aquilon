@@ -17,9 +17,13 @@
 """ Miscelaneous helper libraries for testing """
 
 
+import copy
 import random
 import re
 import string
+
+from broker.brokertest import TestBrokerCommand
+from broker.machinetest import MachineTestMixin
 
 
 def import_depends():
@@ -37,7 +41,12 @@ def import_depends():
     if _TESTDIR not in sys.path:
         sys.path.insert(1, _TESTDIR)
 
+    # noinspection PyUnresolvedReferences
     import depends
+
+
+class MockHubEngine(TestBrokerCommand, MachineTestMixin):
+    pass
 
 
 class MockHub(object):
@@ -60,27 +69,56 @@ class MockHub(object):
     #   is shown in the above examples.  Please see the individual methods
     #   of this class to see what can be achieved and how.
     #
-    #   If you want to clean up (i.e. delete the hub with all the  buildings,
+    #   If you want to clean up (i.e. delete the hub with all the buildings,
     #   machines, etc. created for the current test) before other tests are
     #   executed, please use:
     #
     #   mh.delete()
     #
     # This class assumes that the following are true:
-    #       - domain unittest defined
-    #       - for a given engine engine.net defined (networktest.DummyNetworks)
+    #       - engine implements TestBrokerCommand
+    #       - if you provide default_personality, it has to already be in
+    #         the 'current' stage (if you do not provide it,
+    #         a new personality will be created, and then promoted)
     # Additional requirements if one wants to use machines or hosts:
-    #       - engine.create_machine_dl360g9 defined (see class MachineTestMixin
-    #         in module broker.machinetest)
+    #       - the engine class inherits from MachineTestMixin (if it does not,
+    #         a shallow copy of the engine will be created, and its class will
+    #         be modified to include the missing mixin)
     #       - all dependencies for create_machine_dl360g9 defined (e.g. model)
-    def __init__(self, engine, name=None):
+    def __init__(self, engine, name=None, organisation=None, domain=None,
+                 default_archetype=None, default_personality=None,
+                 default_os=None, default_os_version=None,
+                 grn='grn:/ms/ei/aquilon/aqd'):
         # The engine object should be an instance of TestBrokerCommand (or its
         # subclass), and, if one wants to create machines or hosts,
-        # it shouldinclude a working method create_machine_dl360g9 (as provided
-        # by machinetest.MachineTestMixin).
-        self._engine = engine
+        # it should include a working method create_machine_dl360g9 (as
+        # provided by machinetest.MachineTestMixin).  For the sake of
+        # convenience, let us create a new class with the mixin on-the-fly,
+        # and use it with a shallow copy of the provided engine object,
+        # if the latter does not already include the mixin.
+        assert isinstance(engine, TestBrokerCommand)
+        if not isinstance(engine, MachineTestMixin):
+            # noinspection PyTypeChecker
+            self._engine = copy.copy(engine)  # type: MockHubEngine
+            self._engine.__class__ = type(
+                '{}ModifiedByMockHub'.format(engine.__class__.__name__),
+                (engine.__class__, MachineTestMixin), {})
+        else:
+            # noinspection PyTypeChecker
+            self._engine = engine  # type: MockHubEngine
         self._name = None
-        self.create(name)
+        self.default_organisation = organisation or self.random_name()
+        self.default_domain = domain or self.random_name()
+        self.default_archetype = default_archetype or self.random_name()
+        self.default_personality = default_personality or self.random_name()
+        self.default_os = default_os or self.random_name()
+        self.default_os_version = default_os_version or self.random_name()
+        self.grn = grn
+        self.organisations = []
+        self.archetypes = []
+        self.personalities = []
+        self.operating_systems = []
+        self.domains = []
         self.continents = []
         self.countries = []
         self.cities = []
@@ -90,6 +128,8 @@ class MockHub(object):
         self.hosts = {}
         self.dns_domains = []
         self.networks = {}
+        self.create(name)
+        self._initialise_dependencies()
         self.default_dns_domain = self.add_dns_domain('{}.cc'.format(
             self._name))
 
@@ -183,6 +223,62 @@ class MockHub(object):
         self._engine.net.dispose_network(self._engine, name)
         del self.networks[name]
 
+    def add_archetype(self, name=None):
+        name = self.get_or_create_name(name)
+        if name in self.archetypes:
+            raise ValueError('Archetype {} already exists.'.format(name))
+        self._engine.noouttest(['add_archetype', '--archetype', name])
+        self.archetypes.append(name)
+        return name
+
+    def add_os(self, name, version, archetype):
+        os = (name, version, archetype)
+        if os in self.operating_systems:
+            raise ValueError('OS {} (version {}) for archetype {} already '
+                             'exists.'.format(name, version, archetype))
+        self._engine.noouttest(['add_os',
+                                '--osname', name, '--osversion', version,
+                                '--archetype', archetype])
+        self.operating_systems.append(os)
+        return os
+
+    def add_personality(self, name, archetype, promote=True):
+        personality = (name, archetype)
+        if personality in self.personalities:
+            raise ValueError('Personality {} (archetype: {}) already '
+                             'exists.'.format(name, archetype))
+        command = ['add_personality',
+                   '--personality', name, '--archetype', archetype,
+                   '--grn', self.grn, '--config_override',
+                   '--host_environment', 'dev']
+        self._engine.successtest(command)
+        self._engine.check_plenary_exists(
+            self.default_archetype,
+            'personality', '{}+next'.format(name),
+            'config')
+        if promote:
+            self._engine.successtest(['promote', '--personality', name,
+                                      '--archetype', archetype])
+        self.personalities.append(personality)
+        return personality
+
+    def add_organisation(self, name=None):
+        name = self.get_or_create_name(name)
+        if name in self.organisations:
+            raise ValueError('Organisation {} already exists.'.format(name))
+        self._engine.noouttest(['add_organization', '--organization', name])
+        self.organisations.append(name)
+        return name
+
+    def add_domain(self, name=None):
+        name = self.get_or_create_name(name)
+        if name in self.domains:
+            raise ValueError('Domain {} already exists.'.format(name))
+        self._engine.noouttest(['add_domain', '--domain', name]
+                               + self._engine.valid_just_tcm)
+        self.domains.append(name)
+        return name
+
     @staticmethod
     def random_name(length=8):
         return ''.join(random.choice(string.lowercase) for _ in range(length))
@@ -219,7 +315,7 @@ class MockHub(object):
                 ips.append(net.usable[self.machines[machine]['net_index']])
         for i in range(len(hosts)):
             self._engine.dsdb_expect_delete(ip=ips[i])
-            self._engine.statustest(['del_host', '--hostname', hosts[i]])
+            self._engine.successtest(['del_host', '--hostname', hosts[i]])
             self._engine.dsdb_verify()
         # Verify if all the hosts in self.hosts have been deleted.
         if verify:
@@ -237,7 +333,7 @@ class MockHub(object):
         else:
             machines = self.machines.keys()
         for machine in machines:
-            self._engine.statustest(['del_machine', '--machine', machine])
+            self._engine.successtest(['del_machine', '--machine', machine])
         # Verify if all the machines in self.machines have been deleted.
         if verify:
             if verify:
@@ -255,9 +351,29 @@ class MockHub(object):
                     'At least one {singular} has not been deleted ({singular}:'
                     ' {item})'.format(singular=singular, item=item))
 
+    def _exists_according_to_show_all(self, singular, name, csv_index=1):
+        out, _ = self._engine.successtest(['show_{}'.format(singular), '--all',
+                                           '--format', 'csv'])
+        found = {line.split(',')[csv_index]
+                 for line in out.split() if line.count(',') >= csv_index}
+        return name in found
+
+    def _exists_according_to_show(self, singular, name=None, *args):
+        command = ['show_{}'.format(singular)]
+        if name:
+            command.extend(['--{}'.format(singular), name])
+        if args:
+            command.extend(list(args))
+        try:
+            _ = self._engine.notfoundtest(command)  # noqa: F841
+        except AssertionError:
+            return True
+        else:
+            return False
+
     def delete_desks(self, verify=False):
         for desk in self.desks:
-            self._engine.statustest(['del_desk', '--desk', desk])
+            self._engine.successtest(['del_desk', '--desk', desk])
         if verify:
             self._verify_deletion_with_show_all('desk', self.desks)
         self.desks = []
@@ -266,7 +382,7 @@ class MockHub(object):
         for building in self.buildings:
             self._engine.dsdb_expect('delete_building_aq -building {}'.format(
                 building))
-            self._engine.statustest(['del_building', '--building', building])
+            self._engine.successtest(['del_building', '--building', building])
             self._engine.dsdb_verify()
         if verify:
             self._verify_deletion_with_show_all('building', self.buildings)
@@ -275,7 +391,8 @@ class MockHub(object):
     def delete_cities(self, verify=False):
         for city in self.cities:
             self._engine.dsdb_expect('delete_city_aq -city {}'.format(city))
-            self._engine.statustest(['del_city', '--city', city])
+            self._engine.successtest(['del_city', '--city', city,
+                                     '--force_if_orphaned'])
             self._engine.dsdb_verify()
         if verify:
             self._verify_deletion_with_show_all('city', self.cities)
@@ -283,18 +400,71 @@ class MockHub(object):
 
     def delete_countries(self, verify=False):
         for country in self.countries:
-            self._engine.statustest(['del_country', '--country', country])
+            self._engine.successtest(['del_country', '--country', country,
+                                     '--force_non_empty'])
         if verify:
             self._verify_deletion_with_show_all('country', self.countries)
         self.countries = []
 
     def delete_continents(self, verify=False):
         for continent in self.continents:
-            self._engine.statustest(['del_continent',
-                                     '--continent', continent])
+            self._engine.successtest(['del_continent',
+                                      '--continent', continent])
         if verify:
             self._verify_deletion_with_show_all('continent', self.continents)
         self.continents = []
+
+    def delete_archetypes(self, verify=False):
+        for archetype in self.archetypes:
+            self._engine.successtest(['del_archetype',
+                                      '--archetype', archetype])
+        if verify:
+            self._verify_deletion_with_show_all('archetype', self.archetypes)
+        self.archetypes = []
+
+    def delete_operating_systems(self, verify=False):
+        for os in self.operating_systems:
+            osname, osversion, archetype = os
+            arguments = ['--osname', osname, '--osversion', osversion,
+                         '--archetype', archetype]
+            self._engine.successtest(['del_os'] + arguments)
+            if verify:
+                self._exists_according_to_show('os', None, arguments)
+                raise RuntimeError(
+                    'At least one OS has not been deleted ({}).'.format(os))
+        self.operating_systems = []
+
+    def delete_personalities(self, verify=False):
+        for personality in self.personalities:
+            name, archetype = personality
+            arguments = ['--personality', name,
+                         '--archetype', archetype]
+            self._engine.successtest(['del_personality'] + arguments)
+            if verify:
+                self._exists_according_to_show('personality', None, arguments)
+                raise RuntimeError('At least one personality has not been '
+                                   'deleted ({}).'.format(personality))
+        self.personalities = []
+
+    def delete_domains(self, verify=False):
+        for domain in self.domains:
+            self._engine.successtest(['update_domain', '--domain', domain,
+                                      '--archived']
+                                     + self._engine.valid_just_tcm)
+            self._engine.successtest(['del_domain', '--domain', domain]
+                                     + self._engine.valid_just_tcm)
+        if verify:
+            self._verify_deletion_with_show_all('domain', self.domains)
+        self.domains = []
+
+    def delete_organisations(self, verify=False):
+        for organisation in self.organisations:
+            self._engine.successtest(['del_organization',
+                                      '--organization', organisation])
+        if verify:
+            self._verify_deletion_with_show_all('organization',
+                                                self.organisations)
+        self.organisations = []
 
     def delete(self, slow=False, verify=False):
         # Use slow=True to try to delete objects not created via methods
@@ -314,6 +484,14 @@ class MockHub(object):
         self.delete_countries(verify)
         # Delete continents.
         self.delete_continents(verify)
+        # Delete personalities.
+        self.delete_personalities(verify)
+        # Delete operating systems.
+        self.delete_operating_systems(verify)
+        # Delete archetypes.
+        self.delete_archetypes(verify)
+        # Delete domains.
+        self.delete_domains(verify)
         # Delete DNS domains.
         for dns_domain in self.dns_domains[:]:
             self.delete_dns_domain(dns_domain)
@@ -326,20 +504,28 @@ class MockHub(object):
         if verify:
             self._verify_deletion_with_show_all(
                 'network', self.networks, 0)
-        # Last but not least, delete the hub itself.
+        # Last but not least, delete the hub itself, then all the organisations
+        # created by the hub, including the organisation to which the hub
+        # belongs if the organisation has been created by MockHub.
         if self._name is not None:
             self._engine.noouttest(['del_hub', '--hub', self._name])
             if verify:
                 self._verify_deletion_with_show_all(
                     'hub', [self._name], 1)
             self._name = None
+        self.delete_organisations(verify)
 
     def create(self, name=None):
         if self._name is not None:
             raise ValueError('Hub {} already exists.'.format(self._name))
         if name is None:
             name = self.random_name()
-        command = ['add_hub', '--hub', name]
+        # Add the default organisation if it does not exist.
+        if not self._exists_according_to_show('organization',
+                                              self.default_organisation):
+            self.add_organisation(self.default_organisation)
+        command = ['add_hub', '--hub', name,
+                   '--organization', self.default_organisation]
         self._engine.noouttest(command)
         self._name = name
 
@@ -378,6 +564,12 @@ class MockHub(object):
     def get_or_create_network(self, name, **kwargs):
         return self._get_or_create(self.networks, self.add_network,
                                    name, **kwargs)
+
+    def get_or_create_archetype(self, name):
+        return self._get_or_create(self.archetypes, self.add_archetype, name)
+
+    def get_or_create_domain(self, name):
+        return self._get_or_create(self.domains, self.add_domain, name)
 
     def get_or_create_continent(self, name):
         return self._get_or_create(self.continents, self.add_continent, name)
@@ -578,10 +770,11 @@ class MockHub(object):
         net = self.networks[self.machines[machine]['network']]['net']
         ip = net.usable[self.machines[machine]['net_index']]
         mac = net.usable[self.machines[machine]['net_index']].mac
-        osver = self._engine.config.get('unittest', 'linux_version_curr')
-        command = ['add_host', '--domain', 'unittest',
-                   '--archetype', 'aquilon',
-                   '--osname', 'linux', '--osversion', osver,
+        command = ['add_host', '--domain', self.default_domain,
+                   '--archetype', self.default_archetype,
+                   '--personality', self.default_personality,
+                   '--osname', self.default_os,
+                   '--osversion', self.default_os_version,
                    '--ip', ip, '--machine', machine]
         if hostname:
             command.extend(['--hostname', hostname])
@@ -650,3 +843,27 @@ class MockHub(object):
                     self.add_host(prefix=prefix, dns_domain=default_dns_domain,
                                   desk=desk))
         return hosts
+
+    def _initialise_dependencies(self):
+        # Add the default domain if it does not exist.
+        if not self._exists_according_to_show('domain', self.default_domain):
+            self.add_domain(self.default_domain)
+        # Add the default archetype if it does not exist.
+        if not self._exists_according_to_show_all('archetype',
+                                                  self.default_archetype):
+            self.add_archetype(self.default_archetype)
+        # Add the default OS if it does not exist.
+        os = ['--osname', self.default_os,
+              '--osversion', self.default_os_version,
+              '--archetype', self.archetypes]
+        if not self._exists_according_to_show('os', None, *os):
+            self.add_os(self.default_os, self.default_os_version,
+                        self.default_archetype)
+        # Add the default personality for the default archetype if it does not
+        # exist.
+        personality = ['--personality', self.default_personality,
+                       '--archetype', self.default_archetype]
+        if not self._exists_according_to_show(
+                'personality', None, *personality):
+            self.add_personality(self.default_personality,
+                                 self.default_archetype)
