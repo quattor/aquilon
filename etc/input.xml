@@ -3412,6 +3412,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="force_if_orphaned" type="flag">Delete the city even if it is no longer associated with a country. Warning: this operation cannot be rolled back in DSDB automatically."</option>
         </optgroup>
         <transport method="delete" path="location/city/%(city)s"/>
     </command>

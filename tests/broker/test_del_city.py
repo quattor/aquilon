@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@
 """Module for testing the del city command."""
 
 import os
-
 import unittest
 
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+from broker.utils import MockHub
 from brokertest import TestBrokerCommand
 
 
@@ -70,6 +70,51 @@ class TestDelCity(TestBrokerCommand):
         command = ["show_city", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "ex", command)
+
+    def test_400_disallows_orphaned_cities_without_force(self):
+        mh = MockHub(engine=self)
+        country = mh.add_country()
+        city = mh.add_city(country=country)
+        mh.delete_countries()
+        command = ['del_city', '--city', city]
+        err = self.badrequesttest(command)
+        self.searchoutput(
+            err,
+            (r'City "' + city + r'" is not associated with any country.*'
+             + r'use --force_if_orphaned if you want to delete it.*'
+             + r'cannot be automatically rolled back.*'
+             ),
+            command)
+        mh.delete()
+
+    def test_400_can_be_forced_for_orphaned_cities(self):
+        mh = MockHub(engine=self)
+        country = mh.add_country()
+        city = mh.add_city(country=country)
+        mh.delete_countries()
+        command = ['del_city', '--city', city, '--force_if_orphaned']
+        self.dsdb_expect('delete_city_aq -city {}'.format(city))
+        self.successtest(command)
+        self.dsdb_verify()
+        mh.cities.remove(city)
+        mh.delete()
+
+    def test_400_force_if_orphaned_has_no_impact_on_non_orphaned(self):
+        mh = MockHub(engine=self)
+        country = mh.add_country()
+        city = mh.add_city(country=country)
+        command = ['del_city', '--city', city, '--force_if_orphaned']
+        self.dsdb_expect('delete_city_aq -city {}'.format(city))
+        self.successtest(command)
+        self.dsdb_verify()
+        mh.cities.remove(city)
+        mh.delete()
+
+    def test_400_force_if_orphaned_has_no_impact_on_non_existent(self):
+        name = 'no-such-city'
+        command = ['del_city', '--city', name, '--force_if_orphaned']
+        out = self.notfoundtest(command)
+        self.matchoutput(out, 'City {} not found.'.format(name), command)
 
 
 if __name__ == '__main__':
