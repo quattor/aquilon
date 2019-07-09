@@ -27,6 +27,16 @@
             </para>
         </listitem>
     </varlistentry>
+    <varlistentry>
+        <term>
+            <option>--cm_check</option>
+        </term>
+        <listitem>
+            <para>
+                Do a dry-run, and report the objects in-scope for change-management.
+            </para>
+        </listitem>
+    </varlistentry>
 </variablelist>
 
 <!-- vim: set ai sw=4: -->

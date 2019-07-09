@@ -140,6 +140,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/flush"/>
     </command>
@@ -706,6 +707,7 @@
             <option name="cleandeps" type="boolean">Remove pan dependecy files before compiling (should only be required if switching panc versions)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/compile"/>
         <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile"/>
@@ -875,6 +877,7 @@
             <option name="incremental" type="boolean" conflicts="dryrun">Commit every change as it is decided</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/refresh_network"/>
     </command>
@@ -889,6 +892,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="vendor/%(vendor)s/cpu/%(cpu)s"/>
     </command>
@@ -933,6 +937,7 @@
             <option name="iops_limit" type="int">IOPS limit on disks.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="disk/%(disk)s"/>
     </command>
@@ -955,6 +960,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" trigger="disk" path="disk/%(disk)s"/>
         <transport method="delete" path="disk"/>
@@ -985,6 +991,7 @@
             <option name="iops_limit" type="int">IOPS limit on disks</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="disk/%(disk)s"/>
     </command>
@@ -1039,6 +1046,7 @@
             <option name="force_dns_domain" type="flag">Force the system to use the given DNS domain even if its use for the host being added would generally be discouraged.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="grn" type="string">GRN as string</option>
@@ -1077,6 +1085,7 @@
             <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="ip" type="ip">IP address</option>
@@ -1103,6 +1112,7 @@
                 <option name="buildstatus" type="string">Build Status: defaults to ready. 'blind' and 'ready' also valid.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="aurora_host/%(hostname)s"/>
     </command>
@@ -1149,6 +1159,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport trigger="manager" method="put" path="manager/%(manager)s"/>
         <transport method="post" path="host/%(hostname)s/command/add_manager"/>
@@ -1185,6 +1196,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="manager/%(manager)s"/>
     </command>
@@ -1211,6 +1223,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="vendor/%(vendor)s/model/%(model)s"/>
     </command>
@@ -1286,6 +1299,7 @@
             </option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="vendor/%(vendor)s/model/%(model)s"/>
     </command>
@@ -1299,6 +1313,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="vendor/%(vendor)s/model/%(model)s"/>
     </command>
@@ -1352,6 +1367,7 @@
             <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s"/>
         <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s"/>
@@ -1372,6 +1388,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="network_environment/%(network_environment)s"/>
     </command>
@@ -1384,6 +1401,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="network_environment/%(network_environment)s"/>
     </command>
@@ -1400,6 +1418,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="network_environment/%(network_environment)s"/>
     </command>
@@ -1442,6 +1461,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="network_compartment/%(network_compartment)s"/>
     </command>
@@ -1468,6 +1488,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="network_compartment/%(network_compartment)s"/>
     </command>
@@ -1480,6 +1501,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="network_compartment/%(network_compartment)s"/>
     </command>
@@ -1519,6 +1541,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="network/%(ip)s"/>
     </command>
@@ -1534,6 +1557,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="network/%(ip)s"/>
     </command>
@@ -1555,6 +1579,7 @@
             <option name="network_compartment" type="string">Network compartment</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="organization" type="string">Organization</option>
@@ -1586,6 +1611,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="network/%(ip)s/command/split"/>
     </command>
@@ -1607,6 +1633,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="network/%(ip)s/command/merge"/>
     </command>
@@ -1623,6 +1650,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="router_address"/>
     </command>
@@ -1637,6 +1665,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="router_address"/>
     </command>
@@ -1668,6 +1697,7 @@
             <option name="clear_location" type="flag" conflicts="building">Clear the location mapping</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="router_address"/>
     </command>
@@ -1693,6 +1723,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="static_route"/>
     </command>
@@ -1714,6 +1745,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="static_route"/>
     </command>
@@ -1768,6 +1800,7 @@
             <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s"/>
         <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s"/>
@@ -1798,6 +1831,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="network_device" path="network_device/%(network_device)s/interface/command/del"/>
         <transport method="post" trigger="switch" path="switch/%(switch)s/interface/command/del"/>
@@ -1834,6 +1868,7 @@
             <option name="priority" type="int">Priority of shared address</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="ip" type="ip">IP address</option>
@@ -1868,6 +1903,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" trigger="network_device" path="network_device/%(network_device)s/interface/%(interface)s/address"/>
         <transport method="delete" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
@@ -1893,6 +1929,7 @@
             <option name="allow_alias_bindings" type="boolean">Allow servers to be bound by alias</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="service/%(service)s"/>
         <transport trigger="instance" method="put" path="service/%(service)s/instance/%(instance)s"/>
@@ -1987,6 +2024,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="service/%(service)s"/>
         <transport trigger="instance" method="post" path="service/%(service)s/instance/%(instance)s"/>
@@ -2002,6 +2040,7 @@
             <option name="instance" type="string">Instance name</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="service/%(service)s"/>
         <transport trigger="instance" method="delete" path="service/%(service)s/instance/%(instance)s"/>
@@ -2024,6 +2063,7 @@
             <option name="instance" type="string">Instance name</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" trigger="hostname" path="host/%(hostname)s/client_of_service/%(service)s"/>
         <transport method="put" trigger="cluster" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
@@ -2046,6 +2086,7 @@
             <option name="instance" type="string">Instance name</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="hostname" path="host/%(hostname)s/client_of_service/%(service)s"/>
         <transport method="post" trigger="cluster" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
@@ -2065,6 +2106,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" trigger="hostname" path="host/%(hostname)s/client_of_service/%(service)s"/>
         <transport method="delete" trigger="cluster" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
@@ -2091,6 +2133,7 @@
             <option name="position" type="int">Position in the list</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="service/%(service)s/instance/%(instance)s/bind"/>
     </command>
@@ -2116,6 +2159,7 @@
             <option name="resourcegroup" type="string">Resourcegroup containing the service address</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport trigger="instance" method="delete" path="service/%(service)s/instance/%(instance)s/bind"/>
         <transport method="delete" path="service/%(service)s/bind"/>
@@ -2146,6 +2190,7 @@
             <option name="environment_override" requires="personality" type="string">Override environment selection for this service</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="service/%(service)s/required_for/archetype/%(archetype)s"/>
         <transport trigger="personality" method="put" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s"/>
@@ -2185,6 +2230,7 @@
             <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="service/%(service)s/required_for/archetype/%(archetype)s"/>
         <transport trigger="personality" method="delete" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s"/>
@@ -2224,6 +2270,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="service/%(service)s/instance/%(instance)s/command/map"/>
     </command>
@@ -2293,6 +2340,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="service/%(service)s/instance/%(instance)s/command/unmap"/>
     </command>
@@ -2307,6 +2355,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="host/%(hostname)s"/>
     </command>
@@ -2320,6 +2369,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="windows_host/%(hostname)s"/>
     </command>
@@ -2352,6 +2402,7 @@
             <option name="configure" type="boolean" default="True">(re)initialize the pxeswitch configuration (the default)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="host/%(hostname)s/command/pxeswitch"/>
         <transport trigger="list" method="post" path="command/pxeswitch/list"/>
@@ -2388,6 +2439,7 @@
             <option name="comments" type="string">Update comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="grn" type="string">GRN as string</option>
@@ -2420,6 +2472,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="host/%(hostname)s/buildstatus/%(buildstatus)s"/>
         <transport method="post" trigger="cluster" path="cluster/%(cluster)s/buildstatus/%(buildstatus)s"/>
@@ -2444,6 +2497,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="host/%(hostname)s/command/resetadvertisedstatus"/>
         <transport trigger="list" method="post" path="command/resetadvertisedstatus/list"/>
@@ -2480,6 +2534,7 @@
             <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="domain/%(domain)s"/>
     </command>
@@ -2498,6 +2553,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="archetype/%(archetype)s"/>
     </command>
@@ -2517,6 +2573,7 @@
             <option name="profile_formats" type="string">Profile formats to generate</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="sandbox/%(sandbox)s"/>
     </command>
@@ -2540,6 +2597,7 @@
             <option name="auto_compile" type="boolean">Test compile when adding new hosts to the domain</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="domain/%(domain)s"/>
     </command>
@@ -2555,6 +2613,7 @@
         <optgroup>
             <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
             <option name="reason" type="string">Reason for the operation</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="domain/%(domain)s"/>
     </command>
@@ -2577,6 +2636,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="sandbox/%(sandbox)s" expect="sandbox"/>
     </command>
@@ -2609,6 +2669,7 @@
             <option name="review" type="boolean" default="False">Submit change for review</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/publish" custom="create_bundle" expect="command"/>
     </command>
@@ -2704,6 +2765,7 @@
             <option name="strategy_options" type="string" requires="merge_strategy">Extra options to pass to the merge strategy</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Reason of the deployment to record in the commit log. Mandatory if justification is emergency</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/deploy"/>
     </command>
@@ -2739,6 +2801,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="domain/%(domain)s/command/rollback"/>
     </command>
@@ -2756,6 +2819,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="sandbox/%(sandbox)s"/>
     </command>
@@ -2794,6 +2858,7 @@
             <option name="force" type="flag">Bypasses git status and branch integrity checks (potentially dangerous)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="hostname" path="host/%(hostname)s/command/manage"/>
         <transport method="post" trigger="list" path="command/manage_list"/>
@@ -2907,6 +2972,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="domain/%(domain)s/command/sync"/>
     </command>
@@ -2934,6 +3000,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="chassis/%(chassis)s"/>
     </command>
@@ -2966,6 +3033,7 @@
             <option name="clear_slots" type="flag">Remove all machines first</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="chassis/%(chassis)s"/>
     </command>
@@ -2990,6 +3058,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="chassis/%(chassis)s"/>
     </command>
@@ -3014,6 +3083,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/rack/building/%(building)s/"/>
         <transport method="put" trigger="room" path="location/rack/room/%(room)s/"/>
@@ -3034,6 +3104,7 @@
             <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="building" type="string">Name of the building that houses the rack</option>
@@ -3055,6 +3126,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="location/room/%(room)s"/>
     </command>
@@ -3083,6 +3155,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/rack/%(rack)s"/>
     </command>
@@ -3101,6 +3174,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/desk/%(desk)s"/>
     </command>
@@ -3127,6 +3201,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/desk/%(desk)s"/>
     </command>
@@ -3146,6 +3221,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="force_uri" type="flag">Bypass URI validation</option>
         </optgroup>
         <transport method="put" path="location/building/%(building)s"/>
@@ -3168,6 +3244,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="force_uri" type="flag">Bypass URI Validation</option>
         </optgroup>
         <transport method="post" path="location/building/%(building)s"/>
@@ -3197,6 +3274,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/building/%(building)s"/>
     </command>
@@ -3212,6 +3290,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/campus/%(campus)s"/>
     </command>
@@ -3224,6 +3303,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/campus/%(campus)s"/>
     </command>
@@ -3239,6 +3319,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="location/campus/%(campus)s"/>
     </command>
@@ -3256,6 +3337,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/room/%(room)s"/>
     </command>
@@ -3284,6 +3366,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/room/%(room)s"/>
     </command>
@@ -3302,6 +3385,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/bunker/%(bunker)s"/>
     </command>
@@ -3330,6 +3414,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/bunker/%(bunker)s"/>
     </command>
@@ -3367,6 +3452,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/city/%(city)s"/>
     </command>
@@ -3384,6 +3470,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="location/city/%(city)s"/>
     </command>
@@ -3412,6 +3499,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="force_if_orphaned" type="flag">Delete the city even if it is no longer associated with a country. Warning: this operation cannot be rolled back in DSDB automatically."</option>
         </optgroup>
         <transport method="delete" path="location/city/%(city)s"/>
@@ -3428,6 +3516,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/country/%(country)s"/>
     </command>
@@ -3456,6 +3545,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="force_non_empty" type="flag">Delete the country even if the country still contains one or more cities</option>
         </optgroup>
         <transport method="delete" path="location/country/%(country)s"/>
@@ -3472,6 +3562,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/continent/%(continent)s"/>
     </command>
@@ -3500,6 +3591,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/continent/%(continent)s"/>
     </command>
@@ -3514,6 +3606,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/organization/%(organization)s"/>
     </command>
@@ -3527,6 +3620,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/organization/%(organization)s"/>
     </command>
@@ -3558,6 +3652,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="location/hub/%(hub)s"/>
     </command>
@@ -3586,6 +3681,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="location/hub/%(hub)s"/>
     </command>
@@ -3602,6 +3698,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="archetype/%(archetype)s"/>
     </command>
@@ -3614,6 +3711,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="archetype/%(archetype)s"/>
     </command>
@@ -3643,6 +3741,7 @@
             <option name="staged" type="boolean" reverse="unstaged">Enable staged personality updates</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
     </command>
@@ -3656,6 +3755,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="vendor/%(vendor)s"/>
     </command>
@@ -3668,6 +3768,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="vendor/%(vendor)s"/>
     </command>
@@ -3691,6 +3792,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="vendor/%(vendor)s"/>
     </command>
@@ -3707,6 +3809,7 @@
             <option name="copy_version" type="string">Copy parameters of an existing version</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="os/%(osname)s/%(osversion)s/%(archetype)s"/>
     </command>
@@ -3723,6 +3826,7 @@
             <option name="lifecycle" type="string">Lifecycle status of OS being update to</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="os/%(osname)s/%(osversion)s/%(archetype)s"/>
     </command>
@@ -3737,6 +3841,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="os/%(osname)s/%(osversion)s/%(archetype)s"/>
     </command>
@@ -3766,6 +3871,7 @@
             <option name="personality_stage" type="string">Personality stage to delete</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" trigger="personality_stage" path="personality/archetype/%(archetype)s/personality/%(personality)s/stage/%(personality_stage)s"/>
         <transport method="delete" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
@@ -3787,6 +3893,7 @@
             <option name="staged" type="boolean" reverse="unstaged">Enable/disable staged personality updates</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="comments" type="string">Comments</option>
         </optgroup>
         <optgroup fields="one">
@@ -3865,6 +3972,7 @@
             <option name="comments" type="string">Update comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="grn" type="string">GRN as string</option>
@@ -3892,6 +4000,7 @@
             <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/make_cluster"/>
         <transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make_cluster"/>
@@ -3915,6 +4024,7 @@
             <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make_metacluster"/>
     </command>
@@ -3967,6 +4077,7 @@
             <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="machine/%(machine)s"/>
         <transport method="put" trigger="prefix" path="next_machine/%(prefix)s"/>
@@ -4015,6 +4126,7 @@
             <option name="comments" type="string">Update comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_machine"/>
         <transport method="post" path="machine/%(machine)s/command/update"/>
@@ -4051,6 +4163,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="machine/%(machine)s"/>
     </command>
@@ -4087,6 +4200,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <optgroup fields="one">
             <option name="domain" type="string">Template (not DNS) domain</option>
@@ -4125,6 +4239,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="switch/%(switch)s"/>
     </command>
@@ -4159,6 +4274,7 @@
             <option name="discover" type="flag">Do automatic discovery</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="network_device/%(network_device)s"/>
     </command>
@@ -4311,6 +4427,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="network_device/%(network_device)s"/>
     </command>
@@ -4323,6 +4440,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="switch/%(switch)s"/>
     </command>
@@ -4339,6 +4457,7 @@
             <option name="vlan" type="boolean">[Deprecated] Additionally poll for vlan/subnet mappings</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport trigger="network_device" method="post" path="network_device/%(network_device)s/command/poll"/>
         <transport method="post" path="location/rack/%(rack)s/command/poll"/>
@@ -4356,6 +4475,7 @@
             <option name="vlan" type="boolean">[Deprecated] Additionally poll for vlan/subnet mapping</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport trigger="switch" method="post" path="switch/%(switch)s/command/poll"/>
         <transport method="post" path="poll/rack/%(rack)s"/>
@@ -4380,6 +4500,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="console_server/%(console_server)s" />
     </command>
@@ -4400,6 +4521,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="console_server/%(console_server)s" />
     </command>
@@ -4423,6 +4545,7 @@
             <option name="clear_ports" type="flag">Delete existing port bindings</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="console_server/%(console_server)s" />
     </command>
@@ -4441,6 +4564,7 @@
             <option name="client_port" type="string">Local port name, defaults to "console"</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="console_server/%(console_server)s/bind"/>
     </command>
@@ -4458,6 +4582,7 @@
             <option name="client_port" type="string">Local port name, if there are more than one</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="console_server/%(console_server)s/unbind"/>
     </command>
@@ -4504,6 +4629,7 @@
             <option name="comments" type="string">Comments for the realm</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="realm/%(realm)s"/>
     </command>
@@ -4516,6 +4642,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="role/%(role)s"/>
     </command>
@@ -4528,6 +4655,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="role/%(role)s"/>
     </command>
@@ -4554,6 +4682,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="principal/%(principal)s/role/%(role)s"/>
     </command>
@@ -4567,6 +4696,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="dns_environment/%(dns_environment)s"/>
     </command>
@@ -4589,6 +4719,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="dns_environment/%(dns_environment)s"/>
     </command>
@@ -4602,6 +4733,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="dns_environment/%(dns_environment)s"/>
     </command>
@@ -4621,6 +4753,7 @@
             <option name="restricted" type="flag">Restrict direct DNS manipulation commands</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="dns_domain/%(dns_domain)s"/>
     </command>
@@ -4647,6 +4780,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="dns_domain/%(dns_domain)s"/>
     </command>
@@ -4661,6 +4795,7 @@
             <option name="restricted" type="boolean">Restrict direct DNS manipulation commands</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="dns_domain/%(dns_domain)s"/>
     </command>
@@ -4719,6 +4854,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="metacluster/%(metacluster)s"/>
         <transport method="put" trigger="prefix" path="next_metacluster/%(prefix)s"/>
@@ -4766,6 +4902,7 @@
             <option name="clear_location_preference" type="flag" conflicts="preferred_building">Remove the hot side preference</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="metacluster/%(metacluster)s"/>
     </command>
@@ -4778,6 +4915,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="metacluster/%(metacluster)s"/>
     </command>
@@ -4844,6 +4982,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="cluster/%(cluster)s/esx"/>
     </command>
@@ -4898,6 +5037,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="cluster/%(cluster)s"/>
         <transport method="put" trigger="prefix" path="next_cluster/%(prefix)s"/>
@@ -4938,6 +5078,7 @@
             <option name="clear_location_preference" type="flag" conflicts="preferred_building">Remove the hot side preference</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="cluster/%(cluster)s"/>
     </command>
@@ -4950,6 +5091,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="cluster/%(cluster)s"/>
     </command>
@@ -4967,6 +5109,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
         <transport method="put" trigger="metacluster" path="metacluster/%(metacluster)s/allowed/%(archetype)s/%(personality)s"/>
@@ -4985,6 +5128,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
         <transport method="delete" trigger="metacluster" path="metacluster/%(metacluster)s/allowed/%(archetype)s/%(personality)s"/>
@@ -5008,6 +5152,7 @@
             <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="cluster/%(cluster)s/host/%(hostname)s"/>
     </command>
@@ -5024,6 +5169,7 @@
             <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="cluster/%(cluster)s/host/%(hostname)s"/>
     </command>
@@ -5050,6 +5196,7 @@
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
             <option name="range_class" type="string">Class of the range, defaults to 'vm'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="dynamic_range/%(startip)s/%(endip)s"/>
         <transport trigger="fillnetwork" method="post" path="dynamic_range/fill/%(fillnetwork)s"/>
@@ -5070,6 +5217,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="dynamic_range/%(startip)s/%(endip)s"/>
         <transport trigger="clearnetwork" method="post" path="dynamic_range/clear/%(clearnetwork)s"/>
@@ -5124,6 +5272,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="address/%(fqdn)s"/>
     </command>
@@ -5139,6 +5288,7 @@
             <option name="network_environment" type="string">Name of the environment</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="address"/>
     </command>
@@ -5174,6 +5324,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="address"/>
     </command>
@@ -5201,6 +5352,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="ns_record/%(dns_domain)s/%(fqdn)s"/>
     </command>
@@ -5214,6 +5366,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="ns_record/%(dns_domain)s/%(fqdn)s"/>
     </command>
@@ -5235,6 +5388,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="alias/%(fqdn)s"/>
     </command>
@@ -5248,6 +5402,7 @@
             <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="alias/%(fqdn)s"/>
     </command>
@@ -5269,6 +5424,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="address_alias/%(fqdn)s"/>
     </command>
@@ -5284,6 +5440,7 @@
             <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="address_alias/%(fqdn)s"/>
     </command>
@@ -5307,6 +5464,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="address_alias/%(fqdn)s"/>
     </command>
@@ -5341,6 +5499,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="alias/%(fqdn)s"/>
     </command>
@@ -5367,6 +5526,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s"/>
     </command>
@@ -5386,6 +5546,7 @@
             <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the srv record environment)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s"/>
     </command>
@@ -5426,6 +5587,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s"/>
     </command>
@@ -5591,6 +5753,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/reboot_schedule"/>
     </command>
@@ -5608,6 +5771,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/reboot_schedule"/>
     </command>
@@ -5645,6 +5809,7 @@
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
         </optgroup>
         <optgroup>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="comments" type="string">Comments</option>
             <option name="start_time" type="string">When to start this intervention (default=now)</option>
@@ -5664,6 +5829,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/reboot_intervention"/>
     </command>
@@ -5692,6 +5858,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/filesystem/%(filesystem)s"/>
     </command>
@@ -5710,6 +5877,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/filesystem/%(filesystem)s"/>
     </command>
@@ -5738,6 +5906,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="resource/filesystem/%(filesystem)s"/>
     </command>
@@ -5793,6 +5962,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/share/%(share)s"/>
     </command>
@@ -5807,6 +5977,7 @@
             <option name="latency_threshold" type="string">Latency threshold</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="resource/share/%(share)s"/>
     </command>
@@ -5825,6 +5996,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/share/%(share)s"/>
     </command>
@@ -5867,6 +6039,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/application/%(application)s"/>
     </command>
@@ -5885,6 +6058,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/application/%(application)s"/>
     </command>
@@ -5973,6 +6147,7 @@
 
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/hostlink/%(hostlink)s"/>
     </command>
@@ -6012,6 +6187,7 @@
 
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/hostlink/%(hostlink)s"/>
     </command>
@@ -6114,6 +6290,7 @@
         </optgroup>
         <optgroup>
             <option name="justification" type="string">The reason for the intervention</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
             <option name="comments" type="string">Comments</option>
             <option name="allowusers" type="string">Additional users allowed access</option>
             <option name="allowgroups" type="string">Additional groups allowed access</option>
@@ -6170,6 +6347,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/intervention/%(intervention)s"/>
     </command>
@@ -6203,6 +6381,7 @@
             <option name="shared" type="flag">Allow the address to be used multiple times</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/service_address/%(name)s"/>
     </command>
@@ -6221,6 +6400,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/service_address/%(name)s"/>
     </command>
@@ -6282,6 +6462,7 @@
             <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="resource/service_address/%(name)s"/>
     </command>
@@ -6296,6 +6477,7 @@
             <option name="disabled" type="flag">GRN is disabled and cannot be added to new systems</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="grn/%(eon_id)s/%(grn)s"/>
     </command>
@@ -6309,6 +6491,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="grn"/>
     </command>
@@ -6324,6 +6507,7 @@
             <option name="rename_to" type="string">Rename GRN</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="grn"/>
     </command>
@@ -6343,6 +6527,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/refresh_grns"/>
     </command>
@@ -6360,6 +6545,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="entitlement/type"/>
     </command>
@@ -6372,6 +6558,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="entitlement/type/%(type)s"/>
     </command>
@@ -6401,6 +6588,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="entitlement/type/%(type)s"/>
     </command>
@@ -6467,6 +6655,7 @@
 
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="entitlement"/>
     </command>
@@ -6533,6 +6722,7 @@
 
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="entitlement"/>
     </command>
@@ -6645,6 +6835,7 @@
             <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="grn/command/map"/>
     </command>
@@ -6671,6 +6862,7 @@
             <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="grn/command/unmap"/>
         <transport trigger="clearall" method="post" path="grn/command/unmap_clearall"/>
@@ -6691,6 +6883,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -6708,6 +6901,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -6761,6 +6955,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -6785,6 +6980,7 @@
         values are public, restricted (default), owner_only, owner_approved</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="feature/%(type)s/%(feature)s"/>
     </command>
@@ -6806,6 +7002,7 @@
             </optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="feature/%(type)s/%(feature)s"/>
     </command>
@@ -6819,6 +7016,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="feature/%(type)s/%(feature)s"/>
     </command>
@@ -6860,6 +7058,7 @@
             <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/bind_feature"/>
     </command>
@@ -6885,6 +7084,7 @@
             <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/unbind_feature"/>
     </command>
@@ -6930,6 +7130,7 @@
             <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/add_parameter"/>
     </command>
@@ -6948,6 +7149,7 @@
             <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/update_parameter"/>
     </command>
@@ -6965,6 +7167,7 @@
             <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/del_parameter"/>
     </command>
@@ -7010,6 +7213,7 @@
             <option name="activation" type="string" conflicts="feature type">How the parameter gets activated, valid values are rebuild, reboot, dispatch(default)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
         <transport method="put" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
@@ -7030,6 +7234,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
         <transport method="delete" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
@@ -7057,6 +7262,7 @@
             <option name="activation" type="string" conflicts="feature type">Update how the parameter gets activated, valid values are rebuild, reboot, dispatch</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
         <transport method="post" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
@@ -7141,6 +7347,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="vlan/%(vlan)s/%(name)s"/>
     </command>
@@ -7153,6 +7360,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="vlan/%(vlan)s"/>
     </command>
@@ -7189,6 +7397,7 @@
         <optgroup>
             <option name="archetype" type="string">Archetype of the personality</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="root_access/command/grant"/>
     </command>
@@ -7207,6 +7416,7 @@
         <optgroup>
             <option name="archetype" type="string">Archetype of the personality</option>
             <option name="reason" type="string">String to be specified if justification='emergency'</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="root_access/command/revoke"/>
     </command>
@@ -7219,6 +7429,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="netgroup_whitelist/%(netgroup)s"/>
     </command>
@@ -7231,6 +7442,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="netgroup_whitelist/%(netgroup)s"/>
     </command>
@@ -7254,6 +7466,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="user/type"/>
     </command>
@@ -7266,6 +7479,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="user/type/%(type)s"/>
     </command>
@@ -7291,6 +7505,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="user/type/%(type)s"/>
     </command>
@@ -7313,6 +7528,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="user/%(username)s"/>
     </command>
@@ -7325,6 +7541,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="user/%(username)s"/>
     </command>
@@ -7342,6 +7559,7 @@
             <option name="type" type="string">The type of the user</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="user/%(username)s"/>
     </command>
@@ -7366,6 +7584,7 @@
             <option name="ignore_delete_limit" type="boolean">Allow deleting any number of users</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="command/refresh_user"/>
     </command>
@@ -7379,6 +7598,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="virtual_switch/%(virtual_switch)s"/>
     </command>
@@ -7391,6 +7611,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="virtual_switch/%(virtual_switch)s"/>
     </command>
@@ -7417,6 +7638,7 @@
             <option name="comments" type="string">Comments</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="virtual_switch/%(virtual_switch)s"/>
     </command>
@@ -7436,6 +7658,7 @@
             <option name="type" type="string">Type of the port group</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="virtual_switch/%(virtual_switch)s/port_group/%(networkip)s"/>
         <transport trigger="network_device" method="put" path="network_device/%(network_device)s/port_group/%(networkip)s"/>
@@ -7457,6 +7680,7 @@
             <option name="network_environment" type="string">Network environment (default: internal)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="virtual_switch/%(virtual_switch)s/port_group"/>
         <transport trigger="network_device" method="delete" path="network_device/%(network_device)s/port_group"/>
@@ -7471,6 +7695,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s/command/promote"/>
     </command>
@@ -7494,6 +7719,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="building_preference/%(building_pair)s"/>
     </command>
@@ -7515,6 +7741,7 @@
             <option name="prefer" type="string">Building code that should be preferred</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="building_preference/%(building_pair)s"/>
     </command>
@@ -7573,6 +7800,7 @@
         <optgroup>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="building_preference/%(building_pair)s"/>
     </command>
@@ -7597,6 +7825,7 @@ appear earlier
             </option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="cluster/%(cluster)s/autostartlist"/>
     </command>
@@ -7614,6 +7843,7 @@ appear earlier
             <option name="order" type="int">New order</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="cluster/%(cluster)s/autostartlist"/>
     </command>
@@ -7634,6 +7864,7 @@ appear earlier
             </option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="cluster/%(cluster)s/autostartlist"/>
         <transport method="delete" trigger="all" path="cluster/%(cluster)s/autostartlist/all"/>
@@ -7668,6 +7899,7 @@ appear earlier
             </option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="put" path="cluster/%(cluster)s/systemlist"/>
     </command>
@@ -7686,6 +7918,7 @@ appear earlier
             </option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="post" path="cluster/%(cluster)s/systemlist"/>
     </command>
@@ -7707,6 +7940,7 @@ appear earlier
             </option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
         </optgroup>
         <transport method="delete" path="cluster/%(cluster)s/systemlist"/>
         <transport method="delete" trigger="all" path="cluster/%(cluster)s/systemlist/all"/>

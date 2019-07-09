@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014-2018  Contributor
+# Copyright (C) 2014-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ from aquilon.aqdb.model import (
 )
 from aquilon.aqdb.model.host_environment import Development, UAT, QA, Legacy, Production, Infra
 from aquilon.config import Config
+from aquilon.exceptions_ import ArgumentError
 from aquilon.exceptions_ import AuthorizationException, InternalError, AquilonError
 from aquilon.worker.dbwrappers.user_principal import get_or_create_user_principal
 from aquilon.worker.processes import run_command
@@ -117,14 +118,17 @@ class ChangeManagement(object):
 
     # 'decommissioned', 'blind', 'install', 'reinstall', 'almostready', 'failed'
 
-    def __init__(self, session, user, justification, reason, logger, command, **arguments):
+    def __init__(self, session, user, justification, reason, logger, command,
+                 cm_check=False, **arguments):
         self.command = command
+        self.cm_check = cm_check
         self.justification = justification
         self.reason = reason
         self.logger = logger
         self.requestid = arguments.get('requestid', '')
 
         self.dict_of_impacted_envs = {}
+        self.impacted_objects = {}
         self.eonid = 6980  # to be calculated for each target
         self.enforce_validation = False
 
@@ -170,6 +174,15 @@ class ChangeManagement(object):
             self._call_handler_method(target_obj)
         self.logger.debug('Call aqd_checkedm with metadata')
 
+    def _get_in_scope_objects_as_text(self):
+        if not self.impacted_objects:
+            return '\n\t - no affected objects in-scope for change ' \
+                   'management found -'
+        in_scope_list = '\n'.join('\t{}'.format(o)
+                                  for k in sorted(self.impacted_objects)
+                                  for o in sorted(self.impacted_objects[k]))
+        return in_scope_list
+
     def _call_handler_method(self, obj, queryset=None):
         env_calculate_method = self.handlers.get(obj.__class__, None)
         if not env_calculate_method:
@@ -181,13 +194,23 @@ class ChangeManagement(object):
             env_calculate_method(self, obj)
 
     def validate(self):
-        """
+        """Perform change management validation, or return in-scope objects.
+
         Method calls adq_checkedm cmd tool with target resources metadata
         to calculate if change management validation is required.
         If required, justification validation will happen. If EDM calls
         enabled, the ticket will be checked in EDM.
-        Returns: None or raises AuthorizationException
+        If self.cm_check True, this method immediately finishes by raising
+        ArgumentError to pass the list of objects in-scope for change
+        management to the client.
+
+        Returns: None, or raises AuthorizationException, or ArgumentError
         """
+        if self.cm_check:
+            raise ArgumentError(
+                'aborting upon user request (option --cm_check used).  Please '
+                'find the list of in-scope objects you have requested below:\n'
+                '{}\n'.format(self._get_in_scope_objects_as_text()))
         if not self.check_enabled:
             self.logger.debug('Change management is disabled. Exiting validate.')
             return
@@ -319,6 +342,7 @@ class ChangeManagement(object):
             cluster: single Cluster
         Returns: None
         """
+        self._store_impacted_object_information(cluster)
         # Validate only the impacted cluster
         self.dict_of_impacted_envs.setdefault(
             cluster.personality_stage.personality.host_environment.name, []).append(cluster.status.name)
@@ -338,8 +362,10 @@ class ChangeManagement(object):
             host: a single host
         Returns: None
         """
+        self._store_impacted_object_information(host)
         self.dict_of_impacted_envs.setdefault(
-            host.personality_stage.personality.host_environment.name, []).append(host.status.name)
+            host.personality_stage.personality.host_environment.name,
+            []).append(host.status.name)
 
     def validate_hardware_entity(self, hwentities_or_hwentity):
         """
@@ -697,6 +723,11 @@ class ChangeManagement(object):
 
         for host in q2.all():
             self.validate_host(host)
+
+    def _store_impacted_object_information(self, an_object):
+        # noinspection PyStringFormat
+        self.impacted_objects.setdefault(
+            '{0:c}'.format(an_object), set()).add('{0:l}'.format(an_object))
 
 
 ChangeManagement.handlers[Cluster] = ChangeManagement.validate_cluster
