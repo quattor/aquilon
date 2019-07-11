@@ -2,6 +2,7 @@
 <synopfragment xml:id="change-management" xmlns="http://docbook.org/ns/docbook">
     <arg><option>--justification <replaceable>TOKENS</replaceable></option></arg>
     <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
+    <arg><option>--cm_check</option></arg>
 </synopfragment>
 
 <!-- vim: set ai sw=4: -->

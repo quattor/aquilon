@@ -35,6 +35,7 @@
             <arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
             <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
             <arg choice="plain"><option>--justification <replaceable>TOKENS</replaceable></option></arg>
+            <arg choice="plain"><option>--cm_check</option></arg>
             <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
             <arg><option>--allowusers <replaceable>USERS</replaceable></option></arg>
             <arg><option>--allowgroups <replaceable>GROUPS</replaceable></option></arg>

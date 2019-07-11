@@ -33,6 +33,7 @@
             </group>
             <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
             <arg choice="plain"><option>--justification <replaceable>TOKENS</replaceable></option></arg>
+            <arg choice="plain"><option>--cm_check</option></arg>
             <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
             <arg><option>--start_time <replaceable>WHEN</replaceable></option></arg>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
