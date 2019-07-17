@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,21 +46,25 @@ class CommandAddRouterAddress(BrokerCommand):
 
         dbnetwork = dbdns_rec.network
 
-        self.az.check_network_environment(dbuser, dbnetwork.network_environment)
+        self.az.check_network_environment(dbuser,
+                                          dbnetwork.network_environment)
 
         if ip in dbnetwork.router_ips:
-            raise ArgumentError("IP address {0} is already present as a router "
-                                "for {1:l}.".format(ip, dbnetwork))
+            # noinspection PyStringFormat
+            raise ArgumentError('IP address {0} is already present as a '
+                                'router for {1:l}.'.format(ip, dbnetwork))
 
         # Policy checks are valid only for internal networks
         if dbnetwork.is_internal:
-            if ip >= dbnetwork.first_usable_host or \
-               int(ip) - int(dbnetwork.network_address) in dbnetwork.reserved_offsets:
-                raise ArgumentError("IP address {0} is not a valid router address "
-                                    "on {1:l}.".format(ip, dbnetwork))
+            if (int(ip) - int(dbnetwork.network_address)
+                    in dbnetwork.reserved_offsets):
+                # noinspection PyStringFormat
+                raise ArgumentError('IP address {0} is not a valid router '
+                                    'address on {1:l}.'.format(ip, dbnetwork))
 
         # Validate ChangeManagement
-        cm = ChangeManagement(session, user, justification, reason, logger, self.command, **arguments)
+        cm = ChangeManagement(session, user, justification, reason, logger,
+                              self.command, **arguments)
         cm.consider(dbnetwork)
         cm.validate()
 

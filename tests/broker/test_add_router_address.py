@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2011-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -138,17 +138,29 @@ class TestAddRouterAddress(TestBrokerCommand):
                               "record ut3gd1r04-v109-hsrp.aqd-unittest.ms.com.".format(net.gateway),
                          command)
 
-    def test_200_add_normal_host_as_router(self):
+    def test_200_can_add_non_router_host_space_ips_as_router_addresses(self):
+        # This addresses AQUILON-6321 where unixops requested the removal of
+        # the following constraint from add_router_address:
+        #
+        # if ip >= dbnetwork.first_usable_host:
+        #     raise ArgumentError("IP address {0} is not a valid router "
+        #                         "address on {1:l}.".format(ip, dbnetwork))
+        #
+        # The constraint prevented Ops from being able to add non-standard
+        # router addresses that were sometimes required.  Examples given:
+        #     170.74.169.30
+        #     170.74.169.62
+        #     170.74.170.30
+        #     170.74.170.62
         net = self.net["ut01ga2s01_v710"]
         ip = net.usable[0]
-        command = ["add", "router", "address", "--ip", ip,
-                   "--fqdn", "not-a-router.aqd-unittest.ms.com",
-                   "--building", "ut"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "IP address %s is not a valid router address on "
-                         "network %s [%s]." % (ip, net.name, net),
-                         command)
+        command = ['add_router_address', '--ip', ip,
+                   '--fqdn', 'first-usable-host-ip.aqd-unittest.ms.com',
+                   '--building', 'ut']
+        # Test if it can be added without raising an exception.
+        self.noouttest(command)
+        # Test if it is there, and clean up.
+        self.noouttest(['del_router_address', '--ip', ip])
 
     def test_200_add_reserved(self):
         net = self.net["tor_net_0"]
@@ -186,7 +198,7 @@ class TestAddRouterAddress(TestBrokerCommand):
         self.matchoutput(out, "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Router: ut3gd1r01-v111-hsrp.aqd-unittest.ms.com", command)
         self.matchclean(out, "excx", command)
-        self.matchclean(out, "utcolo", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRouterAddress)
