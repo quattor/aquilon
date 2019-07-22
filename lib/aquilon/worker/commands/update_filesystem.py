@@ -54,6 +54,9 @@ class CommandUpdateFilesystem(CommandUpdateResource):
         if transport_type:
             dbresource.transport_type = transport_type
         else:
+            if transport_type is not None:
+                # is the empty-string -- clear type
+                dbresource.transport_type = None
             dbresource.transport_ident = None
 
         if transport_id is not None:
