@@ -94,6 +94,7 @@ from .test_add_sandbox import TestAddSandbox
 from .test_add_service import TestAddService
 from .test_add_service_address import TestAddServiceAddress
 from .test_add_share import TestAddShare
+from .test_add_shared_service_name import TestAddSharedServiceName
 from .test_add_srv_record import TestAddSrvRecord
 from .test_add_static_route import TestAddStaticRoute
 from .test_add_user import TestAddUser
@@ -204,6 +205,7 @@ from .test_del_sandbox import TestDelSandbox
 from .test_del_service import TestDelService
 from .test_del_service_address import TestDelServiceAddress
 from .test_del_share import TestDelShare
+from .test_del_shared_service_name import TestDelSharedServiceName
 from .test_del_srv_record import TestDelSrvRecord
 from .test_del_static_route import TestDelStaticRoute
 from .test_del_user import TestDelUser
@@ -404,6 +406,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestAddResourceGroup, TestAddShare, TestAddFilesystem,
                  TestAddApplication, TestAddIntervention,
                  TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
+                 TestAddSharedServiceName,
                  TestFlush,
                  TestMakeAquilon, TestMakeCluster, TestCluster,
                  TestAddAllowedPersonality,
@@ -501,6 +504,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestUnbindFeature,
                  TestDel10GigHardware, TestDelVirtualHardware,
                  TestUnbindCluster, TestUncluster,
+                 TestDelSharedServiceName,
                  TestDelShare, TestDelFilesystem,
                  TestDelHostlink, TestDelRebootIntervention, TestDelRebootSchedule,
                  TestDelIntervention, TestDelApplication,

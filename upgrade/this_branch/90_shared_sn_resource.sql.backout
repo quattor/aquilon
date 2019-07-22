@@ -1,0 +1,7 @@
+ALTER TABLE shared_sn DROP CONSTRAINT shared_sn_fqdn_id_fk;
+ALTER TABLE shared_sn DROP CONSTRAINT shared_sn_resource_id_fk;
+
+DROP TABLE shared_sn;
+
+QUIT;
+

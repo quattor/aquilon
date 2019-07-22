@@ -1,0 +1,10 @@
+CREATE TABLE shared_sn (
+	resource_id INTEGER NOT NULL,
+	sa_aliases INTEGER NOT NULL,
+	fqdn_id INTEGER NOT NULL
+);
+
+ALTER TABLE shared_sn ADD CONSTRAINT shared_sn_resource_id_fk FOREIGN KEY (resource_id) REFERENCES "resource" (id) ON DELETE CASCADE;
+ALTER TABLE shared_sn ADD CONSTRAINT shared_sn_fqdn_id_fk FOREIGN KEY (fqdn_id) REFERENCES fqdn (id);
+
+QUIT;

@@ -6362,6 +6362,39 @@
         <transport method="delete" path="resource/intervention/%(intervention)s"/>
     </command>
 
+    <command name="add_shared_service_name">
+        Add a new shared service name resource.
+        <optgroup mandatory="True" fields="all">
+            <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+            <option name="name" type="string">Name of the resource</option>
+            <option name="fqdn" type="string">Fully qualified domain name</option>
+            <option name="sa_aliases" type="boolean">Automatically create address aliases for service addresses</option>
+        </optgroup>
+        <optgroup>
+            <option name="dns_environment" type="string">The name of the environment the FQDN is in (defaults to 'internal')</option>
+            <option name="comments" type="string">Comments</option>
+
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
+        </optgroup>
+        <transport method="put" path="resource/shared_service_name/%(name)s" />
+    </command>
+
+    <command name="del_shared_service_name">
+        Delete a shared service name resource.
+        <optgroup mandatory="True" fields="all">
+            <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+            <option name="name" type="string">Name of the resource</option>
+        </optgroup>
+        <optgroup>
+            <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+            <option name="reason" type="string">Human readable description of why the operation was performed</option>
+            <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
+        </optgroup>
+        <transport method="delete" path="resource/shared_service_name/%(name)s" />
+    </command>
+
     <command name="add_service_address">
         Add a new service address resource.
         <optgroup mandatory="True" fields="all">

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2011,2012,2013,2014,2015,2016,2018  Contributor
+# Copyright (C) 2011-2016,2018-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -263,6 +263,16 @@ class DnsRecord(Base):
                     continue
                 if existing.dns_record_type in _rr_conflict_map[own_type]:
                     raise ArgumentError("{0} already exist.".format(existing))
+
+            # If the FQDN is used in a shared_service_name resource, ensure
+            # that only an address-alias records can be created, iff sa_aliases
+            # is set.
+            if fqdn.shared_service_names:
+                ssnres = fqdn.shared_service_names[0]
+
+                if not ssnres.sa_aliases or own_type != 'address_alias':
+                    raise ArgumentError("{0} already exists with the same "
+                                        "FQDN.".format(ssnres))
 
         self.fqdn = fqdn
         self._require_grn = require_grn

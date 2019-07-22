@@ -175,6 +175,7 @@ from aquilon.aqdb.model.cluster_asl import (PriorityList, MemberPriority,
                                             SystemList, AutoStartList)
 
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
+from aquilon.aqdb.model.shared_service_name import SharedServiceName
 
 # ENTITLEMENTS
 from aquilon.aqdb.model.entitlement import (
