@@ -103,6 +103,18 @@ class TestUpdateFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Cannot set transport ID if no transport type",
                          command)
 
+    def test_40_clear_transport_type(self):
+        command = ["update_filesystem", "--filesystem=iscsi0",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--transport_type="]
+        out = self.commandtest(command)
+
+        command = ["show_filesystem", "--filesystem=iscsi0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Transport Type: None", command)
+        self.matchoutput(out, "Transport ID: None", command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateFilesystem)
     unittest.TextTestRunner(verbosity=2).run(suite)
