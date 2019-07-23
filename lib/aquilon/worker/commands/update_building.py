@@ -22,7 +22,10 @@ from aquilon.aqdb.model import Building
 from aquilon.aqdb.model import City
 from aquilon.aqdb.model import Cluster
 from aquilon.aqdb.model import DnsDomain
+from aquilon.aqdb.model import DnsRecord
+from aquilon.aqdb.model import Fqdn
 from aquilon.aqdb.model import HardwareEntity
+from aquilon.aqdb.model import Host
 from aquilon.aqdb.model import Machine
 from aquilon.aqdb.model import Network
 from aquilon.aqdb.model import NetworkDevice
@@ -164,11 +167,11 @@ class CommandUpdateBuilding(BrokerCommand):
 
     @staticmethod
     def _validate_dns_domain(dns_domain, building, session):
+        dns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         # Check if the given default DNS domain should be allowed for the
         # given building.
         # If the domain is already assigned to other buildings as their default
         # DNS domain, raise an exception.
-        dns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         buildings = dns_domain.get_associated_locations(Building, session)
         if building is not None and buildings and building not in buildings:
             raise ArgumentError(
@@ -182,3 +185,24 @@ class CommandUpdateBuilding(BrokerCommand):
                     # message.
                     buildings=', '.join([b.name for b in buildings[:3]]),
                     building=building.name))
+        # If there are hosts in a building that align with the building's
+        # default DNS domain, and then that building's default DNS domain is
+        # subsequently changed, command 'aq update_building ...
+        # --default_dns_domain ...' should emit a warning and abort unless
+        # '--force_dns_domain' is used.
+        locations = building.offspring_ids()
+        q = (session.query(Host)
+             .join(Host.hardware_entity)
+             .join(HardwareEntity.primary_name)
+             .join(DnsRecord.fqdn)
+             .join(Fqdn.dns_domain)
+             .filter(HardwareEntity.location_id.in_(locations),
+                     Fqdn.dns_domain == building.default_dns_domain))
+        if session.query(q.exists()).scalar():
+            raise ArgumentError(
+                'There is at least one host in building "{building}" that is '
+                'aligned with the default DNS domain currently assigned to '
+                'this building.  Use --force_dns_domain to override this '
+                'check and change the current default DNS domain to '
+                '"{domain}".'
+                .format(domain=dns_domain.name, building=building.name))
