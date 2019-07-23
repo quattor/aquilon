@@ -253,6 +253,45 @@ class TestUpdateBuilding(PersonalityTestMixin, MachineTestMixin,
                          command)
         mh.delete()
 
+    def test_133_current_default_dns_domain_should_be_assumed_valid(self):
+        # In order to improve performance,
+        # Given I run aq update_building ... --default_dns_domain ...,
+        # When the currently set default DNS domain is the same as the new one,
+        # I want CommandUpdateBuilding to skip all its DNS domain validation
+        # checks.
+        mh = MockHub(self)
+        building = mh.add_building()
+        mh.add_hosts(2, building=building)
+        old_dns_domain = mh.add_dns_domain('old.ms.cc')
+        self.noouttest(['update_building', '--building', building,
+                        '--default_dns_domain', old_dns_domain])
+        # Add a host aligned with the default DNS domain old_dns_domain.
+        mh.add_host(building=building)
+        # Since 'building' now contains a host that is aligned with the default
+        # DNS domain of 'building', the following command will only succeed if
+        # the DNS domain verification checks are skipped because the system
+        # detects that the given DNS domain is the same as the currently set
+        # one.
+        self.successtest(['update_building', '--building', building,
+                          '--default_dns_domain', old_dns_domain])
+        command = ['show_building', '--building', building]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'Default DNS Domain: {}'.format(old_dns_domain),
+                         command)
+        # Add a new building with the same default DNS domain as the
+        # previous one, and subsequently try to update its default DNS
+        # domain to the same domain.
+        second_building = mh.add_building()
+        self.noouttest(['update_building', '--building', second_building,
+                        '--default_dns_domain', old_dns_domain,
+                        '--force_dns_domain'])
+        # Even though this DNS domain is already assigned to both this and
+        # another building, since the domain is already set as the default DNS
+        # domain for this building it should be silently accepted.
+        self.noouttest(['update_building', '--building', second_building,
+                        '--default_dns_domain', old_dns_domain])
+        mh.delete()
+
     def test_135_update_tu_nodnsdomain(self):
         command = ["update", "building", "--building", "tu",
                    "--default_dns_domain", ""]
