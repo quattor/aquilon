@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,17 +27,73 @@ from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.aqdb.model import Machine
 
+import aquilon.aqdb.model.hostlifecycle
+
 
 class CommandDelHost(BrokerCommand):
     requires_plenaries = True
 
     required_parameters = ["hostname"]
+    _default_allowed_status = (
+        aquilon.aqdb.model.hostlifecycle.Blind.__mapper_args__[
+            'polymorphic_identity'],
+        aquilon.aqdb.model.hostlifecycle.Build.__mapper_args__[
+            'polymorphic_identity'],
+        aquilon.aqdb.model.hostlifecycle.Decommissioned.__mapper_args__[
+            'polymorphic_identity'],
+        aquilon.aqdb.model.hostlifecycle.Failed.__mapper_args__[
+            'polymorphic_identity'],
+        aquilon.aqdb.model.hostlifecycle.Install.__mapper_args__[
+            'polymorphic_identity']
+    )
+
+    def _get_allowed_status(self, archetype, logger):
+        section = 'archetype_{}'.format(archetype.name)
+        option = 'del_host_buildstatus_allow_only'
+        if self.config.has_section(section) and self.config.has_option(
+                section, option):
+            value = self.config.get(section, option)
+            permitted = {s.strip() for s in value.split(',') if s}
+            all_buildstatus = set(aquilon.aqdb.model.hostlifecycle
+                                  .HostLifecycle.__mapper__.polymorphic_map)
+            if not permitted.issubset(all_buildstatus):
+                unknown = ', '.join(permitted.difference(all_buildstatus))
+                logger.warning(
+                    'Invalid buildstatus detected in configuration option '
+                    '{option} in section {section}: {unknown}.'.format(
+                        option=option, section=section, unknown=unknown))
+                permitted.intersection_update(all_buildstatus)
+        else:
+            permitted = set(self._default_allowed_status)
+        return permitted
+
+    def _validate_buildstatus(self, dbhost, logger):
+        permitted = self._get_allowed_status(dbhost.archetype, logger)
+        msg = ''
+        if not permitted:
+            msg = ('Current configuration for hosts that belong to archetype '
+                   '"{}" does not specify any state in which they could be '
+                   'deleted.'.format(dbhost.archetype.name))
+            logger.warning(msg)
+        if dbhost.status.name not in permitted:
+            reason = msg or (
+                'In case of archetype "{archetype}", only hosts with the '
+                'following status can be deleted: {allowed_status}.'
+                .format(archetype=dbhost.archetype.name,
+                        allowed_status=', '.join(sorted(permitted))))
+            raise ArgumentError(
+                'This host status "{host_status}" combined with its archetype '
+                'configuration prevents it from being deleted.  {reason}'
+                .format(host_status=dbhost.status.name,
+                        reason=reason))
 
     def render(self, session, logger, plenaries, hostname, user,
                justification, reason, exporter, **arguments):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
+        # Only proceed if the host buildstatus allows deletions.
+        self._validate_buildstatus(dbhost, logger)
 
         if not isinstance(dbmachine, Machine):
             raise ArgumentError("Command del_host should only be used for machines, "

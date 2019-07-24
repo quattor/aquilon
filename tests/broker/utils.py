@@ -314,6 +314,8 @@ class MockHub(object):
                 net = self.networks[self.machines[machine]['network']]['net']
                 ips.append(net.usable[self.machines[machine]['net_index']])
         for i in range(len(hosts)):
+            self._engine.successtest(['change_status', '--hostname', hosts[i],
+                                      '--buildstatus', 'decommissioned'])
             self._engine.dsdb_expect_delete(ip=ips[i])
             self._engine.successtest(['del_host', '--hostname', hosts[i]])
             self._engine.dsdb_verify()
@@ -731,7 +733,8 @@ class MockHub(object):
 
     def add_host(self, hostname=None,
                  prefix=None, dns_domain=None,
-                 machine=None, building=None, desk=None):
+                 machine=None, building=None, desk=None,
+                 extra_arguments=None):
         # If machine does not exist, and desk exists, building is ignored.
         # If hostname given, prefix and dns_domain are ignored.
         # NB: Hosts stored in self.hosts by hostname (given directly or
@@ -796,12 +799,13 @@ class MockHub(object):
                     'Could not find default DNS domain while attempting to add'
                     ' a host with prefix {}.'.format(prefix))
             hostname = self.get_next_available_hostname(prefix, dns_domain)
+        command.extend(extra_arguments or [])
         self._engine.dsdb_expect_add(hostname, ip, 'eth0', mac)
         self._engine.successtest(command)
         self._engine.dsdb_verify()
         self.hosts[hostname] = {'machine': machine, 'dns_domain': dns_domain,
                                 'building': building, 'desk': desk}
-        return name
+        return hostname
 
     def add_hosts(self, count=1, prefix=None, dns_domain=None,
                   building=None, desk=None, machines=None):

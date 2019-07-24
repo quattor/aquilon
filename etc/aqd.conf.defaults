@@ -267,43 +267,52 @@ default_personality = generic
 default_domain = ny-prod
 default_osname = linux
 default_osversion = generic
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_esx_cluster]
 allow_cascaded_deco = True
 max_members_default = 8
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_gridcluster]
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_hacluster]
 allow_cascaded_deco = True
 max_members_default = 2
 max_priority_order = 99
 min_priority_order = 1
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_metacluster]
 default_domain = ny-prod
 default_personality = metacluster
 max_members_default = 32
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_netinfra]
 default_domain = netinfra
 default_personality = generic
 default_osname = generic
 default_osversion = generic
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_storagecluster]
 max_members_default = 2
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_vmhost]
 default_grn_target = esp
 host_grn_targets = esp
 personality_grn_targets = esp
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [archetype_windows]
 default_domain = ny-prod
 default_personality = generic
 default_osname = windows
 default_osversion = generic
+del_host_buildstatus_allow_only = almostready, ready, rebuild, reinstall, blind, build, decommissioned, failed, install
 
 [network_unknown]
 # Default offset of the gateway's IP address, if there are no explicit router
