@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,18 +28,34 @@ if __name__ == "__main__":
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 from machinetest import MachineTestMixin
+from utils import MockHub
 
 
 class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                   TestBrokerCommand):
 
+    def to_windows(self, hostname):
+        # Aquilon-6292 makes it impossible to delete 'aquilon' hosts in
+        # protected states.  A simple workaround to make legacy tests work
+        # again is to make them windows hosts.
+        # The real tests for del_host in all status and for any archetype are
+        # in test_200_* below, and in unit tests for CommandDelHost.
+        self.successtest(
+            ['reconfigure', '--hostname', hostname,
+             '--archetype', 'windows',
+             '--personality', 'generic',
+             '--osname', 'windows',
+             '--osversion', 'generic'])
+
     def test_100_del_unittest02(self):
-        self.dsdb_expect_delete(self.net["unknown0"].usable[11])
-        command = "del host --hostname unittest02.one-nyp.ms.com"
-        self.statustest(command.split(" "))
+        self.dsdb_expect_delete(self.net['unknown0'].usable[11])
+        host = 'unittest02.one-nyp.ms.com'
+        self.to_windows(host)
+        command = ['del_host', '--hostname', host]
+        self.statustest(command)
         self.dsdb_verify()
-        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
-                               want_exist=False, command="del_host")
+        self.verify_buildfiles('unittest', host,
+                               want_exist=False, command='del_host')
 
     def test_105_verify_del_unittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -153,12 +169,68 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_171_del_notify(self):
         hostname = self.config.get("unittest", "hostname")
+        self.to_windows(hostname)
         self.dsdb_expect_delete("127.0.0.1")
         basetime = datetime.now()
         command = ["del", "host", "--hostname", hostname]
         self.statustest(command)
         self.wait_notification(basetime, 0)
         self.dsdb_verify()
+
+    def test_200_allowed_by_default_for_selected_states(self):
+        # It should be only allowed for states specified in
+        # CommandDelHost._default_allowed_states: blind, build, decommissioned,
+        # failed, and install.
+        allowed = {'blind', 'build', 'decommissioned', 'failed', 'install'}
+        mh = MockHub(self)
+        # Ensure that the archetype defined by MockHub does not have a
+        # corresponding 'archetype_xxx' config section, and thus does not
+        # override the defaults.
+        assert ('archetype_{}'.format(mh.default_archetype)
+                not in self.config.sections())
+        for status in allowed:
+            host = mh.add_host(extra_arguments=['--buildstatus', status])
+            machine = mh.hosts[host]['machine']
+            net = mh.networks[mh.machines[machine]['network']]['net']
+            ip = net.usable[mh.machines[machine]['net_index']]
+            self.dsdb_expect_delete(ip=ip)
+            self.successtest(['del_host', '--hostname', host])
+            self.dsdb_verify()
+            del mh.hosts[host]
+            self.notfoundtest(['show_host', '--hostname', host])
+        mh.delete()
+
+    def test_200_forbidden_by_default_for_selected_states(self):
+        # It should be only allowed for states specified in
+        # CommandDelHost._default_allowed_states, and thus forbidden in
+        # states: almostready, ready, rebuild, and reinstall.
+        protected = {'almostready', 'ready', 'rebuild', 'reinstall'}
+        allowed = {'blind', 'build', 'decommissioned', 'failed', 'install'}
+        mh = MockHub(self)
+        # Ensure that the archetype defined by MockHub does not have a
+        # corresponding 'archetype_xxx' config section, and thus does not
+        # override the defaults.
+        assert ('archetype_{}'.format(mh.default_archetype)
+                not in self.config.sections())
+        for status in protected:
+            host = mh.add_host(extra_arguments=['--buildstatus', status])
+            command = ['del_host', '--hostname', host]
+            err = self.badrequesttest(command)
+            self.matchoutput(err,
+                             'host status "{}" combined with'.format(status),
+                             command)
+            self.matchoutput(err, 'archetype configuration',
+                             command)
+            self.matchoutput(err, ' prevents it from being deleted',
+                             command)
+            self.matchoutput(err, 'case of archetype "{}"'.format(
+                mh.default_archetype), command)
+            self.matchoutput(err, 'only hosts with the following status '
+                                  'can be deleted',
+                             command)
+            self.matchoutput(err, ': {}'.format(', '.join(sorted(allowed))),
+                             command)
+        mh.delete()
 
     def test_300_del_afsbynet(self):
         self.delete_host("afs-by-net.aqd-unittest.ms.com",
@@ -190,9 +262,10 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                          self.net["unknown0"].usable[18], "ut3c1n8")
 
     def test_300_del_unittest20(self):
+        host = 'unittest20.aqd-unittest.ms.com'
+        self.to_windows(host)
         # The transits are deleted in test_del_interface_address
-        self.delete_host("unittest20.aqd-unittest.ms.com",
-                         self.net["zebra_vip"].usable[2], "ut3c5n2")
+        self.delete_host(host, self.net['zebra_vip'].usable[2], 'ut3c5n2')
 
     def test_300_del_unittest21(self):
         self.delete_host("unittest21.aqd-unittest.ms.com",
@@ -217,8 +290,9 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                          self.net["unknown0"].usable[20], "ut3c5n7")
 
     def test_300_del_unittest26(self):
-        self.delete_host("unittest26.aqd-unittest.ms.com",
-                         self.net["unknown0"].usable[23], "ut3c5n8")
+        host = 'unittest26.aqd-unittest.ms.com'
+        self.to_windows(host)
+        self.delete_host(host, self.net['unknown0'].usable[23], 'ut3c5n8')
 
     def test_300_del_filer(self):
         self.delete_host("filer1.ms.com", self.net["vm_storage_net"].usable[25],
@@ -271,8 +345,10 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             ip = net.usable[port]
             if hostname == 'aquilon67.aqd-unittest.ms.com':
                 ip = self.net["ut_bucket2_localvip"].usable[0]
+            self.to_windows(hostname)
             self.delete_host(hostname, ip, machine,
-                             manager_ip=mgmt_net.usable[port], justification=True)
+                             manager_ip=mgmt_net.usable[port],
+                             justification=True)
 
     def test_300_del_ut10_hosts(self):
         net = self.net["ut10_eth0"]
