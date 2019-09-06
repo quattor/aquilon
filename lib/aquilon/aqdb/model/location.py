@@ -21,6 +21,7 @@ from datetime import datetime
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
                         Index)
+from sqlalchemy import literal
 from sqlalchemy.orm import (relation, backref, object_session, deferred,
                             reconstructor)
 from sqlalchemy.sql import and_, or_, desc
@@ -211,7 +212,7 @@ class Location(Base):
              .join(LocationLink, LocationLink.parent_id == self.id)
              .filter(LocationLink.child_id == location_class.id,
                      LocationLink.child_id != self.id))
-        return session.query(q.exists()).scalar()
+        return session.query(literal(True)).filter(q.exists()).scalar()
 
 
 class LocationLink(Base):
