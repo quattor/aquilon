@@ -1,0 +1,5 @@
+ALTER TABLE disk DROP COLUMN disk_tech;
+ALTER TABLE disk DROP COLUMN diskgroup_key;
+ALTER TABLE disk DROP COLUMN model_key;
+ALTER TABLE disk DROP COLUMN usage;
+ALTER TABLE disk DROP COLUMN vsan_policy_key;

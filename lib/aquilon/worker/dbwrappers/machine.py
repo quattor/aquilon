@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013,2014,2015,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -140,7 +140,8 @@ def create_machine(config, session, logger, machine, dblocation, dbmodel,
 def add_disk(dbmachine, disk, controller, share=None, filesystem=None,
              resourcegroup=None, address=None, size=None, boot=None,
              snapshot=None, wwn=None, bus_address=None, iops_limit=None,
-             comments=None):
+             disk_tech=None, diskgroup_key=None, model_key=None,
+             usage=None, vsan_policy_key=None, comments=None):
     for dbdisk in dbmachine.disks:
         if dbdisk.device_name == disk:
             raise ArgumentError("{0} already has a disk named {1!s}."
@@ -178,12 +179,18 @@ def add_disk(dbmachine, disk, controller, share=None, filesystem=None,
         extra_params["backing_store"] = dbres
         extra_params["snapshotable"] = snapshot
         extra_params["iops_limit"] = iops_limit
+        extra_params["vsan_policy_key"] = vsan_policy_key
     else:
         cls = LocalDisk
+        if vsan_policy_key is not None:
+            raise ArgumentError("VSAN policy can only be set for "
+                                "virtual disks.")
 
     dbdisk = cls(device_name=disk, controller_type=controller,
                  capacity=size, bootable=boot, wwn=wwn, address=address,
-                 bus_address=bus_address, comments=comments, **extra_params)
+                 bus_address=bus_address, disk_tech=disk_tech,
+                 diskgroup_key=diskgroup_key, model_key=model_key,
+                 usage=usage, comments=comments, **extra_params)
 
     dbmachine.disks.append(dbdisk)
 

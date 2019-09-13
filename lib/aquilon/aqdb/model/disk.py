@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2008-2014,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,18 +16,39 @@
 # limitations under the License.
 """ Polymorphic representation of disks which may be local or san """
 
-from datetime import datetime
-import re
-
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, deferred, validates
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.config import Config
-from aquilon.utils import force_wwn
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import Base, Machine, DeviceLinkMixin
+from aquilon.aqdb.model import (
+    Base,
+    DeviceLinkMixin,
+    Machine,
+    )
+from aquilon.config import Config
+from aquilon.exceptions_ import (
+    ArgumentError,
+    InternalError,
+    )
+from aquilon.utils import force_wwn
+
+from datetime import datetime
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Sequence,
+    String,
+    UniqueConstraint,
+    )
+from sqlalchemy.orm import (
+    backref,
+    deferred,
+    relation,
+    validates,
+    )
+
+import re
 
 _TN = 'disk'
 
@@ -60,6 +81,11 @@ class Disk(DeviceLinkMixin, Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
+    disk_tech = Column(AqStr(32), nullable=True)
+    diskgroup_key = Column(String(255), nullable=True)
+    model_key = Column(String(255), nullable=True)
+    usage = Column(AqStr(32), nullable=True)
+
     comments = deferred(Column(String(255), nullable=True))
 
     machine = relation(Machine, innerjoin=True,
@@ -77,6 +103,21 @@ class Disk(DeviceLinkMixin, Base):
             (self._get_class_label(), self.device_name, self.controller_type,
              self.machine.label, self.capacity)
 
+    def _config_match_values(self, section, entry, desc, value, allow_none):
+        if value is None and allow_none:
+            return value
+        if not _config.has_option(section, entry):
+            raise InternalError("Missing configuration for {}.{}"
+                                .format(section, entry))
+        # expect a comma-separated list of values
+        valid_values = [s.strip() for s in
+                        _config.get(section, entry).split(",")]
+        if value not in valid_values:
+            raise ArgumentError("{} is not a valid {}, use one of: {}."
+                                .format(value, desc,
+                                        ", ".join(sorted(valid_values))))
+        return value
+
     @validates('address')
     def validate_address(self, key, value):  # pylint: disable=W0613
         if not value:
@@ -88,16 +129,22 @@ class Disk(DeviceLinkMixin, Base):
 
     @validates('controller_type')
     def validate_controller_type(self, key, value):  # pylint: disable=W0613
-        valid_values = [s.strip() for s in
-                        _config.get("broker", "disk_controller_types").split(",")]
-        if value not in valid_values:
-            raise ArgumentError("%s is not a valid controller type, use one "
-                                "of: %s." % (value, ", ".join(sorted(valid_values))))
-        return value
+        return self._config_match_values("broker", "disk_controller_types",
+                                         "controller type", value, False)
 
     @validates('wwn')
     def validate_wwn(self, key, value):
         return force_wwn(key, value)
+
+    @validates('disk_tech')
+    def validate_disk_tech(self, key, value):   # pylint: disable=W0613
+        return self._config_match_values("broker", "disk_technology_types",
+                                         "disk technology", value, True)
+
+    @validates('usage')
+    def validate_usage(self, key, value):   # pylint: disable=W0613
+        return self._config_match_values("broker", "disk_usage_types",
+                                         "disk usage", value, True)
 
     # Currently this is for curiosity only. It would be more useful if we could
     # look up the vendor name somewhere, based on the OUI.

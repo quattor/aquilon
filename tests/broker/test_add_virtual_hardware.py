@@ -104,12 +104,26 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
 
     def test_120_adddisks(self):
         # The first 8 shares should work...
-        for i in range(1, 9):
+        for i in range(1, 8):
             machine = "evm%s" % i
             self.noouttest(["add", "disk", "--machine", machine,
                             "--disk", "sda", "--controller", "sata",
                             "--size", "15", "--share", "test_share_%s" % i,
                             "--address", "0:0"])
+        # add the last with a VSAN policy key
+        self.noouttest(["add", "disk", "--machine", "evm8",
+                        "--disk", "sda", "--controller", "sata",
+                        "--size", "15", "--share", "test_share_8",
+                        "--address", "0:0",
+                        "--vsan_policy_key", "vsp123"])
+
+    def test_122_update_vsan_policy_keys(self):
+        self.noouttest(["update", "disk", "--machine", "evm7",
+                        "--disk", "sda",
+                        "--vsan_policy_key", "vsp123"])
+        self.noouttest(["update", "disk", "--machine", "evm8",
+                        "--disk", "sda",
+                        "--vsan_policy_key", "vsp456"])
 
     def test_125_searchhostmemberclustershare(self):
         command = ["search_host", "--member_cluster_share=test_share_1"]
@@ -165,6 +179,28 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               r'Address: 0:0$' % i,
                               command)
 
+    def test_130_show_evm7_vsan_policy_key(self):
+        # evm7 should have specific VSAN policy keys
+        command = "show_machine --machine evm7"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'Disk: sda 15 GB sata \(virtual_disk stored '
+                          r'on share test_share_7\) \[boot\]\s*'
+                          r'Address: 0:0\s*'
+                          r'VSAN Policy Key: vsp123$',
+                          command)
+
+    def test_130_show_evm8_vsan_policy_key(self):
+        # evm8 should have specific VSAN policy keys
+        command = "show_machine --machine evm8"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'Disk: sda 15 GB sata \(virtual_disk stored '
+                          r'on share test_share_8\) \[boot\]\s*'
+                          r'Address: 0:0\s*'
+                          r'VSAN Policy Key: vsp456$',
+                          command)
+
     def test_130_cat_utecl1_tmachines(self):
         # Skipping evm9 since the mac is out of sequence
         for i in range(1, 9):
@@ -190,18 +226,23 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
                               r'"hwaddr", "00:50:56:01:20:%02x"\s*\);'
                               % (i - 1),
                               command)
-            self.searchoutput(out,
-                              r'"harddisks/\{sda\}" = nlist\(\s*'
-                              r'"address", "0:0",\s*'
-                              r'"boot", true,\s*'
-                              r'"capacity", 15\*GB,\s*'
-                              r'"interface", "sata",\s*'
-                              r'"mountpoint", "/vol/lnn30f1v1/test_share_%d",\s*'
-                              r'"path", "evm%d/sda.vmdk",\s*'
-                              r'"server", "lnn30f1",\s*'
-                              r'"sharename", "test_share_%d"\s*'
-                              r'\);' % (i, i, i),
-                              command)
+            # evm7 and evm8 have vsan_policy_key defined
+            dmstr = (r'"harddisks/\{sda\}" = nlist\(\s*'
+                     r'"address", "0:0",\s*'
+                     r'"boot", true,\s*'
+                     r'"capacity", 15\*GB,\s*'
+                     r'"interface", "sata",\s*'
+                     r'"mountpoint", "/vol/lnn30f1v1/test_share_%d",\s*'
+                     r'"path", "evm%d/sda.vmdk",\s*'
+                     r'"server", "lnn30f1",\s*'
+                     r'"sharename", "test_share_%d"\s*' % (i, i, i))
+            if i == 7:
+                dmstr += r',\s*"vsan_policy_key", "vsp123"'
+            elif i == 8:
+                dmstr += r',\s*"vsan_policy_key", "vsp456"'
+            dmstr += r'\s*\);'
+
+            self.searchoutput(out, dmstr, command)
 
     def test_130_cat_utecl1(self):
         command = "cat --cluster=utecl1 --data"
@@ -259,6 +300,32 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             machine = "evm%s" % i
             self.matchoutput(out, "Virtual Machine: %s (no hostname, 8192 MB)" %
                              machine, command)
+
+    def test_135_clear_vsan_policy_keys(self):
+        # clean-up the VSAN policy keys for evm7 and evm8
+        self.noouttest(["update", "disk", "--machine", "evm7",
+                        "--disk", "sda",
+                        "--vsan_policy_key", ""])
+        self.noouttest(["update", "disk", "--machine", "evm8",
+                        "--disk", "sda",
+                        "--vsan_policy_key", ""])
+
+    def test_136_evm8_no_vsan_policy(self):
+        # VSAN policy should not appear in plenary for evm8
+        command = "cat --machine evm8"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"harddisks/\{sda\}" = nlist\(\s*'
+                          r'"address", "0:0",\s*'
+                          r'"boot", true,\s*'
+                          r'"capacity", 15\*GB,\s*'
+                          r'"interface", "sata",\s*'
+                          r'"mountpoint", "/vol/lnn30f1v1/test_share_8",\s*'
+                          r'"path", "evm8/sda.vmdk",\s*'
+                          r'"server", "lnn30f1",\s*'
+                          r'"sharename", "test_share_8"\s*'
+                          r'\);',
+                          command)
 
     def test_140_add_windows(self):
         command = ["add_windows_host", "--hostname=aqddesk1.msad.ms.com",

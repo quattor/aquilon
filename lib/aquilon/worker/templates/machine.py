@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -97,6 +98,19 @@ class PlenaryMachineInfo(StructurePlenary):
 
             if hasattr(disk, "iops_limit") and disk.iops_limit is not None:
                 params["iopslimit"] = disk.iops_limit
+
+            if disk.disk_tech:
+                params["disk_tech"] = disk.disk_tech
+            if disk.usage:
+                params["usage"] = disk.usage
+            if disk.diskgroup_key:
+                params["diskgroup_key"] = disk.diskgroup_key
+            if disk.model_key:
+                params["model_key"] = disk.model_key
+
+            if (hasattr(disk, "vsan_policy_key") and
+                    disk.vsan_policy_key is not None):
+                params["vsan_policy_key"] = disk.vsan_policy_key
 
             if isinstance(disk, LocalDisk):
                 tpl = StructureTemplate("hardware/harddisk/generic/%s" %

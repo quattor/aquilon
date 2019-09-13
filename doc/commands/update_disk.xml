@@ -57,6 +57,11 @@
                 </group>
                 <arg><option>--resourcegroup <replaceable>RG</replaceable></option></arg>
             </group>
+            <arg><option>--disk_tech <replaceable>TECH</replaceable></option></arg>
+            <arg><option>--usage <replaceable>USE</replaceable></option></arg>
+            <arg><option>--diskgroup_key <replaceable>DGKEY</replaceable></option></arg>
+            <arg><option>--model_key <replaceable>MODELKEY</replaceable></option></arg>
+            <arg><option>--vsan_policy_key <replaceable>VSANPKEY</replaceable></option></arg>
             <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
             <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
@@ -237,6 +242,58 @@
                 <listitem>
                     <para>
                         Change the IOPS limit on the virtual disk.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--disk_tech <replaceable>TECH</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the disk technology (e.g. hdd, ssd, nvme).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--usage <replaceable>USE</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the intended use for this disk (e.g. os, data, cache, swap).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--diskgroup_key <replaceable>DGKEY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the arbitrary disk-group foreign key (storage infrastructure).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--model_key <replaceable>MODELKEY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the arbitrary disk model foreign key (storage infrastructure).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--vsan_policy_key <replaceable>VSANPKEY</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Change the arbitrary VSAN policy foreign key (storage
+                        infrastructure).  This can only be used with virtual
+                        disks.
                     </para>
                 </listitem>
             </varlistentry>

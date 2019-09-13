@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016  Contributor
+# Copyright (C) 2008-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,6 +89,19 @@ class MachineFormatter(HardwareEntityFormatter):
                                d.bus_address)
             if isinstance(d, VirtualDisk) and d.iops_limit:
                 details.append(indent + "    IOPS Limit: %s" % d.iops_limit)
+            if d.disk_tech:
+                details.append(indent + "    Disk Technology: %s"
+                               % d.disk_tech)
+            if d.usage:
+                details.append(indent + "    Usage: %s" % d.usage)
+            if d.diskgroup_key:
+                details.append(indent + "    Disk-Group Key: %s"
+                               % d.diskgroup_key)
+            if d.model_key:
+                details.append(indent + "    Model Key: %s" % d.model_key)
+            if isinstance(d, VirtualDisk) and d.vsan_policy_key:
+                details.append(indent + "    VSAN Policy Key: %s"
+                               % d.vsan_policy_key)
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
 
@@ -152,8 +165,18 @@ class MachineFormatter(HardwareEntityFormatter):
                         disk_msg.snapshotable = disk.snapshotable
                     if disk.iops_limit is not None:
                         disk_msg.iops_limit = disk.iops_limit
+                    if disk.vsan_policy_key:
+                        disk_msg.vsan_policy_key = disk.vsan_policy_key
                     self.redirect_proto(disk.backing_store,
                                         disk_msg.backing_store)
+                if disk.disk_tech:
+                    disk_msg.disk_tech = disk.disk_tech
+                if disk.usage:
+                    disk_msg.usage = disk.usage
+                if disk.diskgroup_key:
+                    disk_msg.diskgroup_key = disk.diskgroup_key
+                if disk.model_key:
+                    disk_msg.model_key = disk.model_key
 
         if machine.vm_container and not embedded:
             holder = machine.vm_container.holder.holder_object

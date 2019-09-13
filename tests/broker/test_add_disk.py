@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -85,6 +85,22 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                          r"match (?:\d+:){3}\d+$.",
                          command)
 
+    def test_205_add_ut3c5n10_disk_parameters_notvm(self):
+        command = ["add_disk", "--machine=ut3c5n10",
+                   "--disk=sdc", "--controller=scsi", "--size=42",
+                   "--usage", "data", "--disk_tech", "hdd",
+                   "--vsan_policy_key", "test:raid1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         r"VSAN policy can only be set for virtual disks.",
+                         command)
+
+    def test_210_add_ut3c5n10_disk_parameters(self):
+        self.noouttest(["add_disk", "--machine=ut3c5n10",
+                        "--disk=sdc", "--controller=scsi", "--size=42",
+                        "--usage", "data", "--disk_tech", "hdd",
+                        "--diskgroup_key", "dg0"])
+
     def test_300_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
@@ -93,6 +109,12 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                           r"Disk: sdb 34 GB scsi \(local\)\s*"
                           r"Address: 0:0:1:0\s*"
                           r"Comments: Some disk comments",
+                          command)
+        self.searchoutput(out,
+                          r"Disk: sdc 42 GB scsi \(local\)\s*"
+                          r"Disk Technology: hdd\s*"
+                          r"Usage: data\s*"
+                          r"Disk-Group Key: dg0\s*",
                           command)
 
     def test_300_cat_ut3c5n10(self):
@@ -111,6 +133,15 @@ class TestAddDisk(EventsTestMixin, TestBrokerCommand):
                           r'"address", "0:0:1:0",\s*'
                           r'"capacity", 34\*GB,\s*'
                           r'"interface", "scsi"\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"harddisks/{sdc}" = '
+                          r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"capacity", 42\*GB,\s*'
+                          r'"disk_tech", "hdd",\s*'
+                          r'"diskgroup_key", "dg0",\s*'
+                          r'"interface", "scsi",\s*'
+                          r'"usage", "data"\s*\);',
                           command)
 
     def test_300_show_ut3c1n3(self):
