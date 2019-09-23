@@ -114,6 +114,7 @@ class MockHub(object):
         self.default_os = default_os or self.random_name()
         self.default_os_version = default_os_version or self.random_name()
         self.grn = grn
+        self.preexisting_grns = self.get_grns()
         self.organisations = []
         self.archetypes = []
         self.personalities = []
@@ -132,6 +133,36 @@ class MockHub(object):
         self._initialise_dependencies()
         self.default_dns_domain = self.add_dns_domain('{}.cc'.format(
             self._name))
+
+    def get_grns(self):
+        grns = []
+        eon_ids = []
+        disabled = []
+        grn_pattern = r'GRN:[\s]*(grn:[^\s]+)'
+        eon_id_pattern = r'EON ID:[\s]*([\d]+)'
+        disabled_pattern = r'Disabled:[\s]*([^\s]+)'
+        out = self._engine.commandtest(['show_grn', '--all'])
+        for line in out.splitlines():
+            found = re.findall(grn_pattern, line)
+            if found:
+                grns.append(found[0])
+                continue
+            found = re.findall(eon_id_pattern, line)
+            if found:
+                eon_ids.append(found[0])
+                continue
+            found = re.findall(disabled_pattern, line)
+            if found:
+                assert found[0] == 'True' or found[0] == 'False'
+                status = True if found[0] == 'True' else False
+                disabled.append(status)
+                continue
+        assert len(eon_ids) == len(grns) == len(disabled)
+        return {
+            grns[i]: {
+                'eon_id': eon_ids[i],
+                'disabled': disabled[i]
+            } for i in range(len(grns))}
 
     def get_building(self, machine=None, desk=None):
         building = None
@@ -470,6 +501,40 @@ class MockHub(object):
                                                 self.organisations)
         self.organisations = []
 
+    def restore_original_grn_set(self):
+        # Delete new.
+        current = self.get_grns()
+        to_delete = set(current) - set(self.preexisting_grns)
+        for grn in to_delete:
+            self._engine.successtest(['del_grn', '--grn', grn])
+        # Restore preexisting if necessary.
+        current = self.get_grns()
+        current_by_eid = {current[grn]['eon_id']: grn for grn in current}
+        for grn in self.preexisting_grns:
+            eon_id = self.preexisting_grns[grn]['eon_id']
+            disabled = self.preexisting_grns[grn]['disabled']
+            if grn not in current:
+                command = ['add_grn', '--grn', grn, '--eon_id', eon_id]
+                if disabled:
+                    command.append('--disabled')
+            else:
+                command = ['update_grn', '--grn', grn]
+                if eon_id != current[grn]['eon_id']:
+                    command.extend(['--eon_id', eon_id])
+                if disabled is not current[grn]['disabled']:
+                    command.append('--disabled' if disabled
+                                   else '--nodisabled')
+            if len(command) > 3:
+                # Resolve EON ID conflicts.
+                if eon_id in current_by_eid and grn != current_by_eid[eon_id]:
+                    temp_eid = str(max(map(int, current_by_eid)) + 1)
+                    self._engine.successtest(
+                        ['update_grn', '--grn', current_by_eid[eon_id],
+                         '--eon_id', temp_eid])
+                # Finally, restore the GRN state.
+                self._engine.successtest(command)
+        self.preexisting_grns = {}
+
     def delete(self, slow=False, verify=False):
         # Use slow=True to try to delete objects not created via methods
         # defined in this class.
@@ -508,6 +573,8 @@ class MockHub(object):
         if verify:
             self._verify_deletion_with_show_all(
                 'network', self.networks, 0)
+        # Delete new GRNs, restore preexisting GRNs / EON IDs where necessary.
+        self.restore_original_grn_set()
         # Last but not least, delete the hub itself, then all the organisations
         # created by the hub, including the organisation to which the hub
         # belongs if the organisation has been created by MockHub.

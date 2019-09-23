@@ -129,6 +129,7 @@ class ChangeManagement(object):
 
         self.dict_of_impacted_envs = {}
         self.impacted_objects = {}
+        self.impacted_eonids = set()
         self.eonid = 6980  # to be calculated for each target
         self.enforce_validation = False
 
@@ -273,6 +274,7 @@ class ChangeManagement(object):
             log_dict['prod_ready_env_impact'] = 'Yes'
         else:
             log_dict['prod_ready_env_impact'] = 'No'
+        log_dict['impacted_eonids'] = list(self.impacted_eonids)
         cm_logger.info(json.dumps(log_dict))
 
     def validate_default(self, obj):
@@ -728,6 +730,9 @@ class ChangeManagement(object):
         # noinspection PyStringFormat
         self.impacted_objects.setdefault(
             '{0:c}'.format(an_object), set()).add('{0:l}'.format(an_object))
+        if hasattr(an_object, 'effective_owner_grn'):
+            eonid = an_object.effective_owner_grn.eon_id
+            self.impacted_eonids.add(eonid)
 
 
 ChangeManagement.handlers[Cluster] = ChangeManagement.validate_cluster
