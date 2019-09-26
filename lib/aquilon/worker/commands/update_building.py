@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Contains the logic for `aq update building`."""
+from sqlalchemy import literal
 from sqlalchemy.orm import with_polymorphic
 
 from aquilon.aqdb.model import Building
@@ -203,7 +204,7 @@ class CommandUpdateBuilding(BrokerCommand):
              .join(Fqdn.dns_domain)
              .filter(HardwareEntity.location_id.in_(locations),
                      Fqdn.dns_domain == building.default_dns_domain))
-        if session.query(q.exists()).scalar():
+        if session.query(literal(True)).filter(q.exists()).scalar():
             raise ArgumentError(
                 'There is at least one host in building "{building}" that is '
                 'aligned with the default DNS domain currently assigned to '
