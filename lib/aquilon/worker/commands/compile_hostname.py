@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2015,2016  Contributor
+# Copyright (C) 2008-2013,2015-2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ class CommandCompileHostname(BrokerCommand):
     required_parameters = ["hostname"]
     requires_readonly = True
 
-    def render(self, session, logger, hostname, pancinclude, pancexclude,
+    def render_old(self, session, logger, hostname, pancinclude, pancexclude,
                pancdebug, cleandeps, **_):
         dbhost = hostname_to_host(session, hostname)
         if pancdebug:
@@ -41,3 +41,29 @@ class CommandCompileHostname(BrokerCommand):
                         panc_debug_exclude=pancexclude,
                         cleandeps=cleandeps)
         return
+
+    def render(self, session, logger, hostname,
+               pancinclude, pancexclude, pancdebug, cleandeps, **_):
+        template_domain, plenary = self._preprocess(session, logger, hostname)
+        if pancdebug:
+            pancinclude = r'.*'
+            pancexclude = r'components/spma/functions.*'
+        self._compile_template_domain(session, template_domain, plenary,
+                                      pancinclude, pancexclude, cleandeps)
+
+    @staticmethod
+    def _preprocess(session, logger, hostname):
+        dbhost = hostname_to_host(session, hostname)
+        template_domain = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
+                                         logger=logger)
+        plenary = Plenary.get_plenary(dbhost, logger=logger)
+        return template_domain, plenary
+
+    @staticmethod
+    def _compile_template_domain(session, template_domain, plenary,
+                                 pancinclude, pancexclude, cleandeps):
+        with plenary.get_key():
+            template_domain.compile(session, only=plenary.object_templates,
+                                    panc_debug_include=pancinclude,
+                                    panc_debug_exclude=pancexclude,
+                                    cleandeps=cleandeps)
