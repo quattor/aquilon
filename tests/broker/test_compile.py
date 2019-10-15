@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2008-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -258,49 +258,6 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
         self.matchclean(out, "aqd unittest debug for aquilon base", command)
         self.matchclean(out, "aqd unittest debug for aquilon final", command)
-
-    # The 'Assigning repositories to packages...' line is a debug() in
-    # aquilon/components/spma/functions.tpl that is used here to verify
-    # that the auto-exclude from pancdebug is working.
-    def test_510_verifydebughost(self):
-        command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
-                   '--pancdebug', '--cleandeps']
-        out = self.statustest(command)
-        self.matchoutput(out, "aqd unittest debug for aquilon base", command)
-        self.matchoutput(out, "aqd unittest debug for aquilon final", command)
-        self.matchclean(out, "Assigning repositories to packages...", command)
-
-    def test_520_verifydebugdomain(self):
-        command = ['compile', '--domain=unittest', '--pancdebug',
-                   '--cleandeps']
-        out = self.statustest(command)
-        self.matchoutput(out, "aqd unittest debug for aquilon base", command)
-        self.matchoutput(out, "aqd unittest debug for aquilon final", command)
-        self.matchclean(out, "Assigning repositories to packages...", command)
-
-        res = re.search(r"(\d+)/(\d+) template\(s\) being processed",
-                        out, re.M)
-        self.assertEqual(res.group(1), res.group(2),
-                         "All objects need to be recompiled")
-
-    # If this fails on the 'Assigning...' line then all four tests
-    # (510, 520, 530, 540) should be revisited.  See comments above 510.
-    def test_530_verifyexclude(self):
-        command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
-                   '--pancexclude=archetype/base',
-                   '--pancinclude=.*', '--cleandeps']
-        out = self.statustest(command)
-        self.matchclean(out, "aqd unittest debug for aquilon base", command)
-        self.matchoutput(out, "aqd unittest debug for aquilon final", command)
-        self.matchoutput(out, "Assigning repositories to packages...", command)
-
-    def test_540_verifyinclude(self):
-        command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
-                   '--pancinclude=archetype/base', '--cleandeps']
-        out = self.statustest(command)
-        self.matchoutput(out, "aqd unittest debug for aquilon base", command)
-        self.matchclean(out, "aqd unittest debug for aquilon final", command)
-        self.matchclean(out, "Assigning repositories to packages...", command)
 
     def test_550_compile_personality(self):
         command = "compile --personality compileserver --archetype aquilon"

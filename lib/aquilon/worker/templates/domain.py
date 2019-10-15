@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -83,7 +83,9 @@ class TemplateDomain(object):
 
     def compile(self, session, only=None, panc_debug_include=None,
                 panc_debug_exclude=None, cleandeps=False):
-        """The build directories are checked and constructed
+        """Compile the template domain using the panc compiler.
+
+        The build directories are checked and constructed
         if necessary, so no prior setup is required.
 
         The caller is responsible for locking.
@@ -94,47 +96,37 @@ class TemplateDomain(object):
         May raise ArgumentError exception, else returns the standard
         output (as a string) of the compile
         """
+        outputdir, templatedir = self._prepare_dirs()
+        only, nothing_to_do = self._preprocess_only(session, only)
+        if nothing_to_do:
+            return
+        args = self._compute_panc_args(outputdir, templatedir, only,
+                                       panc_debug_exclude, panc_debug_include,
+                                       cleandeps)
+        self._invoke_panc_compiler(args)
 
-        config = Config()
-
-        templatedir = template_branch_basedir(config, self.domain, self.author)
-        if not os.path.exists(templatedir):
-            raise ArgumentError("Template directory '%s' does not exist." %
-                                templatedir)
-
-        self.logger.info("preparing domain %s for compile", self.domain.name)
-
-        # Ensure that the compile directory is in a good state.
-        outputdir = config.get("broker", "profilesdir")
-
-        for d in self.directories() + [config.get("broker", "profilesdir")]:
-            if not os.path.exists(d):
-                try:
-                    self.logger.info("creating %s", d)
-                    os.makedirs(d)
-                except OSError as e:
-                    raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
-
-        nothing_to_do = True
+    def _preprocess_only(self, session, only):
         if only is not None:
             # "only" may be a generator, which may not yield any entries
             only = set(only)
             nothing_to_do = len(only) == 0
         else:
-            hostnames = session.query(Fqdn.name.concat(".")
-                                      .concat(DnsDomain.name).label('hostname'))
+            hostnames = session.query(
+                Fqdn.name.concat(".").concat(DnsDomain.name).label('hostname'))
             hostnames = hostnames.select_from(Fqdn)
             hostnames = hostnames.join(DnsDomain)
             hostnames = hostnames.join(DnsRecord, HardwareEntity, Host)
             hostnames = hostnames.filter_by(branch=self.domain,
                                             sandbox_author=self.author)
-            hostnames = hostnames.join(PersonalityStage, Personality, Archetype)
+            hostnames = hostnames.join(PersonalityStage, Personality,
+                                       Archetype)
             hostnames = hostnames.filter_by(is_compileable=True)
 
             clusternames = session.query(Cluster.name)
             clusternames = clusternames.filter_by(branch=self.domain,
                                                   sandbox_author=self.author)
-            clusternames = clusternames.join(PersonalityStage, Personality, Archetype)
+            clusternames = clusternames.join(PersonalityStage, Personality,
+                                             Archetype)
             clusternames = clusternames.filter_by(is_compileable=True)
 
             if self.author:
@@ -144,12 +136,34 @@ class TemplateDomain(object):
                 only.extend("clusters/%s" % c.name for c in clusternames)
                 nothing_to_do = not bool(only)
             else:
-                nothing_to_do = not hostnames.count() and not clusternames.count()
+                nothing_to_do = not (hostnames.count() or clusternames.count())
 
         if nothing_to_do:
             self.logger.client_info('No object profiles: nothing to do.')
-            return
+        return only, nothing_to_do
 
+    def _prepare_dirs(self):
+        config = Config()
+        templatedir = template_branch_basedir(config, self.domain, self.author)
+        if not os.path.exists(templatedir):
+            raise ArgumentError("Template directory '%s' does not exist." %
+                                templatedir)
+
+        self.logger.info("preparing domain %s for compile", self.domain.name)
+
+        # Ensure that the compile directory is in a good state.
+        outputdir = config.get("broker", "profilesdir")
+        for d in self.directories() + [outputdir]:
+            if not os.path.exists(d):
+                try:
+                    self.logger.info("creating %s", d)
+                    os.makedirs(d)
+                except OSError as e:
+                    raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
+        return outputdir, templatedir
+
+    def _compute_panc_env(self):
+        config = Config()
         panc_env = {"PATH": os.environ.get("PATH", "")}
 
         if config.has_value("tool_locations", "java_home"):
@@ -160,13 +174,16 @@ class TemplateDomain(object):
         if config.has_value("tool_locations", "ant_home"):
             ant_home = config.get("tool_locations", "ant_home")
             panc_env["PATH"] = "%s/bin:%s" % (ant_home, panc_env["PATH"])
-            # The ant wrapper is silly and it may pick up the wrong set of .jars
-            # if ANT_HOME is not set
+            # The ant wrapper is silly and it may pick up the wrong set of
+            # .jars if ANT_HOME is not set
             panc_env["ANT_HOME"] = ant_home
 
         if config.has_value("broker", "ant_options"):
             panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
+        return panc_env
 
+    def _compute_formats_and_suffixes(self):
+        config = Config()
         if config.getboolean('panc', 'gzip_output'):
             compress_suffix = ".gz"
         else:
@@ -187,7 +204,12 @@ class TemplateDomain(object):
             suffixes.append(".xml" + compress_suffix)
         if "json" + compress_suffix in formats:
             suffixes.append(".json" + compress_suffix)
+        return formats, suffixes
 
+    def _compute_panc_args(self, outputdir, templatedir, only,
+                           panc_debug_exclude, panc_debug_include, cleandeps):
+        config = Config()
+        formats, suffixes = self._compute_formats_and_suffixes()
         formats.append("dep")
 
         args = ["ant"]
@@ -226,7 +248,11 @@ class TemplateDomain(object):
             # Cannot send a false value - the test in build.xml is for
             # whether or not the property is defined at all.
             args.append("-Dclean.dep.files=%s" % cleandeps)
+        return args
 
+    def _invoke_panc_compiler(self, args):
+        panc_env = self._compute_panc_env()
+        config = Config()
         self.logger.info("starting compile")
         try:
             run_command(args, env=panc_env, logger=self.logger,
