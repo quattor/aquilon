@@ -912,7 +912,7 @@
     <command name="add_disk">
         Add a new disk to a machine.
         <p/>
-        The controller type must be one of: ide, scsi, sata, sas, cciss.
+        The controller type must be one of: ide, scsi, sata, sas, cciss, fibrechannel, flash, nvme.
         <p/>
         Examples of valid disk names: hda, hdb (IDE); sda, sdb (SCSI, SATA), c0d0 (CCISS).
         <optgroup mandatory="True" fields="all">
@@ -935,6 +935,11 @@
             <option name="wwn" type="string">World Wide Name of the disk</option>
             <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
             <option name="iops_limit" type="int">IOPS limit on disks.</option>
+            <option name="disk_tech" type="string">Disk technology, one of: hdd, sdd, nvme</option>
+            <option name="diskgroup_key" type="string">Disk-group key (foreign system)</option>
+            <option name="model_key" type="string">Disk model key (foreign system)</option>
+	    <option name="usage" type="string">Disk usage, one of: os, data, swap, cache, capacity</option>
+	    <option name="vsan_policy_key" type="string">VSAN policy key (foreign system)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
             <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>
@@ -989,6 +994,11 @@
             <option name="wwn" type="string">World Wide Name of the disk</option>
             <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
             <option name="iops_limit" type="int">IOPS limit on disks</option>
+            <option name="disk_tech" type="string">Disk technology, one of: hdd, sdd, nvme (empty string clears)</option>
+            <option name="diskgroup_key" type="string">Disk-group key (foreign system, empty string clears)</option>
+            <option name="model_key" type="string">Disk model key (foreign system, empty string clears)</option>
+	    <option name="usage" type="string">Disk usage, one of: os, data, swap, cache, capacity (empty string clears)</option>
+	    <option name="vsan_policy_key" type="string">VSAN policy key (foreign system, empty string clears)</option>
             <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
             <option name="reason" type="string">Human readable description of why the operation was performed</option>
             <option name="cm_check" type="flag">Do a dry-run, and report the objects in-scope for change-management.</option>

@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2013-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,6 +65,21 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'Controller Bus Address: pci:0000:01:00.0$',
                           command_verify)
 
+    def test_104_update_ut3c5n10_sdc_parameters(self):
+        command = ["update_disk", "--machine=ut3c5n10", "--disk=sdc",
+                   "--disk_tech", "ssd", "--model_key", "ut_testmodel",
+                   "--diskgroup_key", "dg2"]
+        self.noouttest(command)
+        command_verify = ["show_machine", "--machine", "ut3c5n10"]
+        out = self.commandtest(command_verify)
+        self.searchoutput(out,
+                          r'Disk: sdc 42 GB scsi \(local\)\s*'
+                          r'Disk Technology: ssd\s*'
+                          r'Usage: data\s*'
+                          r'Disk-Group Key: dg2\s*'
+                          r'Model Key: ut_testmodel\s*',
+                          command)
+
     def test_105_show_ut3c1n3(self):
         command = ["show_machine", "--machine", "ut3c1n3"]
         out = self.commandtest(command)
@@ -117,6 +132,20 @@ class TestUpdateDisk(EventsTestMixin, TestBrokerCommand):
                           r'"interface", "sata"\s*\);',
                           command)
         self.matchclean(out, "c0d0", command)
+
+    def test_107_clear_ut3c5n10_sdc_parameters(self):
+        command = ["update_disk", "--machine=ut3c5n10", "--disk=sdc",
+                   "--disk_tech", "", "--model_key", "", "--usage", "",
+                   "--diskgroup_key", ""]
+        self.noouttest(command)
+        command_verify = ["cat", "--machine", "ut3c5n10"]
+        out = self.commandtest(command_verify)
+        self.searchoutput(out,
+                          r'"harddisks/{sdc}" = '
+                          r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"capacity", 42\*GB,\s*'
+                          r'"interface", "scsi"\s*\);',
+                          command)
 
     def test_110_prepare_vm_test(self):
         self.noouttest(["add_filesystem", "--filesystem", "disk_update_test",

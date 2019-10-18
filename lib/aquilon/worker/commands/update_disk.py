@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2013,2014,2015,2016,2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,8 +32,9 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, plenaries, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, wwn, bus_address, iops_limit, user,
-               justification, reason, logger, **kwargs):
+               snapshot, rename_to, wwn, bus_address, iops_limit,
+               disk_tech, diskgroup_key, model_key, usage, vsan_policy_key,
+               user, justification, reason, logger, **kwargs):
 
         dbmachine = get_hardware(session, compel=True, **kwargs)
 
@@ -54,6 +55,39 @@ class CommandUpdateDisk(BrokerCommand):
 
         if comments is not None:
             dbdisk.comments = comments
+
+        if disk_tech is not None:
+            if disk_tech:
+                dbdisk.disk_tech = disk_tech
+            else:
+                dbdisk.disk_tech = None     # clear to NULL if empty-string
+
+        if diskgroup_key is not None:
+            if diskgroup_key:
+                dbdisk.diskgroup_key = diskgroup_key
+            else:
+                dbdisk.diskgroup_key = None   # clear to NULL if empty-string
+
+        if model_key is not None:
+            if model_key:
+                dbdisk.model_key = model_key
+            else:
+                dbdisk.model_key = None     # clear to NULL if empty-string
+
+        if usage is not None:
+            if usage:
+                dbdisk.usage = usage
+            else:
+                dbdisk.usage = None         # clear to NULL if empty-string
+
+        if vsan_policy_key is not None:
+            if not isinstance(dbdisk, VirtualDisk):
+                raise ArgumentError("VSAN policy can only be set for "
+                                    "virtual disks.")
+            if vsan_policy_key:
+                dbdisk.vsan_policy_key = vsan_policy_key
+            else:
+                dbdisk.vsan_policy_key = None   # clear to NULL if ""
 
         if wwn is not None:
             wwn = force_wwn("--wwn", wwn)

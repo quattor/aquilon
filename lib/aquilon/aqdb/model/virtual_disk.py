@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016  Contributor
+# Copyright (C) 2008-2014,2016,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,12 +18,30 @@
 
 import re
 
-from sqlalchemy import Column, Boolean, ForeignKey, Integer
-from sqlalchemy.orm import relation, column_property, validates
-from sqlalchemy.sql import select, func
-
+from aquilon.aqdb.model import (
+    Disk,
+    Filesystem,
+    Resource,
+    Share,
+    )
 from aquilon.exceptions_ import AquilonError
-from aquilon.aqdb.model import Disk, Resource, Share, Filesystem
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    )
+from sqlalchemy.orm import (
+    column_property,
+    relation,
+    validates,
+    )
+from sqlalchemy.sql import (
+    func,
+    select,
+    )
 
 _TN = 'disk'
 
@@ -38,6 +56,8 @@ class VirtualDisk(Disk):
     backing_store_id = Column(ForeignKey(Resource.id,
                                          name='%s_backing_store_fk' % _TN),
                               nullable=True, index=True)
+
+    vsan_policy_key = Column(String(255), nullable=True)
 
     backing_store = relation(Resource)
 
