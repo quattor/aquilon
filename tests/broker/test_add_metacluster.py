@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2009-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,22 +181,37 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                          command)
 
     def test_172_show_utmc8_proto(self):
+        # Define expected values for port groups.
         net1 = self.net["autopg1"]
         net2 = self.net["autopg3"]
+        expected = [
+            {
+                'ip': str(net1.ip),
+                'network_tag': 710,
+                'usage': 'user'
+            },
+            {
+                'ip': str(net2.ip),
+                'network_tag': 123,
+                'usage': 'customtype'
+            }
+        ]
         command = ["show_metacluster", "--metacluster", "utmc8",
                    "--format", "proto"]
         mc = self.protobuftest(command, expect=1)[0]
         self.assertEqual(mc.name, "utmc8")
         self.assertEqual(mc.virtual_switch.name, "utvswitch")
         self.assertEqual(len(mc.virtual_switch.portgroups), 2)
-        self.assertEqual(mc.virtual_switch.portgroups[0].ip, str(net1.ip))
-        self.assertEqual(mc.virtual_switch.portgroups[0].cidr, 29)
-        self.assertEqual(mc.virtual_switch.portgroups[0].network_tag, 710)
-        self.assertEqual(mc.virtual_switch.portgroups[0].usage, "user")
-        self.assertEqual(mc.virtual_switch.portgroups[1].ip, str(net2.ip))
-        self.assertEqual(mc.virtual_switch.portgroups[1].cidr, 29)
-        self.assertEqual(mc.virtual_switch.portgroups[1].network_tag, 123)
-        self.assertEqual(mc.virtual_switch.portgroups[1].usage, "customtype")
+        actual = mc.virtual_switch.portgroups
+        # The order of port groups may differ between Oracle and SQLite.  Fix.
+        ordered = actual[0].ip == expected[0]['ip']
+        if not ordered:
+            expected.reverse()
+        for i in (0, 1):
+            self.assertEqual(actual[i].ip, expected[i]['ip'])
+            self.assertEqual(actual[i].cidr, 29)
+            self.assertEqual(actual[i].network_tag, expected[i]['network_tag'])
+            self.assertEqual(actual[i].usage, expected[i]['usage'])
 
     def test_175_add_utmc9(self):
         # FIXME: Localdisk setups should not have a metacluster, but the
