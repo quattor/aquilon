@@ -100,6 +100,7 @@ _col_abbrev = {
     'cluster_id': 'clstr',
     'personality_id': 'pers',
     'archetype_id': 'arch',
+    'user_type_id': 'usrtype',
 }
 
 
@@ -111,7 +112,6 @@ def ref_constraint_name(local_table, remote_table=None, column=None, suffix=None
     # - Abbreviate from right to left. In this case, it means trying to
     #   abbreviate the column name first, if that's not enough then the remote
     #   table, if even that's not enough then the local table name.
-
     local_abbrev = _table_abbrev.get(local_table, local_table)
 
     if remote_table:
@@ -136,7 +136,6 @@ def ref_constraint_name(local_table, remote_table=None, column=None, suffix=None
                 name = "_".join(items)
                 if len(name) <= 30:
                     return name
-
     raise AquilonError("Cannot abbreviate (%s, %s, %s)" %
                        (local_table, remote_table, column))
 
@@ -176,7 +175,6 @@ def multi_col_constraint_name(table_name, columns, suffix):
                          "_".join(col_names), suffix)
     if len(name) <= 30:
         return name
-
     raise AquilonError("Cannot abbreviate (%s, %s)" %
                        (table_name, ", ".join(list(columns.keys()))))
 
