@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2016,2017,2018  Contributor
+# Copyright (C) 2008-2014,2016-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,26 +77,33 @@ class LocationFormatter(ObjectFormatter):
                     parent.location_type = p.location_type
 
     def csv_fields(self, location):
+        """Yield a CSV-ready list of selected attribute values for location."""
+        # Columns 0 and 1
         details = [location.location_type, location.name]
+        # Columns 2 and 3
         if location.parent:
             details.append(location.parent.location_type)
             details.append(location.parent.name)
         else:
             details.extend([None, None])
-
+        # Columns 4 and 5
         if isinstance(location, Rack):
             details.append(location.rack_row)
             details.append(location.rack_column)
         else:
             details.extend([None, None])
-
+        # Column 6
         if hasattr(location, 'timezone'):
             details.append(location.timezone)
         else:
-            details.extend([None])
-
+            details.append(None)
+        # Column 7
         details.append(location.fullname)
-
+        # Column 8
+        if location.default_dns_domain:
+            details.append(location.default_dns_domain)
+        else:
+            details.append(None)
         yield details
 
 for location_type, mapper in Location.__mapper__.polymorphic_map.items():
