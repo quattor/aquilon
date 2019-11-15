@@ -37,6 +37,7 @@ from aquilon.aqdb.model import (
     ResourceGroup,
     ServiceAddress,
     Share,
+    SharedServiceName,
     SystemList,
     VirtualMachine,
 )
@@ -243,6 +244,7 @@ Plenary.handlers[Application] = PlenaryResource
 Plenary.handlers[Filesystem] = PlenaryResource
 Plenary.handlers[Intervention] = PlenaryResource
 Plenary.handlers[Hostlink] = PlenaryResource
+Plenary.handlers[SharedServiceName] = PlenaryResource
 Plenary.handlers[RebootSchedule] = PlenaryResource
 Plenary.handlers[RebootIntervention] = PlenaryResource
 Plenary.handlers[ServiceAddress] = PlenaryResource

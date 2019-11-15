@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2008-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,10 +24,21 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
-from aquilon.aqdb.model import (Fqdn, DnsDomain, DnsRecord, ARecord,
-                                DynamicStub, Alias, ReservedName, SrvRecord,
-                                DnsEnvironment, AddressAssignment,
-                                NetworkEnvironment, AddressAlias)
+from aquilon.aqdb.model import (
+    AddressAlias,
+    AddressAssignment,
+    Alias,
+    ARecord,
+    DnsDomain,
+    DnsEnvironment,
+    DnsRecord,
+    DynamicStub,
+    Fqdn,
+    NetworkEnvironment,
+    ReservedName,
+    SharedServiceName,
+    SrvRecord,
+)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -100,7 +112,12 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False, exporte
     # Delete the FQDN if it is orphaned
     q = session.query(DnsRecord)
     q = q.filter_by(fqdn=dbfqdn)
-    if q.count() == 0:
+
+    # Also check for references in SharedServiceName resources
+    q2 = session.query(SharedServiceName)
+    q2 = q2.filter_by(fqdn=dbfqdn)
+
+    if q.count() == 0 and q2.count() == 0:
         session.delete(dbfqdn)
         if exporter:
             exporter.delete(dbfqdn)
@@ -456,8 +473,8 @@ def delete_target_if_needed(session, dbtarget, exporter=None):
     else:
         dbdns_rec = None
 
-    # Check if the FQDN is still the target of an existing alias, service record
-    # or reverse PTR record
+    # Check if the FQDN is still the target of an existing alias, service
+    # record, reverse PTR record or SharedServiceName
     q = session.query(DnsRecord)
     q = q.with_polymorphic([ARecord, Alias, AddressAlias, SrvRecord])
     q = q.filter(or_(ARecord.reverse_ptr_id == dbtarget.id,
@@ -465,7 +482,11 @@ def delete_target_if_needed(session, dbtarget, exporter=None):
                      AddressAlias.target_id == dbtarget.id,
                      SrvRecord.target_id == dbtarget.id))
     q = q.options(lazyload('fqdn'))
-    if not q.count():
+
+    q2 = session.query(SharedServiceName)
+    q2 = q2.filter_by(fqdn=dbtarget)
+
+    if not q.count() and not q2.count():
         for dbdns_rec in dbtarget.dns_records:
             session.delete(dbdns_rec)
             if exporter:
