@@ -19,11 +19,11 @@
 
 import socket
 
-from sqlalchemy.orm import object_session, joinedload, lazyload
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import or_
-
-from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
+from aquilon.exceptions_ import (
+    AquilonError,
+    ArgumentError,
+    NotFoundException,
+)
 from aquilon.aqdb.model import (
     AddressAlias,
     AddressAssignment,
@@ -41,7 +41,16 @@ from aquilon.aqdb.model import (
 )
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
+
+from sqlalchemy.orm import (
+    joinedload,
+    lazyload,
+    object_session,
+)
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import or_
 
 
 def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False, exporter=None):
@@ -516,3 +525,65 @@ def set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr):
             raise ArgumentError(err)
     else:
         dbdns_rec.reverse_ptr = None
+
+
+def add_address_alias(session, logger, config, dbsrcfqdn, dbtargetfqdn,
+                      ttl, grn, eon_id, comments, exporter=None,
+                      flush_session=False):
+    """Add an address-alias record (from source and target FQDN DB objects).
+
+    Does not allow the addition of an address-alias into 'ms.com' in the
+    'internal' environment, nor the addition of an address-alias in restricted
+    DNS domains.
+
+    Ensures that all address-aliases have the same GRN where set.
+
+    Returns the newly created AddressAlias object on success, raises an
+    exception on error.
+    """
+
+    if (dbsrcfqdn.dns_environment.is_default and
+            dbsrcfqdn.dns_domain.name == 'ms.com'):
+        raise ArgumentError("{0:s} record in DNS domain ms.com, DNS "
+                            "environment {1:s} is not allowed."
+                            .format(AddressAlias._get_class_label(),
+                                    dbsrcfqdn.dns_environment.name))
+
+    if dbsrcfqdn.dns_domain.restricted:
+        raise ArgumentError("{0} is restricted, aliases are not allowed."
+                            .format(dbsrcfqdn.dns_domain))
+
+    # Make sure all AddressAlias records under the same FQDN have the
+    # same GRN (if set).
+    dbgrn = None
+    if grn or eon_id:
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                           config=config)
+
+    for rec in dbsrcfqdn.dns_records:
+        if isinstance(rec, AddressAlias):
+            if not dbgrn:
+                dbgrn = rec.owner_grn
+            elif dbgrn != rec.owner_grn:
+                raise ArgumentError("{0} with target {1} is set to a "
+                                    "different GRN."
+                                    .format(dbsrcfqdn, rec.target.fqdn))
+            break       # assume the rest are checked
+
+    dbaa = AddressAlias(fqdn=dbsrcfqdn, target=dbtargetfqdn, ttl=ttl,
+                        owner_grn=dbgrn, comments=comments,
+                        require_grn=False)
+    session.add(dbaa)
+
+    if exporter:
+        other_recs = [dr for dr in dbsrcfqdn.dns_records
+                      if dr != dbaa and not isinstance(dr, ReservedName)]
+        if other_recs:
+            exporter.update(dbsrcfqdn)
+        else:
+            exporter.create(dbsrcfqdn)
+
+    if flush_session:
+        session.flush()
+
+    return dbaa
