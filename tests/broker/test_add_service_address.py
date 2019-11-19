@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016,2017  Contributor
+# Copyright (C) 2012-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -363,6 +363,22 @@ class TestAddServiceAddress(TestBrokerCommand):
                    "--name", "test2"]
         self.successtest(command)
         self.dsdb_verify()
+
+    def test_700_default_dns_domain_from_fails_with_correct_message(self):
+        # Command add_service_address should print a correct message from
+        # function worker.dbwrappers.location.get_default_dns_domain when no
+        # default DNS domain is found among parents of the resource holder that
+        # are of a given class (in the example below: SomeLocationClass).
+        ip = self.net['unknown0'].usable[0]
+        command = ['add_service_address', '--cluster', 'camelcase',
+                   '--shortname', 'testaddress', '--name', 'test',
+                   '--default_dns_domain_from', 'SomeLocationClass',
+                   '--ip', ip]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, 'No default DNS domain at level '
+                              '"SomeLocationClass" could be found for '
+                              'building ut.  Please specify --dns_domain.',
+                         command)
 
 
 if __name__ == '__main__':

@@ -6418,7 +6418,11 @@
                 <option name="ipfromtype" type="string">Generate next IP based on type ('vip' or 'localvip') and resource location</option>
             </optgroup>
             <option name="network_environment" type="string">Network environment (default: internal)</option>
-            <option name="dns_domain" type="string" requires="prefix">Override the default DNS domain for --prefix and --shortname (ignored for --service_address)</option>
+            <option name="dns_domain" type="string" requires="prefix shortname">Override the default DNS domain for --prefix and --shortname (ignored for --service_address)</option>
+            <option name="default_dns_domain_from" type="string" requires="prefix shortname cluster metacluster resourcegroup" conflicts="hostname">
+                Ignore all location types other than the one specified using this option (e.g. --default_dns_domain_from
+                campus) while looking for the default DNS domain to be used with --prefix or --shortname
+            </option>
             <option name="comments" type="string">Comments</option>
             <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
             <option name="shared" type="flag">Allow the address to be used multiple times</option>
