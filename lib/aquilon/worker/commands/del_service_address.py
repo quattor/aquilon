@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2012,2013,2014,2015,2016,2017,2018  Contributor
+# Copyright (C) 2012-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from aquilon.aqdb.model import (
+    AddressAlias,
+    BundleResource,
+    ResourceGroup,
+    ServiceAddress,
+    SharedServiceName,
+)
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandDelServiceAddress(BrokerCommand):
@@ -59,6 +66,30 @@ class CommandDelServiceAddress(BrokerCommand):
 
         holder.resources.remove(dbsrv)
         if not dbdns_rec.service_addresses:
+            # if we're in a resource-group and a shared-service-name exists
+            # that has sa_aliases set, and there'a an alias pointing at
+            # ourselves, remove it.
+
+            sibling_ssn = None
+            if (isinstance(holder, BundleResource) and
+                    isinstance(holder.resourcegroup, ResourceGroup)):
+                for res in holder.resources:
+                    if isinstance(res, SharedServiceName):
+                        # this one
+                        sibling_ssn = res
+                        break
+
+            if sibling_ssn and sibling_ssn.sa_aliases:
+                # look for one match against this target only
+                for rr in sibling_ssn.fqdn.dns_records:
+                    if not isinstance(rr, AddressAlias):
+                        continue
+                    if rr.target != dbdns_rec.fqdn:
+                        continue
+
+                    delete_dns_record(rr, exporter=exporter)
+                    break
+
             delete_dns_record(dbdns_rec, exporter=exporter)
 
         session.flush()

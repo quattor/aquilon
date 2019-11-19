@@ -93,6 +93,7 @@ from .test_add_router_address import TestAddRouterAddress
 from .test_add_sandbox import TestAddSandbox
 from .test_add_service import TestAddService
 from .test_add_service_address import TestAddServiceAddress
+from .test_add_service_address_sn_aliases import TestAddServiceAddressSNAliases
 from .test_add_share import TestAddShare
 from .test_add_shared_service_name import TestAddSharedServiceName
 from .test_add_srv_record import TestAddSrvRecord
@@ -204,6 +205,7 @@ from .test_del_router_address import TestDelRouterAddress
 from .test_del_sandbox import TestDelSandbox
 from .test_del_service import TestDelService
 from .test_del_service_address import TestDelServiceAddress
+from .test_del_service_address_sn_aliases import TestDelServiceAddressSNAliases
 from .test_del_share import TestDelShare
 from .test_del_shared_service_name import TestDelSharedServiceName
 from .test_del_srv_record import TestDelSrvRecord
@@ -406,7 +408,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestAddResourceGroup, TestAddShare, TestAddFilesystem,
                  TestAddApplication, TestAddIntervention,
                  TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
-                 TestAddSharedServiceName,
+                 TestAddSharedServiceName, TestAddServiceAddressSNAliases,
                  TestFlush,
                  TestMakeAquilon, TestMakeCluster, TestCluster,
                  TestAddAllowedPersonality,
@@ -504,7 +506,7 @@ class BrokerTestSuite(unittest.TestSuite):
                  TestUnbindFeature,
                  TestDel10GigHardware, TestDelVirtualHardware,
                  TestUnbindCluster, TestUncluster,
-                 TestDelSharedServiceName,
+                 TestDelServiceAddressSNAliases, TestDelSharedServiceName,
                  TestDelShare, TestDelFilesystem,
                  TestDelHostlink, TestDelRebootIntervention, TestDelRebootSchedule,
                  TestDelIntervention, TestDelApplication,
