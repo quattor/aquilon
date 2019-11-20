@@ -39,7 +39,49 @@ class CommandAddServiceAddress(BrokerCommand):
     def render(self, session, logger, plenaries, service_address, shortname, prefix,
                dns_domain, ip, ipfromtype, name, interfaces, hostname, cluster, metacluster,
                resourcegroup, network_environment, map_to_primary, shared,
-               comments, user, justification, reason, exporter, **kwargs):
+               comments, user, justification, reason, exporter,
+               default_dns_domain_from, **kwargs):
+        """Extend the superclass method to render this command.
+
+        :param session: an sqlalchemy.orm.session.Session object
+        :param logger: an aquilon.worker.logger.RequestLogger object
+        :param plenaries: PlenaryCollection()
+        :param service_address: a fully qualified name to register in the DNS
+        :param shortname: a short name of the address in the default DNS domain
+        :param prefix: a prefix for generating a name in the default DNS domain
+        :param dns_domain: a domain used to override the default DNS domain
+                          for prefix and shortname (ignored if
+                          service_address given)
+        :param ip: IP address
+        :param ipfromtype: generate next IP based on type ('vip' or 'localvip')
+                           and resource location
+        :param name: a logical name of the service address
+        :param interfaces: a comma separated list of interfaces
+        :param hostname: a string with a hostname to apply resource
+        :param cluster: a cluster to apply resource
+        :param metacluster: a metacluster to apply resource
+        :param resourcegroup: a resource group to apply resource
+        :param network_environment: a network environment (default: internal)
+        :param map_to_primary: True if the reverse PTR should point to the
+                               primary name
+        :param shared: allow the address to be used multiple times
+        :param comments: a string with comments
+        :param user: a string with the principal / user who invoked the command
+        :param justification: authorization tokens (e.g. TCM number or
+                              "emergency") to validate the request (None or
+                              str)
+        :param reason: a human-readable description of why the operation was
+                       performed (None or str)
+        :param exporter: an aquilon.worker.exporter.Exporter object
+        :param default_dns_domain_from: if given, only take into account
+                                        location objects of class with name
+                                        equal (ignores case) to this
+
+        :return: None (on success)
+
+        :raise ArgumentError: on failure (please see the code below to see all
+                              the cases when the error is raised)
+        """
 
         validate_nlist_key("name", name)
         audit_results = []
@@ -97,7 +139,9 @@ class CommandAddServiceAddress(BrokerCommand):
             elif isinstance(toplevel_holder, Host):
                 dbdns_domain = toplevel_holder.hardware_entity.primary_name.fqdn.dns_domain
             else:
-                dbdns_domain = get_default_dns_domain(toplevel_holder.location_constraint)
+                dbdns_domain = get_default_dns_domain(
+                    toplevel_holder.location_constraint,
+                    default_dns_domain_from)
 
             if prefix:
                 prefix = AqStr.normalize(prefix)

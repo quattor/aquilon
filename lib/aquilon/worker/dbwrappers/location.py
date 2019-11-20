@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014,2016,2017,2018  Contributor
+# Copyright (C) 2008-2011,2013-2014,2016-2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -140,18 +141,49 @@ def add_location(session, cls, name, parent, force_uri=None, logger=None, **kwar
     return dbloc
 
 
-def get_default_dns_domain(dblocation):
+def get_default_dns_domain(dblocation, location_class_name=None):
+    """Get the default DNS domain for dblocation.
+
+    Traverse a list that consists of dblocation and its parents (sorted
+    in the ascending order from the level of dblocation up) to find the default
+    DNS domain for dblocation.  The list can be filtered using the
+    location_class_name arguments.
+
+    :param dblocation: an instance of Location or one of its subclasses
+    :param location_class_name: if given, only take into account objects of
+                                class with name equal (ignore case) to this
+    :return: the default DNS domain (if found)
+    :raise ArgumentError: if no default DNS domain satisfying the given
+                          constraints found
+    """
+    if location_class_name is None:
+        lcn = ''
+    else:
+        lcn = location_class_name.strip().lower()
     locations = dblocation.parents[:]
     locations.append(dblocation)
     locations.reverse()
-    try:
-        return next(loc.default_dns_domain
-                    for loc in locations
-                    if loc.default_dns_domain)
-    except StopIteration:
-        raise ArgumentError("There is no default DNS domain configured for "
-                            "{0:l}.  Please specify --dns_domain."
+    # If location_class_name given, filter out all non-relevant locations.
+    locations = [loc for loc in locations
+                 if not lcn or lcn == loc.__class__.__name__.lower()]
+    # Find and return the default DNS domain.
+    for loc in locations:
+        if loc.default_dns_domain:
+            return loc.default_dns_domain
+    # If no default DNS domain satisfying the constraints found, notify the
+    # user.
+    if not lcn:
+        # noinspection PyStringFormat
+        raise ArgumentError('There is no default DNS domain configured for '
+                            '{0:l}.  Please specify --dns_domain.'
                             .format(dblocation))
+    else:
+        # noinspection PyStringFormat
+        raise ArgumentError(
+            'No default DNS domain at level "{0}" could be found for {1:l}.'
+            '  Please specify --dns_domain.'.format(location_class_name,
+                                                    dblocation))
+
 
 def validate_uri(uri, clsname, name, force, logger):
     # To Do: move this to Building model @validates method so that different
