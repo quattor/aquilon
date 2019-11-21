@@ -17,18 +17,33 @@
 # limitations under the License.
 """Contains the logic for `aq add service address`."""
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import ServiceAddress, Host, Fqdn, DnsDomain, Bunker
+from aquilon.aqdb.model import (
+    BundleResource,
+    Bunker,
+    DnsDomain,
+    Fqdn,
+    Host,
+    ResourceGroup,
+    ServiceAddress,
+    SharedServiceName,
+)
+from aquilon.exceptions_ import ArgumentError
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.interface import get_interfaces, generate_ip
+from aquilon.worker.dbwrappers.change_management import ChangeManagement
+from aquilon.worker.dbwrappers.dns import (
+    add_address_alias,
+    grab_address,
+)
+from aquilon.worker.dbwrappers.interface import (
+    generate_ip,
+    get_interfaces,
+)
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.search import search_next
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.change_management import ChangeManagement
 
 
 class CommandAddServiceAddress(BrokerCommand):
@@ -36,10 +51,11 @@ class CommandAddServiceAddress(BrokerCommand):
 
     required_parameters = ["name"]
 
-    def render(self, session, logger, plenaries, service_address, shortname, prefix,
-               dns_domain, ip, ipfromtype, name, interfaces, hostname, cluster, metacluster,
-               resourcegroup, network_environment, map_to_primary, shared,
-               comments, user, justification, reason, exporter,
+    def render(self, session, logger, plenaries, service_address, shortname,
+               prefix, dns_domain, ip, ipfromtype, name, interfaces,
+               hostname, cluster, metacluster, resourcegroup,
+               network_environment, map_to_primary, map_to_shared_name,
+               shared, comments, user, justification, reason, exporter,
                default_dns_domain_from, **kwargs):
         """Extend the superclass method to render this command.
 
@@ -64,6 +80,8 @@ class CommandAddServiceAddress(BrokerCommand):
         :param network_environment: a network environment (default: internal)
         :param map_to_primary: True if the reverse PTR should point to the
                                primary name
+        :param map_to_shared_name: True if the reverse PTR should point to
+                                   a shared-name within the same resourcegroup
         :param shared: allow the address to be used multiple times
         :param comments: a string with comments
         :param user: a string with the principal / user who invoked the command
@@ -159,6 +177,16 @@ class CommandAddServiceAddress(BrokerCommand):
 
         ip = generate_ip(session, logger, None, net_location_set, ip=ip, ipfromtype=ipfromtype)
 
+        # if in a resource-group, look for a sibling SharedServiceName resource
+        sibling_ssn = None
+        if (isinstance(holder, BundleResource) and
+                isinstance(holder.resourcegroup, ResourceGroup)):
+            for res in holder.resources:
+                if isinstance(res, SharedServiceName):
+                    # this one
+                    sibling_ssn = res
+                    break
+
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
                                                 network_environment,
@@ -167,11 +195,27 @@ class CommandAddServiceAddress(BrokerCommand):
                                                 require_grn=False)
         ip = dbdns_rec.ip
 
-        if map_to_primary:
-            if not isinstance(toplevel_holder, Host):
+        if map_to_primary and map_to_shared_name:
+            raise ArgumentError("Cannot use --map_to_primary and "
+                                "--map_to_shared_name together")
+        elif map_to_shared_name:
+            # if the holder is a resource-group that has a SharedServiceName
+            # resource, then set the PTR record as the SharedServiceName's FQDN
+            if sibling_ssn:
+                dbdns_rec.reverse_ptr = sibling_ssn.fqdn
+            else:
+                raise ArgumentError("--map_to_shared_name specified, but no "
+                                    "shared service name in {0:l}".
+                                    format(holder))
+        elif map_to_primary:
+            if isinstance(toplevel_holder, Host):
+                dbdns_rec.reverse_ptr = \
+                    toplevel_holder.hardware_entity.primary_name.fqdn
+            else:
                 raise ArgumentError("The --map_to_primary option works only "
-                                    "for host-based service addresses.")
-            dbdns_rec.reverse_ptr = toplevel_holder.hardware_entity.primary_name.fqdn
+                                    "for host-based service addresses or "
+                                    "within a resource-group where a "
+                                    "SharedServiceName resource exists.")
 
         dbifaces = []
         if interfaces:
@@ -192,6 +236,16 @@ class CommandAddServiceAddress(BrokerCommand):
                 dbsrv.interfaces = dbifaces
 
         session.flush()
+
+        # if we have a sibling SharedServiceName where service-address
+        # aliases is set, add a new address-alias pointing at the IP
+        if sibling_ssn and sibling_ssn.sa_aliases:
+            add_address_alias(session, logger, config=self.config,
+                              dbsrcfqdn=sibling_ssn.fqdn,
+                              dbtargetfqdn=dbdns_rec.fqdn,
+                              ttl=None, grn=None, eon_id=None,
+                              comments=None, exporter=exporter,
+                              flush_session=True)
 
         plenaries.add(holder.holder_object)
         plenaries.add(dbsrv)

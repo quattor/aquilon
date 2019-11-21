@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016,2017  Contributor
+# Copyright (C) 2015,2016,2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -111,7 +111,8 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
         # the request has finished.  Any errors are logged, but ignored.
         d = self._creator.connectUNIX(sockname, timeout)  # pid
         d.addCallback(send_messages, notifications)
-        d.addErrback(lambda e: log.msg('Notification push failed: %s', e.getErrorMessage()))
+        d.addErrback(lambda e: log.msg("Notification push failed: {0:s}"
+                                       .format(e.getErrorMessage())))
 
     def fill_fqdn(self, msg, obj):
         msg.entity_type = msg.DNS_RECORD

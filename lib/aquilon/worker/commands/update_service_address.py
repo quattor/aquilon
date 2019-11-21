@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2015,2016,2017  Contributor
+# Copyright (C) 2015-2017,2019  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ServiceAddress, Host, NetworkEnvironment
+from aquilon.aqdb.model import (
+    BundleResource,
+    Host,
+    NetworkEnvironment,
+    ResourceGroup,
+    ServiceAddress,
+    SharedServiceName,
+)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import update_address
 from aquilon.worker.dbwrappers.interface import get_interfaces
@@ -31,8 +39,9 @@ class CommandUpdateServiceAddress(BrokerCommand):
 
     required_parameters = ["name"]
 
-    def render(self, session, logger, plenaries, ip, name, interfaces, hostname, cluster,
-               metacluster, resourcegroup, network_environment, map_to_primary,
+    def render(self, session, logger, plenaries, ip, name, interfaces,
+               hostname, cluster, metacluster, resourcegroup,
+               network_environment, map_to_primary, map_to_shared_name,
                comments, user, justification, reason, **arguments):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=True)
@@ -73,6 +82,10 @@ class CommandUpdateServiceAddress(BrokerCommand):
         if comments is not None:
             dbsrv.comments = comments
 
+        if map_to_primary and map_to_shared_name:
+            raise ArgumentError("Cannot use --map_to_primary and "
+                                "--map_to_shared_name together")
+
         if map_to_primary is not None:
             if not isinstance(toplevel_holder, Host):
                 raise ArgumentError("The --map_to_primary option works only "
@@ -81,6 +94,25 @@ class CommandUpdateServiceAddress(BrokerCommand):
                 dbsrv.dns_record.reverse_ptr = toplevel_holder.hardware_entity.primary_name.fqdn
             else:
                 dbsrv.dns_record.reverse_ptr = None
+
+        if map_to_shared_name:
+            # if the holder is a resource-group that has a SharedServiceName
+            # resource, then set the PTR record as the SharedServiceName's FQDN
+
+            sibling_ssn = None
+            if (isinstance(holder, BundleResource) and
+                    isinstance(holder.resourcegroup, ResourceGroup)):
+                for res in holder.resources:
+                    if isinstance(res, SharedServiceName):
+                        # this one
+                        sibling_ssn = res
+                        break
+
+            if sibling_ssn:
+                dbsrv.dns_record.reverse_ptr = sibling_ssn.fqdn
+            else:
+                raise ArgumentError("--map_to_shared_name specified, but no "
+                                    "shared service name")
 
         session.flush()
 
