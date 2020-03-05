@@ -257,6 +257,7 @@ class PlenaryHostData(StructurePlenary):
 
         lines.append("")
         dbos = self.dbobj.operating_system
+        pan_assign(lines, "system/archetype/name", self.dbobj.archetype.name)
         pan_assign(lines, "system/archetype/os", dbos.name)
         pan_assign(lines, "system/archetype/model", dbos.version)
         pan_assign(lines, "system/archetype/os_lifecycle", dbos.lifecycle)
