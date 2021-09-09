@@ -1,4 +1,4 @@
-ALTER TABLE hostlink ALTER target SET NULL;
+ALTER TABLE hostlink ALTER COLUMN target DROP NOT NULL;
 
 CREATE TABLE hostlink_parent_map (
         resource_id INTEGER NOT NULL,
